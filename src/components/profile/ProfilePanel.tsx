@@ -82,11 +82,14 @@ export const ProfilePanel: React.FC<ProfilePanelProps> = ({ onClose }) => {
           <button
             type="button"
             onClick={async () => {
+              console.log('ProfilePanel: logout button clicked');
               try {
                 await logout();
+                console.log('ProfilePanel: logout resolved');
               } catch (err) {
                 console.error('Logout failed:', err);
               } finally {
+                console.log('ProfilePanel: closing panel');
                 onClose();
               }
             }}

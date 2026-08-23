@@ -173,15 +173,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const logout = async () => {
-    try {
-      // Attempt to persist progress but don't let failures block sign-out
-      await syncProgressToDb(auth.currentUser?.email || "");
-    } catch (err) {
-      console.error('Failed to sync progress before logout:', err);
-    }
+    console.debug('logout: initiated');
+
+    // Start syncing progress but don't await — make it fire-and-forget so a slow network
+    // or Firestore call cannot block the UI logout flow.
+    syncProgressToDb(auth.currentUser?.email || "").catch((err) => console.error('Failed to sync progress before logout:', err));
 
     try {
       await signOut(auth);
+      console.debug('logout: signOut completed');
     } catch (err) {
       console.error('Firebase signOut failed:', err);
     }
