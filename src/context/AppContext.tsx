@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
 import {
   NavTab,
@@ -14,6 +14,8 @@ import { analyzePrompt } from "../lib/promptAnalyzer";
 import { translations, Language, I18nTranslations } from "../i18n/translations";
 import { amharicCurriculumModules } from "../i18n/amharicLessons";
 import { curriculumModules } from "../data/lessonsData";
+import { auth, db } from "../lib/firebase";
+import { doc, getDoc, onSnapshot, setDoc } from "firebase/firestore";
 
 interface AppContextType {
   activeTab: NavTab;
@@ -94,6 +96,7 @@ interface AppContextType {
 }
 
 const STORAGE_KEY = "promptlab_user_progress_v1";
+const USERS_COLLECTION = "users";
 
 const initialProgress: UserProgress = {
   completedLessons: [],
@@ -147,8 +150,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const syncProgressToDb = async (email: string) => {
-    // Stub for sync functionality - requires user authentication
-    console.log("Syncing progress for", email, userProgress);
+    const user = auth.currentUser;
+    if (!user || (email && user.email !== email)) return;
+    await setDoc(doc(db, USERS_COLLECTION, user.uid), {
+      displayName: user.displayName || "Ecorp Scholar",
+      photoURL: user.photoURL || null,
+      curriculumProgress: userProgress.completedLessons.length,
+      currentStreak: userProgress.streakDays,
+      lastLoginDate: new Date().toISOString().slice(0, 10),
+      xp: userProgress.xp,
+      completedLessons: userProgress.completedLessons,
+      completedMissions: userProgress.completedMissions,
+      missionScores: userProgress.missionScores,
+      bookmarkedPatterns: userProgress.bookmarkedPatterns,
+      savedCustomPrompts: userProgress.savedCustomPrompts,
+      achievements: userProgress.achievements,
+    }, { merge: true });
   };
 
   // Playground state
@@ -246,6 +263,84 @@ Provide:
     }
     return initialProgress;
   });
+  const firestoreUserId = useRef<string | null>(null);
+  const firestoreReady = useRef(false);
+
+  // Hydrate each signed-in user from Firestore and update their daily streak.
+  useEffect(() => {
+    let unsubscribe: (() => void) | undefined;
+    const unsubscribeAuth = auth.onAuthStateChanged(async (user) => {
+      firestoreReady.current = false;
+      firestoreUserId.current = user?.uid || null;
+      unsubscribe?.();
+      unsubscribe = undefined;
+      if (!user) return;
+
+      const userRef = doc(db, USERS_COLLECTION, user.uid);
+      const today = new Date().toISOString().slice(0, 10);
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+      try {
+        const snapshot = await getDoc(userRef);
+        const data = snapshot.exists() ? snapshot.data() : {};
+        const previousLogin = typeof data.lastLoginDate === "string" ? data.lastLoginDate : null;
+        const currentStreak = previousLogin === today
+          ? Number(data.currentStreak || data.streakDays || 1)
+          : previousLogin === yesterday
+            ? Number(data.currentStreak || data.streakDays || 0) + 1
+            : 1;
+        const cloudProgress: UserProgress = {
+          ...initialProgress,
+          completedLessons: Array.isArray(data.completedLessons) ? data.completedLessons : [],
+          completedMissions: Array.isArray(data.completedMissions) ? data.completedMissions : [],
+          missionScores: data.missionScores && typeof data.missionScores === "object" ? data.missionScores : {},
+          bookmarkedPatterns: Array.isArray(data.bookmarkedPatterns) ? data.bookmarkedPatterns : [],
+          savedCustomPrompts: Array.isArray(data.savedCustomPrompts) ? data.savedCustomPrompts : [],
+          xp: typeof data.xp === "number" ? data.xp : initialProgress.xp,
+          streakDays: currentStreak,
+          achievements: Array.isArray(data.achievements) ? data.achievements : [],
+        };
+        setUserProgress(cloudProgress);
+        await setDoc(userRef, {
+          displayName: user.displayName || data.displayName || "Ecorp Scholar",
+          photoURL: user.photoURL || data.photoURL || null,
+          curriculumProgress: cloudProgress.completedLessons.length,
+          currentStreak,
+          lastLoginDate: today,
+          xp: cloudProgress.xp,
+          completedLessons: cloudProgress.completedLessons,
+          completedMissions: cloudProgress.completedMissions,
+          missionScores: cloudProgress.missionScores,
+          bookmarkedPatterns: cloudProgress.bookmarkedPatterns,
+          savedCustomPrompts: cloudProgress.savedCustomPrompts,
+          achievements: cloudProgress.achievements,
+        }, { merge: true });
+        firestoreReady.current = true;
+        unsubscribe = onSnapshot(userRef, (updatedSnapshot) => {
+          if (!firestoreReady.current || !updatedSnapshot.exists()) return;
+          const updated = updatedSnapshot.data();
+          setUserProgress((previous) => ({
+            ...previous,
+            completedLessons: Array.isArray(updated.completedLessons) ? updated.completedLessons : previous.completedLessons,
+            completedMissions: Array.isArray(updated.completedMissions) ? updated.completedMissions : previous.completedMissions,
+            missionScores: updated.missionScores && typeof updated.missionScores === "object" ? updated.missionScores : previous.missionScores,
+            bookmarkedPatterns: Array.isArray(updated.bookmarkedPatterns) ? updated.bookmarkedPatterns : previous.bookmarkedPatterns,
+            savedCustomPrompts: Array.isArray(updated.savedCustomPrompts) ? updated.savedCustomPrompts : previous.savedCustomPrompts,
+            xp: typeof updated.xp === "number" ? updated.xp : previous.xp,
+            streakDays: typeof updated.currentStreak === "number" ? updated.currentStreak : previous.streakDays,
+            achievements: Array.isArray(updated.achievements) ? updated.achievements : previous.achievements,
+          }));
+        });
+      } catch (error) {
+        console.warn("Could not load progress from Firestore", error);
+        firestoreReady.current = true;
+      }
+    });
+    return () => {
+      unsubscribeAuth();
+      unsubscribe?.();
+    };
+  }, []);
 
   // Save progress changes
   useEffect(() => {
@@ -254,6 +349,16 @@ Provide:
     } catch (e) {
       console.warn("Could not save progress to localStorage", e);
     }
+  }, [userProgress]);
+
+  // Persist all progress mutations so every view stays in sync across sessions.
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user || !firestoreReady.current || firestoreUserId.current !== user.uid) return;
+    const timeout = window.setTimeout(() => {
+      void syncProgressToDb(user.email || "");
+    }, 250);
+    return () => window.clearTimeout(timeout);
   }, [userProgress]);
 
   // Check health endpoint for backend / real Gemini API availability

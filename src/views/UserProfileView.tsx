@@ -2,6 +2,7 @@ import React from 'react';
 import { jsPDF } from 'jspdf';
 import { Award, CheckCircle2, Flame, Lock, Star, Trophy } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { auth } from '../lib/firebase';
 import { BadgeComponent } from '../components/profile/BadgeComponent';
 import { ProgressRing } from '../components/profile/ProgressRing';
 
@@ -21,7 +22,8 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path }) => {
   const totalCount = path.lessons.length;
   const completionPercent = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
   const isComplete = totalCount > 0 && completedCount === totalCount;
-  const userName = 'Ecorp Scholar';
+  const userName = auth.currentUser?.displayName || auth.currentUser?.email?.split('@')[0] || 'Ecorp Scholar';
+  const photoUrl = auth.currentUser?.photoURL;
   const level = Math.floor(userProgress.xp / 500) + 1;
 
   const downloadCertificate = () => {
@@ -61,7 +63,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path }) => {
   return (
     <div className="app-view mx-auto max-w-4xl space-y-8 p-6">
       <div className="flex flex-col items-center gap-6 rounded-2xl border border-slate-800 bg-slate-900 p-6 md:flex-row">
-        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-4xl text-white">{userName[0]}</div>
+        <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-4xl text-white">{photoUrl ? <img src={photoUrl} alt="" className="h-full w-full object-cover" /> : userName[0]}</div>
         <div className="flex-1 text-center md:text-left">
           <h1 className="text-2xl font-bold text-white">{userName}</h1>
           <p className="text-blue-300">Prompt Engineer • Level {level}</p>
