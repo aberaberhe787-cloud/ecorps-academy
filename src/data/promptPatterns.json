@@ -1,0 +1,26 @@
+[
+  {
+    "id": "foundation-clarity",
+    "title": "Clarity Brief",
+    "category": "Foundations",
+    "template": "Task: [specific action]\nAudience: [who will use the answer]\nSuccess criteria: [what a good answer must contain]\nInput:\n[add the relevant material]"
+  },
+  {
+    "id": "foundation-role",
+    "title": "Expert Role",
+    "category": "Foundations",
+    "template": "Act as a [specific expert role]. Use the perspective and vocabulary of that role.\nTask: [what you need done]"
+  },
+  {
+    "id": "foundation-constraints",
+    "title": "Structured Output",
+    "category": "Foundations",
+    "template": "Return the answer as a [table / numbered list / JSON object].\nLimit: [word or item limit].\nRequired fields or columns: [list them]."
+  },
+  {
+    "id": "foundation-context",
+    "title": "Context Block",
+    "category": "Foundations",
+    "template": "Use only the context inside <context> tags.\n<context>\n[background, source material, constraints]\n</context>\nTask: [specific request]"
+  }
+]

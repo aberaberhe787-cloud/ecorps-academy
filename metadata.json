@@ -1,0 +1,6 @@
+{
+  "name": "Ecorp Acadamy",
+  "description": "Ecorp Acadamy - An interactive prompt engineering learning hub, playground sandbox, challenge missions, and pattern library with real-time prompt analysis and AI simulation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

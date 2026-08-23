@@ -1,0 +1,133 @@
+@import "tailwindcss";
+@import "./theme.css";
+
+@layer base {
+  :root {
+    --bg-primary: #ffffff;
+    --text-primary: #0f172a;
+  }
+  .dark {
+    --bg-primary: #020617;
+    --text-primary: #f8fafc;
+  }
+  
+  html {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    scroll-behavior: smooth;
+  }
+}
+
+/* Google Translate Widget & Layout Fixes */
+.goog-te-banner-frame,
+.goog-te-banner-frame.skiptranslate,
+.goog-te-banner,
+#goog-gt-tt,
+#goog-gt-tt *,
+.goog-te-balloon-frame,
+.goog-tooltip,
+.goog-tooltip *,
+.goog-tooltip:hover {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Completely remove Google Translate word hover highlight (white overlay/background) */
+.goog-text-highlight,
+.goog-text-highlight:hover,
+.goog-text-highlight:focus,
+.goog-text-highlight:active,
+[class*="goog-text-highlight"],
+[class*="goog-text-highlight"]:hover,
+[class*="VIpgJd-yAWneB-"],
+[class*="VIpgJd-yAWneB-"]:hover,
+font[style*="background-color"],
+font[style*="background-color"]:hover,
+span[style*="background-color"],
+span[style*="background-color"]:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  outline: none !important;
+  text-decoration: inherit !important;
+  color: inherit !important;
+}
+
+/* Ensure Google-injected font tags do not interfere with text styling */
+font {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: inherit !important;
+}
+
+body {
+  top: 0px !important;
+  position: static !important;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.login-input {
+  width: 100%;
+  border: 1px solid rgb(51 65 85 / 0.9);
+  border-radius: 0.5rem;
+  background: rgb(2 6 23 / 0.55);
+  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+  color: #e2e8f0;
+  font-size: 0.75rem;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.login-input::placeholder {
+  color: #64748b;
+}
+
+.login-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.12);
+}
+
+.skiptranslate > iframe {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+#google_translate_element {
+  position: absolute !important;
+  top: -9999px !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0.01 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+}
+
+/* Custom scrollbar for dropdown menus */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.8);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.8);
+}
+

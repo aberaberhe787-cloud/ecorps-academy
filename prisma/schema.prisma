@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+model User {
+  id            Int           @id @default(autoincrement())
+  email         String        @unique @db.VarChar(320)
+  name          String?       @db.VarChar(120)
+  passwordHash  String?       @map("password_hash")
+  xp            Int           @default(0)
+  streakDays    Int           @default(0) @map("streak_days")
+  achievements  Json          @default("[]")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  progress      Progress[]
+  certificates  Certificate[]
+
+  @@index([createdAt])
+  @@map("users")
+}
+
+model Lesson {
+  id             String      @id @db.VarChar(100)
+  moduleId       String      @map("module_id") @db.VarChar(100)
+  moduleTitle    String      @map("module_title") @db.VarChar(200)
+  title          String      @db.VarChar(200)
+  difficulty     Difficulty
+  estimatedMinutes Int       @map("estimated_minutes")
+  path           String      @default("curriculum") @db.VarChar(100)
+  progress       Progress[]
+
+  @@index([path, difficulty])
+  @@index([moduleId])
+  @@map("lessons")
+}
+
+model Progress {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @map("user_id")
+  lessonId        String    @map("lesson_id") @db.VarChar(100)
+  completed       Boolean   @default(false)
+  quizScore       Int?      @map("quiz_score")
+  practiceScore   Int?      @map("practice_score")
+  timeSpentSeconds Int      @default(0) @map("time_spent_seconds")
+  completedAt     DateTime? @map("completed_at")
+  lastAccessedAt  DateTime  @default(now()) @map("last_accessed_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson          Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([userId, completed])
+  @@index([lessonId])
+  @@map("progress")
+}
+
+model Certificate {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  trackId     String   @map("track_id") @db.VarChar(100)
+  title       String   @db.VarChar(200)
+  issuedAt    DateTime @default(now()) @map("issued_at")
+  certificateUrl String? @map("certificate_url") @db.Text
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, trackId])
+  @@index([userId, issuedAt])
+  @@map("certificates")
+}

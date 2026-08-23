@@ -1,0 +1,111 @@
+/* Light theme variables */
+:root.light {
+  --bg-color: #ffffff;
+  --text-color: #000000;
+  --accent-color: #007bff;
+}
+
+/* Dark theme variables */
+:root.dark {
+  --bg-color: #121212;
+  --text-color: #ffffff;
+  --accent-color: #ff9800;
+}
+
+/* Apply globally */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.app-view {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Most feature surfaces use slate utilities as their dark default. */
+:root.light [class*="bg-slate-950"] {
+  background-color: #f1f5f9 !important;
+}
+
+:root.light [class*="bg-slate-900"] {
+  background-color: #ffffff !important;
+}
+
+:root.light [class*="bg-slate-800"] {
+  background-color: #e2e8f0 !important;
+}
+
+:root.light [class*="from-slate-"],
+:root.light [class*="via-slate-"],
+:root.light [class*="to-slate-"] {
+  --tw-gradient-from: #ffffff !important;
+  --tw-gradient-to: rgb(255 255 255 / 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+:root.light [class*="text-white"] {
+  color: #0f172a !important;
+}
+
+:root.light [class*="text-slate-100"],
+:root.light [class*="text-slate-200"] {
+  color: #1e293b !important;
+}
+
+:root.light [class*="text-slate-300"],
+:root.light [class*="text-slate-400"] {
+  color: #475569 !important;
+}
+
+:root.light [class*="border-slate-800"],
+:root.light [class*="border-slate-700"] {
+  border-color: #cbd5e1 !important;
+}
+
+:root.light header[class],
+:root.light footer[class] {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  backdrop-filter: none;
+}
+
+:root.light .foundation-page [class*="bg-slate-950"],
+:root.light .foundation-page [class*="bg-slate-900"] {
+  background-color: #ffffff !important;
+}
+
+:root.light .foundation-page [class*="bg-blue-950"] {
+  background-color: #eff6ff !important;
+}
+
+:root.light .foundation-page [class*="bg-rose-950"] {
+  background-color: #fff1f2 !important;
+}
+
+:root.light .foundation-page [class*="bg-emerald-950"] {
+  background-color: #ecfdf5 !important;
+}
+
+:root.light .foundation-page [class*="border-slate-800"],
+:root.light .foundation-page [class*="border-slate-700"] {
+  border-color: #cbd5e1 !important;
+}
+
+:root.light .foundation-page [class*="text-white"] {
+  color: #0f172a !important;
+}
+
+:root.light .foundation-page [class*="text-slate-200"],
+:root.light .foundation-page [class*="text-slate-300"] {
+  color: #334155 !important;
+}
+
+:root.light .foundation-page textarea,
+:root.light .foundation-page select {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
