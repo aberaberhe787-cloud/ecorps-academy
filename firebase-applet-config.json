@@ -1,12 +1,12 @@
 {
-  "projectId": "mimetic-listener-w224x",
-  "appId": "1:82841416932:web:c276139e927c7b37e028f1",
-  "apiKey": "AIzaSyCcC2khhKbs4JjgbalYGbIb8SU064nKcb8",
-  "authDomain": "mimetic-listener-w224x.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-ecorpacademy-a4d363c0-eaad-4018-9cfe-bb3696ccdbbd",
-  "storageBucket": "mimetic-listener-w224x.firebasestorage.app",
-  "messagingSenderId": "82841416932",
-  "measurementId": "",
-  "oAuthClientId": "82841416932-1lapl3hf3gqgegv1uapomstqfd1r3nru.apps.googleusercontent.com",
+  "projectId": "ecorp-b9fde",
+  "appId": "1:444245917763:web:0e4a5e4982beade46154f6",
+  "apiKey": "AIzaSyCNktFghXYXtNhghWjW9FEEa6_DoRpTjLM",
+  "authDomain": "ecorp-b9fde.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "ecorp-b9fde.firebasestorage.app",
+  "messagingSenderId": "444245917763",
+  "measurementId": "G-JR8GYRNRN4",
+  "oAuthClientId": "",
   "recaptchaSiteKey": ""
 }
