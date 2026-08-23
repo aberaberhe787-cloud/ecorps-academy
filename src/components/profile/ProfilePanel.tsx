@@ -81,7 +81,15 @@ export const ProfilePanel: React.FC<ProfilePanelProps> = ({ onClose }) => {
         <div className="p-4">
           <button
             type="button"
-            onClick={() => void logout()}
+            onClick={async () => {
+              try {
+                await logout();
+              } catch (err) {
+                console.error('Logout failed:', err);
+              } finally {
+                onClose();
+              }
+            }}
             className="flex w-full items-center justify-center gap-2 rounded-lg border border-rose-900/60 px-4 py-2.5 text-sm font-semibold text-rose-300 transition hover:bg-rose-950/40"
           >
             <LogOut className="h-4 w-4" />

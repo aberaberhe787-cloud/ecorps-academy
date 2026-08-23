@@ -173,8 +173,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const logout = async () => {
-    await syncProgressToDb(auth.currentUser?.email || "");
-    await signOut(auth);
+    try {
+      // Attempt to persist progress but don't let failures block sign-out
+      await syncProgressToDb(auth.currentUser?.email || "");
+    } catch (err) {
+      console.error('Failed to sync progress before logout:', err);
+    }
+
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.error('Firebase signOut failed:', err);
+    }
+
+    // Reset UI to home regardless of signOut outcome
     setActiveTab("home");
   };
 
