@@ -15,6 +15,7 @@ import { translations, Language, I18nTranslations } from "../i18n/translations";
 import { amharicCurriculumModules } from "../i18n/amharicLessons";
 import { curriculumModules } from "../data/lessonsData";
 import { auth, db } from "../lib/firebase";
+import { signOut } from "firebase/auth";
 import { doc, getDoc, onSnapshot, setDoc } from "firebase/firestore";
 
 interface AppContextType {
@@ -80,6 +81,7 @@ interface AppContextType {
   deleteCustomPrompt: (id: string) => void;
   toggleBookmarkPattern: (patternId: string) => void;
   syncProgressToDb: (email: string) => Promise<void>;
+  logout: () => Promise<void>;
   
   // LMS Focus / Distraction-free mode
   isDistractionFreeMode: boolean;
@@ -156,6 +158,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       displayName: user.displayName || "Ecorp Scholar",
       photoURL: user.photoURL || null,
       curriculumProgress: userProgress.completedLessons.length,
+      completedLessonCount: userProgress.completedLessons.length,
+      curriculumProgressPercent: 0,
       currentStreak: userProgress.streakDays,
       lastLoginDate: new Date().toISOString().slice(0, 10),
       xp: userProgress.xp,
@@ -166,6 +170,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       savedCustomPrompts: userProgress.savedCustomPrompts,
       achievements: userProgress.achievements,
     }, { merge: true });
+  };
+
+  const logout = async () => {
+    await syncProgressToDb(auth.currentUser?.email || "");
+    await signOut(auth);
+    setActiveTab("home");
   };
 
   // Playground state
@@ -305,6 +315,8 @@ Provide:
           displayName: user.displayName || data.displayName || "Ecorp Scholar",
           photoURL: user.photoURL || data.photoURL || null,
           curriculumProgress: cloudProgress.completedLessons.length,
+          completedLessonCount: cloudProgress.completedLessons.length,
+          curriculumProgressPercent: 0,
           currentStreak,
           lastLoginDate: today,
           xp: cloudProgress.xp,
@@ -780,6 +792,7 @@ Provide:
         deleteCustomPrompt,
         toggleBookmarkPattern,
         syncProgressToDb,
+        logout,
         isDistractionFreeMode,
         setIsDistractionFreeMode,
         language,

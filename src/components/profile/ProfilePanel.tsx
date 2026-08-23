@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, User, Flame, BookOpen, Target, Award, Trophy, Sparkles, ChevronRight } from 'lucide-react';
+import { X, User, Flame, BookOpen, Target, Award, Trophy, Sparkles, ChevronRight, LogOut } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { BadgeComponent } from './BadgeComponent';
 import { ProgressRing } from './ProgressRing';
@@ -10,7 +10,7 @@ interface ProfilePanelProps {
 }
 
 export const ProfilePanel: React.FC<ProfilePanelProps> = ({ onClose }) => {
-  const { userProgress, currentCurriculum } = useApp();
+  const { userProgress, currentCurriculum, logout } = useApp();
   const allLessons = currentCurriculum.flatMap((m) => m.lessons);
   const completionPercent = Math.round(
     (userProgress.completedLessons.length / allLessons.length) * 100
@@ -76,6 +76,17 @@ export const ProfilePanel: React.FC<ProfilePanelProps> = ({ onClose }) => {
             Curriculum Progress
           </h3>
           <ProgressRing progress={completionPercent} label="Mastery" />
+        </div>
+
+        <div className="p-4">
+          <button
+            type="button"
+            onClick={() => void logout()}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-rose-900/60 px-4 py-2.5 text-sm font-semibold text-rose-300 transition hover:bg-rose-950/40"
+          >
+            <LogOut className="h-4 w-4" />
+            Log out
+          </button>
         </div>
 
         <div className="p-4 border-b border-slate-800">
