@@ -16,7 +16,7 @@ import { amharicCurriculumModules } from "../i18n/amharicLessons";
 import { curriculumModules } from "../data/lessonsData";
 import { auth, db } from "../lib/firebase";
 import { signOut } from "firebase/auth";
-import { doc, getDoc, onSnapshot, setDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
 
 interface AppContextType {
   activeTab: NavTab;
@@ -154,6 +154,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const syncProgressToDb = async (email: string) => {
     const user = auth.currentUser;
     if (!user || (email && user.email !== email)) return;
+    const lessonsMap = Object.fromEntries(userProgress.completedLessons.map(id => [id, true]));
     await setDoc(doc(db, USERS_COLLECTION, user.uid), {
       displayName: user.displayName || "Ecorp Scholar",
       photoURL: user.photoURL || null,
@@ -164,6 +165,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       lastLoginDate: new Date().toISOString().slice(0, 10),
       xp: userProgress.xp,
       completedLessons: userProgress.completedLessons,
+      lessons: lessonsMap,
       completedMissions: userProgress.completedMissions,
       missionScores: userProgress.missionScores,
       bookmarkedPatterns: userProgress.bookmarkedPatterns,
@@ -341,7 +343,7 @@ Provide:
 
         const cloudProgress: UserProgress = {
           ...initialProgress,
-          completedLessons: Array.isArray(data.completedLessons) ? data.completedLessons : [],
+          completedLessons: Array.isArray(data.completedLessons) ? Array.from(new Set([...data.completedLessons, ...(data.lessons && typeof data.lessons === 'object' ? Object.keys(data.lessons).filter(k => data.lessons[k]) : [])])) : (data.lessons && typeof data.lessons === 'object' ? Object.keys(data.lessons).filter(k => data.lessons[k]) : []),
           completedMissions: Array.isArray(data.completedMissions) ? data.completedMissions : [],
           missionScores: data.missionScores && typeof data.missionScores === "object" ? data.missionScores : {},
           bookmarkedPatterns: Array.isArray(data.bookmarkedPatterns) ? data.bookmarkedPatterns : [],
@@ -353,6 +355,7 @@ Provide:
         setUserProgress(cloudProgress);
 
         // Persist an up-to-date snapshot of essential fields (merge) including today's login date
+        const lessonsMap = Object.fromEntries(cloudProgress.completedLessons.map((id) => [id, true]));
         await setDoc(userRef, {
           displayName: user.displayName || data.displayName || "Ecorp Scholar",
           photoURL: user.photoURL || data.photoURL || null,
@@ -363,6 +366,7 @@ Provide:
           lastLoginDate: today,
           xp: cloudProgress.xp,
           completedLessons: cloudProgress.completedLessons,
+          lessons: lessonsMap,
           completedMissions: cloudProgress.completedMissions,
           missionScores: cloudProgress.missionScores,
           bookmarkedPatterns: cloudProgress.bookmarkedPatterns,
@@ -737,17 +741,23 @@ Provide:
           try {
             const snapshot = await getDoc(userRef);
             const data = snapshot.exists() ? snapshot.data() : {};
-            const existing = Array.isArray(data.completedLessons) ? data.completedLessons : [];
-            const merged = Array.from(new Set([...existing, ...next.completedLessons]));
+            const existingArray = Array.isArray(data.completedLessons) ? data.completedLessons : [];
+            const existingMapKeys = data.lessons && typeof data.lessons === 'object' ? Object.keys(data.lessons).filter(k => data.lessons[k]) : [];
+            const merged = Array.from(new Set([...existingArray, ...existingMapKeys, ...next.completedLessons]));
             const newXp = typeof data.xp === 'number' ? data.xp : initialProgress.xp;
-            // If local XP increased, reflect it in cloud XP as increment
             const xpToSet = Math.max(newXp, next.xp);
-            await setDoc(userRef, {
+
+            // Update both array and lessons map to ensure other devices can read either shape
+            const lessonsMap = Object.fromEntries(merged.map(id => [id, true]));
+
+            // Use updateDoc so we can set nested fields safely
+            await updateDoc(userRef, {
               completedLessons: merged,
+              lessons: lessonsMap,
               xp: xpToSet,
               completedLessonCount: merged.length,
               curriculumProgress: merged.length
-            }, { merge: true });
+            });
           } catch (err) {
             console.error('Failed to persist lesson completion to Firestore:', err);
           }

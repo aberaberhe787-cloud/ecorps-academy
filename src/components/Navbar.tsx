@@ -23,6 +23,8 @@ import { NavTab } from "../types";
 import { GoogleTranslate } from "./GoogleTranslate";
 import { EcorpLogo } from "./EcorpLogo";
 import { CertificateGenerator } from "./CertificateGenerator";
+import { auth } from "../lib/firebase";
+import { sendPasswordResetEmail } from "firebase/auth";
 
 interface ProfilePanelProps {
   onClose: () => void;
@@ -33,9 +35,10 @@ import { ProfilePanel } from "./profile/ProfilePanel";
 import { motion, AnimatePresence } from "motion/react";
 
 export const Navbar: React.FC = () => {
-  const { activeTab, setActiveTab, openSandbox, userProgress, hasRealApiAvailable, aiMode, setAiMode, t } = useApp();
+  const { activeTab, setActiveTab, openSandbox, userProgress, hasRealApiAvailable, aiMode, setAiMode, t, logout } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
@@ -57,7 +60,7 @@ export const Navbar: React.FC = () => {
     { id: "playground", label: t.nav.sandbox, icon: Terminal },
     { id: "patterns", label: t.nav.patterns, icon: Grid3X3 },
     { id: "resources", label: t.nav.resources, icon: Sparkles },
-    { id: "profile", label: "Profile", icon: User }
+    { id: "profile", label: "Dashboard", icon: User }
   ];
 
   const level = Math.floor(userProgress.xp / 500) + 1;
@@ -102,7 +105,7 @@ export const Navbar: React.FC = () => {
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => { if (item.id === 'profile') { setProfileOpen(true); } setActiveTab(item.id); }}
                   className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-150 ${
                     isActive
                       ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25"
@@ -119,14 +122,59 @@ export const Navbar: React.FC = () => {
           {/* Right Side */}
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            {/* Auth Buttons/Profile */}
-             <button
-              onClick={() => setProfileOpen(true)}
-              className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center"
-              aria-label="Open profile"
-            >
-              <User className="h-4 w-4 text-white" />
-            </button>
+            {/* Auth Buttons / Account menu */}
+            <div className="relative">
+              <button
+                onClick={() => { setAccountOpen((s) => !s); setProfileOpen(false); }}
+                className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center"
+                aria-label="Open account menu"
+              >
+                <User className="h-4 w-4 text-white" />
+              </button>
+
+              {accountOpen && (
+                <div className="absolute right-0 mt-2 w-48 rounded-lg bg-slate-950 border border-slate-800 shadow-lg z-50">
+                  <div className="p-2">
+                    <button
+                      className="w-full text-left px-3 py-2 text-sm text-slate-200 hover:bg-slate-900 rounded"
+                      onClick={async () => {
+                        setAccountOpen(false);
+                        try {
+                          await logout();
+                        } catch (e) {
+                          console.error('Logout from account menu failed', e);
+                        }
+                      }}
+                    >
+                      Log out
+                    </button>
+                    <button
+                      className="w-full text-left px-3 py-2 text-sm text-slate-200 hover:bg-slate-900 rounded"
+                      onClick={async () => {
+                        setAccountOpen(false);
+                        const email = (auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : null;
+                        if (!email) {
+                          alert('No email available for password reset');
+                          return;
+                        }
+                        try {
+                          await sendPasswordResetEmail(auth, email);
+                          alert('Password reset email sent to ' + email);
+                        } catch (err) {
+                          console.error('sendPasswordResetEmail failed', err);
+                          alert('Failed to send password reset email');
+                        }
+                      }}
+                    >
+                      Change password
+                    </button>
+                    <div className="px-3 py-2">
+                      <ThemeToggle />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2 text-slate-300"
