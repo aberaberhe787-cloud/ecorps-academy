@@ -299,18 +299,46 @@ Provide:
       if (!user) return;
 
       const userRef = doc(db, USERS_COLLECTION, user.uid);
-      const today = new Date().toISOString().slice(0, 10);
-      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+      // Compute UTC-based date values to avoid timezone drift between devices
+      const now = new Date();
+      const todayUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+      const toYmd = (utcMillis: number) => {
+        const d = new Date(utcMillis);
+        const y = d.getUTCFullYear();
+        const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(d.getUTCDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      };
+      const today = toYmd(todayUtc);
 
       try {
         const snapshot = await getDoc(userRef);
         const data = snapshot.exists() ? snapshot.data() : {};
         const previousLogin = typeof data.lastLoginDate === "string" ? data.lastLoginDate : null;
-        const currentStreak = previousLogin === today
-          ? Number(data.currentStreak || data.streakDays || 1)
-          : previousLogin === yesterday
-            ? Number(data.currentStreak || data.streakDays || 0) + 1
-            : 1;
+
+        const parseYmdToUtc = (s: string) => {
+          const [y, m, d] = s.split('-').map(Number);
+          return Date.UTC(y, m - 1, d);
+        };
+
+        let currentStreak = 1;
+        if (previousLogin) {
+          try {
+            const prevUtc = parseYmdToUtc(previousLogin);
+            const diffDays = Math.round((todayUtc - prevUtc) / 86400000);
+            if (diffDays === 0) {
+              currentStreak = Number(data.currentStreak || data.streakDays || 1);
+            } else if (diffDays === 1) {
+              currentStreak = Number(data.currentStreak || data.streakDays || 0) + 1;
+            } else {
+              currentStreak = 1;
+            }
+          } catch (e) {
+            currentStreak = Number(data.currentStreak || data.streakDays || 1);
+          }
+        }
+
         const cloudProgress: UserProgress = {
           ...initialProgress,
           completedLessons: Array.isArray(data.completedLessons) ? data.completedLessons : [],
@@ -323,6 +351,8 @@ Provide:
           achievements: Array.isArray(data.achievements) ? data.achievements : [],
         };
         setUserProgress(cloudProgress);
+
+        // Persist an up-to-date snapshot of essential fields (merge) including today's login date
         await setDoc(userRef, {
           displayName: user.displayName || data.displayName || "Ecorp Scholar",
           photoURL: user.photoURL || data.photoURL || null,
@@ -339,6 +369,7 @@ Provide:
           savedCustomPrompts: cloudProgress.savedCustomPrompts,
           achievements: cloudProgress.achievements,
         }, { merge: true });
+
         firestoreReady.current = true;
         unsubscribe = onSnapshot(userRef, (updatedSnapshot) => {
           if (!firestoreReady.current || !updatedSnapshot.exists()) return;
@@ -691,11 +722,39 @@ Provide:
         spread: 50,
         origin: { y: 0.7 }
       });
-      return {
+
+      const next = {
         ...prev,
         completedLessons: [...prev.completedLessons, lessonId],
         xp: prev.xp + 40
       };
+
+      // Persist immediately if signed in and Firestore is ready
+      const user = auth.currentUser;
+      if (user && firestoreReady.current && firestoreUserId.current === user.uid) {
+        const userRef = doc(db, USERS_COLLECTION, user.uid);
+        (async () => {
+          try {
+            const snapshot = await getDoc(userRef);
+            const data = snapshot.exists() ? snapshot.data() : {};
+            const existing = Array.isArray(data.completedLessons) ? data.completedLessons : [];
+            const merged = Array.from(new Set([...existing, ...next.completedLessons]));
+            const newXp = typeof data.xp === 'number' ? data.xp : initialProgress.xp;
+            // If local XP increased, reflect it in cloud XP as increment
+            const xpToSet = Math.max(newXp, next.xp);
+            await setDoc(userRef, {
+              completedLessons: merged,
+              xp: xpToSet,
+              completedLessonCount: merged.length,
+              curriculumProgress: merged.length
+            }, { merge: true });
+          } catch (err) {
+            console.error('Failed to persist lesson completion to Firestore:', err);
+          }
+        })();
+      }
+
+      return next;
     });
   };
 
