@@ -54,10 +54,7 @@ const AppShell: React.FC = () => {
   return (
     <div className="flex min-h-screen flex-col w-full overflow-x-hidden bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-blue-600 selection:text-white font-sans antialiased">
       {!hideGlobalChrome && <Navbar />}
-      {!hideGlobalChrome && <DashboardHeader />}
-      <RequireAuth>
-        <MainContent />
-      </RequireAuth>
+      <MainContent />
       {!hideGlobalChrome && <Footer />}
     </div>
   );

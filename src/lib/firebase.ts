@@ -5,7 +5,27 @@ import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-export const auth = getAuth();
+
+// Provide a small test hook: if window.__E2E_MOCK_AUTH is set, export a mock auth object
+let _auth: any;
+if (typeof window !== 'undefined' && (window as any).__E2E_MOCK_AUTH) {
+  const mockUser = (window as any).__E2E_MOCK_AUTH;
+  _auth = {
+    currentUser: mockUser,
+    onAuthStateChanged: (cb: any) => {
+      try { cb(mockUser); } catch (e) {}
+      return () => {};
+    },
+    signOut: () => {
+      (window as any).__E2E_MOCK_AUTH = null;
+      return Promise.resolve();
+    }
+  };
+} else {
+  _auth = getAuth();
+}
+
+export const auth = _auth as any;
 
 export enum OperationType {
   CREATE = 'create',

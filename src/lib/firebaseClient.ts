@@ -25,8 +25,30 @@ import firebaseConfig from '../../firebase-applet-config.json';
 // Initialize Firebase App (singleton)
 const app = initializeApp(firebaseConfig as any);
 
+// Testing hook: if the browser sets window.__E2E_MOCK_AUTH, provide a minimal mock auth
+// This lets e2e scripts run without contacting Firebase (useful in CI or restricted envs).
+let _auth: any;
+if (typeof window !== 'undefined' && (window as any).__E2E_MOCK_AUTH) {
+  const mockUser = (window as any).__E2E_MOCK_AUTH;
+  _auth = {
+    currentUser: mockUser,
+    onAuthStateChanged: (cb: any) => {
+      // Immediately notify with the mock user
+      try { cb(mockUser); } catch (e) { /* ignore */ }
+      return () => {};
+    },
+    // minimal signOut implementation
+    signOut: () => {
+      (window as any).__E2E_MOCK_AUTH = null;
+      return Promise.resolve();
+    }
+  };
+} else {
+  _auth = getAuth(app);
+}
+
 // Exports for Auth, Firestore, Functions
-export const auth = getAuth(app);
+export const auth = _auth as any;
 export const db = getFirestore(app);
 export const functions = getFunctions(app);
 
