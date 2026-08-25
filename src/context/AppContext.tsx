@@ -14,9 +14,8 @@ import { analyzePrompt } from "../lib/promptAnalyzer";
 import { translations, Language, I18nTranslations } from "../i18n/translations";
 import { amharicCurriculumModules } from "../i18n/amharicLessons";
 import { curriculumModules } from "../data/lessonsData";
-import { auth, db } from "../lib/firebase";
-import { signOut } from "firebase/auth";
-import { doc, getDoc, onSnapshot, setDoc, updateDoc } from "firebase/firestore";
+import { auth, db, useEmulatorsIfDev, updateLastLoginCallable, mergeLessonCompletionCallable, subscribeToUserDoc, readUserDoc, signOut as fbSignOut, onAuthStateChanged as firebaseOnAuthStateChanged } from "../lib/firebaseClient";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 interface AppContextType {
   activeTab: NavTab;
@@ -292,102 +291,64 @@ Provide:
 
   // Hydrate each signed-in user from Firestore and update their daily streak.
   useEffect(() => {
+    // Connect to emulators when developing locally
+    try { useEmulatorsIfDev(); } catch {}
+
     let unsubscribe: (() => void) | undefined;
-    const unsubscribeAuth = auth.onAuthStateChanged(async (user) => {
+    const unsubscribeAuth = firebaseOnAuthStateChanged(auth, async (user) => {
       firestoreReady.current = false;
       firestoreUserId.current = user?.uid || null;
       unsubscribe?.();
       unsubscribe = undefined;
       if (!user) return;
 
-      const userRef = doc(db, USERS_COLLECTION, user.uid);
-
-      // Compute UTC-based date values to avoid timezone drift between devices
-      const now = new Date();
-      const todayUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-      const toYmd = (utcMillis: number) => {
-        const d = new Date(utcMillis);
-        const y = d.getUTCFullYear();
-        const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(d.getUTCDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
-      };
-      const today = toYmd(todayUtc);
-
       try {
-        const snapshot = await getDoc(userRef);
-        const data = snapshot.exists() ? snapshot.data() : {};
-        const previousLogin = typeof data.lastLoginDate === "string" ? data.lastLoginDate : null;
-
-        const parseYmdToUtc = (s: string) => {
-          const [y, m, d] = s.split('-').map(Number);
-          return Date.UTC(y, m - 1, d);
-        };
-
-        let currentStreak = 1;
-        if (previousLogin) {
-          try {
-            const prevUtc = parseYmdToUtc(previousLogin);
-            const diffDays = Math.round((todayUtc - prevUtc) / 86400000);
-            if (diffDays === 0) {
-              currentStreak = Number(data.currentStreak || data.streakDays || 1);
-            } else if (diffDays === 1) {
-              currentStreak = Number(data.currentStreak || data.streakDays || 0) + 1;
-            } else {
-              currentStreak = 1;
-            }
-          } catch (e) {
-            currentStreak = Number(data.currentStreak || data.streakDays || 1);
-          }
+        // Let the server compute and persist the UTC-based streak and lastLoginDate
+        try {
+          const updateFn = updateLastLoginCallable();
+          await updateFn();
+        } catch (err) {
+          console.warn('updateLastLogin callable failed', err);
         }
+
+        // Read the user doc and hydrate progress (merge array + lessons map)
+        const data = (await readUserDoc(user.uid)) || {};
+        const arrayFromDoc = Array.isArray(data.completedLessons) ? data.completedLessons : [];
+        const mapKeys = data.lessons && typeof data.lessons === 'object' ? Object.keys(data.lessons).filter(k => data.lessons[k]) : [];
+        const merged = Array.from(new Set([...arrayFromDoc, ...mapKeys]));
 
         const cloudProgress: UserProgress = {
           ...initialProgress,
-          completedLessons: Array.isArray(data.completedLessons) ? Array.from(new Set([...data.completedLessons, ...(data.lessons && typeof data.lessons === 'object' ? Object.keys(data.lessons).filter(k => data.lessons[k]) : [])])) : (data.lessons && typeof data.lessons === 'object' ? Object.keys(data.lessons).filter(k => data.lessons[k]) : []),
+          completedLessons: merged,
           completedMissions: Array.isArray(data.completedMissions) ? data.completedMissions : [],
           missionScores: data.missionScores && typeof data.missionScores === "object" ? data.missionScores : {},
           bookmarkedPatterns: Array.isArray(data.bookmarkedPatterns) ? data.bookmarkedPatterns : [],
           savedCustomPrompts: Array.isArray(data.savedCustomPrompts) ? data.savedCustomPrompts : [],
           xp: typeof data.xp === "number" ? data.xp : initialProgress.xp,
-          streakDays: currentStreak,
+          streakDays: typeof data.currentStreak === 'number' ? data.currentStreak : (typeof data.streakDays === 'number' ? data.streakDays : initialProgress.streakDays),
           achievements: Array.isArray(data.achievements) ? data.achievements : [],
         };
+
         setUserProgress(cloudProgress);
 
-        // Persist an up-to-date snapshot of essential fields (merge) including today's login date
-        const lessonsMap = Object.fromEntries(cloudProgress.completedLessons.map((id) => [id, true]));
-        await setDoc(userRef, {
-          displayName: user.displayName || data.displayName || "Ecorp Scholar",
-          photoURL: user.photoURL || data.photoURL || null,
-          curriculumProgress: cloudProgress.completedLessons.length,
-          completedLessonCount: cloudProgress.completedLessons.length,
-          curriculumProgressPercent: 0,
-          currentStreak,
-          lastLoginDate: today,
-          xp: cloudProgress.xp,
-          completedLessons: cloudProgress.completedLessons,
-          lessons: lessonsMap,
-          completedMissions: cloudProgress.completedMissions,
-          missionScores: cloudProgress.missionScores,
-          bookmarkedPatterns: cloudProgress.bookmarkedPatterns,
-          savedCustomPrompts: cloudProgress.savedCustomPrompts,
-          achievements: cloudProgress.achievements,
-        }, { merge: true });
-
         firestoreReady.current = true;
-        unsubscribe = onSnapshot(userRef, (updatedSnapshot) => {
-          if (!firestoreReady.current || !updatedSnapshot.exists()) return;
-          const updated = updatedSnapshot.data();
+
+        // Subscribe to realtime updates so other devices reflect changes immediately
+        unsubscribe = subscribeToUserDoc(user.uid, (docData) => {
+          if (!firestoreReady.current || !docData) return;
+          const arrayFromDoc2 = Array.isArray(docData.completedLessons) ? docData.completedLessons : [];
+          const mapKeys2 = docData.lessons && typeof docData.lessons === 'object' ? Object.keys(docData.lessons).filter(k => docData.lessons[k]) : [];
+          const merged2 = Array.from(new Set([...arrayFromDoc2, ...mapKeys2]));
           setUserProgress((previous) => ({
             ...previous,
-            completedLessons: Array.isArray(updated.completedLessons) ? updated.completedLessons : previous.completedLessons,
-            completedMissions: Array.isArray(updated.completedMissions) ? updated.completedMissions : previous.completedMissions,
-            missionScores: updated.missionScores && typeof updated.missionScores === "object" ? updated.missionScores : previous.missionScores,
-            bookmarkedPatterns: Array.isArray(updated.bookmarkedPatterns) ? updated.bookmarkedPatterns : previous.bookmarkedPatterns,
-            savedCustomPrompts: Array.isArray(updated.savedCustomPrompts) ? updated.savedCustomPrompts : previous.savedCustomPrompts,
-            xp: typeof updated.xp === "number" ? updated.xp : previous.xp,
-            streakDays: typeof updated.currentStreak === "number" ? updated.currentStreak : previous.streakDays,
-            achievements: Array.isArray(updated.achievements) ? updated.achievements : previous.achievements,
+            completedLessons: merged2,
+            completedMissions: Array.isArray(docData.completedMissions) ? docData.completedMissions : previous.completedMissions,
+            missionScores: docData.missionScores && typeof docData.missionScores === "object" ? docData.missionScores : previous.missionScores,
+            bookmarkedPatterns: Array.isArray(docData.bookmarkedPatterns) ? docData.bookmarkedPatterns : previous.bookmarkedPatterns,
+            savedCustomPrompts: Array.isArray(docData.savedCustomPrompts) ? docData.savedCustomPrompts : previous.savedCustomPrompts,
+            xp: typeof docData.xp === "number" ? docData.xp : previous.xp,
+            streakDays: typeof docData.currentStreak === "number" ? docData.currentStreak : previous.streakDays,
+            achievements: Array.isArray(docData.achievements) ? docData.achievements : previous.achievements,
           }));
         });
       } catch (error) {
@@ -719,53 +680,37 @@ Provide:
   };
 
   const markLessonComplete = (lessonId: string) => {
+    // Optimistic local update
     setUserProgress((prev) => {
       if (prev.completedLessons.includes(lessonId)) return prev;
-      confetti({
-        particleCount: 50,
-        spread: 50,
-        origin: { y: 0.7 }
-      });
-
-      const next = {
-        ...prev,
-        completedLessons: [...prev.completedLessons, lessonId],
-        xp: prev.xp + 40
-      };
-
-      // Persist immediately if signed in and Firestore is ready
-      const user = auth.currentUser;
-      if (user && firestoreReady.current && firestoreUserId.current === user.uid) {
-        const userRef = doc(db, USERS_COLLECTION, user.uid);
-        (async () => {
-          try {
-            const snapshot = await getDoc(userRef);
-            const data = snapshot.exists() ? snapshot.data() : {};
-            const existingArray = Array.isArray(data.completedLessons) ? data.completedLessons : [];
-            const existingMapKeys = data.lessons && typeof data.lessons === 'object' ? Object.keys(data.lessons).filter(k => data.lessons[k]) : [];
-            const merged = Array.from(new Set([...existingArray, ...existingMapKeys, ...next.completedLessons]));
-            const newXp = typeof data.xp === 'number' ? data.xp : initialProgress.xp;
-            const xpToSet = Math.max(newXp, next.xp);
-
-            // Update both array and lessons map to ensure other devices can read either shape
-            const lessonsMap = Object.fromEntries(merged.map(id => [id, true]));
-
-            // Use updateDoc so we can set nested fields safely
-            await updateDoc(userRef, {
-              completedLessons: merged,
-              lessons: lessonsMap,
-              xp: xpToSet,
-              completedLessonCount: merged.length,
-              curriculumProgress: merged.length
-            });
-          } catch (err) {
-            console.error('Failed to persist lesson completion to Firestore:', err);
-          }
-        })();
-      }
-
-      return next;
+      confetti({ particleCount: 50, spread: 50, origin: { y: 0.7 } });
+      return { ...prev, completedLessons: [...prev.completedLessons, lessonId], xp: prev.xp + 40 };
     });
+
+    // Persist via callable so server performs an atomic merge and xp update
+    const user = auth.currentUser;
+    if (user && firestoreReady.current && firestoreUserId.current === user.uid) {
+      (async () => {
+        try {
+          const fn = mergeLessonCompletionCallable();
+          await fn({ lessonId, xp: 40 });
+        } catch (err) {
+          console.error('mergeLessonCompletion callable failed:', err);
+          // On failure, resync from server
+          try {
+            const docData = await readUserDoc(user.uid);
+            if (docData) {
+              const arrayFromDoc = Array.isArray(docData.completedLessons) ? docData.completedLessons : [];
+              const mapKeys = docData.lessons && typeof docData.lessons === 'object' ? Object.keys(docData.lessons).filter(k => docData.lessons[k]) : [];
+              const merged = Array.from(new Set([...arrayFromDoc, ...mapKeys]));
+              setUserProgress((prev) => ({ ...prev, completedLessons: merged, xp: typeof docData.xp === 'number' ? docData.xp : prev.xp }));
+            }
+          } catch (e) {
+            console.error('Failed to resync after merge failure', e);
+          }
+        }
+      })();
+    }
   };
 
   const addXp = (amount: number) => {

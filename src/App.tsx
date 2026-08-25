@@ -18,6 +18,8 @@ import { UserProfileView } from "./views/UserProfileView";
 import { PromptEngineeringPath, FOUNDATION_LESSONS } from "./views/PromptEngineeringPath";
 import { LoginPage } from "./components/LoginPage";
 import { auth } from "./lib/firebase";
+import { DashboardHeader } from "./components/DashboardHeader";
+import { RequireAuth } from "./components/RequireAuth";
 
 const MainContent: React.FC = () => {
   const { activeTab, userProgress } = useApp();
@@ -52,7 +54,10 @@ const AppShell: React.FC = () => {
   return (
     <div className="flex min-h-screen flex-col w-full overflow-x-hidden bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-blue-600 selection:text-white font-sans antialiased">
       {!hideGlobalChrome && <Navbar />}
-      <MainContent />
+      {!hideGlobalChrome && <DashboardHeader />}
+      <RequireAuth>
+        <MainContent />
+      </RequireAuth>
       {!hideGlobalChrome && <Footer />}
     </div>
   );
