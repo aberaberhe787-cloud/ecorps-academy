@@ -36,12 +36,12 @@ const MainContent: React.FC = () => {
   return (
     <main className="flex-1">
       {activeTab === "home" && <HomeView />}
-      {activeTab === "curriculum" && <CurriculumView />}
-      {activeTab === "foundations" && <PromptEngineeringPath />}
-      {activeTab === "playground" && <PlaygroundView />}
-      {activeTab === "patterns" && <PatternLibraryView />}
-      {activeTab === "resources" && <ResourcesView />}
-      {activeTab === "profile" && <ProtectedRoute><UserProfileView path={profilePath} /></ProtectedRoute>}
+      {activeTab === "curriculum" && <RequireAuth><CurriculumView /></RequireAuth>}
+      {activeTab === "foundations" && <RequireAuth><PromptEngineeringPath /></RequireAuth>}
+      {activeTab === "playground" && <RequireAuth><PlaygroundView /></RequireAuth>}
+      {activeTab === "patterns" && <RequireAuth><PatternLibraryView /></RequireAuth>}
+      {activeTab === "resources" && <RequireAuth><ResourcesView /></RequireAuth>}
+      {activeTab === "profile" && <RequireAuth><UserProfileView path={profilePath} /></RequireAuth>}
     </main>
   );
 };
