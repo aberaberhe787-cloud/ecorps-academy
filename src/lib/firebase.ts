@@ -22,7 +22,7 @@ if (typeof window !== 'undefined' && (window as any).__E2E_MOCK_AUTH) {
     }
   };
 } else {
-  _auth = getAuth();
+  _auth = getAuth(app);
 }
 
 export const auth = _auth as any;

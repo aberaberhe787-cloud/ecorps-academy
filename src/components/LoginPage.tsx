@@ -22,6 +22,7 @@ import {
   signInWithEmailAndPassword,
   signInWithRedirect,
   signInWithPopup,
+  getRedirectResult,
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 
@@ -33,6 +34,14 @@ export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  React.useEffect(() => {
+    getRedirectResult(auth).catch((redirectError: any) => {
+      if (redirectError) {
+        setError(redirectError?.message || 'Redirect sign-in failed. Please try again.');
+      }
+    });
+  }, []);
 
   const handleEmailAuth = async (event: FormEvent) => {
     event.preventDefault();
