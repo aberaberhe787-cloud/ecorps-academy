@@ -14,8 +14,8 @@ import { analyzePrompt } from "../lib/promptAnalyzer";
 import { translations, Language, I18nTranslations } from "../i18n/translations";
 import { amharicCurriculumModules } from "../i18n/amharicLessons";
 import { curriculumModules } from "../data/lessonsData";
-import { auth, db, useEmulatorsIfDev, updateLastLoginCallable, mergeLessonCompletionCallable, subscribeToUserDoc, readUserDoc, signOut as fbSignOut, onAuthStateChanged as firebaseOnAuthStateChanged } from "../lib/firebaseClient";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { auth, db, useEmulatorsIfDev, subscribeToUserDoc, readUserDoc, signOut as fbSignOut, onAuthStateChanged as firebaseOnAuthStateChanged } from "../lib/firebaseClient";
+import { doc, setDoc } from "firebase/firestore";
 
 interface AppContextType {
   activeTab: NavTab;
@@ -110,6 +110,55 @@ const initialProgress: UserProgress = {
   achievements: []
 };
 
+function getUtcDateString(date: Date = new Date()): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function computeDailyStreak(lastDateStr?: string, existingStreak = 1): { streak: number; date: string } {
+  const todayStr = getUtcDateString();
+  if (!lastDateStr) {
+    return { streak: Math.max(1, existingStreak), date: todayStr };
+  }
+  if (lastDateStr === todayStr) {
+    return { streak: Math.max(1, existingStreak), date: todayStr };
+  }
+  const lastDate = new Date(lastDateStr + "T00:00:00Z");
+  const todayDate = new Date(todayStr + "T00:00:00Z");
+  const diffTime = todayDate.getTime() - lastDate.getTime();
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 1) {
+    return { streak: Math.max(1, existingStreak) + 1, date: todayStr };
+  } else if (diffDays > 1) {
+    return { streak: 1, date: todayStr };
+  }
+  return { streak: Math.max(1, existingStreak), date: todayStr };
+}
+
+function getStorageKeyForUid(uid?: string | null): string {
+  return uid ? `promptlab_user_progress_${uid}` : STORAGE_KEY;
+}
+
+function loadCachedProgress(uid?: string | null): UserProgress {
+  try {
+    const key = getStorageKeyForUid(uid);
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      return { ...initialProgress, ...JSON.parse(saved) };
+    }
+    // Backward-compatibility fallback to legacy global key for guests
+    if (!uid) {
+      const legacy = localStorage.getItem(STORAGE_KEY);
+      if (legacy) {
+        return { ...initialProgress, ...JSON.parse(legacy) };
+      }
+    }
+  } catch (e) {
+    console.warn("Could not load cached progress from localStorage", e);
+  }
+  return initialProgress;
+}
+
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -152,33 +201,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const syncProgressToDb = async (email: string) => {
     const user = auth.currentUser;
-    if (!user || (email && user.email !== email)) return;
-    const lessonsMap = Object.fromEntries(userProgress.completedLessons.map(id => [id, true]));
-    await setDoc(doc(db, USERS_COLLECTION, user.uid), {
-      displayName: user.displayName || "Ecorp Scholar",
-      photoURL: user.photoURL || null,
-      curriculumProgress: userProgress.completedLessons.length,
-      completedLessonCount: userProgress.completedLessons.length,
-      curriculumProgressPercent: 0,
-      currentStreak: userProgress.streakDays,
-      lastLoginDate: new Date().toISOString().slice(0, 10),
-      xp: userProgress.xp,
-      completedLessons: userProgress.completedLessons,
-      lessons: lessonsMap,
-      completedMissions: userProgress.completedMissions,
-      missionScores: userProgress.missionScores,
-      bookmarkedPatterns: userProgress.bookmarkedPatterns,
-      savedCustomPrompts: userProgress.savedCustomPrompts,
-      achievements: userProgress.achievements,
-    }, { merge: true });
+    if (!user) return;
+    if (email && user.email && user.email !== email) return;
+    
+    try {
+      const lessonsMap = Object.fromEntries(userProgress.completedLessons.map(id => [id, true]));
+      await setDoc(doc(db, USERS_COLLECTION, user.uid), {
+        displayName: user.displayName || "Ecorp Scholar",
+        photoURL: user.photoURL || null,
+        curriculumProgress: userProgress.completedLessons.length,
+        completedLessonCount: userProgress.completedLessons.length,
+        curriculumProgressPercent: 0,
+        currentStreak: userProgress.streakDays,
+        streakDays: userProgress.streakDays,
+        lastLoginDate: getUtcDateString(),
+        xp: userProgress.xp,
+        completedLessons: userProgress.completedLessons,
+        lessons: lessonsMap,
+        completedMissions: userProgress.completedMissions,
+        missionScores: userProgress.missionScores,
+        bookmarkedPatterns: userProgress.bookmarkedPatterns,
+        savedCustomPrompts: userProgress.savedCustomPrompts,
+        achievements: userProgress.achievements,
+      }, { merge: true });
+    } catch (err) {
+      console.error('Failed to sync progress to Firestore:', err);
+    }
   };
 
   const logout = async () => {
     console.debug('logout: initiated');
 
-    // Start syncing progress but don't await — make it fire-and-forget so a slow network
-    // or Firestore call cannot block the UI logout flow.
-    syncProgressToDb(auth.currentUser?.email || "").catch((err) => console.error('Failed to sync progress before logout:', err));
+    // Flush any pending progress before signing out
+    if (auth.currentUser) {
+      try {
+        await syncProgressToDb(auth.currentUser.email || "");
+      } catch (err) {
+        console.error('Failed to sync progress before logout:', err);
+      }
+    }
 
     try {
       await fbSignOut();
@@ -187,7 +248,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.error('Firebase signOut failed:', err);
     }
 
-    // Reset UI to home regardless of signOut outcome
+    // Reset local authenticated state to clean initial guest state
+    firestoreReady.current = false;
+    firestoreUserId.current = null;
+    setUserProgress(initialProgress);
     setActiveTab("home");
   };
 
@@ -276,18 +340,11 @@ Provide:
 
   // Progress state
   const [userProgress, setUserProgress] = useState<UserProgress>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        return { ...initialProgress, ...JSON.parse(saved) };
-      }
-    } catch (e) {
-      console.warn("Could not load progress from localStorage", e);
-    }
-    return initialProgress;
+    return loadCachedProgress(null);
   });
   const firestoreUserId = useRef<string | null>(null);
   const firestoreReady = useRef(false);
+  const isRemoteUpdate = useRef(false);
 
   // Hydrate each signed-in user from Firestore and update their daily streak.
   useEffect(() => {
@@ -297,84 +354,171 @@ Provide:
     let unsubscribe: (() => void) | undefined;
     const unsubscribeAuth = firebaseOnAuthStateChanged(auth, async (user) => {
       firestoreReady.current = false;
-      firestoreUserId.current = user?.uid || null;
       unsubscribe?.();
       unsubscribe = undefined;
-      if (!user) return;
+
+      if (!user) {
+        firestoreUserId.current = null;
+        setUserProgress(initialProgress);
+        return;
+      }
+
+      firestoreUserId.current = user.uid;
 
       try {
-        // Let the server compute and persist the UTC-based streak and lastLoginDate
-        try {
-          const updateFn = updateLastLoginCallable();
-          await updateFn();
-        } catch (err) {
-          console.warn('updateLastLogin callable failed', err);
+        // Read the user doc directly from Firestore
+        const data = await readUserDoc(user.uid);
+        const todayUtc = getUtcDateString();
+
+        if (data) {
+          // Compute daily streak deterministically in UTC
+          const existingStreak = typeof data.currentStreak === 'number'
+            ? data.currentStreak
+            : (typeof data.streakDays === 'number' ? data.streakDays : 1);
+          const streakResult = computeDailyStreak(data.lastLoginDate, existingStreak);
+
+          const arrayFromDoc = Array.isArray(data.completedLessons) ? data.completedLessons : [];
+          const mapKeys = data.lessons && typeof data.lessons === 'object'
+            ? Object.keys(data.lessons).filter(k => data.lessons[k])
+            : [];
+          const mergedLessons = Array.from(new Set([...arrayFromDoc, ...mapKeys]));
+
+          const cloudProgress: UserProgress = {
+            ...initialProgress,
+            completedLessons: mergedLessons,
+            completedMissions: Array.isArray(data.completedMissions) ? data.completedMissions : [],
+            missionScores: data.missionScores && typeof data.missionScores === "object" ? data.missionScores : {},
+            bookmarkedPatterns: Array.isArray(data.bookmarkedPatterns) ? data.bookmarkedPatterns : [],
+            savedCustomPrompts: Array.isArray(data.savedCustomPrompts) ? data.savedCustomPrompts : [],
+            xp: typeof data.xp === "number" ? data.xp : initialProgress.xp,
+            streakDays: streakResult.streak,
+            achievements: Array.isArray(data.achievements) ? data.achievements : [],
+          };
+
+          isRemoteUpdate.current = true;
+          setUserProgress(cloudProgress);
+
+          // Update user-namespaced local cache
+          try {
+            localStorage.setItem(getStorageKeyForUid(user.uid), JSON.stringify(cloudProgress));
+          } catch (e) {
+            console.warn("Could not cache user progress locally", e);
+          }
+
+          // Persist updated streak and lastLoginDate to Firestore
+          try {
+            await setDoc(doc(db, USERS_COLLECTION, user.uid), {
+              displayName: user.displayName || data.displayName || "Ecorp Scholar",
+              photoURL: user.photoURL || data.photoURL || null,
+              currentStreak: streakResult.streak,
+              streakDays: streakResult.streak,
+              lastLoginDate: streakResult.date,
+            }, { merge: true });
+          } catch (updateErr) {
+            console.warn("Could not update login streak in Firestore", updateErr);
+          }
+        } else {
+          // New user: create initial document in Firestore
+          const newUserData = {
+            displayName: user.displayName || "Ecorp Scholar",
+            photoURL: user.photoURL || null,
+            curriculumProgress: 0,
+            completedLessonCount: 0,
+            curriculumProgressPercent: 0,
+            currentStreak: 1,
+            streakDays: 1,
+            lastLoginDate: todayUtc,
+            xp: initialProgress.xp,
+            completedLessons: [],
+            lessons: {},
+            completedMissions: [],
+            missionScores: {},
+            bookmarkedPatterns: [],
+            savedCustomPrompts: [],
+            achievements: [],
+          };
+
+          try {
+            await setDoc(doc(db, USERS_COLLECTION, user.uid), newUserData, { merge: true });
+          } catch (createErr) {
+            console.warn("Could not create initial user document in Firestore", createErr);
+          }
+
+          isRemoteUpdate.current = true;
+          setUserProgress(initialProgress);
+
+          try {
+            localStorage.setItem(getStorageKeyForUid(user.uid), JSON.stringify(initialProgress));
+          } catch (e) {
+            console.warn("Could not cache initial progress locally", e);
+          }
         }
-
-        // Read the user doc and hydrate progress (merge array + lessons map)
-        const data = (await readUserDoc(user.uid)) || {};
-        const arrayFromDoc = Array.isArray(data.completedLessons) ? data.completedLessons : [];
-        const mapKeys = data.lessons && typeof data.lessons === 'object' ? Object.keys(data.lessons).filter(k => data.lessons[k]) : [];
-        const merged = Array.from(new Set([...arrayFromDoc, ...mapKeys]));
-
-        const cloudProgress: UserProgress = {
-          ...initialProgress,
-          completedLessons: merged,
-          completedMissions: Array.isArray(data.completedMissions) ? data.completedMissions : [],
-          missionScores: data.missionScores && typeof data.missionScores === "object" ? data.missionScores : {},
-          bookmarkedPatterns: Array.isArray(data.bookmarkedPatterns) ? data.bookmarkedPatterns : [],
-          savedCustomPrompts: Array.isArray(data.savedCustomPrompts) ? data.savedCustomPrompts : [],
-          xp: typeof data.xp === "number" ? data.xp : initialProgress.xp,
-          streakDays: typeof data.currentStreak === 'number' ? data.currentStreak : (typeof data.streakDays === 'number' ? data.streakDays : initialProgress.streakDays),
-          achievements: Array.isArray(data.achievements) ? data.achievements : [],
-        };
-
-        setUserProgress(cloudProgress);
 
         firestoreReady.current = true;
 
-        // Subscribe to realtime updates so other devices reflect changes immediately
+        // Subscribe to real-time updates so multi-tab / multi-device changes reflect immediately
         unsubscribe = subscribeToUserDoc(user.uid, (docData) => {
           if (!firestoreReady.current || !docData) return;
           const arrayFromDoc2 = Array.isArray(docData.completedLessons) ? docData.completedLessons : [];
-          const mapKeys2 = docData.lessons && typeof docData.lessons === 'object' ? Object.keys(docData.lessons).filter(k => docData.lessons[k]) : [];
+          const mapKeys2 = docData.lessons && typeof docData.lessons === 'object'
+            ? Object.keys(docData.lessons).filter(k => docData.lessons[k])
+            : [];
           const merged2 = Array.from(new Set([...arrayFromDoc2, ...mapKeys2]));
-          setUserProgress((previous) => ({
-            ...previous,
-            completedLessons: merged2,
-            completedMissions: Array.isArray(docData.completedMissions) ? docData.completedMissions : previous.completedMissions,
-            missionScores: docData.missionScores && typeof docData.missionScores === "object" ? docData.missionScores : previous.missionScores,
-            bookmarkedPatterns: Array.isArray(docData.bookmarkedPatterns) ? docData.bookmarkedPatterns : previous.bookmarkedPatterns,
-            savedCustomPrompts: Array.isArray(docData.savedCustomPrompts) ? docData.savedCustomPrompts : previous.savedCustomPrompts,
-            xp: typeof docData.xp === "number" ? docData.xp : previous.xp,
-            streakDays: typeof docData.currentStreak === "number" ? docData.currentStreak : previous.streakDays,
-            achievements: Array.isArray(docData.achievements) ? docData.achievements : previous.achievements,
-          }));
+
+          isRemoteUpdate.current = true;
+          setUserProgress((previous) => {
+            const nextProgress: UserProgress = {
+              ...previous,
+              completedLessons: merged2,
+              completedMissions: Array.isArray(docData.completedMissions) ? docData.completedMissions : previous.completedMissions,
+              missionScores: docData.missionScores && typeof docData.missionScores === "object" ? docData.missionScores : previous.missionScores,
+              bookmarkedPatterns: Array.isArray(docData.bookmarkedPatterns) ? docData.bookmarkedPatterns : previous.bookmarkedPatterns,
+              savedCustomPrompts: Array.isArray(docData.savedCustomPrompts) ? docData.savedCustomPrompts : previous.savedCustomPrompts,
+              xp: typeof docData.xp === "number" ? docData.xp : previous.xp,
+              streakDays: typeof docData.currentStreak === "number" ? docData.currentStreak : previous.streakDays,
+              achievements: Array.isArray(docData.achievements) ? docData.achievements : previous.achievements,
+            };
+            try {
+              localStorage.setItem(getStorageKeyForUid(user.uid), JSON.stringify(nextProgress));
+            } catch {}
+            return nextProgress;
+          });
         });
       } catch (error) {
-        console.warn("Could not load progress from Firestore", error);
+        console.warn("Could not load progress from Firestore, using local cached state", error);
+        const cached = loadCachedProgress(user.uid);
+        setUserProgress(cached);
         firestoreReady.current = true;
       }
     });
+
     return () => {
       unsubscribeAuth();
       unsubscribe?.();
     };
   }, []);
 
-  // Save progress changes
+  // Save progress changes to namespaced local cache
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(userProgress));
+      const currentUid = firestoreUserId.current;
+      localStorage.setItem(getStorageKeyForUid(currentUid), JSON.stringify(userProgress));
     } catch (e) {
       console.warn("Could not save progress to localStorage", e);
     }
   }, [userProgress]);
 
-  // Persist all progress mutations so every view stays in sync across sessions.
+  // Persist all user-initiated progress mutations to Firestore
   useEffect(() => {
     const user = auth.currentUser;
     if (!user || !firestoreReady.current || firestoreUserId.current !== user.uid) return;
+    
+    // If this state update originated from remote snapshot, skip redundant write-back
+    if (isRemoteUpdate.current) {
+      isRemoteUpdate.current = false;
+      return;
+    }
+
     const timeout = window.setTimeout(() => {
       void syncProgressToDb(user.email || "");
     }, 250);
@@ -662,14 +806,15 @@ Provide:
         origin: { y: 0.6 }
       });
       setUserProgress((prev) => {
-        const completed = prev.completedMissions.includes(missionId)
+        const isAlreadyCompleted = prev.completedMissions.includes(missionId);
+        const completed = isAlreadyCompleted
           ? prev.completedMissions
           : [...prev.completedMissions, missionId];
         return {
           ...prev,
           completedMissions: completed,
           missionScores: { ...prev.missionScores, [missionId]: Math.max(prev.missionScores[missionId] || 0, score) },
-          xp: prev.xp + xpEarned
+          xp: isAlreadyCompleted ? prev.xp : prev.xp + xpEarned
         };
       });
     }
@@ -680,37 +825,12 @@ Provide:
   };
 
   const markLessonComplete = (lessonId: string) => {
-    // Optimistic local update
+    // Optimistic local update with duplicate completion protection
     setUserProgress((prev) => {
       if (prev.completedLessons.includes(lessonId)) return prev;
       confetti({ particleCount: 50, spread: 50, origin: { y: 0.7 } });
       return { ...prev, completedLessons: [...prev.completedLessons, lessonId], xp: prev.xp + 40 };
     });
-
-    // Persist via callable so server performs an atomic merge and xp update
-    const user = auth.currentUser;
-    if (user && firestoreReady.current && firestoreUserId.current === user.uid) {
-      (async () => {
-        try {
-          const fn = mergeLessonCompletionCallable();
-          await fn({ lessonId, xp: 40 });
-        } catch (err) {
-          console.error('mergeLessonCompletion callable failed:', err);
-          // On failure, resync from server
-          try {
-            const docData = await readUserDoc(user.uid);
-            if (docData) {
-              const arrayFromDoc = Array.isArray(docData.completedLessons) ? docData.completedLessons : [];
-              const mapKeys = docData.lessons && typeof docData.lessons === 'object' ? Object.keys(docData.lessons).filter(k => docData.lessons[k]) : [];
-              const merged = Array.from(new Set([...arrayFromDoc, ...mapKeys]));
-              setUserProgress((prev) => ({ ...prev, completedLessons: merged, xp: typeof docData.xp === 'number' ? docData.xp : prev.xp }));
-            }
-          } catch (e) {
-            console.error('Failed to resync after merge failure', e);
-          }
-        }
-      })();
-    }
   };
 
   const addXp = (amount: number) => {

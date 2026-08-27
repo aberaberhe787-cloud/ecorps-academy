@@ -15,11 +15,6 @@ import {
   setDoc,
   connectFirestoreEmulator,
 } from "firebase/firestore";
-import {
-  getFunctions,
-  httpsCallable,
-  connectFunctionsEmulator,
-} from "firebase/functions";
 import firebaseConfig from '../../firebase-applet-config.json';
 
 // Initialize Firebase App (singleton)
@@ -47,14 +42,9 @@ if (typeof window !== 'undefined' && (window as any).__E2E_MOCK_AUTH) {
   _auth = getAuth(app);
 }
 
-// Exports for Auth, Firestore, Functions
+// Exports for Auth and Firestore
 export const auth = _auth as any;
 export const db = getFirestore(app);
-export const functions = getFunctions(app);
-
-// Client helpers (callables)
-export const updateLastLoginCallable = () => httpsCallable(functions, 'updateLastLogin');
-export const mergeLessonCompletionCallable = () => httpsCallable(functions, 'mergeLessonCompletion');
 
 // Optional: connect to local emulators during development
 export function useEmulatorsIfDev() {
@@ -67,11 +57,6 @@ export function useEmulatorsIfDev() {
     }
     try {
       connectFirestoreEmulator(db, 'localhost', 8080);
-    } catch (e) {
-      /* ignore */
-    }
-    try {
-      connectFunctionsEmulator(functions, 'localhost', 5001);
     } catch (e) {
       /* ignore */
     }
