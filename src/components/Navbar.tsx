@@ -76,22 +76,23 @@ export const Navbar: React.FC = () => {
             className="flex shrink-0 items-center gap-2 transition-opacity hover:opacity-90"
             aria-label="Go to home"
           >
-            <EcorpLogo size="md" />
-            <span className="hidden xs:block font-mono font-extrabold text-white">
+            <EcorpLogo size="sm" className="sm:hidden" />
+            <EcorpLogo size="md" className="hidden sm:flex" />
+            <span className="hidden sm:block font-mono font-extrabold text-white text-sm sm:text-base">
               {t.nav.brandName}
             </span>
           </button>
 
           {/* Search Bar */}
-          <div className="flex-1 flex justify-center px-4" role="search">
-            <div className="relative w-full max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+          <div className="flex-1 min-w-0 max-w-xs sm:max-w-sm mx-1 sm:mx-4" role="search">
+            <div className="relative w-full">
+              <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-500" />
               <input
                 type="text"
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full rounded-xl border border-slate-700 bg-slate-900/60 pl-9 pr-4 py-1.5 text-sm text-slate-200 placeholder:text-slate-500 focus:border-blue-500 focus:outline-none"
+                className="w-full rounded-xl border border-slate-700 bg-slate-900/60 pl-8 sm:pl-9 pr-3 py-1 sm:py-1.5 text-xs sm:text-sm text-slate-200 placeholder:text-slate-500 focus:border-blue-500 focus:outline-none truncate"
                 aria-label="Search courses and content"
               />
             </div>
@@ -120,7 +121,7 @@ export const Navbar: React.FC = () => {
           </nav>
 
           {/* Right Side */}
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <ThemeToggle />
             {/* Auth Buttons / Account menu */}
             <div className="relative">
@@ -177,7 +178,7 @@ export const Navbar: React.FC = () => {
             </div>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-slate-300"
+              className="md:hidden p-1.5 sm:p-2 text-slate-300 hover:text-white"
               aria-label="Toggle navigation menu"
               aria-expanded={mobileMenuOpen}
             >
@@ -190,34 +191,78 @@ export const Navbar: React.FC = () => {
       {/* Mobile Menu Drawer */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 right-0 z-[60] w-64 bg-slate-950 border-l border-slate-800 p-6 md:hidden"
-          >
-            <div className="flex justify-end mb-6">
-              <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-slate-300">
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            <div className="flex flex-col gap-2">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => { setActiveTab(item.id); setMobileMenuOpen(false); }}
-                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium text-slate-300 hover:bg-slate-800 hover:text-white"
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs md:hidden"
+              aria-hidden="true"
+            />
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed inset-y-0 right-0 z-[60] w-72 max-w-[85vw] bg-slate-950 border-l border-slate-800 p-5 sm:p-6 md:hidden overflow-y-auto flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-6 pb-3 border-b border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <EcorpLogo size="sm" />
+                    <span className="font-mono font-bold text-white text-sm">
+                      {t.nav.brandName}
+                    </span>
+                  </div>
+                  <button 
+                    onClick={() => setMobileMenuOpen(false)} 
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                    aria-label="Close navigation menu"
                   >
-                    <Icon className="h-5 w-5" />
-                    {item.label}
+                    <X className="h-5 w-5" />
                   </button>
-                );
-              })}
-            </div>
-          </motion.div>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  {navItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activeTab === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => { 
+                          if (item.id === 'profile') { 
+                            setProfileOpen(true); 
+                          } 
+                          setActiveTab(item.id); 
+                          setMobileMenuOpen(false); 
+                        }}
+                        className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all ${
+                          isActive
+                            ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25"
+                            : "text-slate-300 hover:bg-slate-800/80 hover:text-white"
+                        }`}
+                      >
+                        <Icon className={`h-4 w-4 ${isActive ? "text-white" : "text-slate-400"}`} />
+                        <span>{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="pt-4 mt-6 border-t border-slate-800/80 text-xs text-slate-400 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400">Level {level}</span>
+                  <span className="text-blue-400 font-mono font-semibold">{userProgress.xp} XP</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400">Streak</span>
+                  <span className="text-amber-400 font-semibold">{userProgress.streakDays} days 🔥</span>
+                </div>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
       
