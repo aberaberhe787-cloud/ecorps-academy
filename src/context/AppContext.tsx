@@ -104,6 +104,9 @@ interface AppContextType {
   }) => void;
 }
 
+const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
+const WARNING_TIMEOUT_MS = 25 * 60 * 1000;
+
 const STORAGE_KEY = "promptlab_user_progress_v1";
 const USERS_COLLECTION = "users";
 
@@ -410,6 +413,29 @@ Provide:
     // Connect to emulators if explicitly requested via environment variable
     try { useEmulatorsIfDev(); } catch {}
 
+    // Inactivity Monitor
+    let inactivityTimer: number | null = null;
+    let warningTimer: number | null = null;
+
+    const resetInactivityTimer = () => {
+      if (inactivityTimer) window.clearTimeout(inactivityTimer);
+      if (warningTimer) window.clearTimeout(warningTimer);
+
+      warningTimer = window.setTimeout(() => {
+        // Show warning - in a real app, this would trigger a UI state
+        if (import.meta.env.DEV) console.log('[ECORP:PERSISTENCE] SESSION_WARNING: 5 mins remaining');
+      }, WARNING_TIMEOUT_MS);
+
+      inactivityTimer = window.setTimeout(() => {
+        if (import.meta.env.DEV) console.log('[ECORP:PERSISTENCE] SESSION_TIMEOUT: Logout');
+        logout();
+      }, SESSION_TIMEOUT_MS);
+    };
+
+    const activityEvents = ['mousedown', 'keydown', 'touchstart', 'scroll', 'mousemove'];
+    activityEvents.forEach(event => window.addEventListener(event, resetInactivityTimer));
+    resetInactivityTimer();
+
     const unsubscribeAuth = firebaseOnAuthStateChanged(auth, async (user) => {
       firestoreReady.current = false;
       if (activeUnsubscribeRef.current) {
@@ -436,13 +462,13 @@ Provide:
         const todayUtc = getUtcDateString();
 
         if (readResult.error) {
-          // Firestore read failed (network/permission issue) -> PRESERVE local cache, DO NOT overwrite Firestore
+          // Firestore read failed (network/permission issue) -> PRESERVE local cache, DO NOT trigger sync
           if (import.meta.env.DEV) {
-            console.warn(`[ECORP:PERSISTENCE] READ_FAILURE path=users/${user.uid} - preserving cached state`);
+            console.warn(`[ECORP:PERSISTENCE] READ_FAILURE path=users/${user.uid} - blocking sync`);
           }
           const cached = loadCachedProgress(user.uid);
           setUserProgress(cached);
-          firestoreReady.current = true;
+          // Do NOT set firestoreReady.current = true; this blocks writes until read succeeds
           return;
         }
 
@@ -592,6 +618,9 @@ Provide:
         activeUnsubscribeRef.current();
         activeUnsubscribeRef.current = null;
       }
+      activityEvents.forEach(event => window.removeEventListener(event, resetInactivityTimer));
+      if (inactivityTimer) window.clearTimeout(inactivityTimer);
+      if (warningTimer) window.clearTimeout(warningTimer);
     };
   }, []);
 
