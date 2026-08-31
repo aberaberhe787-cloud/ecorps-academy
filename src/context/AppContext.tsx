@@ -82,6 +82,7 @@ interface AppContextType {
 
   // User Progress
   userProgress: UserProgress;
+  persistenceStatus: 'synced' | 'saving' | 'offline' | 'error';
   markLessonComplete: (lessonId: string) => void;
   addXp: (amount: number) => void;
   saveCustomPrompt: (title: string, promptText: string) => void;
@@ -120,6 +121,19 @@ const initialProgress: UserProgress = {
   streakDays: 1,
   achievements: []
 };
+
+function getProgressFingerprint(p: UserProgress): string {
+  return JSON.stringify({
+    xp: p.xp,
+    streak: p.streakDays,
+    lessons: [...p.completedLessons].sort(),
+    missions: [...p.completedMissions].sort(),
+    scores: p.missionScores,
+    prompts: p.savedCustomPrompts.map(x => ({ id: x.id, title: x.title, prompt: x.prompt })),
+    bookmarks: [...p.bookmarkedPatterns].sort(),
+    achievements: p.achievements.map(x => x.id).sort(),
+  });
+}
 
 function getUtcDateString(date: Date = new Date()): string {
   return date.toISOString().slice(0, 10);
@@ -210,14 +224,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('ecorp_theme', newTheme);
   };
 
-  // Progress state
+  // Progress state & Persistence Lifecycle
+  type PersistenceLifecycle = 'idle' | 'hydrating' | 'ready' | 'saving' | 'error' | 'loggingOut';
+  type PersistenceStatus = 'synced' | 'saving' | 'offline' | 'error';
+
   const [userProgress, setUserProgress] = useState<UserProgress>(() => {
     return loadCachedProgress(null);
   });
+  const [persistenceStatus, setPersistenceStatus] = useState<PersistenceStatus>('synced');
+
+  const persistenceLifecycle = useRef<PersistenceLifecycle>('idle');
   const firestoreUserId = useRef<string | null>(null);
-  const firestoreReady = useRef(false);
-  const isRemoteUpdate = useRef(false);
   const latestUserProgressRef = useRef<UserProgress>(userProgress);
+  const lastSyncedFingerprint = useRef<string>(getProgressFingerprint(userProgress));
   const syncTimerRef = useRef<number | null>(null);
   const activeUnsubscribeRef = useRef<(() => void) | null>(null);
 
@@ -226,60 +245,91 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     latestUserProgressRef.current = userProgress;
   }, [userProgress]);
 
-  // Canonical Direct Sync to Firestore
-  const syncProgressToDbDirect = async (uid: string, progressToSync: UserProgress, userObj?: any) => {
+  // Single Authoritative Persistence Pipeline
+  const persistUserProgress = async (
+    uid: string,
+    progressToPersist: UserProgress,
+    options?: { force?: boolean; reason?: string }
+  ): Promise<{ success: boolean; error?: string; code?: string }> => {
     const currentUser = auth.currentUser;
-    if (!currentUser || currentUser.uid !== uid) {
-      if (import.meta.env.DEV) {
-        console.warn(`[ECORP:PERSISTENCE] WRITE_ABORTED auth uid mismatch currentUser=${currentUser?.uid} target=${uid}`);
-      }
-      return;
-    }
-    
-    try {
-      const lessonsMap = Object.fromEntries(progressToSync.completedLessons.map(id => [id, true]));
-      await setDoc(doc(db, USERS_COLLECTION, uid), {
-        displayName: userObj?.displayName || currentUser.displayName || "Ecorp Scholar",
-        photoURL: userObj?.photoURL || currentUser.photoURL || null,
-        curriculumProgress: progressToSync.completedLessons.length,
-        completedLessonCount: progressToSync.completedLessons.length,
-        curriculumProgressPercent: 0,
-        currentStreak: progressToSync.streakDays,
-        streakDays: progressToSync.streakDays,
-        lastLoginDate: getUtcDateString(),
-        xp: progressToSync.xp,
-        completedLessons: progressToSync.completedLessons,
-        lessons: lessonsMap,
-        completedMissions: progressToSync.completedMissions,
-        missionScores: progressToSync.missionScores,
-        bookmarkedPatterns: progressToSync.bookmarkedPatterns,
-        savedCustomPrompts: progressToSync.savedCustomPrompts,
-        achievements: progressToSync.achievements,
-      }, { merge: true });
+    const opId = `op-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    const reason = options?.reason || 'auto_sync';
 
-      if (import.meta.env.DEV) {
-        console.log(`[ECORP:PERSISTENCE] FIRESTORE_WRITE path=users/${uid} success=true xp=${progressToSync.xp}`);
+    if (!currentUser || currentUser.uid !== uid) {
+      console.warn(`[ECORP:PERSISTENCE] WRITE_ABORTED uid_mismatch opId=${opId} reason=${reason} authUid=${currentUser?.uid} targetUid=${uid}`);
+      return { success: false, error: 'User UID mismatch or unauthenticated' };
+    }
+
+    if (!options?.force && (persistenceLifecycle.current === 'hydrating' || persistenceLifecycle.current === 'loggingOut')) {
+      console.warn(`[ECORP:PERSISTENCE] WRITE_BLOCKED_BY_LIFECYCLE opId=${opId} state=${persistenceLifecycle.current}`);
+      return { success: false, error: `Blocked by lifecycle state: ${persistenceLifecycle.current}` };
+    }
+
+    const lessonsCount = progressToPersist.completedLessons.length;
+    const missionsCount = progressToPersist.completedMissions.length;
+    const xp = progressToPersist.xp;
+    const timestamp = new Date().toISOString();
+
+    console.log(`[ECORP:PERSISTENCE] WRITE_STARTED uid=${uid} path=users/${uid} opId=${opId} reason=${reason} xp=${xp} lessons=${lessonsCount} missions=${missionsCount} time=${timestamp}`);
+    setPersistenceStatus('saving');
+
+    try {
+      const lessonsMap = Object.fromEntries(progressToPersist.completedLessons.map(id => [id, true]));
+      const payload = {
+        displayName: currentUser.displayName || "Ecorp Scholar",
+        photoURL: currentUser.photoURL || null,
+        curriculumProgress: lessonsCount,
+        completedLessonCount: lessonsCount,
+        curriculumProgressPercent: 0,
+        currentStreak: progressToPersist.streakDays,
+        streakDays: progressToPersist.streakDays,
+        lastLoginDate: getUtcDateString(),
+        xp: progressToPersist.xp,
+        completedLessons: progressToPersist.completedLessons,
+        lessons: lessonsMap,
+        completedMissions: progressToPersist.completedMissions,
+        missionScores: progressToPersist.missionScores,
+        bookmarkedPatterns: progressToPersist.bookmarkedPatterns,
+        savedCustomPrompts: progressToPersist.savedCustomPrompts,
+        achievements: progressToPersist.achievements,
+      };
+
+      // Set last synced fingerprint BEFORE await to prevent local loop
+      lastSyncedFingerprint.current = getProgressFingerprint(progressToPersist);
+
+      await setDoc(doc(db, USERS_COLLECTION, uid), payload, { merge: true });
+
+      try {
+        localStorage.setItem(getStorageKeyForUid(uid), JSON.stringify(progressToPersist));
+      } catch (cacheErr) {
+        console.warn("Could not cache user progress locally", cacheErr);
       }
-    } catch (err) {
-      if (import.meta.env.DEV) {
-        console.error(`[ECORP:PERSISTENCE] FIRESTORE_WRITE_ERROR path=users/${uid}`, err);
-      }
+
+      console.log(`[ECORP:PERSISTENCE] WRITE_SUCCESS uid=${uid} path=users/${uid} opId=${opId} reason=${reason} xp=${xp} lessons=${lessonsCount} missions=${missionsCount} time=${new Date().toISOString()}`);
+      setPersistenceStatus('synced');
+      return { success: true };
+    } catch (err: any) {
+      const code = err?.code || 'unknown_error';
+      const message = err?.message || String(err);
+      console.error(`[ECORP:PERSISTENCE] WRITE_FAILED uid=${uid} path=users/${uid} opId=${opId} reason=${reason} code=${code} message=${message}`);
+      setPersistenceStatus('error');
+      return { success: false, error: message, code };
     }
   };
 
   const syncProgressToDb = async (_email?: string) => {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
-    await syncProgressToDbDirect(currentUser.uid, latestUserProgressRef.current, currentUser);
+    await persistUserProgress(currentUser.uid, latestUserProgressRef.current, { reason: 'manual_sync' });
   };
 
   const logout = async () => {
-    if (import.meta.env.DEV) {
-      console.log('[ECORP:PERSISTENCE] LOGOUT_INITIATED');
-    }
     const user = auth.currentUser;
-    const targetUid = user?.uid;
+    const targetUid = user?.uid || firestoreUserId.current;
     const currentProgress = latestUserProgressRef.current;
+
+    console.log(`[ECORP:PERSISTENCE] LOGOUT_STARTED uid=${targetUid || 'none'}`);
+    persistenceLifecycle.current = 'loggingOut';
 
     // 1. Cancel pending debounce timer
     if (syncTimerRef.current !== null) {
@@ -287,41 +337,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       syncTimerRef.current = null;
     }
 
-    // 2. Perform final awaited write if user is authenticated and firestore was ready
-    if (user && targetUid && firestoreReady.current) {
-      try {
-        await syncProgressToDbDirect(targetUid, currentProgress, user);
-        if (import.meta.env.DEV) {
-          console.log(`[ECORP:PERSISTENCE] LOGOUT_FLUSH success=true uid=${targetUid}`);
-        }
-      } catch (err) {
-        console.error('[ECORP:PERSISTENCE] LOGOUT_FLUSH failed:', err);
+    // 2. Perform final awaited flush write if authenticated
+    if (user && targetUid) {
+      console.log(`[ECORP:PERSISTENCE] LOGOUT_FLUSH_STARTED uid=${targetUid}`);
+      const flushResult = await persistUserProgress(targetUid, currentProgress, { force: true, reason: 'logout_flush' });
+      if (flushResult.success) {
+        console.log(`[ECORP:PERSISTENCE] LOGOUT_FLUSH_SUCCESS uid=${targetUid}`);
+      } else {
+        console.error(`[ECORP:PERSISTENCE] LOGOUT_FLUSH_FAILED uid=${targetUid} code=${flushResult.code} error=${flushResult.error}`);
       }
     }
 
-    // 3. Unsubscribe real-time listener if active
+    // 3. Unsubscribe real-time listener
     if (activeUnsubscribeRef.current) {
       activeUnsubscribeRef.current();
       activeUnsubscribeRef.current = null;
-      if (import.meta.env.DEV) {
-        console.log(`[ECORP:PERSISTENCE] LISTENER_DETACHED uid=${targetUid}`);
-      }
+      console.log(`[ECORP:PERSISTENCE] LISTENER_DETACHED uid=${targetUid || 'none'}`);
     }
 
     // 4. Call Firebase signOut
     try {
       await fbSignOut();
-      if (import.meta.env.DEV) {
-        console.log('[ECORP:PERSISTENCE] AUTH_SIGNOUT success=true');
-      }
-    } catch (err) {
-      console.error('Firebase signOut failed:', err);
+      console.log('[ECORP:PERSISTENCE] AUTH_SIGNOUT');
+    } catch (signOutErr) {
+      console.error('[ECORP:PERSISTENCE] SIGNOUT_ERROR', signOutErr);
     }
 
     // 5. Reset local authenticated state to clean initial guest state
-    firestoreReady.current = false;
     firestoreUserId.current = null;
+    persistenceLifecycle.current = 'idle';
+    lastSyncedFingerprint.current = getProgressFingerprint(initialProgress);
     setUserProgress(initialProgress);
+    setPersistenceStatus('synced');
     setActiveTab("home");
   };
 
@@ -422,13 +469,12 @@ Provide:
       if (warningTimer) window.clearTimeout(warningTimer);
 
       warningTimer = window.setTimeout(() => {
-        // Show warning - in a real app, this would trigger a UI state
         if (import.meta.env.DEV) console.log('[ECORP:PERSISTENCE] SESSION_WARNING: 5 mins remaining');
       }, WARNING_TIMEOUT_MS);
 
       inactivityTimer = window.setTimeout(() => {
-        if (import.meta.env.DEV) console.log('[ECORP:PERSISTENCE] SESSION_TIMEOUT: Logout');
-        logout();
+        if (import.meta.env.DEV) console.log('[ECORP:PERSISTENCE] SESSION_TIMEOUT: Logout triggered');
+        void logout();
       }, SESSION_TIMEOUT_MS);
     };
 
@@ -437,46 +483,49 @@ Provide:
     resetInactivityTimer();
 
     const unsubscribeAuth = firebaseOnAuthStateChanged(auth, async (user) => {
-      firestoreReady.current = false;
+      // Detach existing listener if user changed
       if (activeUnsubscribeRef.current) {
         activeUnsubscribeRef.current();
         activeUnsubscribeRef.current = null;
+        console.log(`[ECORP:PERSISTENCE] LISTENER_DETACHED uid=${firestoreUserId.current || 'none'}`);
       }
 
       if (!user) {
-        if (import.meta.env.DEV) {
-          console.log('[ECORP:PERSISTENCE] AUTH_UNAUTHENTICATED');
-        }
+        console.log('[ECORP:PERSISTENCE] AUTH_UNAUTHENTICATED');
         firestoreUserId.current = null;
+        persistenceLifecycle.current = 'idle';
+        lastSyncedFingerprint.current = getProgressFingerprint(initialProgress);
         setUserProgress(initialProgress);
+        setPersistenceStatus('synced');
         return;
       }
 
-      if (import.meta.env.DEV) {
-        console.log(`[ECORP:PERSISTENCE] AUTH_READY uid=${user.uid} email=${user.email || 'none'}`);
-      }
+      console.log(`[ECORP:PERSISTENCE] AUTH_READY uid=${user.uid} email=${user.email || 'none'}`);
       firestoreUserId.current = user.uid;
+      persistenceLifecycle.current = 'hydrating';
 
+      // Load cached state to make UI responsive immediately
+      const cached = loadCachedProgress(user.uid);
+      if (cached) {
+        lastSyncedFingerprint.current = getProgressFingerprint(cached);
+        setUserProgress(cached);
+      }
+
+      console.log(`[ECORP:PERSISTENCE] HYDRATION_START uid=${user.uid}`);
       try {
         const readResult = await readUserDoc(user.uid);
-        const todayUtc = getUtcDateString();
 
         if (readResult.error) {
-          // Firestore read failed (network/permission issue) -> PRESERVE local cache, DO NOT trigger sync
-          if (import.meta.env.DEV) {
-            console.warn(`[ECORP:PERSISTENCE] READ_FAILURE path=users/${user.uid} - blocking sync`);
-          }
-          const cached = loadCachedProgress(user.uid);
-          setUserProgress(cached);
-          // Do NOT set firestoreReady.current = true; this blocks writes until read succeeds
+          // PHASE 2 CASE C: READ_ERROR
+          // Forbidden to initialize or overwrite on error
+          console.error(`[ECORP:PERSISTENCE] HYDRATION_ERROR uid=${user.uid} code=${readResult.code} message=${readResult.error?.message}`);
+          persistenceLifecycle.current = 'error';
+          setPersistenceStatus('offline');
           return;
         }
 
         if (readResult.exists && readResult.data) {
-          // Existing user profile found in Firestore
-          if (import.meta.env.DEV) {
-            console.log(`[ECORP:PERSISTENCE] FIRESTORE_READ path=users/${user.uid} exists=true`);
-          }
+          // PHASE 2 CASE A: SUCCESS_EXISTS
           const data = readResult.data;
           const existingStreak = typeof data.currentStreak === 'number'
             ? data.currentStreak
@@ -501,14 +550,10 @@ Provide:
             achievements: Array.isArray(data.achievements) ? data.achievements : [],
           };
 
-          isRemoteUpdate.current = true;
+          const cloudFingerprint = getProgressFingerprint(cloudProgress);
+          lastSyncedFingerprint.current = cloudFingerprint;
           setUserProgress(cloudProgress);
 
-          if (import.meta.env.DEV) {
-            console.log(`[ECORP:PERSISTENCE] HYDRATION source=firestore xp=${cloudProgress.xp} lessons=${cloudProgress.completedLessons.length}`);
-          }
-
-          // Update user-namespaced local cache
           try {
             localStorage.setItem(getStorageKeyForUid(user.uid), JSON.stringify(cloudProgress));
           } catch (e) {
@@ -516,22 +561,27 @@ Provide:
           }
 
           // Persist updated streak and lastLoginDate to Firestore
-          try {
-            await setDoc(doc(db, USERS_COLLECTION, user.uid), {
-              displayName: user.displayName || data.displayName || "Ecorp Scholar",
-              photoURL: user.photoURL || data.photoURL || null,
-              currentStreak: streakResult.streak,
-              streakDays: streakResult.streak,
-              lastLoginDate: streakResult.date,
-            }, { merge: true });
-          } catch (updateErr) {
-            console.warn("Could not update login streak in Firestore", updateErr);
+          if (streakResult.streak !== existingStreak || streakResult.date !== data.lastLoginDate) {
+            try {
+              await setDoc(doc(db, USERS_COLLECTION, user.uid), {
+                displayName: user.displayName || data.displayName || "Ecorp Scholar",
+                photoURL: user.photoURL || data.photoURL || null,
+                currentStreak: streakResult.streak,
+                streakDays: streakResult.streak,
+                lastLoginDate: streakResult.date,
+              }, { merge: true });
+            } catch (updateErr) {
+              console.warn("Could not update login streak in Firestore", updateErr);
+            }
           }
+
+          console.log(`[ECORP:PERSISTENCE] HYDRATION_SUCCESS uid=${user.uid} xp=${cloudProgress.xp} lessons=${cloudProgress.completedLessons.length} missions=${cloudProgress.completedMissions.length}`);
+          persistenceLifecycle.current = 'ready';
+          setPersistenceStatus('synced');
         } else {
-          // Genuinely a new user: snapshot.exists() === false AND read succeeded without error
-          if (import.meta.env.DEV) {
-            console.log(`[ECORP:PERSISTENCE] NEW_USER_INITIALIZATION path=users/${user.uid}`);
-          }
+          // PHASE 2 CASE B: SUCCESS_MISSING
+          console.log(`[ECORP:PERSISTENCE] HYDRATION_MISSING uid=${user.uid}`);
+          const todayUtc = getUtcDateString();
           const newUserData = {
             displayName: user.displayName || "Ecorp Scholar",
             photoURL: user.photoURL || null,
@@ -553,62 +603,72 @@ Provide:
 
           try {
             await setDoc(doc(db, USERS_COLLECTION, user.uid), newUserData, { merge: true });
-            if (import.meta.env.DEV) {
-              console.log(`[ECORP:PERSISTENCE] FIRESTORE_WRITE path=users/${user.uid} type=new_user success=true`);
-            }
+            console.log(`[ECORP:PERSISTENCE] NEW_USER_INITIALIZED uid=${user.uid}`);
           } catch (createErr) {
             console.warn("Could not create initial user document in Firestore", createErr);
           }
 
-          isRemoteUpdate.current = true;
+          lastSyncedFingerprint.current = getProgressFingerprint(initialProgress);
           setUserProgress(initialProgress);
-
           try {
             localStorage.setItem(getStorageKeyForUid(user.uid), JSON.stringify(initialProgress));
           } catch (e) {
             console.warn("Could not cache initial progress locally", e);
           }
+
+          persistenceLifecycle.current = 'ready';
+          setPersistenceStatus('synced');
         }
 
-        firestoreReady.current = true;
+        // Attach real-time Firestore listener
+        activeUnsubscribeRef.current = subscribeToUserDoc(
+          user.uid,
+          (docData) => {
+            if (!docData || auth.currentUser?.uid !== user.uid) return;
+            
+            const arrayFromDoc2 = Array.isArray(docData.completedLessons) ? docData.completedLessons : [];
+            const mapKeys2 = docData.lessons && typeof docData.lessons === 'object'
+              ? Object.keys(docData.lessons).filter(k => docData.lessons[k])
+              : [];
+            const merged2 = Array.from(new Set([...arrayFromDoc2, ...mapKeys2]));
 
-        // Subscribe to real-time updates so multi-tab / multi-device changes reflect immediately
-        activeUnsubscribeRef.current = subscribeToUserDoc(user.uid, (docData) => {
-          if (!firestoreReady.current || !docData || auth.currentUser?.uid !== user.uid) return;
-          const arrayFromDoc2 = Array.isArray(docData.completedLessons) ? docData.completedLessons : [];
-          const mapKeys2 = docData.lessons && typeof docData.lessons === 'object'
-            ? Object.keys(docData.lessons).filter(k => docData.lessons[k])
-            : [];
-          const merged2 = Array.from(new Set([...arrayFromDoc2, ...mapKeys2]));
-
-          isRemoteUpdate.current = true;
-          setUserProgress((previous) => {
+            const currentProg = latestUserProgressRef.current;
             const nextProgress: UserProgress = {
-              ...previous,
+              ...currentProg,
               completedLessons: merged2,
-              completedMissions: Array.isArray(docData.completedMissions) ? docData.completedMissions : previous.completedMissions,
-              missionScores: docData.missionScores && typeof docData.missionScores === "object" ? docData.missionScores : previous.missionScores,
-              bookmarkedPatterns: Array.isArray(docData.bookmarkedPatterns) ? docData.bookmarkedPatterns : previous.bookmarkedPatterns,
-              savedCustomPrompts: Array.isArray(docData.savedCustomPrompts) ? docData.savedCustomPrompts : previous.savedCustomPrompts,
-              xp: typeof docData.xp === "number" ? docData.xp : previous.xp,
-              streakDays: typeof docData.currentStreak === "number" ? docData.currentStreak : previous.streakDays,
-              achievements: Array.isArray(docData.achievements) ? docData.achievements : previous.achievements,
+              completedMissions: Array.isArray(docData.completedMissions) ? docData.completedMissions : currentProg.completedMissions,
+              missionScores: docData.missionScores && typeof docData.missionScores === "object" ? docData.missionScores : currentProg.missionScores,
+              bookmarkedPatterns: Array.isArray(docData.bookmarkedPatterns) ? docData.bookmarkedPatterns : currentProg.bookmarkedPatterns,
+              savedCustomPrompts: Array.isArray(docData.savedCustomPrompts) ? docData.savedCustomPrompts : currentProg.savedCustomPrompts,
+              xp: typeof docData.xp === "number" ? docData.xp : currentProg.xp,
+              streakDays: typeof docData.currentStreak === "number" ? docData.currentStreak : (typeof docData.streakDays === "number" ? docData.streakDays : currentProg.streakDays),
+              achievements: Array.isArray(docData.achievements) ? docData.achievements : currentProg.achievements,
             };
+
+            const incomingFingerprint = getProgressFingerprint(nextProgress);
+            if (incomingFingerprint === lastSyncedFingerprint.current) {
+              // Echo snapshot of our own recent write -> ignore
+              return;
+            }
+
+            console.log(`[ECORP:PERSISTENCE] SNAPSHOT_RECEIVED uid=${user.uid} xp=${nextProgress.xp} lessons=${nextProgress.completedLessons.length} missions=${nextProgress.completedMissions.length}`);
+            lastSyncedFingerprint.current = incomingFingerprint;
+            setUserProgress(nextProgress);
+
             try {
               localStorage.setItem(getStorageKeyForUid(user.uid), JSON.stringify(nextProgress));
             } catch {}
-            return nextProgress;
-          });
-        });
+          },
+          (snapshotError) => {
+            console.error(`[ECORP:PERSISTENCE] SNAPSHOT_LISTENER_ERROR uid=${user.uid}`, snapshotError);
+          }
+        );
 
-        if (import.meta.env.DEV) {
-          console.log(`[ECORP:PERSISTENCE] LISTENER_ATTACHED uid=${user.uid}`);
-        }
+        console.log(`[ECORP:PERSISTENCE] LISTENER_ATTACHED uid=${user.uid}`);
       } catch (error) {
-        console.warn("[ECORP:PERSISTENCE] Unexpected error during hydration, preserving cached state", error);
-        const cached = loadCachedProgress(user.uid);
-        setUserProgress(cached);
-        firestoreReady.current = true;
+        console.error(`[ECORP:PERSISTENCE] HYDRATION_UNEXPECTED_ERROR uid=${user.uid}`, error);
+        persistenceLifecycle.current = 'error';
+        setPersistenceStatus('offline');
       }
     });
 
@@ -628,7 +688,11 @@ Provide:
   useEffect(() => {
     try {
       const currentUid = firestoreUserId.current;
-      localStorage.setItem(getStorageKeyForUid(currentUid), JSON.stringify(userProgress));
+      if (currentUid && persistenceLifecycle.current === 'ready') {
+        localStorage.setItem(getStorageKeyForUid(currentUid), JSON.stringify(userProgress));
+      } else if (!currentUid && persistenceLifecycle.current === 'idle') {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(userProgress));
+      }
     } catch (e) {
       console.warn("Could not save progress to localStorage", e);
     }
@@ -637,13 +701,16 @@ Provide:
   // Persist all user-initiated progress mutations to Firestore via 250ms debounce
   useEffect(() => {
     const user = auth.currentUser;
-    if (!user || !firestoreReady.current || firestoreUserId.current !== user.uid) return;
-    
-    // If this state update originated from remote snapshot, skip redundant write-back
-    if (isRemoteUpdate.current) {
-      isRemoteUpdate.current = false;
+    if (!user || persistenceLifecycle.current !== 'ready' || firestoreUserId.current !== user.uid) {
       return;
     }
+    
+    const currentFingerprint = getProgressFingerprint(userProgress);
+    if (currentFingerprint === lastSyncedFingerprint.current) {
+      return;
+    }
+
+    console.log(`[ECORP:PERSISTENCE] WRITE_SCHEDULED uid=${user.uid} xp=${userProgress.xp}`);
 
     if (syncTimerRef.current !== null) {
       window.clearTimeout(syncTimerRef.current);
@@ -651,7 +718,7 @@ Provide:
 
     syncTimerRef.current = window.setTimeout(() => {
       syncTimerRef.current = null;
-      void syncProgressToDbDirect(user.uid, userProgress, user);
+      void persistUserProgress(user.uid, latestUserProgressRef.current, { reason: 'debounced_mutation' });
     }, 250);
 
     return () => {
@@ -1069,6 +1136,7 @@ Provide:
         setTheme,
         isDarkMode,
         userProgress,
+        persistenceStatus,
         markLessonComplete,
         addXp,
         saveCustomPrompt,

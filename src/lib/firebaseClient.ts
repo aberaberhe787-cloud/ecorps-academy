@@ -100,7 +100,7 @@ export function subscribeToUserDoc(
 }
 
 // Safe document read returning existence, data, and any captured error
-export async function readUserDoc(uid: string): Promise<{ exists: boolean; data: any | null; error?: any }> {
+export async function readUserDoc(uid: string): Promise<{ exists: boolean; data: any | null; error?: any; code?: string }> {
   try {
     const ref = doc(db, 'users', uid);
     const snap = await getDoc(ref);
@@ -108,11 +108,10 @@ export async function readUserDoc(uid: string): Promise<{ exists: boolean; data:
       return { exists: true, data: snap.data() };
     }
     return { exists: false, data: null };
-  } catch (error) {
-    if (import.meta.env.DEV) {
-      console.error(`[ECORP:PERSISTENCE] FIRESTORE_READ_ERROR path=users/${uid}`, error);
-    }
-    return { exists: false, data: null, error };
+  } catch (error: any) {
+    const code = error?.code || 'unknown_error';
+    console.error(`[ECORP:PERSISTENCE] FIRESTORE_READ_ERROR path=users/${uid} code=${code}`, error);
+    return { exists: false, data: null, error, code };
   }
 }
 
