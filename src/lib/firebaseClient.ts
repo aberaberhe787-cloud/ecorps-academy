@@ -1,4 +1,4 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import {
   getAuth,
   onAuthStateChanged,
@@ -17,22 +17,19 @@ import {
 } from "firebase/firestore";
 import firebaseConfig from '../../firebase-applet-config.json';
 
-// Initialize Firebase App (singleton)
-const app = initializeApp(firebaseConfig as any);
+// Initialize Firebase App (Canonical Safe Singleton)
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig as any);
 
-// Testing hook: if the browser sets window.__E2E_MOCK_AUTH, provide a minimal mock auth
-// This lets e2e scripts run without contacting Firebase (useful in CI or restricted envs).
+// Provide test hook for e2e tests
 let _auth: any;
 if (typeof window !== 'undefined' && (window as any).__E2E_MOCK_AUTH) {
   const mockUser = (window as any).__E2E_MOCK_AUTH;
   _auth = {
     currentUser: mockUser,
     onAuthStateChanged: (cb: any) => {
-      // Immediately notify with the mock user
       try { cb(mockUser); } catch (e) { /* ignore */ }
       return () => {};
     },
-    // minimal signOut implementation
     signOut: () => {
       (window as any).__E2E_MOCK_AUTH = null;
       return Promise.resolve();
@@ -42,44 +39,81 @@ if (typeof window !== 'undefined' && (window as any).__E2E_MOCK_AUTH) {
   _auth = getAuth(app);
 }
 
-// Exports for Auth and Firestore
 export const auth = _auth as any;
-export const db = getFirestore(app);
 
-// Optional: connect to local emulators during development
+// Canonical Firestore database instance
+const databaseId = (firebaseConfig as any).firestoreDatabaseId;
+export const db = databaseId ? getFirestore(app, databaseId) : getFirestore(app);
+
+// Safe emulator hook: ONLY connect when VITE_USE_FIREBASE_EMULATORS === 'true'
+let emulatorsConnected = false;
 export function useEmulatorsIfDev() {
-  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-    try {
-      // Adjust ports if your emulators use different ports
-      connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
-    } catch (e) {
-      /* ignore if emulator connector not available in environment */
+  if (typeof window === 'undefined') return;
+  const useEmulators = import.meta.env.VITE_USE_FIREBASE_EMULATORS === 'true';
+  if (!useEmulators) return;
+  if (emulatorsConnected) return;
+
+  try {
+    connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
+    if (import.meta.env.DEV) {
+      console.log('[ECORP:PERSISTENCE] Auth emulator connected on port 9099');
     }
-    try {
-      connectFirestoreEmulator(db, 'localhost', 8080);
-    } catch (e) {
-      /* ignore */
-    }
+  } catch (e) {
+    console.warn("Auth emulator connection failed", e);
   }
-}
-
-// Hydration helper: load and subscribe to user's Firestore doc
-export function subscribeToUserDoc(uid: string, onChange: (data: any) => void) {
-  const ref = doc(db, 'users', uid);
-  return onSnapshot(ref, (snap) => {
-    if (!snap.exists()) {
-      onChange(null);
-      return;
+  try {
+    connectFirestoreEmulator(db, 'localhost', 8080);
+    if (import.meta.env.DEV) {
+      console.log('[ECORP:PERSISTENCE] Firestore emulator connected on port 8080');
     }
-    onChange(snap.data());
-  });
+  } catch (e) {
+    console.warn("Firestore emulator connection failed", e);
+  }
+  emulatorsConnected = true;
 }
 
-// Utility to read user doc once
-export async function readUserDoc(uid: string) {
+// Hydration helper: subscribe to user's Firestore document
+export function subscribeToUserDoc(
+  uid: string,
+  onChange: (data: any) => void,
+  onError?: (error: any) => void
+) {
   const ref = doc(db, 'users', uid);
-  const snap = await getDoc(ref);
-  return snap.exists() ? snap.data() : null;
+  return onSnapshot(
+    ref,
+    (snap) => {
+      if (!snap.exists()) {
+        onChange(null);
+        return;
+      }
+      onChange(snap.data());
+    },
+    (error) => {
+      if (import.meta.env.DEV) {
+        console.error(`[ECORP:PERSISTENCE] SNAPSHOT_ERROR path=users/${uid}`, error);
+      }
+      if (onError) {
+        onError(error);
+      }
+    }
+  );
+}
+
+// Safe document read returning existence, data, and any captured error
+export async function readUserDoc(uid: string): Promise<{ exists: boolean; data: any | null; error?: any }> {
+  try {
+    const ref = doc(db, 'users', uid);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      return { exists: true, data: snap.data() };
+    }
+    return { exists: false, data: null };
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.error(`[ECORP:PERSISTENCE] FIRESTORE_READ_ERROR path=users/${uid}`, error);
+    }
+    return { exists: false, data: null, error };
+  }
 }
 
 // Convenience auth helpers
@@ -88,3 +122,52 @@ export const signOut = () => firebaseSignOut(auth);
 export const sendPasswordReset = (email: string) => sendPasswordResetEmail(auth, email);
 
 export { onAuthStateChanged };
+
+export enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId?: string | null;
+    email?: string | null;
+    emailVerified?: boolean | null;
+    isAnonymous?: boolean | null;
+    tenantId?: string | null;
+    providerInfo?: {
+      providerId?: string | null;
+      email?: string | null;
+    }[];
+  };
+}
+
+export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+      tenantId: auth.currentUser?.tenantId,
+      providerInfo: auth.currentUser?.providerData?.map((provider: any) => ({
+        providerId: provider.providerId,
+        email: provider.email,
+      })) || []
+    },
+    operationType,
+    path
+  };
+  if (import.meta.env.DEV) {
+    console.error('[ECORP:PERSISTENCE] Firestore Error:', JSON.stringify(errInfo));
+  }
+  throw new Error(JSON.stringify(errInfo));
+}

@@ -14,7 +14,15 @@ import { analyzePrompt } from "../lib/promptAnalyzer";
 import { translations, Language, I18nTranslations } from "../i18n/translations";
 import { amharicCurriculumModules } from "../i18n/amharicLessons";
 import { curriculumModules } from "../data/lessonsData";
-import { auth, db, useEmulatorsIfDev, subscribeToUserDoc, readUserDoc, signOut as fbSignOut, onAuthStateChanged as firebaseOnAuthStateChanged } from "../lib/firebaseClient";
+import {
+  auth,
+  db,
+  useEmulatorsIfDev,
+  subscribeToUserDoc,
+  readUserDoc,
+  signOut as fbSignOut,
+  onAuthStateChanged as firebaseOnAuthStateChanged
+} from "../lib/firebaseClient";
 import { doc, setDoc } from "firebase/firestore";
 
 interface AppContextType {
@@ -79,7 +87,7 @@ interface AppContextType {
   saveCustomPrompt: (title: string, promptText: string) => void;
   deleteCustomPrompt: (id: string) => void;
   toggleBookmarkPattern: (patternId: string) => void;
-  syncProgressToDb: (email: string) => Promise<void>;
+  syncProgressToDb: (email?: string) => Promise<void>;
   logout: () => Promise<void>;
   
   // LMS Focus / Distraction-free mode
@@ -199,56 +207,115 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('ecorp_theme', newTheme);
   };
 
-  const syncProgressToDb = async (email: string) => {
-    const user = auth.currentUser;
-    if (!user) return;
-    if (email && user.email && user.email !== email) return;
+  // Progress state
+  const [userProgress, setUserProgress] = useState<UserProgress>(() => {
+    return loadCachedProgress(null);
+  });
+  const firestoreUserId = useRef<string | null>(null);
+  const firestoreReady = useRef(false);
+  const isRemoteUpdate = useRef(false);
+  const latestUserProgressRef = useRef<UserProgress>(userProgress);
+  const syncTimerRef = useRef<number | null>(null);
+  const activeUnsubscribeRef = useRef<(() => void) | null>(null);
+
+  // Synchronize ref whenever userProgress changes
+  useEffect(() => {
+    latestUserProgressRef.current = userProgress;
+  }, [userProgress]);
+
+  // Canonical Direct Sync to Firestore
+  const syncProgressToDbDirect = async (uid: string, progressToSync: UserProgress, userObj?: any) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser || currentUser.uid !== uid) {
+      if (import.meta.env.DEV) {
+        console.warn(`[ECORP:PERSISTENCE] WRITE_ABORTED auth uid mismatch currentUser=${currentUser?.uid} target=${uid}`);
+      }
+      return;
+    }
     
     try {
-      const lessonsMap = Object.fromEntries(userProgress.completedLessons.map(id => [id, true]));
-      await setDoc(doc(db, USERS_COLLECTION, user.uid), {
-        displayName: user.displayName || "Ecorp Scholar",
-        photoURL: user.photoURL || null,
-        curriculumProgress: userProgress.completedLessons.length,
-        completedLessonCount: userProgress.completedLessons.length,
+      const lessonsMap = Object.fromEntries(progressToSync.completedLessons.map(id => [id, true]));
+      await setDoc(doc(db, USERS_COLLECTION, uid), {
+        displayName: userObj?.displayName || currentUser.displayName || "Ecorp Scholar",
+        photoURL: userObj?.photoURL || currentUser.photoURL || null,
+        curriculumProgress: progressToSync.completedLessons.length,
+        completedLessonCount: progressToSync.completedLessons.length,
         curriculumProgressPercent: 0,
-        currentStreak: userProgress.streakDays,
-        streakDays: userProgress.streakDays,
+        currentStreak: progressToSync.streakDays,
+        streakDays: progressToSync.streakDays,
         lastLoginDate: getUtcDateString(),
-        xp: userProgress.xp,
-        completedLessons: userProgress.completedLessons,
+        xp: progressToSync.xp,
+        completedLessons: progressToSync.completedLessons,
         lessons: lessonsMap,
-        completedMissions: userProgress.completedMissions,
-        missionScores: userProgress.missionScores,
-        bookmarkedPatterns: userProgress.bookmarkedPatterns,
-        savedCustomPrompts: userProgress.savedCustomPrompts,
-        achievements: userProgress.achievements,
+        completedMissions: progressToSync.completedMissions,
+        missionScores: progressToSync.missionScores,
+        bookmarkedPatterns: progressToSync.bookmarkedPatterns,
+        savedCustomPrompts: progressToSync.savedCustomPrompts,
+        achievements: progressToSync.achievements,
       }, { merge: true });
+
+      if (import.meta.env.DEV) {
+        console.log(`[ECORP:PERSISTENCE] FIRESTORE_WRITE path=users/${uid} success=true xp=${progressToSync.xp}`);
+      }
     } catch (err) {
-      console.error('Failed to sync progress to Firestore:', err);
+      if (import.meta.env.DEV) {
+        console.error(`[ECORP:PERSISTENCE] FIRESTORE_WRITE_ERROR path=users/${uid}`, err);
+      }
     }
   };
 
-  const logout = async () => {
-    console.debug('logout: initiated');
+  const syncProgressToDb = async (_email?: string) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+    await syncProgressToDbDirect(currentUser.uid, latestUserProgressRef.current, currentUser);
+  };
 
-    // Flush any pending progress before signing out
-    if (auth.currentUser) {
+  const logout = async () => {
+    if (import.meta.env.DEV) {
+      console.log('[ECORP:PERSISTENCE] LOGOUT_INITIATED');
+    }
+    const user = auth.currentUser;
+    const targetUid = user?.uid;
+    const currentProgress = latestUserProgressRef.current;
+
+    // 1. Cancel pending debounce timer
+    if (syncTimerRef.current !== null) {
+      window.clearTimeout(syncTimerRef.current);
+      syncTimerRef.current = null;
+    }
+
+    // 2. Perform final awaited write if user is authenticated and firestore was ready
+    if (user && targetUid && firestoreReady.current) {
       try {
-        await syncProgressToDb(auth.currentUser.email || "");
+        await syncProgressToDbDirect(targetUid, currentProgress, user);
+        if (import.meta.env.DEV) {
+          console.log(`[ECORP:PERSISTENCE] LOGOUT_FLUSH success=true uid=${targetUid}`);
+        }
       } catch (err) {
-        console.error('Failed to sync progress before logout:', err);
+        console.error('[ECORP:PERSISTENCE] LOGOUT_FLUSH failed:', err);
       }
     }
 
+    // 3. Unsubscribe real-time listener if active
+    if (activeUnsubscribeRef.current) {
+      activeUnsubscribeRef.current();
+      activeUnsubscribeRef.current = null;
+      if (import.meta.env.DEV) {
+        console.log(`[ECORP:PERSISTENCE] LISTENER_DETACHED uid=${targetUid}`);
+      }
+    }
+
+    // 4. Call Firebase signOut
     try {
       await fbSignOut();
-      console.debug('logout: signOut completed');
+      if (import.meta.env.DEV) {
+        console.log('[ECORP:PERSISTENCE] AUTH_SIGNOUT success=true');
+      }
     } catch (err) {
       console.error('Firebase signOut failed:', err);
     }
 
-    // Reset local authenticated state to clean initial guest state
+    // 5. Reset local authenticated state to clean initial guest state
     firestoreReady.current = false;
     firestoreUserId.current = null;
     setUserProgress(initialProgress);
@@ -338,40 +405,53 @@ Provide:
   const [isEvaluatingMission, setIsEvaluatingMission] = useState<boolean>(false);
   const [missionResult, setMissionResult] = useState<MissionEvaluationResult | null>(null);
 
-  // Progress state
-  const [userProgress, setUserProgress] = useState<UserProgress>(() => {
-    return loadCachedProgress(null);
-  });
-  const firestoreUserId = useRef<string | null>(null);
-  const firestoreReady = useRef(false);
-  const isRemoteUpdate = useRef(false);
-
   // Hydrate each signed-in user from Firestore and update their daily streak.
   useEffect(() => {
-    // Connect to emulators when developing locally
+    // Connect to emulators if explicitly requested via environment variable
     try { useEmulatorsIfDev(); } catch {}
 
-    let unsubscribe: (() => void) | undefined;
     const unsubscribeAuth = firebaseOnAuthStateChanged(auth, async (user) => {
       firestoreReady.current = false;
-      unsubscribe?.();
-      unsubscribe = undefined;
+      if (activeUnsubscribeRef.current) {
+        activeUnsubscribeRef.current();
+        activeUnsubscribeRef.current = null;
+      }
 
       if (!user) {
+        if (import.meta.env.DEV) {
+          console.log('[ECORP:PERSISTENCE] AUTH_UNAUTHENTICATED');
+        }
         firestoreUserId.current = null;
         setUserProgress(initialProgress);
         return;
       }
 
+      if (import.meta.env.DEV) {
+        console.log(`[ECORP:PERSISTENCE] AUTH_READY uid=${user.uid} email=${user.email || 'none'}`);
+      }
       firestoreUserId.current = user.uid;
 
       try {
-        // Read the user doc directly from Firestore
-        const data = await readUserDoc(user.uid);
+        const readResult = await readUserDoc(user.uid);
         const todayUtc = getUtcDateString();
 
-        if (data) {
-          // Compute daily streak deterministically in UTC
+        if (readResult.error) {
+          // Firestore read failed (network/permission issue) -> PRESERVE local cache, DO NOT overwrite Firestore
+          if (import.meta.env.DEV) {
+            console.warn(`[ECORP:PERSISTENCE] READ_FAILURE path=users/${user.uid} - preserving cached state`);
+          }
+          const cached = loadCachedProgress(user.uid);
+          setUserProgress(cached);
+          firestoreReady.current = true;
+          return;
+        }
+
+        if (readResult.exists && readResult.data) {
+          // Existing user profile found in Firestore
+          if (import.meta.env.DEV) {
+            console.log(`[ECORP:PERSISTENCE] FIRESTORE_READ path=users/${user.uid} exists=true`);
+          }
+          const data = readResult.data;
           const existingStreak = typeof data.currentStreak === 'number'
             ? data.currentStreak
             : (typeof data.streakDays === 'number' ? data.streakDays : 1);
@@ -398,6 +478,10 @@ Provide:
           isRemoteUpdate.current = true;
           setUserProgress(cloudProgress);
 
+          if (import.meta.env.DEV) {
+            console.log(`[ECORP:PERSISTENCE] HYDRATION source=firestore xp=${cloudProgress.xp} lessons=${cloudProgress.completedLessons.length}`);
+          }
+
           // Update user-namespaced local cache
           try {
             localStorage.setItem(getStorageKeyForUid(user.uid), JSON.stringify(cloudProgress));
@@ -418,7 +502,10 @@ Provide:
             console.warn("Could not update login streak in Firestore", updateErr);
           }
         } else {
-          // New user: create initial document in Firestore
+          // Genuinely a new user: snapshot.exists() === false AND read succeeded without error
+          if (import.meta.env.DEV) {
+            console.log(`[ECORP:PERSISTENCE] NEW_USER_INITIALIZATION path=users/${user.uid}`);
+          }
           const newUserData = {
             displayName: user.displayName || "Ecorp Scholar",
             photoURL: user.photoURL || null,
@@ -440,6 +527,9 @@ Provide:
 
           try {
             await setDoc(doc(db, USERS_COLLECTION, user.uid), newUserData, { merge: true });
+            if (import.meta.env.DEV) {
+              console.log(`[ECORP:PERSISTENCE] FIRESTORE_WRITE path=users/${user.uid} type=new_user success=true`);
+            }
           } catch (createErr) {
             console.warn("Could not create initial user document in Firestore", createErr);
           }
@@ -457,8 +547,8 @@ Provide:
         firestoreReady.current = true;
 
         // Subscribe to real-time updates so multi-tab / multi-device changes reflect immediately
-        unsubscribe = subscribeToUserDoc(user.uid, (docData) => {
-          if (!firestoreReady.current || !docData) return;
+        activeUnsubscribeRef.current = subscribeToUserDoc(user.uid, (docData) => {
+          if (!firestoreReady.current || !docData || auth.currentUser?.uid !== user.uid) return;
           const arrayFromDoc2 = Array.isArray(docData.completedLessons) ? docData.completedLessons : [];
           const mapKeys2 = docData.lessons && typeof docData.lessons === 'object'
             ? Object.keys(docData.lessons).filter(k => docData.lessons[k])
@@ -484,8 +574,12 @@ Provide:
             return nextProgress;
           });
         });
+
+        if (import.meta.env.DEV) {
+          console.log(`[ECORP:PERSISTENCE] LISTENER_ATTACHED uid=${user.uid}`);
+        }
       } catch (error) {
-        console.warn("Could not load progress from Firestore, using local cached state", error);
+        console.warn("[ECORP:PERSISTENCE] Unexpected error during hydration, preserving cached state", error);
         const cached = loadCachedProgress(user.uid);
         setUserProgress(cached);
         firestoreReady.current = true;
@@ -494,7 +588,10 @@ Provide:
 
     return () => {
       unsubscribeAuth();
-      unsubscribe?.();
+      if (activeUnsubscribeRef.current) {
+        activeUnsubscribeRef.current();
+        activeUnsubscribeRef.current = null;
+      }
     };
   }, []);
 
@@ -508,7 +605,7 @@ Provide:
     }
   }, [userProgress]);
 
-  // Persist all user-initiated progress mutations to Firestore
+  // Persist all user-initiated progress mutations to Firestore via 250ms debounce
   useEffect(() => {
     const user = auth.currentUser;
     if (!user || !firestoreReady.current || firestoreUserId.current !== user.uid) return;
@@ -519,10 +616,21 @@ Provide:
       return;
     }
 
-    const timeout = window.setTimeout(() => {
-      void syncProgressToDb(user.email || "");
+    if (syncTimerRef.current !== null) {
+      window.clearTimeout(syncTimerRef.current);
+    }
+
+    syncTimerRef.current = window.setTimeout(() => {
+      syncTimerRef.current = null;
+      void syncProgressToDbDirect(user.uid, userProgress, user);
     }, 250);
-    return () => window.clearTimeout(timeout);
+
+    return () => {
+      if (syncTimerRef.current !== null) {
+        window.clearTimeout(syncTimerRef.current);
+        syncTimerRef.current = null;
+      }
+    };
   }, [userProgress]);
 
   // Check health endpoint for backend / real Gemini API availability
