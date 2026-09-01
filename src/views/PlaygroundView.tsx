@@ -274,11 +274,15 @@ export const PlaygroundView: React.FC = () => {
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  const [presetLoadedName, setPresetLoadedName] = useState<string | null>(null);
+
   const handleInsertSnippet = (snippet: string) => setPrompt(prompt + snippet);
 
   const handleLoadPreset = (preset: typeof STARTER_PRESETS[0]) => {
     setPrompt(preset.prompt);
     setSystemInstruction(preset.systemInstruction);
+    setPresetLoadedName(preset.name);
+    setTimeout(() => setPresetLoadedName(null), 2500);
   };
 
   const handleSavePrompt = () => {
@@ -389,6 +393,11 @@ export const PlaygroundView: React.FC = () => {
                     );
                   })}
                 </div>
+                {presetLoadedName && (
+                  <span className="animate-in fade-in text-[11px] font-bold text-emerald-300 bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded flex items-center gap-1">
+                    <Check className="h-3 w-3 text-emerald-400" /> Loaded "{presetLoadedName}"
+                  </span>
+                )}
               </div>
             )}
 

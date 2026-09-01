@@ -415,23 +415,33 @@ export const CurriculumView: React.FC = () => {
                       <CheckCircle2 className="h-4 w-4 text-emerald-400" /> {t.curriculum.mastered} (+{currentLesson.xpReward || 50} XP)
                     </span>
                   ) : (
-                    <button
-                      id="lesson-mark-mastered-btn"
-                      onClick={handleCompleteFullLesson}
-                      disabled={!allMilestonesReached}
-                      className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold transition-all ${
-                        allMilestonesReached
-                          ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-950/60 hover:brightness-110 active:scale-95"
-                          : "bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed opacity-60"
-                      }`}
-                    >
-                      <CheckCircle2 className="h-4 w-4" />
-                      <span>
-                        {allMilestonesReached
-                          ? `${t.curriculum.verifyMastery} (+${currentLesson.xpReward || 50} XP)`
-                          : t.curriculum.completeCheckpointsFirst}
-                      </span>
-                    </button>
+                    <div className="flex flex-col items-end gap-1">
+                      <button
+                        id="lesson-mark-mastered-btn"
+                        onClick={handleCompleteFullLesson}
+                        disabled={!allMilestonesReached}
+                        className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold transition-all ${
+                          allMilestonesReached
+                            ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-950/60 hover:brightness-110 active:scale-95"
+                            : "bg-slate-900 text-slate-400 border border-slate-800 cursor-not-allowed"
+                        }`}
+                      >
+                        <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                        <span>
+                          {allMilestonesReached
+                            ? `${t.curriculum.verifyMastery} (+${currentLesson.xpReward || 50} XP)`
+                            : `Unlock Mastery (+${currentLesson.xpReward || 50} XP)`}
+                        </span>
+                      </button>
+                      {!allMilestonesReached && (
+                        <span className="text-[10px] font-mono text-amber-300/90 bg-amber-950/40 border border-amber-900/50 px-2 py-0.5 rounded">
+                          Pending: {[
+                            (totalConcepts - readConceptIds.length) > 0 ? `${totalConcepts - readConceptIds.length} Concept${(totalConcepts - readConceptIds.length) > 1 ? 's' : ''}` : '',
+                            (totalCheckpoints - passedCheckpointIds.length) > 0 ? `${totalCheckpoints - passedCheckpointIds.length} Quiz${(totalCheckpoints - passedCheckpointIds.length) > 1 ? 'zes' : ''}` : ''
+                          ].filter(Boolean).join(' & ')}
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>

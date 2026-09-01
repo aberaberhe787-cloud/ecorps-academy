@@ -16,6 +16,12 @@
     color: var(--text-primary);
     scroll-behavior: smooth;
   }
+
+  /* Global Keyboard Focus ring standards for accessibility */
+  :focus-visible {
+    outline: 2px solid #3b82f6 !important;
+    outline-offset: 2px !important;
+  }
 }
 
 /* Google Translate Widget & Layout Fixes */
