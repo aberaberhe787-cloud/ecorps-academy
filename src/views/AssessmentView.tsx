@@ -17,8 +17,6 @@ export const AssessmentView: React.FC = () => {
       
       const res = await submitAssessment({
         assessmentId: 'prompt-foundations-final',
-        assessmentVersion: '1.0.0',
-        pathId: 'prompt-foundations',
         submissionId: crypto.randomUUID(),
         payload: submission
       });
