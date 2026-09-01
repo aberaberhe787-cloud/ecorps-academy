@@ -119,6 +119,7 @@ const initialProgress: UserProgress = {
   savedCustomPrompts: [],
   xp: 120, // Initial welcome XP
   streakDays: 1,
+  lastActivityDate: getUtcDateString(),
   achievements: []
 };
 
@@ -283,7 +284,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         curriculumProgressPercent: 0,
         currentStreak: progressToPersist.streakDays,
         streakDays: progressToPersist.streakDays,
-        lastLoginDate: getUtcDateString(),
+        lastActivityDate: progressToPersist.lastActivityDate,
         xp: progressToPersist.xp,
         completedLessons: progressToPersist.completedLessons,
         lessons: lessonsMap,
@@ -541,7 +542,7 @@ Provide:
           const existingStreak = typeof data.currentStreak === 'number'
             ? data.currentStreak
             : (typeof data.streakDays === 'number' ? data.streakDays : 1);
-          const streakResult = computeDailyStreak(data.lastLoginDate, existingStreak);
+          const streakResult = computeDailyStreak(data.lastActivityDate || data.lastLoginDate, existingStreak);
 
           const arrayFromDoc = Array.isArray(data.completedLessons) ? data.completedLessons : [];
           const mapKeys = data.lessons && typeof data.lessons === 'object'
@@ -558,6 +559,7 @@ Provide:
             savedCustomPrompts: Array.isArray(data.savedCustomPrompts) ? data.savedCustomPrompts : [],
             xp: typeof data.xp === "number" ? data.xp : initialProgress.xp,
             streakDays: streakResult.streak,
+            lastActivityDate: streakResult.date,
             achievements: Array.isArray(data.achievements) ? data.achievements : [],
           };
 
@@ -601,7 +603,7 @@ Provide:
             curriculumProgressPercent: 0,
             currentStreak: 1,
             streakDays: 1,
-            lastLoginDate: todayUtc,
+            lastActivityDate: todayUtc,
             xp: initialProgress.xp,
             completedLessons: [],
             lessons: {},
@@ -653,6 +655,7 @@ Provide:
               savedCustomPrompts: Array.isArray(docData.savedCustomPrompts) ? docData.savedCustomPrompts : currentProg.savedCustomPrompts,
               xp: typeof docData.xp === "number" ? docData.xp : currentProg.xp,
               streakDays: typeof docData.currentStreak === "number" ? docData.currentStreak : (typeof docData.streakDays === "number" ? docData.streakDays : currentProg.streakDays),
+              lastActivityDate: typeof docData.lastActivityDate === "string" ? docData.lastActivityDate : currentProg.lastActivityDate,
               achievements: Array.isArray(docData.achievements) ? docData.achievements : currentProg.achievements,
             };
 
@@ -1040,24 +1043,33 @@ Provide:
     return evaluationResult;
   };
 
+  const processUserActivity = (prev: UserProgress): UserProgress => {
+    const { streak, date } = computeDailyStreak(prev.lastActivityDate, prev.streakDays);
+    if (streak === prev.streakDays && date === prev.lastActivityDate) {
+      return prev;
+    }
+    return { ...prev, streakDays: streak, lastActivityDate: date };
+  };
+
   const markLessonComplete = (lessonId: string) => {
     // Optimistic local update with duplicate completion protection
     setUserProgress((prev) => {
       if (prev.completedLessons.includes(lessonId)) return prev;
       confetti({ particleCount: 50, spread: 50, origin: { y: 0.7 } });
-      return { ...prev, completedLessons: [...prev.completedLessons, lessonId], xp: prev.xp + 40 };
+      const next = { ...prev, completedLessons: [...prev.completedLessons, lessonId], xp: prev.xp + 40 };
+      return processUserActivity(next);
     });
   };
 
   const addXp = (amount: number) => {
-    setUserProgress((prev) => ({
+    setUserProgress((prev) => processUserActivity({
       ...prev,
       xp: prev.xp + amount
     }));
   };
 
   const saveCustomPrompt = (title: string, promptText: string) => {
-    setUserProgress((prev) => ({
+    setUserProgress((prev) => processUserActivity({
       ...prev,
       savedCustomPrompts: [
         { id: "p-" + Date.now(), title, prompt: promptText, createdAt: Date.now() },

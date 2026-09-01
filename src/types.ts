@@ -201,6 +201,7 @@ export interface UserProgress {
   savedCustomPrompts: { id: string; title: string; prompt: string; createdAt: number }[];
   xp: number;
   streakDays: number;
+  lastActivityDate: string;
   achievements: Achievement[];
 }
 
