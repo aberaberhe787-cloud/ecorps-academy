@@ -79,10 +79,13 @@ export const submitAssessment = onCall(async (request) => {
     const attemptDoc = await transaction.get(attemptRef);
     
     if (attemptDoc.exists) {
-        if (attemptDoc.data()?.learnerId !== request.auth!.uid) {
+        const existingAttempt = attemptDoc.data();
+
+        if (existingAttempt?.learnerId !== request.auth!.uid) {
             throw new HttpsError('permission-denied', 'Forbidden');
         }
-        return attemptDoc.data();
+
+        return existingAttempt;
     }
 
     const now = admin.firestore.Timestamp.now();
