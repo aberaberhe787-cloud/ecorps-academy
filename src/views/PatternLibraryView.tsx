@@ -17,6 +17,7 @@ import {
   Boxes
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
+import { EmptyState } from "../components/EmptyState";
 import { promptPatterns } from "../data/patternsData";
 import { PromptPattern } from "../types";
 
@@ -139,66 +140,74 @@ export const PatternLibraryView: React.FC = () => {
           </div>
 
           <div className="space-y-2.5 max-h-[calc(100vh-220px)] overflow-y-auto pr-1">
-            {filteredPatterns.map((pattern) => {
-              const isSelected = activePattern.id === pattern.id;
-              const isMarked = userProgress.bookmarkedPatterns.includes(pattern.id);
+            {filteredPatterns.length > 0 ? (
+              filteredPatterns.map((pattern) => {
+                const isSelected = activePattern.id === pattern.id;
+                const isMarked = userProgress.bookmarkedPatterns.includes(pattern.id);
 
-              return (
-                <div
-                  key={pattern.id}
-                  id={`pattern-card-${pattern.id}`}
-                  onClick={() => handleSelectPattern(pattern)}
-                  className={`cursor-pointer rounded-xl border p-4 transition-all ${
-                    isSelected
-                      ? "border-blue-500 bg-slate-900/90 shadow-lg shadow-blue-500/10"
-                      : "border-slate-800 bg-slate-950/60 hover:border-slate-700 hover:bg-slate-900/40"
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-blue-300 font-mono">
-                          {pattern.category}
-                        </span>
-                        <span className="text-[10px] text-slate-500 font-medium">
-                          {pattern.difficulty}
-                        </span>
+                return (
+                  <div
+                    key={pattern.id}
+                    id={`pattern-card-${pattern.id}`}
+                    onClick={() => handleSelectPattern(pattern)}
+                    className={`cursor-pointer rounded-xl border p-4 transition-all ${
+                      isSelected
+                        ? "border-blue-500 bg-slate-900/90 shadow-lg shadow-blue-500/10"
+                        : "border-slate-800 bg-slate-950/60 hover:border-slate-700 hover:bg-slate-900/40"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-blue-300 font-mono">
+                            {pattern.category}
+                          </span>
+                          <span className="text-[10px] text-slate-500 font-medium">
+                            {pattern.difficulty}
+                          </span>
+                        </div>
+                        <h3 className="mt-1.5 text-sm font-bold text-white">{pattern.title}</h3>
                       </div>
-                      <h3 className="mt-1.5 text-sm font-bold text-white">{pattern.title}</h3>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleBookmarkPattern(pattern.id);
+                        }}
+                        className="text-slate-400 hover:text-amber-400 p-1"
+                      >
+                        {isMarked ? (
+                          <BookmarkCheck className="h-4 w-4 text-amber-400 fill-amber-400" />
+                        ) : (
+                          <Bookmark className="h-4 w-4" />
+                        )}
+                      </button>
                     </div>
 
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleBookmarkPattern(pattern.id);
-                      }}
-                      className="text-slate-400 hover:text-amber-400 p-1"
-                    >
-                      {isMarked ? (
-                        <BookmarkCheck className="h-4 w-4 text-amber-400 fill-amber-400" />
-                      ) : (
-                        <Bookmark className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
+                    <p className="mt-1 text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                      {pattern.description}
+                    </p>
 
-                  <p className="mt-1 text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                    {pattern.description}
-                  </p>
-
-                  <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                    {pattern.tags.slice(0, 3).map((tag, i) => (
-                      <span
-                        key={i}
-                        className="rounded-md bg-slate-900 border border-slate-800 px-2 py-0.5 text-[10px] text-slate-400"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
+                    <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                      {pattern.tags.slice(0, 3).map((tag, i) => (
+                        <span
+                          key={i}
+                          className="rounded-md bg-slate-900 border border-slate-800 px-2 py-0.5 text-[10px] text-slate-400"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            ) : (
+              <EmptyState
+                icon={Grid3X3}
+                title="No patterns found"
+                description="Try adjusting your search query or category filter."
+              />
+            )}
           </div>
         </div>
 
