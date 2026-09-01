@@ -460,27 +460,38 @@ Provide:
     // Connect to emulators if explicitly requested via environment variable
     try { useEmulatorsIfDev(); } catch {}
 
-    // Inactivity Monitor
-    let inactivityTimer: number | null = null;
-    let warningTimer: number | null = null;
+    // Inactivity Monitor - Robust Timestamp-based
+    const LAST_ACTIVITY_KEY = 'ecorp_last_activity';
 
-    const resetInactivityTimer = () => {
-      if (inactivityTimer) window.clearTimeout(inactivityTimer);
-      if (warningTimer) window.clearTimeout(warningTimer);
-
-      warningTimer = window.setTimeout(() => {
-        if (import.meta.env.DEV) console.log('[ECORP:PERSISTENCE] SESSION_WARNING: 5 mins remaining');
-      }, WARNING_TIMEOUT_MS);
-
-      inactivityTimer = window.setTimeout(() => {
-        if (import.meta.env.DEV) console.log('[ECORP:PERSISTENCE] SESSION_TIMEOUT: Logout triggered');
-        void logout();
-      }, SESSION_TIMEOUT_MS);
+    const updateLastActivity = () => {
+      localStorage.setItem(LAST_ACTIVITY_KEY, Date.now().toString());
     };
 
+    const checkSession = () => {
+      const last = parseInt(localStorage.getItem(LAST_ACTIVITY_KEY) || '0', 10);
+      const now = Date.now();
+      const elapsed = now - last;
+
+      if (elapsed >= SESSION_TIMEOUT_MS) {
+        console.log('[ECORP:PERSISTENCE] SESSION_TIMEOUT: Logout triggered');
+        void logout();
+        alert("Your session expired due to inactivity. Please sign in again.");
+      } else if (elapsed >= WARNING_TIMEOUT_MS) {
+        console.warn('[ECORP:PERSISTENCE] SESSION_WARNING: 5 mins remaining');
+      }
+    };
+
+    // Update on activity
     const activityEvents = ['mousedown', 'keydown', 'touchstart', 'scroll', 'mousemove'];
-    activityEvents.forEach(event => window.addEventListener(event, resetInactivityTimer));
-    resetInactivityTimer();
+    activityEvents.forEach(event => window.addEventListener(event, updateLastActivity));
+    
+    // Check periodically + on visibility/focus
+    const interval = window.setInterval(checkSession, 60000); // Check every minute
+    window.addEventListener('visibilitychange', checkSession);
+    window.addEventListener('focus', checkSession);
+
+    updateLastActivity();
+    checkSession(); // Initial check
 
     const unsubscribeAuth = firebaseOnAuthStateChanged(auth, async (user) => {
       // Detach existing listener if user changed
@@ -678,9 +689,10 @@ Provide:
         activeUnsubscribeRef.current();
         activeUnsubscribeRef.current = null;
       }
-      activityEvents.forEach(event => window.removeEventListener(event, resetInactivityTimer));
-      if (inactivityTimer) window.clearTimeout(inactivityTimer);
-      if (warningTimer) window.clearTimeout(warningTimer);
+      activityEvents.forEach(event => window.removeEventListener(event, updateLastActivity));
+      window.clearInterval(interval);
+      window.removeEventListener('visibilitychange', checkSession);
+      window.removeEventListener('focus', checkSession);
     };
   }, []);
 

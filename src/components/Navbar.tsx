@@ -106,7 +106,7 @@ export const Navbar: React.FC = () => {
               return (
                 <button
                   key={item.id}
-                  onClick={() => { if (item.id === 'profile') { setProfileOpen(true); } setActiveTab(item.id); }}
+                  onClick={() => { setActiveTab(item.id); }}
                   className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-150 ${
                     isActive
                       ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25"
@@ -231,9 +231,6 @@ export const Navbar: React.FC = () => {
                       <button
                         key={item.id}
                         onClick={() => { 
-                          if (item.id === 'profile') { 
-                            setProfileOpen(true); 
-                          } 
                           setActiveTab(item.id); 
                           setMobileMenuOpen(false); 
                         }}
