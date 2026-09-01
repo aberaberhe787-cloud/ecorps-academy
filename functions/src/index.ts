@@ -1,4 +1,4 @@
-import { onCall } from "firebase-functions/v2/https";
+import { onCall, HttpsError } from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
 
 admin.initializeApp();
@@ -21,6 +21,29 @@ const ASSESSMENT_CONFIG: Record<string, any> = {
     requiresOutputFormat: true,
     minCharLength: 150
   },
+  'mission-3': {
+    requiredKeywords: ["step", "equation", "verif", "variable", "reasoning"],
+    requiresRole: false,
+    requiresDelimiters: false,
+    requiresCoT: true,
+    requiresOutputFormat: true,
+    minCharLength: 140
+  },
+  'mission-4': {
+    requiredKeywords: ["act as", "analogy", "forbidden", "tone", "paragraph"],
+    requiresRole: true,
+    requiresDelimiters: false,
+    requiresOutputFormat: true,
+    minCharLength: 130
+  },
+  'mission-5': {
+    requiredKeywords: ["example", "input:", "output:", "category", "primary"],
+    requiresRole: false,
+    requiresDelimiters: true,
+    requiresFewShot: true,
+    requiresOutputFormat: true,
+    minCharLength: 200
+  },
   'prompt-foundations-final': {
     requiredKeywords: ["step", "reasoning"],
     forbiddenKeywords: ["forbiddenPattern"],
@@ -32,16 +55,16 @@ const ASSESSMENT_CONFIG: Record<string, any> = {
 };
 
 export const submitAssessment = onCall(async (request) => {
-  if (!request.auth) throw new Error('Unauthorized');
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Unauthorized');
 
   const { assessmentId, submissionId, payload } = request.data;
   
-  if (!assessmentId || !submissionId || !payload || typeof payload !== 'string') {
-    throw new Error('Invalid input');
+  if (!assessmentId || !submissionId || !payload || typeof payload !== 'string' || payload.length > 5000) {
+    throw new HttpsError('invalid-argument', 'Invalid input');
   }
 
   const config = ASSESSMENT_CONFIG[assessmentId];
-  if (!config) throw new Error('Unsupported assessment');
+  if (!config) throw new HttpsError('invalid-argument', 'Unsupported assessment');
 
   const db = admin.firestore();
   
@@ -51,10 +74,16 @@ export const submitAssessment = onCall(async (request) => {
 
   // Atomic Transaction
   return await db.runTransaction(async (transaction) => {
+    // Unique Idempotency Key: submissionId belongs to learnerId
     const attemptRef = db.collection('assessmentAttempts').doc(submissionId);
     const attemptDoc = await transaction.get(attemptRef);
     
-    if (attemptDoc.exists) return attemptDoc.data();
+    if (attemptDoc.exists) {
+        if (attemptDoc.data()?.learnerId !== request.auth!.uid) {
+            throw new HttpsError('permission-denied', 'Forbidden');
+        }
+        return attemptDoc.data();
+    }
 
     const now = admin.firestore.Timestamp.now();
     const userAttemptsQuery = db.collection('assessmentAttempts')
@@ -70,14 +99,14 @@ export const submitAssessment = onCall(async (request) => {
     if (userAttempts.size >= 3) {
       const latestAttempt = userAttempts.docs[0].data();
       if (latestAttempt.submittedAt.toMillis() > oneDayAgo.toMillis()) {
-        throw new Error('Maximum attempts reached.');
+        throw new HttpsError('resource-exhausted', 'Maximum attempts reached.');
       }
     }
 
     if (userAttempts.size > 0) {
       const latestAttempt = userAttempts.docs[0].data();
       if (now.toMillis() - latestAttempt.submittedAt.toMillis() < 5 * 60 * 1000) {
-        throw new Error('Wait 5 minutes between attempts.');
+        throw new HttpsError('resource-exhausted', 'Wait 5 minutes between attempts.');
       }
     }
 
@@ -94,9 +123,11 @@ export const submitAssessment = onCall(async (request) => {
     transaction.set(attemptRef, attempt);
 
     if (status === 'PASS') {
-      const evidenceRef = db.collection('evidence').doc();
+      // Deterministic evidence ID: learnerId + assessmentId
+      const evidenceId = `${request.auth.uid}_${assessmentId}`;
+      const evidenceRef = db.collection('evidence').doc(evidenceId);
       transaction.set(evidenceRef, {
-        evidenceId: evidenceRef.id,
+        evidenceId,
         assessmentAttemptId: submissionId,
         learnerId: request.auth.uid,
         assessmentId,
@@ -105,17 +136,14 @@ export const submitAssessment = onCall(async (request) => {
         createdAt: now,
       });
 
-      const credsQuery = db.collection('credentials')
-        .where('learnerId', '==', request.auth.uid)
-        .where('assessmentId', '==', assessmentId)
-        .where('verificationStatus', '==', 'VALID');
+      // Deterministic credential ID
+      const credId = `${request.auth.uid}_${assessmentId}`;
+      const credRef = db.collection('credentials').doc(credId);
       
-      const creds = await transaction.get(credsQuery);
-        
-      if (creds.empty) {
-        const credRef = db.collection('credentials').doc();
+      const credDoc = await transaction.get(credRef);
+      if (!credDoc.exists) {
         transaction.set(credRef, {
-          credentialId: credRef.id,
+          credentialId: credId,
           credentialName: 'Certified',
           pathName: assessmentId,
           learnerName: request.auth.token.name || 'Learner',
@@ -133,15 +161,23 @@ export const submitAssessment = onCall(async (request) => {
 function validatePayload(payload: string, config: any): number {
   if (payload.length < config.minCharLength) return 0;
   
-  for (const keyword of config.requiredKeywords) {
-    if (!payload.toLowerCase().includes(keyword.toLowerCase())) return 0;
+  if (config.requiredKeywords) {
+    for (const keyword of config.requiredKeywords) {
+      if (!payload.toLowerCase().includes(keyword.toLowerCase())) return 0;
+    }
   }
   
-  for (const keyword of config.forbiddenKeywords) {
-    if (payload.toLowerCase().includes(keyword.toLowerCase())) return 0;
+  if (config.forbiddenKeywords) {
+    for (const keyword of config.forbiddenKeywords) {
+      if (payload.toLowerCase().includes(keyword.toLowerCase())) return 0;
+    }
   }
 
   if (config.requiresRole && !payload.toLowerCase().includes("act as")) return 0;
+  if (config.requiresDelimiters && !payload.includes("---") && !payload.includes("===") && !payload.includes("```")) return 0;
+  if (config.requiresOutputFormat && !payload.toLowerCase().includes("json") && !payload.toLowerCase().includes("schema")) return 0;
+  if (config.requiresCoT && !payload.toLowerCase().includes("step") && !payload.toLowerCase().includes("reasoning")) return 0;
+  if (config.requiresFewShot && !payload.toLowerCase().includes("example") && !payload.toLowerCase().includes("input:")) return 0;
   
   return 100;
 }
