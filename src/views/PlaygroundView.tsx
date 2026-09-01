@@ -200,13 +200,40 @@ const SideDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
                       </button>
                       <button
                         onClick={() => {
+                          const blob = new Blob([JSON.stringify(p, null, 2)], { type: 'application/json' });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `${p.title.replace(/\s+/g, '_')}.json`;
+                          a.click();
+                        }}
+                        className="flex items-center gap-1 rounded-lg border border-slate-700 px-2 py-1 text-[10px] text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                      >
+                        JSON
+                      </button>
+                      <button
+                        onClick={() => {
+                          const markdown = `# ${p.title}\n\n${p.prompt}`;
+                          const blob = new Blob([markdown], { type: 'text/markdown' });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `${p.title.replace(/\s+/g, '_')}.md`;
+                          a.click();
+                        }}
+                        className="flex items-center gap-1 rounded-lg border border-slate-700 px-2 py-1 text-[10px] text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                      >
+                        MD
+                      </button>
+                      <button
+                        onClick={() => {
                           setPrompt(p.prompt);
                           setPlaygroundSubTab("sandbox");
                           onClose();
                         }}
                         className="flex-1 rounded-lg bg-blue-600 py-1.5 text-xs font-semibold text-white hover:bg-blue-500 transition-colors"
                       >
-                        Load into Editor
+                        Load
                       </button>
                     </div>
                   </div>

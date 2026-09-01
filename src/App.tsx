@@ -4,6 +4,7 @@
  */
 
 import React from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { AppProvider, useApp } from "./context/AppContext";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { Navbar } from "./components/Navbar";
@@ -34,14 +35,25 @@ const MainContent: React.FC = () => {
   };
 
   return (
-    <main className="flex-1">
-      {activeTab === "home" && <HomeView />}
-      {activeTab === "curriculum" && <RequireAuth><CurriculumView /></RequireAuth>}
-      {activeTab === "foundations" && <RequireAuth><PromptEngineeringPath /></RequireAuth>}
-      {activeTab === "playground" && <RequireAuth><PlaygroundView /></RequireAuth>}
-      {activeTab === "patterns" && <RequireAuth><PatternLibraryView /></RequireAuth>}
-      {activeTab === "resources" && <RequireAuth><ResourcesView /></RequireAuth>}
-      {activeTab === "profile" && <RequireAuth><UserProfileView path={profilePath} /></RequireAuth>}
+    <main className="flex-1 overflow-hidden relative">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2 }}
+          className="h-full"
+        >
+          {activeTab === "home" && <HomeView />}
+          {activeTab === "curriculum" && <RequireAuth><CurriculumView /></RequireAuth>}
+          {activeTab === "foundations" && <RequireAuth><PromptEngineeringPath /></RequireAuth>}
+          {activeTab === "playground" && <RequireAuth><PlaygroundView /></RequireAuth>}
+          {activeTab === "patterns" && <RequireAuth><PatternLibraryView /></RequireAuth>}
+          {activeTab === "resources" && <RequireAuth><ResourcesView /></RequireAuth>}
+          {activeTab === "profile" && <RequireAuth><UserProfileView path={profilePath} /></RequireAuth>}
+        </motion.div>
+      </AnimatePresence>
     </main>
   );
 };
