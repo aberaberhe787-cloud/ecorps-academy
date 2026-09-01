@@ -6,7 +6,6 @@ import {
   Clock, BookmarkCheck
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
-import { EmptyState } from "../components/EmptyState";
 import { PromptQualityMeter } from "../components/PromptQualityMeter";
 import { TerminalOutput } from "../components/TerminalOutput";
 import { PromptHelperBar } from "../components/PromptHelperBar";
@@ -138,11 +137,11 @@ const SideDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
           {activeDrawerTab === "history" && (
             <>
               {executionHistory.length === 0 ? (
-                <EmptyState
-                  icon={History}
-                  title="No runs yet"
-                  description="Execute a prompt in the Sandbox to build your execution history."
-                />
+                <div className="flex flex-col items-center justify-center h-48 text-center text-slate-500 space-y-2">
+                  <History className="h-10 w-10 text-slate-700" />
+                  <p className="text-sm font-medium">No runs yet</p>
+                  <p className="text-xs">Execute a prompt in the Sandbox to build history.</p>
+                </div>
               ) : (
                 executionHistory.map((item) => (
                   <div key={item.id} className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-2">
@@ -177,11 +176,11 @@ const SideDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
           {activeDrawerTab === "saved" && (
             <>
               {userProgress.savedCustomPrompts.length === 0 ? (
-                <EmptyState
-                  icon={Bookmark}
-                  title="No saved prompts"
-                  description="Build your prompt library by clicking the bookmark icon in the editor."
-                />
+                <div className="flex flex-col items-center justify-center h-48 text-center text-slate-500 space-y-2">
+                  <Bookmark className="h-10 w-10 text-slate-700" />
+                  <p className="text-sm font-medium">No saved prompts</p>
+                  <p className="text-xs">Use the "Save" button in the editor to build your library.</p>
+                </div>
               ) : (
                 userProgress.savedCustomPrompts.map((p) => (
                   <div key={p.id} className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-2">

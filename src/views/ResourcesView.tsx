@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { FileText, Trash2, Play, BookOpen, Search, ExternalLink, Copy, Check, Calendar, Sparkles } from "lucide-react";
 import { useApp } from "../context/AppContext";
-import { EmptyState } from "../components/EmptyState";
 import { glossaryTerms, promptOfTheDayList, externalLearningResources } from "../data/resourcesData";
 import { GlossaryTerm } from "../types";
 
@@ -108,12 +107,12 @@ export const ResourcesView: React.FC = () => {
       </div>
 
       {/* Saved Custom Prompts Section */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-          <FileText className="h-4 w-4 text-blue-400" /> My Saved Prompts ({userProgress.savedCustomPrompts.length})
-        </h2>
+      {userProgress.savedCustomPrompts.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+            <FileText className="h-4 w-4 text-blue-400" /> My Saved Prompts ({userProgress.savedCustomPrompts.length})
+          </h2>
 
-        {userProgress.savedCustomPrompts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {userProgress.savedCustomPrompts.map((saved) => (
               <div key={saved.id} className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 flex flex-col justify-between space-y-3">
@@ -152,16 +151,8 @@ export const ResourcesView: React.FC = () => {
               </div>
             ))}
           </div>
-        ) : (
-          <EmptyState
-            icon={FileText}
-            title="No saved prompts"
-            description="Build your prompt library by clicking the bookmark icon in the editor."
-            actionLabel="Go to Sandbox"
-            onAction={() => setActiveTab("playground")}
-          />
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Interactive Glossary Section */}
       <div className="space-y-4">
