@@ -1,8 +1,39 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Admin check - assumes an 'isAdmin' field in the user document
+    function isAdmin() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+    
+    // Existing learner persistence (Preserved)
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow update: if request.auth != null && request.auth.uid == userId 
+                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isAdmin']);
+      allow create: if request.auth != null && request.auth.uid == userId 
+                    && request.resource.data.isAdmin != true;
+    }
+
+    // New Competency Engine Collections
+    
+    match /assessmentAttempts/{attemptId} {
+      allow read: if request.auth != null && (request.auth.uid == resource.data.learnerId || isAdmin());
+      allow create, update, delete: if false; // Only Cloud Functions via Admin SDK
+    }
+    
+    match /evidence/{evidenceId} {
+      allow read: if request.auth != null && (request.auth.uid == resource.data.learnerId || isAdmin());
+      allow create, update, delete: if false; // Only Cloud Functions via Admin SDK
+    }
+    
+    match /credentials/{credentialId} {
+      // Public verification: read-only.
+      // Cloud Function must ensure these docs only contain public information.
+      allow read: if true;
+      allow create, update, delete: if false; // Only Cloud Functions via Admin SDK
     }
   }
 }
