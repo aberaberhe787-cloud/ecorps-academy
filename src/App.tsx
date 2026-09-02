@@ -25,16 +25,7 @@ import { DashboardHeader } from "./components/DashboardHeader";
 import { RequireAuth } from "./components/RequireAuth";
 
 const MainContent: React.FC = () => {
-  const { activeTab, userProgress } = useApp();
-  const profilePath = {
-    id: "prompt-engineering-foundations",
-    title: "Prompt Engineering Foundations",
-    lessons: FOUNDATION_LESSONS.map((lesson) => ({
-      id: lesson.id,
-      title: lesson.title,
-      completed: userProgress.completedLessons.includes(lesson.id),
-    })),
-  };
+  const { activeTab } = useApp();
 
   return (
     <main className="flex-1 overflow-hidden relative">
@@ -54,7 +45,7 @@ const MainContent: React.FC = () => {
           {activeTab === "patterns" && <RequireAuth><PatternLibraryView /></RequireAuth>}
           {activeTab === "resources" && <RequireAuth><ResourcesView /></RequireAuth>}
           {activeTab === "certification" && <RequireAuth><AssessmentView /></RequireAuth>}
-          {activeTab === "profile" && <RequireAuth><UserProfileView path={profilePath} /></RequireAuth>}
+          {activeTab === "profile" && <RequireAuth><UserProfileView /></RequireAuth>}
         </motion.div>
       </AnimatePresence>
     </main>

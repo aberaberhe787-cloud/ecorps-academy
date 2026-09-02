@@ -77,7 +77,183 @@ export const PromptEngineeringPath: React.FC = () => {
               </button>
             </div>
           )}
-          <article className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6"><div className="flex items-start justify-between gap-4"><div><p className="text-sm font-semibold text-blue-300">Concept {FOUNDATION_LESSONS.findIndex((lesson) => lesson.id === activeLesson.id) + 1}</p><h2 className="mt-1 text-2xl font-bold text-white">{activeLesson.title}</h2><p className="mt-3 text-slate-300">{activeLesson.summary}</p></div><Lightbulb className="h-7 w-7 shrink-0 text-amber-400" /></div><div className="mt-6 grid gap-4 md:grid-cols-2"><div className="rounded-xl border border-rose-900/50 bg-rose-950/20 p-4"><p className="mb-2 text-xs font-bold uppercase text-rose-300">Vague</p><pre className="whitespace-pre-wrap text-sm text-slate-300">{activeLesson.example}</pre></div><div className="rounded-xl border border-emerald-900/50 bg-emerald-950/20 p-4"><p className="mb-2 text-xs font-bold uppercase text-emerald-300">Precise</p><pre className="whitespace-pre-wrap text-sm text-slate-300">{activeLesson.refined}</pre></div></div><div className="mt-6 rounded-xl border border-slate-800 bg-slate-950/60 p-4"><div className="flex items-center justify-between"><h3 className="text-sm font-bold text-white">Guided practice check</h3>{practiceScore !== null ? <span className={`text-xs font-bold px-2 py-0.5 rounded border ${practiceScore >= 60 ? 'bg-emerald-950 text-emerald-300 border-emerald-800' : 'bg-amber-950 text-amber-300 border-amber-800'}`}>{practiceScore >= 60 ? '✓ Score Requirement Met (' + practiceScore + '/100)' : '⚠ Refine prompt (Score: ' + practiceScore + '/100, min 60)'}</span> : <span className="text-xs text-slate-400 font-mono">Run prompt to test score</span>}</div><textarea value={practicePrompt} onChange={(event) => setPracticePrompt(event.target.value)} rows={3} className="mt-3 w-full rounded-lg border border-slate-700 bg-slate-950 p-3 text-sm text-slate-200 outline-none focus:border-blue-500" /><button type="button" onClick={runPractice} disabled={isPracticing} className="mt-3 rounded-lg bg-blue-600 px-3.5 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60">{isPracticing ? 'Running...' : 'Run and score prompt'}</button>{practiceOutput && <p className="mt-3 whitespace-pre-wrap text-xs leading-5 text-slate-400">{practiceOutput}</p>}</div><div className="mt-4 rounded-xl border border-slate-800 p-4"><div className="flex items-center justify-between"><p className="text-sm font-bold text-white">Concept check</p>{conceptCheckPassed ? <span className="text-xs font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded">✓ Correct</span> : <span className="text-xs text-amber-300 bg-amber-950/60 border border-amber-800/80 px-2 py-0.5 rounded">Select correct option</span>}</div><p className="mt-1 text-xs text-slate-400">Which change makes a prompt easier for a model to follow?</p><select value={quizAnswer} onChange={(event) => setQuizAnswer(event.target.value)} className="mt-3 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200"><option value="">Choose an answer</option><option value="specificity">Add a specific task, audience, and success criteria</option><option value="length">Make the prompt longer without a clear goal</option></select></div><div className="mt-6 flex flex-wrap items-center justify-between gap-4"><button type="button" onClick={() => markLessonComplete(activeLesson.id)} disabled={userProgress.completedLessons.includes(activeLesson.id) || !canComplete} className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-500 transition-all">{userProgress.completedLessons.includes(activeLesson.id) ? <CheckCircle2 className="h-4 w-4 text-emerald-400" /> : <Circle className="h-4 w-4" />} {userProgress.completedLessons.includes(activeLesson.id) ? 'Lesson completed' : canComplete ? 'Complete lesson (+50 XP)' : 'Practice & pass check to unlock'}</button>{!userProgress.completedLessons.includes(activeLesson.id) && !canComplete && <span className="text-xs font-mono text-amber-300 bg-amber-950/40 border border-amber-900/50 px-3 py-1 rounded">Requirements: {!practiceScore || practiceScore < 60 ? 'Run prompt (score ≥ 60) ' : ''}{!practiceScore || practiceScore < 60 ? '• ' : ''}{!conceptCheckPassed ? 'Pass concept check' : ''}</span>}</div></article>
+          <article className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 space-y-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-blue-300">
+                  Concept {FOUNDATION_LESSONS.findIndex((lesson) => lesson.id === activeLesson.id) + 1} of {FOUNDATION_LESSONS.length}
+                </p>
+                <h2 className="mt-1 text-2xl font-bold text-white">{activeLesson.title}</h2>
+                <p className="mt-2 text-slate-300">{activeLesson.summary}</p>
+              </div>
+              <Lightbulb className="h-7 w-7 shrink-0 text-amber-400" />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-xl border border-rose-900/50 bg-rose-950/20 p-4">
+                <p className="mb-2 text-xs font-bold uppercase text-rose-300 font-mono">Vague Pattern</p>
+                <pre className="whitespace-pre-wrap text-sm text-slate-300 font-mono">{activeLesson.example}</pre>
+              </div>
+              <div className="rounded-xl border border-emerald-900/50 bg-emerald-950/20 p-4">
+                <p className="mb-2 text-xs font-bold uppercase text-emerald-300 font-mono">Precise Engineered Pattern</p>
+                <pre className="whitespace-pre-wrap text-sm text-slate-300 font-mono">{activeLesson.refined}</pre>
+              </div>
+            </div>
+
+            {/* Guided Practice Lab */}
+            <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-5 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-blue-400" />
+                  <h3 className="text-sm font-bold text-white">Interactive Practice Check</h3>
+                </div>
+                {practiceScore !== null ? (
+                  <span
+                    className={`text-xs font-bold font-mono px-2.5 py-1 rounded-full border ${
+                      practiceScore >= 60
+                        ? 'bg-emerald-950 text-emerald-300 border-emerald-800'
+                        : 'bg-amber-950 text-amber-300 border-amber-800'
+                    }`}
+                  >
+                    {practiceScore >= 60
+                      ? `✓ Rubric Score: ${practiceScore}/100 (Pass)`
+                      : `⚠ Score: ${practiceScore}/100 (Min 60 Required)`}
+                  </span>
+                ) : (
+                  <span className="text-xs text-slate-400 font-mono bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-full">
+                    Step 1: Execute prompt to evaluate score
+                  </span>
+                )}
+              </div>
+
+              <textarea
+                value={practicePrompt}
+                onChange={(event) => setPracticePrompt(event.target.value)}
+                rows={3}
+                placeholder="Write or refine your prompt..."
+                className="w-full rounded-xl border border-slate-700 bg-slate-950 p-3.5 text-xs sm:text-sm font-mono text-slate-200 outline-none focus:border-blue-500 transition-colors"
+              />
+
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={runPractice}
+                  disabled={isPracticing}
+                  className="rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-60 px-4 py-2 text-xs font-bold text-white shadow transition-all active:scale-95"
+                >
+                  {isPracticing ? 'Analyzing Prompt...' : 'Run and Score Prompt'}
+                </button>
+                {practiceScore !== null && practiceScore < 60 && (
+                  <span className="text-xs text-amber-300/90 font-mono">
+                    💡 Tip: Add specific context, explicit role, or defined output constraints.
+                  </span>
+                )}
+              </div>
+
+              {practiceOutput && (
+                <div className="mt-3 rounded-xl border border-slate-800 bg-slate-900/70 p-3.5 space-y-1">
+                  <p className="text-[11px] font-bold text-slate-400 font-mono uppercase">Model Execution Output</p>
+                  <p className="whitespace-pre-wrap text-xs leading-relaxed text-slate-300">{practiceOutput}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Concept Check Quiz */}
+            <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-5 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm font-bold text-white">Concept Verification</p>
+                {conceptCheckPassed ? (
+                  <span className="text-xs font-bold font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2.5 py-1 rounded-full">
+                    ✓ Correct
+                  </span>
+                ) : (
+                  <span className="text-xs font-mono text-amber-300 bg-amber-950/60 border border-amber-800/80 px-2.5 py-1 rounded-full">
+                    Step 2: Select the correct concept
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-300">
+                Which change makes a prompt easiest for a large language model to reliably follow?
+              </p>
+              <select
+                value={quizAnswer}
+                onChange={(event) => setQuizAnswer(event.target.value)}
+                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-xs sm:text-sm text-slate-200 outline-none focus:border-blue-500 transition-colors"
+              >
+                <option value="">Choose an answer...</option>
+                <option value="specificity">Add a specific task, explicit audience, and success criteria</option>
+                <option value="length">Make the prompt longer without structured goals</option>
+              </select>
+            </div>
+
+            {/* Completion & Diagnostic Action Panel */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-slate-800 pt-5">
+              <button
+                type="button"
+                onClick={() => markLessonComplete(activeLesson.id)}
+                disabled={userProgress.completedLessons.includes(activeLesson.id) || !canComplete}
+                className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-xs sm:text-sm font-bold shadow-lg transition-all active:scale-95 ${
+                  userProgress.completedLessons.includes(activeLesson.id)
+                    ? 'bg-slate-800 text-emerald-400 border border-emerald-800/60 cursor-default'
+                    : canComplete
+                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white cursor-pointer'
+                    : 'bg-slate-800 text-slate-500 border border-slate-700/50 cursor-not-allowed'
+                }`}
+              >
+                {userProgress.completedLessons.includes(activeLesson.id) ? (
+                  <>
+                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                    <span>Lesson Completed</span>
+                  </>
+                ) : canComplete ? (
+                  <>
+                    <CheckCircle2 className="h-4 w-4 text-white" />
+                    <span>Complete Lesson (+50 XP)</span>
+                  </>
+                ) : (
+                  <>
+                    <Circle className="h-4 w-4" />
+                    <span>Complete All Requirements</span>
+                  </>
+                )}
+              </button>
+
+              {/* Requirement Diagnostic Badges */}
+              {!userProgress.completedLessons.includes(activeLesson.id) && (
+                <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border ${
+                      practiceScore !== null && practiceScore >= 60
+                        ? 'bg-emerald-950/60 text-emerald-300 border-emerald-800'
+                        : 'bg-slate-900 text-slate-400 border-slate-800'
+                    }`}
+                  >
+                    {practiceScore !== null && practiceScore >= 60 ? (
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                    ) : (
+                      <Circle className="h-3.5 w-3.5 text-slate-500" />
+                    )}
+                    <span>Score ≥ 60 {practiceScore !== null ? `(${practiceScore})` : ''}</span>
+                  </span>
+
+                  <span
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border ${
+                      conceptCheckPassed
+                        ? 'bg-emerald-950/60 text-emerald-300 border-emerald-800'
+                        : 'bg-slate-900 text-slate-400 border-slate-800'
+                    }`}
+                  >
+                    {conceptCheckPassed ? (
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                    ) : (
+                      <Circle className="h-3.5 w-3.5 text-slate-500" />
+                    )}
+                    <span>Concept Quiz</span>
+                  </span>
+                </div>
+              )}
+            </div>
+          </article>
           <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5"><h3 className="text-sm font-bold text-white">Reusable prompt templates</h3><div className="mt-3 flex flex-wrap gap-2">{promptPatterns.slice(0, 3).map((pattern) => <button key={pattern.id} type="button" onClick={() => setPracticePrompt(pattern.template)} className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-300 hover:border-blue-500 hover:text-blue-300">Use {pattern.title}</button>)}</div><p className="mt-3 text-xs text-slate-400">Choose a template, adapt it to the scenario, run it, and review the rubric feedback.</p>{practiceScore !== null && <p className="mt-3 rounded-lg border border-blue-900/60 bg-blue-950/30 p-3 text-xs text-blue-200">Rubric feedback: {practiceFeedback}</p>}</div>
           <PromptPlayground initialPrompt={activeLesson.example} />
         </main>
