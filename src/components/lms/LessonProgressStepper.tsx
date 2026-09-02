@@ -152,10 +152,10 @@ export const LessonProgressStepper: React.FC<LessonProgressStepperProps> = ({
               onClick={() => onStepClick && onStepClick(step.id)}
               className={`group text-left rounded-xl border p-2.5 sm:p-3 transition-all relative overflow-hidden flex flex-col justify-between ${
                 step.isCompleted
-                  ? "border-emerald-700/50 bg-emerald-950/20 hover:bg-emerald-950/40"
+                  ? "border-emerald-800/40 bg-emerald-950/20 hover:bg-emerald-950/40 opacity-80"
                   : step.isActive
-                  ? "border-blue-600/80 bg-blue-950/30 shadow-md ring-1 ring-blue-500/30 hover:bg-blue-950/50"
-                  : "border-slate-800 bg-slate-950/40 text-slate-500 hover:border-slate-700 hover:text-slate-400"
+                  ? "border-2 border-blue-500 bg-gradient-to-br from-blue-900/60 to-slate-900 shadow-[0_0_15px_rgba(37,99,235,0.2)] ring-1 ring-blue-500/20 hover:bg-blue-900/40 z-10"
+                  : "border-slate-800 bg-slate-950/40 text-slate-500 hover:border-slate-700 hover:text-slate-400 opacity-60"
               }`}
             >
               {/* Step indicator top row */}
@@ -163,14 +163,14 @@ export const LessonProgressStepper: React.FC<LessonProgressStepperProps> = ({
                 <div
                   className={`flex h-6 w-6 items-center justify-center rounded-lg text-xs font-bold transition-colors ${
                     step.isCompleted
-                      ? "bg-emerald-900/80 text-emerald-300 border border-emerald-700"
+                      ? "bg-emerald-950 text-emerald-400 border border-emerald-700/50"
                       : step.isActive
-                      ? "bg-blue-600 text-white shadow-sm shadow-blue-500/50 animate-pulse"
+                      ? "bg-blue-600 text-white shadow-sm shadow-blue-500/50"
                       : "bg-slate-800 text-slate-400 border border-slate-700"
                   }`}
                 >
                   {step.isCompleted ? (
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-300" />
+                    <CheckCircle2 className="h-3.5 w-3.5" />
                   ) : (
                     <StepIcon className="h-3.5 w-3.5" />
                   )}
@@ -180,9 +180,9 @@ export const LessonProgressStepper: React.FC<LessonProgressStepperProps> = ({
                   <span
                     className={`font-mono text-[10px] font-semibold px-1.5 py-0.5 rounded border ${
                       step.isCompleted
-                        ? "bg-emerald-950 border-emerald-800 text-emerald-400"
+                        ? "bg-emerald-950 border-emerald-800/60 text-emerald-400"
                         : step.isActive
-                        ? "bg-blue-950 border-blue-800 text-blue-300"
+                        ? "bg-blue-600/20 border-blue-500/50 text-blue-300"
                         : "bg-slate-900 border-slate-800 text-slate-500"
                     }`}
                   >
@@ -204,14 +204,14 @@ export const LessonProgressStepper: React.FC<LessonProgressStepperProps> = ({
                 >
                   {step.title}
                 </div>
-                <div className="text-[10px] text-slate-400/90 truncate font-mono mt-0.5">
+                <div className={`text-[10px] truncate font-mono mt-0.5 ${step.isActive ? "text-blue-200" : "text-slate-500"}`}>
                   {step.subtitle}
                 </div>
               </div>
 
               {/* Active Step Indicator Pill */}
               {step.isActive && (
-                <div className="absolute top-0 right-0 w-2 h-2 rounded-bl-full bg-blue-500" />
+                <div className="absolute top-0 right-0 h-full w-1 bg-blue-500" />
               )}
             </button>
           );

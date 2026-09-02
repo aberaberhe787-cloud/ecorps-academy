@@ -1,5 +1,6 @@
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useState, useEffect } from 'react';
 import {
+  AlertCircle,
   ArrowRight,
   BookOpen,
   Check,
@@ -23,8 +24,12 @@ import {
   signInWithRedirect,
   signInWithPopup,
   getRedirectResult,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
+import { recordUserActivity, consumeSessionExpiredNotice } from '../lib/sessionManager';
 
 export const LoginPage: React.FC = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -34,6 +39,13 @@ export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [sessionNotice, setSessionNotice] = useState('');
+
+  useEffect(() => {
+    if (consumeSessionExpiredNotice()) {
+      setSessionNotice('Your previous session expired due to inactivity. Please sign in again to continue.');
+    }
+  }, []);
 
   React.useEffect(() => {
     getRedirectResult(auth).catch((redirectError: any) => {
@@ -51,13 +63,21 @@ export const LoginPage: React.FC = () => {
     }
 
     setError('');
+    setSessionNotice('');
     setIsSubmitting(true);
     try {
+      try {
+        await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+      } catch (persistErr) {
+        console.warn('Could not set auth persistence mode', persistErr);
+      }
+
       if (isSignUp) {
         await createUserWithEmailAndPassword(auth, email.trim(), password);
       } else {
         await signInWithEmailAndPassword(auth, email.trim(), password);
       }
+      recordUserActivity();
     } catch (authError: any) {
       setError(authError?.code === 'auth/invalid-credential'
         ? 'The email or password is incorrect.'
@@ -69,9 +89,17 @@ export const LoginPage: React.FC = () => {
 
   const handleProviderAuth = async (provider: GoogleAuthProvider | GithubAuthProvider) => {
     setError('');
+    setSessionNotice('');
     setIsSubmitting(true);
     try {
+      try {
+        await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+      } catch (persistErr) {
+        console.warn('Could not set auth persistence mode', persistErr);
+      }
+
       await signInWithPopup(auth, provider);
+      recordUserActivity();
     } catch (authError: any) {
       if (authError?.code === 'auth/popup-blocked') {
         try {
@@ -118,7 +146,13 @@ export const LoginPage: React.FC = () => {
           <div className="absolute right-8 top-6 flex h-8 w-8 items-center justify-center rounded-full bg-slate-800/70 text-slate-400"><Moon className="h-4 w-4" /></div>
           <div className="w-full rounded-2xl border border-indigo-500/50 bg-[#0c142a] p-6 shadow-[0_0_45px_rgba(37,99,235,.08)] sm:p-8">
             <div className="text-center"><h2 className="text-2xl font-bold text-slate-100">{isSignUp ? 'Create your account' : 'Welcome back'}</h2><p className="mt-2 text-xs text-slate-400">{isSignUp ? 'Start your AI learning journey' : 'Continue your AI learning journey'}</p></div>
-            <form onSubmit={handleEmailAuth} className="mt-7 space-y-4">
+            {sessionNotice && (
+              <div className="mt-4 flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-300">
+                <AlertCircle className="h-4 w-4 shrink-0 text-amber-400" />
+                <span>{sessionNotice}</span>
+              </div>
+            )}
+            <form onSubmit={handleEmailAuth} className="mt-6 space-y-4">
               {isSignUp && <label className="block"><span className="mb-1.5 block text-[11px] text-slate-300">Full name</span><div className="relative"><UserRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" /><input type="text" placeholder="Your name" className="login-input" /></div></label>}
               <label className="block"><span className="mb-1.5 block text-[11px] text-slate-300">Email address</span><div className="relative"><Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" /><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" className="login-input" autoComplete="email" /></div></label>
               <label className="block"><span className="mb-1.5 block text-[11px] text-slate-300">Password</span><div className="relative"><LockKeyhole className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" /><input type={showPassword ? 'text' : 'password'} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="••••••••••••" className="login-input pr-10" autoComplete={isSignUp ? 'new-password' : 'current-password'} /><button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300" aria-label={showPassword ? 'Hide password' : 'Show password'}>{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></div></label>

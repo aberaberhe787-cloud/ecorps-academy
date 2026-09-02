@@ -7,7 +7,8 @@ import {
   Sparkles,
   ChevronRight,
   BookOpen,
-  GraduationCap
+  GraduationCap,
+  Play
 } from "lucide-react";
 import { CurriculumModule, Lesson, BloomsTaxonomyLevel } from "../../types";
 import { useApp } from "../../context/AppContext";
@@ -159,28 +160,30 @@ export const LearningPathway: React.FC<LearningPathwayProps> = ({
                       key={lesson.id}
                       id={`pathway-node-${lesson.id}`}
                       onClick={() => onSelectLesson(lesson)}
-                      className={`group relative flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3 sm:p-4 cursor-pointer transition-all ${
+                      className={`group relative flex flex-wrap items-center justify-between gap-3 rounded-2xl cursor-pointer transition-all ${
                         isCurrent
-                          ? "border-blue-500 bg-gradient-to-r from-blue-950/70 to-slate-900 shadow-lg shadow-blue-950/50 ring-2 ring-blue-500/40 ring-offset-2 ring-offset-slate-950"
+                          ? "border-2 border-blue-500 bg-gradient-to-r from-blue-900/60 to-slate-900 shadow-[0_0_20px_rgba(37,99,235,0.15)] ring-2 ring-blue-500/20 ring-offset-2 ring-offset-slate-950 p-4 sm:p-5"
                           : isCompleted
-                          ? "border-emerald-800/40 bg-slate-950/80 hover:border-emerald-700/60 hover:bg-slate-900/90"
-                          : "border-slate-800/90 bg-slate-950/60 hover:border-slate-700 hover:bg-slate-900/70"
+                          ? "border border-emerald-900/40 bg-slate-950/40 hover:border-emerald-800/60 hover:bg-slate-900/60 opacity-80 p-3 sm:p-4"
+                          : "border border-slate-800 bg-slate-950/80 hover:border-slate-600 hover:bg-slate-900/90 p-3 sm:p-4"
                       }`}
                     >
                       {/* Left: Indicator & Title */}
-                      <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                      <div className="flex items-center gap-4 min-w-0 flex-1">
                         {/* Node status icon */}
                         <div
-                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl font-mono text-xs font-bold transition-transform group-hover:scale-105 ${
+                          className={`flex shrink-0 items-center justify-center rounded-xl font-mono text-xs font-bold transition-transform group-hover:scale-105 ${
                             isCurrent
-                              ? "bg-blue-600 text-white shadow-md shadow-blue-500/30 animate-pulse"
+                              ? "h-10 w-10 bg-blue-600 text-white shadow-md shadow-blue-500/30"
                               : isCompleted
-                              ? "bg-emerald-950 text-emerald-300 border border-emerald-600/50"
-                              : "bg-slate-800 text-slate-400 border border-slate-700"
+                              ? "h-9 w-9 bg-emerald-950 text-emerald-400 border border-emerald-700/50"
+                              : "h-9 w-9 bg-slate-800 text-slate-400 border border-slate-700"
                           }`}
                         >
                           {isCompleted ? (
-                            <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                            <CheckCircle2 className="h-5 w-5" />
+                          ) : isCurrent ? (
+                            <Play className="h-4 w-4 fill-white ml-0.5" />
                           ) : (
                             <span>{lIdx + 1}</span>
                           )}
@@ -189,45 +192,45 @@ export const LearningPathway: React.FC<LearningPathwayProps> = ({
                         {/* Text details */}
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                            <span className="font-semibold text-sm text-slate-100 group-hover:text-white truncate">
+                            <span className={`font-semibold text-sm truncate ${isCurrent ? "text-white text-base" : "text-slate-200 group-hover:text-white"}`}>
                               {lesson.title}
                             </span>
                             <span
-                              className={`rounded px-1.5 py-0.2 text-[9px] font-mono font-semibold border ${bloomStyle.bg} ${bloomStyle.text} ${bloomStyle.border}`}
+                              className={`rounded px-1.5 py-0.5 text-[9px] font-mono font-semibold border ${bloomStyle.bg} ${bloomStyle.text} ${bloomStyle.border}`}
                             >
                               {bloom}
                             </span>
                           </div>
-                          <p className="text-[11px] text-slate-400 line-clamp-1">
+                          <p className={`text-xs line-clamp-1 ${isCurrent ? "text-blue-200" : "text-slate-400"}`}>
                             {lesson.objective || lesson.subtitle}
                           </p>
                         </div>
                       </div>
 
                       {/* Right: Meta stats & action button */}
-                      <div className="flex items-center gap-3 shrink-0">
-                        <div className="hidden sm:flex items-center gap-2.5 text-[11px] font-mono text-slate-400">
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3 text-slate-500" />
+                      <div className="flex items-center gap-4 shrink-0">
+                        <div className={`hidden sm:flex items-center gap-3 text-xs font-mono ${isCurrent ? "text-blue-300" : "text-slate-400"}`}>
+                          <span className="flex items-center gap-1.5">
+                            <Clock className="h-3.5 w-3.5 opacity-70" />
                             {lesson.estimatedMinutes}{t.curriculum.mins}
                           </span>
-                          <span className="flex items-center gap-1 text-amber-400/90 font-semibold">
-                            <Sparkles className="h-3 w-3 text-amber-400" />
+                          <span className="flex items-center gap-1.5 text-amber-400 font-semibold">
+                            <Sparkles className="h-3.5 w-3.5" />
                             +{lesson.xpReward || 50} XP
                           </span>
                         </div>
 
                         <div className="flex items-center">
                           {isCurrent ? (
-                            <span className="rounded-lg bg-blue-600 px-2.5 py-1 text-xs font-bold text-white shadow-sm flex items-center gap-1">
-                              {t.curriculum.current} <ChevronRight className="h-3.5 w-3.5" />
+                            <span className="rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-1.5 text-sm font-bold text-white shadow-lg flex items-center gap-1.5 transition-colors">
+                              {t.curriculum.current} <ChevronRight className="h-4 w-4" />
                             </span>
                           ) : isCompleted ? (
-                            <span className="rounded-lg bg-emerald-950/80 border border-emerald-700/60 px-2 py-1 text-[11px] font-medium text-emerald-300">
+                            <span className="rounded-lg bg-emerald-950 border border-emerald-800/80 px-2.5 py-1 text-xs font-medium text-emerald-400">
                               {t.curriculum.mastered}
                             </span>
                           ) : (
-                            <span className="rounded-lg border border-slate-700 bg-slate-800/80 px-2 py-1 text-[11px] font-medium text-slate-300 group-hover:border-blue-500 group-hover:text-white transition-colors">
+                            <span className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-300 group-hover:bg-slate-700 group-hover:text-white transition-colors">
                               {t.curriculum.start}
                             </span>
                           )}

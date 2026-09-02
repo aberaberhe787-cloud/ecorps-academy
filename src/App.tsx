@@ -19,6 +19,7 @@ import { UserProfileView } from "./views/UserProfileView";
 import { PromptEngineeringPath, FOUNDATION_LESSONS } from "./views/PromptEngineeringPath";
 import { LoginPage } from "./components/LoginPage";
 import { auth } from "./lib/firebase";
+import { isSessionExpired, markSessionExpired } from "./lib/sessionManager";
 import { DashboardHeader } from "./components/DashboardHeader";
 import { RequireAuth } from "./components/RequireAuth";
 
@@ -74,15 +75,28 @@ const AppShell: React.FC = () => {
 
 const AuthGate: React.FC = () => {
   const { setActiveTab } = useApp();
-  const [user, setUser] = React.useState(auth.currentUser);
+  const [user, setUser] = React.useState<any>(null);
   const [isAuthLoading, setIsAuthLoading] = React.useState(true);
 
   React.useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((nextUser) => {
-      setUser(nextUser);
-      setIsAuthLoading(false);
+    const unsubscribe = auth.onAuthStateChanged(async (nextUser: any) => {
       if (nextUser) {
+        if (isSessionExpired()) {
+          console.log('[ECORP:AUTH] Session expired on startup -> signing out');
+          markSessionExpired();
+          try {
+            await auth.signOut();
+          } catch {}
+          setUser(null);
+          setIsAuthLoading(false);
+          return;
+        }
+        setUser(nextUser);
+        setIsAuthLoading(false);
         setActiveTab("home");
+      } else {
+        setUser(null);
+        setIsAuthLoading(false);
       }
     });
     return unsubscribe;

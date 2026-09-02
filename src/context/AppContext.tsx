@@ -24,6 +24,12 @@ import {
   onAuthStateChanged as firebaseOnAuthStateChanged
 } from "../lib/firebaseClient";
 import { doc, setDoc } from "firebase/firestore";
+import {
+  isSessionExpired,
+  recordUserActivity,
+  clearSessionActivity,
+  markSessionExpired,
+} from "../lib/sessionManager";
 
 interface AppContextType {
   activeTab: NavTab;
@@ -364,7 +370,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.error('[ECORP:PERSISTENCE] SIGNOUT_ERROR', signOutErr);
     }
 
-    // 5. Reset local authenticated state to clean initial guest state
+    // 5. Clear session activity timestamp
+    clearSessionActivity();
+
+    // 6. Reset local authenticated state to clean initial guest state
     firestoreUserId.current = null;
     persistenceLifecycle.current = 'idle';
     lastSyncedFingerprint.current = getProgressFingerprint(initialProgress);
@@ -462,37 +471,32 @@ Provide:
     try { useEmulatorsIfDev(); } catch {}
 
     // Inactivity Monitor - Robust Timestamp-based
-    const LAST_ACTIVITY_KEY = 'ecorp_last_activity';
-
-    const updateLastActivity = () => {
-      localStorage.setItem(LAST_ACTIVITY_KEY, Date.now().toString());
-    };
-
-    const checkSession = () => {
-      const last = parseInt(localStorage.getItem(LAST_ACTIVITY_KEY) || '0', 10);
-      const now = Date.now();
-      const elapsed = now - last;
-
-      if (elapsed >= SESSION_TIMEOUT_MS) {
-        console.log('[ECORP:PERSISTENCE] SESSION_TIMEOUT: Logout triggered');
-        void logout();
-        alert("Your session expired due to inactivity. Please sign in again.");
-      } else if (elapsed >= WARNING_TIMEOUT_MS) {
-        console.warn('[ECORP:PERSISTENCE] SESSION_WARNING: 5 mins remaining');
+    const checkSession = async () => {
+      if (auth.currentUser && isSessionExpired()) {
+        console.log('[ECORP:PERSISTENCE] SESSION_TIMEOUT: Inactivity logout triggered');
+        markSessionExpired();
+        await logout();
       }
     };
 
-    // Update on activity
-    const activityEvents = ['mousedown', 'keydown', 'touchstart', 'scroll', 'mousemove'];
-    activityEvents.forEach(event => window.addEventListener(event, updateLastActivity));
+    // Update on activity with throttling
+    let lastActivityWrite = 0;
+    const handleUserActivity = () => {
+      if (!auth.currentUser) return;
+      const now = Date.now();
+      if (now - lastActivityWrite > 3000) { // Throttle writes to every 3s
+        lastActivityWrite = now;
+        recordUserActivity();
+      }
+    };
+
+    const activityEvents = ['mousedown', 'keydown', 'touchstart', 'scroll'];
+    activityEvents.forEach(event => window.addEventListener(event, handleUserActivity, { passive: true }));
     
     // Check periodically + on visibility/focus
-    const interval = window.setInterval(checkSession, 60000); // Check every minute
+    const interval = window.setInterval(checkSession, 30000); // Check every 30s
     window.addEventListener('visibilitychange', checkSession);
     window.addEventListener('focus', checkSession);
-
-    updateLastActivity();
-    checkSession(); // Initial check
 
     const unsubscribeAuth = firebaseOnAuthStateChanged(auth, async (user) => {
       // Detach existing listener if user changed
@@ -511,6 +515,17 @@ Provide:
         setPersistenceStatus('synced');
         return;
       }
+
+      // Check session expiration on auth event (e.g. startup / returning after a long time)
+      if (isSessionExpired()) {
+        console.log(`[ECORP:PERSISTENCE] SESSION_EXPIRED_ON_STARTUP uid=${user.uid}`);
+        markSessionExpired();
+        await logout();
+        return;
+      }
+
+      // Valid active session
+      recordUserActivity();
 
       console.log(`[ECORP:PERSISTENCE] AUTH_READY uid=${user.uid} email=${user.email || 'none'}`);
       firestoreUserId.current = user.uid;
@@ -692,7 +707,7 @@ Provide:
         activeUnsubscribeRef.current();
         activeUnsubscribeRef.current = null;
       }
-      activityEvents.forEach(event => window.removeEventListener(event, updateLastActivity));
+      activityEvents.forEach(event => window.removeEventListener(event, handleUserActivity));
       window.clearInterval(interval);
       window.removeEventListener('visibilitychange', checkSession);
       window.removeEventListener('focus', checkSession);

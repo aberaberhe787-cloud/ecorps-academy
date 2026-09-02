@@ -1,25 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { auth, onAuthStateChanged } from '../lib/firebaseClient';
-
-const redirectToLogin = () => {
-  if (typeof window !== 'undefined') {
-    window.location.href = '/login';
-  }
-};
+import { isSessionExpired, markSessionExpired } from '../lib/sessionManager';
 
 export const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [checking, setChecking] = useState(true);
   const [authed, setAuthed] = useState(false);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        if (isSessionExpired()) {
+          markSessionExpired();
+          try {
+            await auth.signOut();
+          } catch {}
+          setAuthed(false);
+          setChecking(false);
+          return;
+        }
         setAuthed(true);
         setChecking(false);
       } else {
         setAuthed(false);
         setChecking(false);
-        redirectToLogin();
       }
     });
     return () => unsub();
