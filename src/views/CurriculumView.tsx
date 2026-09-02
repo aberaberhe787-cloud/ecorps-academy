@@ -54,6 +54,7 @@ export const CurriculumView: React.FC = () => {
     isDistractionFreeMode,
     setIsDistractionFreeMode,
     currentCurriculum,
+    setActiveTab,
     t,
   } = useApp();
 
@@ -693,11 +694,14 @@ export const CurriculumView: React.FC = () => {
                   </button>
                 ) : (
                   <button
-                    onClick={handleExitLesson}
-                    className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-emerald-500 transition-colors"
+                    onClick={() => {
+                      handleExitLesson();
+                      setActiveTab("certification");
+                    }}
+                    className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:brightness-110 transition-all"
                   >
                     <Award className="h-4 w-4" />
-                    <span>{t.curriculum.completeAcademicCurriculum}</span>
+                    <span>Advance to Capstone Assessment &rarr;</span>
                   </button>
                 )}
               </div>

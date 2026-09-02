@@ -516,16 +516,19 @@ Provide:
         return;
       }
 
-      // Check session expiration on auth event (e.g. startup / returning after a long time)
-      if (isSessionExpired()) {
-        console.log(`[ECORP:PERSISTENCE] SESSION_EXPIRED_ON_STARTUP uid=${user.uid}`);
-        markSessionExpired();
-        await logout();
-        return;
+      // Perform silent token refresh before evaluating session expiration
+      try {
+        await user.getIdToken(false);
+        recordUserActivity();
+      } catch (tokenErr) {
+        console.warn(`[ECORP:PERSISTENCE] Silent token refresh failed for uid=${user.uid}`, tokenErr);
+        if (isSessionExpired()) {
+          console.log(`[ECORP:PERSISTENCE] SESSION_EXPIRED_ON_STARTUP uid=${user.uid}`);
+          markSessionExpired();
+          await logout();
+          return;
+        }
       }
-
-      // Valid active session
-      recordUserActivity();
 
       console.log(`[ECORP:PERSISTENCE] AUTH_READY uid=${user.uid} email=${user.email || 'none'}`);
       firestoreUserId.current = user.uid;

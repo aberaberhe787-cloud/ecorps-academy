@@ -60,6 +60,7 @@ export const Navbar: React.FC = () => {
     { id: "playground", label: t.nav.sandbox, icon: Terminal },
     { id: "patterns", label: t.nav.patterns, icon: Grid3X3 },
     { id: "resources", label: t.nav.resources, icon: Sparkles },
+    { id: "certification", label: "Assessment", icon: Award },
     { id: "profile", label: "Dashboard", icon: User }
   ];
 

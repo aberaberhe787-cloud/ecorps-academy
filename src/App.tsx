@@ -17,9 +17,10 @@ import { ResourcesView } from "./views/ResourcesView";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { UserProfileView } from "./views/UserProfileView";
 import { PromptEngineeringPath, FOUNDATION_LESSONS } from "./views/PromptEngineeringPath";
+import { AssessmentView } from "./views/AssessmentView";
 import { LoginPage } from "./components/LoginPage";
 import { auth } from "./lib/firebase";
-import { isSessionExpired, markSessionExpired } from "./lib/sessionManager";
+import { isSessionExpired, markSessionExpired, recordUserActivity } from "./lib/sessionManager";
 import { DashboardHeader } from "./components/DashboardHeader";
 import { RequireAuth } from "./components/RequireAuth";
 
@@ -52,6 +53,7 @@ const MainContent: React.FC = () => {
           {activeTab === "playground" && <RequireAuth><PlaygroundView /></RequireAuth>}
           {activeTab === "patterns" && <RequireAuth><PatternLibraryView /></RequireAuth>}
           {activeTab === "resources" && <RequireAuth><ResourcesView /></RequireAuth>}
+          {activeTab === "certification" && <RequireAuth><AssessmentView /></RequireAuth>}
           {activeTab === "profile" && <RequireAuth><UserProfileView path={profilePath} /></RequireAuth>}
         </motion.div>
       </AnimatePresence>
@@ -81,19 +83,29 @@ const AuthGate: React.FC = () => {
   React.useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (nextUser: any) => {
       if (nextUser) {
-        if (isSessionExpired()) {
-          console.log('[ECORP:AUTH] Session expired on startup -> signing out');
-          markSessionExpired();
-          try {
-            await auth.signOut();
-          } catch {}
-          setUser(null);
+        try {
+          // Perform silent token refresh before evaluating session expiration
+          await nextUser.getIdToken(false);
+          recordUserActivity();
+          setUser(nextUser);
           setIsAuthLoading(false);
-          return;
+          setActiveTab("home");
+        } catch (tokenErr) {
+          console.warn('[ECORP:AUTH] Silent token refresh failed:', tokenErr);
+          if (isSessionExpired()) {
+            console.log('[ECORP:AUTH] Session expired on startup -> signing out');
+            markSessionExpired();
+            try {
+              await auth.signOut();
+            } catch {}
+            setUser(null);
+            setIsAuthLoading(false);
+            return;
+          }
+          setUser(nextUser);
+          setIsAuthLoading(false);
+          setActiveTab("home");
         }
-        setUser(nextUser);
-        setIsAuthLoading(false);
-        setActiveTab("home");
       } else {
         setUser(null);
         setIsAuthLoading(false);
