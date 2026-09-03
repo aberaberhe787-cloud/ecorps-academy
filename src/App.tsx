@@ -28,7 +28,7 @@ const MainContent: React.FC = () => {
   const { activeTab } = useApp();
 
   return (
-    <main className="flex-1 overflow-hidden relative">
+    <main className="w-full relative flex-1 flex flex-col">
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
@@ -36,7 +36,7 @@ const MainContent: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.2 }}
-          className="h-full"
+          className="w-full flex-1 flex flex-col"
         >
           {activeTab === "home" && <HomeView />}
           {activeTab === "curriculum" && <RequireAuth><CurriculumView /></RequireAuth>}
@@ -72,19 +72,46 @@ const AuthGate: React.FC = () => {
   const [isAuthLoading, setIsAuthLoading] = React.useState(true);
 
   React.useEffect(() => {
+    // Dedicated session expiration enforcement handler
+    const enforceSessionExpiration = async () => {
+      if (auth.currentUser && isSessionExpired()) {
+        console.log('[ECORP:AUTH] Inactivity timeout detected -> signing out');
+        markSessionExpired();
+        try {
+          await auth.signOut();
+        } catch (signOutErr) {
+          console.warn('[ECORP:AUTH] SignOut failed', signOutErr);
+        }
+        setUser(null);
+        setIsAuthLoading(false);
+      }
+    };
+
     const unsubscribe = auth.onAuthStateChanged(async (nextUser: any) => {
       if (nextUser) {
+        // CRITICAL: Check session expiration FIRST before accepting auth state
+        if (isSessionExpired()) {
+          console.log('[ECORP:AUTH] Session expired on startup / resume -> signing out');
+          markSessionExpired();
+          try {
+            await auth.signOut();
+          } catch (signOutErr) {
+            console.warn('[ECORP:AUTH] SignOut failed', signOutErr);
+          }
+          setUser(null);
+          setIsAuthLoading(false);
+          return;
+        }
+
         try {
-          // Perform silent token refresh before evaluating session expiration
+          // Perform silent token refresh only after verifying session is valid
           await nextUser.getIdToken(false);
           recordUserActivity();
           setUser(nextUser);
           setIsAuthLoading(false);
-          setActiveTab("home");
         } catch (tokenErr) {
           console.warn('[ECORP:AUTH] Silent token refresh failed:', tokenErr);
           if (isSessionExpired()) {
-            console.log('[ECORP:AUTH] Session expired on startup -> signing out');
             markSessionExpired();
             try {
               await auth.signOut();
@@ -95,14 +122,32 @@ const AuthGate: React.FC = () => {
           }
           setUser(nextUser);
           setIsAuthLoading(false);
-          setActiveTab("home");
         }
       } else {
         setUser(null);
         setIsAuthLoading(false);
       }
     });
-    return unsubscribe;
+
+    // Handle mobile phone lock/unlock, tab visibility changes, and bfcache restores
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        enforceSessionExpiration();
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('pageshow', enforceSessionExpiration);
+    window.addEventListener('focus', enforceSessionExpiration);
+    const interval = window.setInterval(enforceSessionExpiration, 15000);
+
+    return () => {
+      unsubscribe();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('pageshow', enforceSessionExpiration);
+      window.removeEventListener('focus', enforceSessionExpiration);
+      window.clearInterval(interval);
+    };
   }, [setActiveTab]);
 
   if (isAuthLoading) {

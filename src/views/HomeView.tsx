@@ -18,6 +18,7 @@ import {
 import { useApp } from "../context/AppContext";
 import { analyzePrompt } from "../lib/promptAnalyzer";
 import { FOUNDATION_LESSONS } from "./PromptEngineeringPath";
+import { promptPatterns } from "../data/patternsData";
 
 export const HomeView: React.FC = () => {
   const { setActiveTab, openSandbox, loadIntoPlayground, userProgress, currentCurriculum, t } = useApp();
@@ -45,7 +46,7 @@ export const HomeView: React.FC = () => {
   };
 
   return (
-    <div className="app-view space-y-10 sm:space-y-14 lg:space-y-16 py-6 sm:py-8">
+    <div className="app-view space-y-8 sm:space-y-12 lg:space-y-14 py-6 sm:py-8 pb-12">
       {/* Learner control center */}
       <section className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
         <div className="rounded-2xl border border-blue-900/60 bg-slate-900/90 p-4 sm:p-5 lg:p-6 shadow-xl">
@@ -260,6 +261,198 @@ export const HomeView: React.FC = () => {
             </div>
             <h3 className="text-sm font-bold text-white">{t.home.pillar4Title}</h3>
             <p className="mt-1.5 text-xs text-slate-400 leading-relaxed">{t.home.pillar4Desc}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Curriculum Tracks Pathways Showcase */}
+      <section className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-lg bg-blue-500/10 border border-blue-500/30 px-3 py-1 text-xs font-semibold text-blue-300 mb-2">
+              <BookOpen className="h-3.5 w-3.5 text-blue-400" />
+              <span>Syllabus</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-white">
+              {t.home.tracksTitle}
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-slate-400 max-w-2xl">
+              {t.home.tracksSubtitle}
+            </p>
+          </div>
+          <button
+            id="home-view-all-tracks-btn"
+            onClick={() => setActiveTab("curriculum")}
+            className="inline-flex items-center gap-2 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors shrink-0 self-start sm:self-auto"
+          >
+            <span>{t.home.exploreAllTracksBtn}</span>
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {currentCurriculum.slice(0, 4).map((mod) => {
+            const completedInMod = mod.lessons.filter((l) =>
+              userProgress.completedLessons.includes(l.id)
+            ).length;
+            const isCompleted = completedInMod === mod.lessons.length && mod.lessons.length > 0;
+            const progressPct = mod.lessons.length > 0 ? Math.round((completedInMod / mod.lessons.length) * 100) : 0;
+
+            return (
+              <div
+                key={mod.id}
+                onClick={() => setActiveTab("curriculum")}
+                className="group relative flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/60 p-5 hover:border-slate-700 hover:bg-slate-900 transition-all cursor-pointer"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="rounded-md bg-slate-800/80 px-2 py-0.5 font-mono text-[11px] font-bold text-blue-400 border border-slate-700/60">
+                      {mod.code}
+                    </span>
+                    <span className="text-[11px] text-slate-400 font-medium">
+                      {mod.estimatedTotalHours}h est.
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-bold text-white group-hover:text-blue-300 transition-colors line-clamp-1">
+                    {mod.title}
+                  </h3>
+                  <p className="mt-1.5 text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                    {mod.description}
+                  </p>
+                </div>
+
+                <div className="mt-5 pt-4 border-t border-slate-800/80">
+                  <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1.5">
+                    <span>{mod.lessons.length} Lessons</span>
+                    <span className={isCompleted ? "text-emerald-400 font-bold" : "text-slate-400"}>
+                      {isCompleted ? "Mastered" : `${progressPct}%`}
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full rounded-full bg-slate-800 overflow-hidden">
+                    <div
+                      className={`h-full transition-all duration-500 ${
+                        isCompleted ? "bg-emerald-500" : "bg-blue-500"
+                      }`}
+                      style={{ width: `${progressPct}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Featured Production Patterns */}
+      <section className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 text-xs font-semibold text-emerald-300 mb-2">
+              <Zap className="h-3.5 w-3.5 text-emerald-400" />
+              <span>Blueprints</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-white">
+              {t.home.patternsTitle}
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-slate-400 max-w-2xl">
+              {t.home.patternsSubtitle}
+            </p>
+          </div>
+          <button
+            id="home-view-all-patterns-btn"
+            onClick={() => setActiveTab("patterns")}
+            className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors shrink-0 self-start sm:self-auto"
+          >
+            <span>{t.home.exploreAllPatternsBtn}</span>
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {promptPatterns.slice(0, 3).map((pat) => (
+            <div
+              key={pat.id}
+              className="group flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/60 p-5 hover:border-slate-700 hover:bg-slate-900 transition-all"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="rounded-md bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[11px] font-semibold text-emerald-400">
+                    {pat.category}
+                  </span>
+                  <span className="text-[11px] text-slate-400 font-mono">
+                    {pat.difficulty}
+                  </span>
+                </div>
+                <h3 className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">
+                  {pat.title}
+                </h3>
+                <p className="mt-2 text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                  {pat.description}
+                </p>
+              </div>
+
+              <div className="mt-5 pt-4 border-t border-slate-800/80 flex items-center justify-between">
+                <button
+                  onClick={() => {
+                    loadIntoPlayground({
+                      prompt: pat.template,
+                      systemInstruction: "You are an expert AI prompt engineer assistant.",
+                      subTab: "sandbox"
+                    });
+                  }}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-white transition-colors"
+                >
+                  <Play className="h-3.5 w-3.5 text-emerald-400" />
+                  <span>Try in Sandbox</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab("patterns")}
+                  className="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-200 transition-colors"
+                >
+                  <span>Details</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Lab Specifications & Architecture */}
+      <section className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5 sm:p-6 lg:p-8">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 rounded-lg bg-purple-500/10 border border-purple-500/30 px-3 py-1 text-xs font-semibold text-purple-300">
+                <Cpu className="h-3.5 w-3.5 text-purple-400" />
+                <span>Architecture</span>
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-white">
+                {t.home.labTitle}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
+                {t.home.labSubtitle}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                id="home-open-sandbox-btn"
+                onClick={() => openSandbox("sandbox")}
+                className="flex items-center gap-2 rounded-xl bg-slate-800 border border-slate-700 px-4 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-700 transition-colors"
+              >
+                <Terminal className="h-4 w-4 text-blue-400" />
+                <span>Launch Laboratory Sandbox</span>
+              </button>
+              <button
+                id="home-open-assessment-btn"
+                onClick={() => setActiveTab("certification")}
+                className="flex items-center gap-2 rounded-xl bg-purple-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-purple-500 transition-colors"
+              >
+                <ShieldCheck className="h-4 w-4" />
+                <span>Certification Exam</span>
+              </button>
+            </div>
           </div>
         </div>
       </section>

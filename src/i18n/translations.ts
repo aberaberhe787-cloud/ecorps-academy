@@ -55,6 +55,14 @@ export interface I18nTranslations {
     ctaBannerTitle: string;
     ctaBannerSubtitle: string;
     ctaBannerBtn: string;
+    tracksTitle: string;
+    tracksSubtitle: string;
+    exploreAllTracksBtn: string;
+    patternsTitle: string;
+    patternsSubtitle: string;
+    exploreAllPatternsBtn: string;
+    labTitle: string;
+    labSubtitle: string;
   };
   // Curriculum / LMS View
   curriculum: {
@@ -288,7 +296,15 @@ export const translations: Record<Language, I18nTranslations> = {
       pillar4Desc: "ትምህርቱን እያነበቡ ወዲያውኑ ፖርምፕት አርመው የሚሞክሩበት የተቀናጀ የኮዲንግ ላቦራቶሪ።",
       ctaBannerTitle: "የኤአይ ፖርምፕት ምህንድስና ብቃትን አሁን ያረጋግጡ",
       ctaBannerSubtitle: "ከመሰረታዊ የቶከን (Token) ባህሪ እስከ ውስብስብ ሰንሰለታዊ አስተሳሰብ (Chain-of-Thought) እና የዴሊሚተር (Delimiter) ጥበቃ ድረስ በይነተገናኝ ይለማመዱ።",
-      ctaBannerBtn: "አሁኑኑ ይጀምሩ (ነፃ)"
+      ctaBannerBtn: "አሁኑኑ ይጀምሩ (ነፃ)",
+      tracksTitle: "የተዋቀሩ አካዳሚክ የስርዓተ-ትምህርት አቅጣጫዎች",
+      tracksSubtitle: "ከመሰረታዊ የቶከን ዕድል ስሌት እና መመሪያዎች እስከ ድርጅታዊ ባለብዙ-ኤጀንት አሰራር ድረስ ይማሩ",
+      exploreAllTracksBtn: "ሙሉውን ስርዓተ-ትምህርት ይመልከቱ",
+      patternsTitle: "በተግባር የተረጋገጡ የፖርምፕት (Prompt) ፓተርኖች",
+      patternsSubtitle: "ለአስተማማኝ እና ትክክለኛ የኤአይ ውጤቶች በምርት ላይ የተረጋገጡ የፖርምፕት አወቃቀሮች",
+      exploreAllPatternsBtn: "የፓተርን ቤተ-መጽሐፍትን ይመልከቱ",
+      labTitle: "የ Ecorp AI ላቦራቶሪ እና የምዘና ሞተር",
+      labSubtitle: "የቀጥታ የጥራት ምዘና፣ የዴሊሚተር ጥበቃ እና የተረጋገጠ የብቃት ማረጋገጫ"
     },
     curriculum: {
       academyHeader: "Ecorp Acadamy",
@@ -512,7 +528,15 @@ export const translations: Record<Language, I18nTranslations> = {
       pillar4Desc: "In-situ prompt refactoring labs with real-time heuristic validation.",
       ctaBannerTitle: "Elevate Your Prompt Engineering Capabilities",
       ctaBannerSubtitle: "From token probability conditioning to Chain-of-Thought reasoning allocations and Delimiter defense.",
-      ctaBannerBtn: "Get Started Free"
+      ctaBannerBtn: "Get Started Free",
+      tracksTitle: "Structured Academic Curriculum Pathways",
+      tracksSubtitle: "From foundational token probability mechanics to enterprise multi-agent orchestration",
+      exploreAllTracksBtn: "Explore Full Curriculum",
+      patternsTitle: "Production Prompt Engineering Patterns",
+      patternsSubtitle: "Field-tested architectural patterns for deterministic LLM behavior in mission-critical applications",
+      exploreAllPatternsBtn: "Explore Pattern Library",
+      labTitle: "The Ecorp AI Laboratory & Evaluation Engine",
+      labSubtitle: "Real-time semantic heuristic grading, adversarial injection defense, and verifiable accreditation"
     },
     curriculum: {
       academyHeader: "Ecorp Acadamy",

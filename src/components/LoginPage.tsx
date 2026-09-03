@@ -51,7 +51,11 @@ export const LoginPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    getRedirectResult(auth).catch((redirectError: any) => {
+    getRedirectResult(auth).then((result) => {
+      if (result && result.user) {
+        recordUserActivity();
+      }
+    }).catch((redirectError: any) => {
       if (redirectError) {
         setError(redirectError?.message || 'Redirect sign-in failed. Please try again.');
       }

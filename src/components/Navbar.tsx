@@ -20,6 +20,10 @@ import {
   Check,
   AlertCircle,
   Loader2,
+  ExternalLink,
+  CornerDownLeft,
+  Command,
+  Layers,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { useApp } from "../context/AppContext";
@@ -29,34 +33,88 @@ import { EcorpLogo } from "./EcorpLogo";
 import { CertificateGenerator } from "./CertificateGenerator";
 import { auth } from "../lib/firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { curriculumModules } from "../data/lessonsData";
-import { FOUNDATION_LESSONS } from "../views/PromptEngineeringPath";
-import { promptPatterns } from "../data/patternsData";
 import { ProfilePanel } from "./profile/ProfilePanel";
 import { motion, AnimatePresence } from "motion/react";
-
-interface SearchResultItem {
-  id: string;
-  title: string;
-  type: "curriculum" | "foundation" | "pattern" | "tab";
-  tab: NavTab;
-  category?: string;
-  lessonId?: string;
-}
+import {
+  buildGlobalSearchIndex,
+  queryGlobalSearch,
+  POPULAR_QUICK_SEARCHES,
+  GlobalSearchItem,
+  SearchItemType,
+} from "../lib/globalSearch";
 
 export const Navbar: React.FC = () => {
-  const { activeTab, setActiveTab, openSandbox, userProgress, hasRealApiAvailable, aiMode, setAiMode, t, logout, setActiveLessonId } = useApp();
+  const {
+    activeTab,
+    setActiveTab,
+    openSandbox,
+    userProgress,
+    hasRealApiAvailable,
+    aiMode,
+    setAiMode,
+    t,
+    logout,
+    setActiveLessonId,
+    selectedPatternId,
+    setSelectedPatternId,
+    selectedResourceFilter,
+    setSelectedResourceFilter,
+    language,
+  } = useApp();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
+  const [searchCategory, setSearchCategory] = useState<'all' | SearchItemType>('all');
+  const [searchResults, setSearchResults] = useState<GlobalSearchItem[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [resetStatus, setResetStatus] = useState<string | null>(null);
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const accountMenuRef = useRef<HTMLDivElement>(null);
+
+  // Global search index built across all academy lessons, patterns, resources, missions
+  const globalIndex = React.useMemo(() => {
+    return buildGlobalSearchIndex(language);
+  }, [language]);
+
+  // Execute global search whenever query or category changes
+  useEffect(() => {
+    if (!searchQuery.trim() || searchQuery.trim().length < 2) {
+      setSearchResults([]);
+      setSelectedIndex(0);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    const results = queryGlobalSearch(globalIndex, searchQuery, searchCategory, 12);
+    setSearchResults(results);
+    setSelectedIndex(0);
+    setIsSearching(false);
+  }, [searchQuery, searchCategory, globalIndex]);
+
+  // Keyboard shortcut listener (⌘K or Ctrl+K)
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSearchOpen((prev) => {
+          const next = !prev;
+          if (next) {
+            setTimeout(() => searchInputRef.current?.focus(), 50);
+          }
+          return next;
+        });
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
 
   // Close menus when clicking outside
   useEffect(() => {
@@ -90,117 +148,51 @@ export const Navbar: React.FC = () => {
     };
   }, []);
 
-  const handleSearch = async (query: string) => {
-    setSearchQuery(query);
-    if (!query.trim() || query.trim().length < 2) {
-      setSearchResults([]);
-      setSearchOpen(false);
-      return;
-    }
-
-    setIsSearching(true);
-    setSearchOpen(true);
-
-    const q = query.toLowerCase().trim();
-    const localMatches: SearchResultItem[] = [];
-
-    // Search foundations
-    FOUNDATION_LESSONS.forEach((lesson) => {
-      if (
-        lesson.title.toLowerCase().includes(q) ||
-        lesson.summary.toLowerCase().includes(q)
-      ) {
-        localMatches.push({
-          id: lesson.id,
-          title: lesson.title,
-          type: "foundation",
-          tab: "foundations",
-          category: "Foundations",
-          lessonId: lesson.id,
-        });
-      }
-    });
-
-    // Search curriculum modules
-    curriculumModules.forEach((mod) => {
-      if (mod.title.toLowerCase().includes(q)) {
-        localMatches.push({
-          id: mod.id,
-          title: mod.title,
-          type: "curriculum",
-          tab: "curriculum",
-          category: "Curriculum Module",
-        });
-      }
-      mod.lessons.forEach((l) => {
-        if (
-          l.title.toLowerCase().includes(q) ||
-          (l.conceptSummary && l.conceptSummary.toLowerCase().includes(q)) ||
-          (l.subtitle && l.subtitle.toLowerCase().includes(q))
-        ) {
-          localMatches.push({
-            id: l.id,
-            title: l.title,
-            type: "curriculum",
-            tab: "curriculum",
-            category: mod.title,
-            lessonId: l.id,
-          });
-        }
-      });
-    });
-
-    // Search prompt patterns
-    promptPatterns.forEach((pat) => {
-      if (
-        pat.title.toLowerCase().includes(q) ||
-        pat.description.toLowerCase().includes(q) ||
-        pat.category.toLowerCase().includes(q)
-      ) {
-        localMatches.push({
-          id: pat.id,
-          title: pat.title,
-          type: "pattern",
-          tab: "patterns",
-          category: `Pattern · ${pat.category}`,
-        });
-      }
-    });
-
-    // Try server search or deduplicate local matches
-    try {
-      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-      if (response.ok) {
-        const serverResults = await response.json();
-        if (Array.isArray(serverResults)) {
-          serverResults.forEach((item: any) => {
-            if (!localMatches.some((m) => m.title.toLowerCase() === item.title.toLowerCase())) {
-              localMatches.push({
-                id: item.id || `srv-${Math.random()}`,
-                title: item.title,
-                type: item.type === "course" ? "curriculum" : "tab",
-                tab: item.type === "profile" ? "profile" : "curriculum",
-                category: "Knowledge Base",
-              });
-            }
-          });
-        }
-      }
-    } catch {
-      // Graceful fallback to rich local search
-    }
-
-    setSearchResults(localMatches.slice(0, 8));
-    setIsSearching(false);
-  };
-
-  const handleSelectSearchResult = (item: SearchResultItem) => {
+  const handleSelectSearchResult = (item: GlobalSearchItem) => {
     setActiveTab(item.tab);
-    if (item.lessonId && setActiveLessonId) {
+    if (item.type === 'lesson' && item.lessonId && setActiveLessonId) {
       setActiveLessonId(item.lessonId);
+    } else if (item.type === 'pattern' && item.patternId && setSelectedPatternId) {
+      setSelectedPatternId(item.patternId);
+    } else if (item.type === 'resource') {
+      if (item.externalUrl) {
+        window.open(item.externalUrl, '_blank', 'noopener,noreferrer');
+      } else if (item.resourceTerm && setSelectedResourceFilter) {
+        setSelectedResourceFilter(item.resourceTerm);
+      }
+    } else if (item.type === 'mission') {
+      openSandbox('missions');
     }
     setSearchOpen(false);
     setSearchQuery("");
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!searchOpen) {
+      if (e.key === 'ArrowDown') {
+        setSearchOpen(true);
+      }
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (searchResults.length > 0) {
+        setSelectedIndex((prev) => (prev < searchResults.length - 1 ? prev + 1 : 0));
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (searchResults.length > 0) {
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : searchResults.length - 1));
+      }
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (searchResults[selectedIndex]) {
+        handleSelectSearchResult(searchResults[selectedIndex]);
+      }
+    } else if (e.key === 'Escape') {
+      setSearchOpen(false);
+    }
   };
 
   const handlePasswordReset = async () => {
@@ -217,6 +209,48 @@ export const Navbar: React.FC = () => {
       setResetStatus(err.message || "Failed to send reset link.");
     }
   };
+
+  const getItemIcon = (type: SearchItemType) => {
+    switch (type) {
+      case 'lesson':
+        return <BookOpen className="h-3.5 w-3.5 text-blue-400" />;
+      case 'foundation':
+        return <Target className="h-3.5 w-3.5 text-indigo-400" />;
+      case 'pattern':
+        return <Grid3X3 className="h-3.5 w-3.5 text-emerald-400" />;
+      case 'resource':
+        return <Sparkles className="h-3.5 w-3.5 text-amber-400" />;
+      case 'mission':
+        return <Terminal className="h-3.5 w-3.5 text-purple-400" />;
+      default:
+        return <BookOpen className="h-3.5 w-3.5 text-blue-400" />;
+    }
+  };
+
+  const getItemBadgeClass = (type: SearchItemType) => {
+    switch (type) {
+      case 'lesson':
+        return 'bg-blue-950/70 text-blue-300 border-blue-800/60';
+      case 'foundation':
+        return 'bg-indigo-950/70 text-indigo-300 border-indigo-800/60';
+      case 'pattern':
+        return 'bg-emerald-950/70 text-emerald-300 border-emerald-800/60';
+      case 'resource':
+        return 'bg-amber-950/70 text-amber-300 border-amber-800/60';
+      case 'mission':
+        return 'bg-purple-950/70 text-purple-300 border-purple-800/60';
+      default:
+        return 'bg-slate-900 text-slate-400 border-slate-800';
+    }
+  };
+
+  const SEARCH_CATEGORIES: { id: 'all' | SearchItemType; label: string }[] = [
+    { id: 'all', label: 'All' },
+    { id: 'lesson', label: 'Lessons' },
+    { id: 'pattern', label: 'Patterns' },
+    { id: 'resource', label: 'Resources' },
+    { id: 'mission', label: 'Missions' },
+  ];
 
   const navItems: { id: NavTab; label: string; icon: React.FC<{ className?: string }> }[] = [
     { id: "home", label: t.nav.home, icon: Compass },
@@ -249,77 +283,179 @@ export const Navbar: React.FC = () => {
             </span>
           </button>
 
-          {/* Search Bar with Autocomplete Dropdown */}
-          <div ref={searchContainerRef} className="relative flex-1 min-w-0 max-w-xs sm:max-w-sm mx-1 sm:mx-3" role="search">
+          {/* Global Search Bar with Autocomplete Modal / Dropdown */}
+          <div ref={searchContainerRef} className="relative flex-1 min-w-0 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-1 sm:mx-3" role="search">
             <div className="relative w-full">
-              <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-500" />
+              <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-500 pointer-events-none" />
               <input
+                ref={searchInputRef}
                 type="text"
-                placeholder="Search modules, patterns..."
+                placeholder="Search lessons, patterns, resources..."
                 value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
-                onFocus={() => {
-                  if (searchQuery.trim().length >= 2 && searchResults.length > 0) {
-                    setSearchOpen(true);
-                  }
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setSearchOpen(true);
                 }}
-                className="w-full rounded-xl border border-slate-700 bg-slate-900/80 pl-8 sm:pl-9 pr-8 py-1 sm:py-1.5 text-xs sm:text-sm text-slate-200 placeholder:text-slate-500 focus:border-blue-500 focus:outline-none truncate transition-colors"
-                aria-label="Search courses and content"
+                onFocus={() => setSearchOpen(true)}
+                onKeyDown={handleInputKeyDown}
+                className="w-full rounded-xl border border-slate-700/90 bg-slate-900/90 pl-8 sm:pl-9 pr-14 py-1.5 text-xs sm:text-sm text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none truncate transition-all shadow-inner"
+                aria-label="Global search across academy lessons, patterns, and resources"
+                aria-expanded={searchOpen}
               />
-              {isSearching && (
-                <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 animate-spin" />
-              )}
-              {!isSearching && searchQuery && (
-                <button
-                  onClick={() => {
-                    setSearchQuery("");
-                    setSearchResults([]);
-                    setSearchOpen(false);
-                  }}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
-                  aria-label="Clear search"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              )}
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                {isSearching && (
+                  <Loader2 className="h-3.5 w-3.5 text-blue-400 animate-spin" />
+                )}
+                {!isSearching && searchQuery && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSearchResults([]);
+                      searchInputRef.current?.focus();
+                    }}
+                    className="p-1 text-slate-400 hover:text-white transition-colors"
+                    aria-label="Clear search"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+                {!searchQuery && (
+                  <kbd className="hidden md:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-slate-800/90 border border-slate-700/80 rounded select-none shadow-xs">
+                    ⌘K
+                  </kbd>
+                )}
+              </div>
             </div>
 
-            {/* Live Search Results Dropdown */}
+            {/* Global Search Results Dropdown / Modal */}
             {searchOpen && (
-              <div className="absolute left-0 right-0 mt-1.5 max-h-80 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950 p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150">
-                {searchResults.length > 0 ? (
-                  <div className="space-y-1">
-                    <div className="px-2 py-1 text-[10px] font-mono uppercase tracking-widest text-slate-500 flex justify-between items-center">
-                      <span>Matching Content</span>
-                      <span>{searchResults.length} results</span>
-                    </div>
-                    {searchResults.map((item) => (
+              <div className="absolute left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0 mt-2 w-[calc(100vw-24px)] sm:w-[500px] md:w-[560px] max-w-[94vw] max-h-[82vh] overflow-hidden rounded-2xl border border-slate-800/90 bg-slate-950/98 backdrop-blur-xl shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150 flex flex-col">
+                {/* Category Filter Tabs */}
+                <div className="flex items-center gap-1 px-3 pt-2.5 pb-2 border-b border-slate-800/80 overflow-x-auto scrollbar-none bg-slate-900/40">
+                  {SEARCH_CATEGORIES.map((cat) => {
+                    const isSelected = searchCategory === cat.id;
+                    return (
                       <button
-                        key={item.id}
-                        onClick={() => handleSelectSearchResult(item)}
-                        className="w-full text-left rounded-lg p-2.5 hover:bg-slate-900/90 transition-colors flex items-center justify-between gap-3 group"
+                        key={cat.id}
+                        onClick={() => setSearchCategory(cat.id)}
+                        className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
+                          isSelected
+                            ? "bg-blue-600 text-white shadow-xs"
+                            : "bg-slate-900/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800/80"
+                        }`}
                       >
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs font-semibold text-slate-200 group-hover:text-blue-400 truncate">
-                            {item.title}
-                          </p>
-                          {item.category && (
-                            <p className="text-[10px] text-slate-400 truncate font-mono">
-                              {item.category}
-                            </p>
-                          )}
-                        </div>
-                        <span className="shrink-0 text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400 group-hover:border-blue-500/50 group-hover:text-blue-300">
-                          {item.type}
-                        </span>
+                        {cat.label}
                       </button>
-                    ))}
+                    );
+                  })}
+                  {searchResults.length > 0 && (
+                    <span className="ml-auto text-[10px] font-mono text-slate-400 shrink-0 pr-1">
+                      {searchResults.length} match{searchResults.length === 1 ? '' : 'es'}
+                    </span>
+                  )}
+                </div>
+
+                {/* Content Area */}
+                <div className="overflow-y-auto max-h-[380px] p-2 space-y-1">
+                  {searchQuery.trim().length >= 2 ? (
+                    searchResults.length > 0 ? (
+                      searchResults.map((item, idx) => {
+                        const isHighlighted = idx === selectedIndex;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => handleSelectSearchResult(item)}
+                            onMouseEnter={() => setSelectedIndex(idx)}
+                            className={`w-full text-left rounded-xl p-2.5 transition-all flex items-start gap-3 group border ${
+                              isHighlighted
+                                ? "bg-slate-900/90 border-blue-500/50 shadow-sm"
+                                : "hover:bg-slate-900/60 border-transparent"
+                            }`}
+                          >
+                            <div className="shrink-0 mt-0.5 p-1.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center">
+                              {getItemIcon(item.type)}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 mb-0.5">
+                                <p className={`text-xs font-semibold truncate ${
+                                  isHighlighted ? "text-blue-300" : "text-slate-200 group-hover:text-blue-300"
+                                }`}>
+                                  {item.title}
+                                </p>
+                              </div>
+                              {item.subtitle && (
+                                <p className="text-[11px] text-slate-400 line-clamp-1">
+                                  {item.subtitle}
+                                </p>
+                              )}
+                              <div className="mt-1 flex items-center gap-2 text-[10px] font-mono text-slate-400">
+                                <span>{item.category}</span>
+                                {item.tags && item.tags.length > 0 && (
+                                  <>
+                                    <span>•</span>
+                                    <span className="text-slate-400 truncate max-w-[150px]">
+                                      #{item.tags[0]}
+                                    </span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                            <div className="shrink-0 flex flex-col items-end gap-1.5 mt-0.5">
+                              <span className={`text-[10px] font-mono px-2 py-0.5 rounded border capitalize ${getItemBadgeClass(item.type)}`}>
+                                {item.type}
+                              </span>
+                              {isHighlighted && (
+                                <CornerDownLeft className="h-3 w-3 text-blue-400 animate-pulse" />
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })
+                    ) : (
+                      <div className="py-8 px-4 text-center">
+                        <p className="text-xs font-medium text-slate-300">
+                          No matches found for &ldquo;{searchQuery}&rdquo;
+                        </p>
+                        <p className="mt-1 text-[11px] text-slate-400">
+                          Try searching for prompt concepts like &ldquo;Chain-of-Thought&rdquo;, &ldquo;Zero-Shot&rdquo;, or &ldquo;XML Delimiters&rdquo;.
+                        </p>
+                      </div>
+                    )
+                  ) : (
+                    /* Suggestions & Quick Links when query is empty */
+                    <div className="p-3">
+                      <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-2.5">
+                        <span>Popular Academy Topics</span>
+                        <span className="text-slate-400">Quick Filter</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {POPULAR_QUICK_SEARCHES.map((qs) => (
+                          <button
+                            key={qs.label}
+                            onClick={() => {
+                              setSearchQuery(qs.query);
+                              searchInputRef.current?.focus();
+                            }}
+                            className="text-left px-2.5 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 text-[11px] text-slate-300 hover:text-white transition-all flex items-center gap-1.5 group"
+                          >
+                            <span className="h-1.5 w-1.5 rounded-full bg-blue-400 group-hover:scale-125 transition-transform" />
+                            <span>{qs.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Keyboard Shortcut Footer */}
+                <div className="px-3 py-2 border-t border-slate-800/80 bg-slate-900/60 flex items-center justify-between text-[10px] font-mono text-slate-400">
+                  <div className="flex items-center gap-3">
+                    <span><kbd className="px-1 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-300">↑↓</kbd> navigate</span>
+                    <span><kbd className="px-1 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-300">↵</kbd> select</span>
+                    <span><kbd className="px-1 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-300">ESC</kbd> close</span>
                   </div>
-                ) : (
-                  <div className="p-4 text-center text-xs text-slate-400">
-                    No results found for &ldquo;{searchQuery}&rdquo;
-                  </div>
-                )}
+                  <span className="hidden sm:inline text-slate-400">ECORP Academy Global Search</span>
+                </div>
               </div>
             )}
           </div>
@@ -493,6 +629,23 @@ export const Navbar: React.FC = () => {
                     <X className="h-5 w-5" />
                   </button>
                 </div>
+
+                {/* Mobile Search Trigger in Drawer */}
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setSearchOpen(true);
+                    setTimeout(() => searchInputRef.current?.focus(), 150);
+                  }}
+                  className="w-full mb-3 flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 hover:text-white hover:border-slate-700 transition-colors shadow-inner"
+                >
+                  <div className="flex items-center gap-2">
+                    <Search className="h-4 w-4 text-blue-400" />
+                    <span>Search academy content...</span>
+                  </div>
+                  <kbd className="text-[10px] font-mono px-1.5 py-0.5 bg-slate-800 rounded text-slate-400 border border-slate-700">⌘K</kbd>
+                </button>
+
                 <div className="flex flex-col gap-1.5">
                   {navItems.map((item) => {
                     const Icon = item.icon;

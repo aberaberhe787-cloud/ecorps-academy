@@ -21,11 +21,22 @@ import { promptPatterns } from "../data/patternsData";
 import { PromptPattern } from "../types";
 
 export const PatternLibraryView: React.FC = () => {
-  const { userProgress, toggleBookmarkPattern, loadIntoPlayground, t } = useApp();
+  const { userProgress, toggleBookmarkPattern, loadIntoPlayground, t, selectedPatternId } = useApp();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [activePattern, setActivePattern] = useState<PromptPattern>(promptPatterns[0]);
+
+  // Sync when selectedPatternId is triggered from Global Search
+  React.useEffect(() => {
+    if (selectedPatternId) {
+      const match = promptPatterns.find((p) => p.id === selectedPatternId);
+      if (match) {
+        handleSelectPattern(match);
+        setSelectedCategory(match.category);
+      }
+    }
+  }, [selectedPatternId]);
   const [variableValues, setVariableValues] = useState<{ [key: string]: string }>(() => {
     const initial: { [key: string]: string } = {};
     promptPatterns[0].variables.forEach((v) => {

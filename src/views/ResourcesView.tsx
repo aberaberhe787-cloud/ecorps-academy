@@ -5,11 +5,19 @@ import { glossaryTerms, promptOfTheDayList, externalLearningResources } from "..
 import { GlossaryTerm } from "../types";
 
 export const ResourcesView: React.FC = () => {
-  const { userProgress, deleteCustomPrompt, loadIntoPlayground, setActiveTab, t } = useApp();
+  const { userProgress, deleteCustomPrompt, loadIntoPlayground, setActiveTab, t, selectedResourceFilter } = useApp();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGlossaryCategory, setSelectedGlossaryCategory] = useState("All");
   const [copiedPromptId, setCopiedPromptId] = useState<string | null>(null);
+
+  // Sync when selectedResourceFilter is triggered from Global Search
+  React.useEffect(() => {
+    if (selectedResourceFilter) {
+      setSearchTerm(selectedResourceFilter);
+      setSelectedGlossaryCategory("All");
+    }
+  }, [selectedResourceFilter]);
 
   const todayPrompt = promptOfTheDayList[0];
 

@@ -97,6 +97,12 @@ interface AppContextType {
   syncProgressToDb: (email?: string) => Promise<void>;
   logout: () => Promise<void>;
   
+  // Navigation & Search Deep-Linking
+  selectedPatternId: string | null;
+  setSelectedPatternId: (id: string | null) => void;
+  selectedResourceFilter: string | null;
+  setSelectedResourceFilter: (filter: string | null) => void;
+
   // LMS Focus / Distraction-free mode
   isDistractionFreeMode: boolean;
   setIsDistractionFreeMode: (v: boolean) => void;
@@ -465,6 +471,10 @@ Provide:
   const [isEvaluatingMission, setIsEvaluatingMission] = useState<boolean>(false);
   const [missionResult, setMissionResult] = useState<MissionEvaluationResult | null>(null);
 
+  // Search & Navigation Deep Linking
+  const [selectedPatternId, setSelectedPatternId] = useState<string | null>(null);
+  const [selectedResourceFilter, setSelectedResourceFilter] = useState<string | null>(null);
+
   // Hydrate each signed-in user from Firestore and update their daily streak.
   useEffect(() => {
     // Connect to emulators if explicitly requested via environment variable
@@ -479,10 +489,14 @@ Provide:
       }
     };
 
-    // Update on activity with throttling
+    // Update on activity with throttling, but NEVER refresh if session already expired
     let lastActivityWrite = 0;
     const handleUserActivity = () => {
       if (!auth.currentUser) return;
+      if (isSessionExpired()) {
+        checkSession();
+        return;
+      }
       const now = Date.now();
       if (now - lastActivityWrite > 3000) { // Throttle writes to every 3s
         lastActivityWrite = now;
@@ -490,13 +504,19 @@ Provide:
       }
     };
 
-    const activityEvents = ['mousedown', 'keydown', 'touchstart', 'scroll'];
+    const activityEvents = ['mousedown', 'keydown', 'touchstart', 'scroll', 'pointerdown'];
     activityEvents.forEach(event => window.addEventListener(event, handleUserActivity, { passive: true }));
     
-    // Check periodically + on visibility/focus
-    const interval = window.setInterval(checkSession, 30000); // Check every 30s
-    window.addEventListener('visibilitychange', checkSession);
+    // Check periodically + on mobile phone resume / visibility / focus / pageshow
+    const interval = window.setInterval(checkSession, 15000); // Check every 15s
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkSession();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
     window.addEventListener('focus', checkSession);
+    window.addEventListener('pageshow', checkSession);
 
     const unsubscribeAuth = firebaseOnAuthStateChanged(auth, async (user) => {
       // Detach existing listener if user changed
@@ -516,7 +536,15 @@ Provide:
         return;
       }
 
-      // Perform silent token refresh before evaluating session expiration
+      // CRITICAL: Check session expiration FIRST before silent token refresh or activity recording
+      if (isSessionExpired()) {
+        console.log(`[ECORP:PERSISTENCE] SESSION_EXPIRED_ON_STARTUP uid=${user.uid}`);
+        markSessionExpired();
+        await logout();
+        return;
+      }
+
+      // Perform silent token refresh
       try {
         await user.getIdToken(false);
         recordUserActivity();
@@ -712,8 +740,9 @@ Provide:
       }
       activityEvents.forEach(event => window.removeEventListener(event, handleUserActivity));
       window.clearInterval(interval);
-      window.removeEventListener('visibilitychange', checkSession);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('focus', checkSession);
+      window.removeEventListener('pageshow', checkSession);
     };
   }, []);
 
@@ -1186,6 +1215,10 @@ Provide:
         toggleBookmarkPattern,
         syncProgressToDb,
         logout,
+        selectedPatternId,
+        setSelectedPatternId,
+        selectedResourceFilter,
+        setSelectedResourceFilter,
         isDistractionFreeMode,
         setIsDistractionFreeMode,
         language,
