@@ -28,9 +28,38 @@ import {
   browserLocalPersistence,
   browserSessionPersistence,
   sendPasswordResetEmail,
+  updateProfile,
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { recordUserActivity, consumeSessionExpiredNotice } from '../lib/sessionManager';
+
+function getAuthErrorMessage(authError: any): string {
+  const code = authError?.code;
+  switch (code) {
+    case 'auth/invalid-credential':
+    case 'auth/wrong-password':
+    case 'auth/user-not-found':
+      return 'The email or password you entered is incorrect. Please verify your credentials or reset your password.';
+    case 'auth/email-already-in-use':
+      return 'An account with this email address already exists. Please switch to the Sign In tab.';
+    case 'auth/weak-password':
+      return 'Password should be at least 6 characters long.';
+    case 'auth/invalid-email':
+      return 'Please provide a valid email address.';
+    case 'auth/operation-not-allowed':
+      return 'This sign-in provider is not enabled in the Firebase Console. Please enable Email/Password or Google provider under Authentication > Sign-in method.';
+    case 'auth/unauthorized-domain':
+      return 'This preview domain is not authorized in Firebase Auth. Please add this domain under Firebase Console -> Authentication -> Settings -> Authorized domains.';
+    case 'auth/popup-closed-by-user':
+      return 'Sign-in popup was closed before completing authentication. Please try again.';
+    case 'auth/too-many-requests':
+      return 'Access temporarily blocked due to too many failed attempts. Please reset your password or try again in a few minutes.';
+    case 'auth/network-request-failed':
+      return 'Network communication failed. Please check your internet connection and try again.';
+    default:
+      return authError?.message || 'Authentication failed. Please try again.';
+  }
+}
 
 export const LoginPage: React.FC = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -57,7 +86,7 @@ export const LoginPage: React.FC = () => {
       }
     }).catch((redirectError: any) => {
       if (redirectError) {
-        setError(redirectError?.message || 'Redirect sign-in failed. Please try again.');
+        setError(getAuthErrorMessage(redirectError));
       }
     });
   }, []);
@@ -73,6 +102,9 @@ export const LoginPage: React.FC = () => {
     setResetSuccess('');
     setSessionNotice('');
     setIsSubmitting(true);
+    // Pre-record user activity so subsequent auth callbacks see fresh activity
+    recordUserActivity();
+
     try {
       try {
         await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
@@ -81,15 +113,20 @@ export const LoginPage: React.FC = () => {
       }
 
       if (isSignUp) {
-        await createUserWithEmailAndPassword(auth, email.trim(), password);
+        const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+        if (name.trim() && userCredential.user) {
+          try {
+            await updateProfile(userCredential.user, { displayName: name.trim() });
+          } catch (profileErr) {
+            console.warn('Could not set user display name', profileErr);
+          }
+        }
       } else {
         await signInWithEmailAndPassword(auth, email.trim(), password);
       }
       recordUserActivity();
     } catch (authError: any) {
-      setError(authError?.code === 'auth/invalid-credential'
-        ? 'The email or password is incorrect.'
-        : authError?.message || 'Authentication failed. Please try again.');
+      setError(getAuthErrorMessage(authError));
     } finally {
       setIsSubmitting(false);
     }
@@ -100,6 +137,9 @@ export const LoginPage: React.FC = () => {
     setResetSuccess('');
     setSessionNotice('');
     setIsSubmitting(true);
+    // Pre-record user activity so subsequent auth callbacks see fresh activity
+    recordUserActivity();
+
     try {
       try {
         await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
@@ -115,10 +155,10 @@ export const LoginPage: React.FC = () => {
           await signInWithRedirect(auth, provider);
           return;
         } catch (redirectError: any) {
-          setError(redirectError?.message || 'Redirect sign-in failed. Please try again.');
+          setError(getAuthErrorMessage(redirectError));
         }
       } else {
-        setError(authError?.message || 'Social sign-in failed. Please try again.');
+        setError(getAuthErrorMessage(authError));
       }
     } finally {
       setIsSubmitting(false);
@@ -136,7 +176,7 @@ export const LoginPage: React.FC = () => {
       await sendPasswordResetEmail(auth, email.trim());
       setResetSuccess(`Password reset email sent to ${email.trim()}. Please check your inbox.`);
     } catch (err: any) {
-      setError(err?.message || 'Failed to send password reset email.');
+      setError(getAuthErrorMessage(err));
     }
   };
 

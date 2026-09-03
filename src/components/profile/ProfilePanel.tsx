@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { BadgeComponent } from './BadgeComponent';
 import { ProgressRing } from './ProgressRing';
 import { CertificateGenerator } from '../CertificateGenerator';
+import { auth } from '../../lib/firebase';
 
 interface ProfilePanelProps {
   onClose: () => void;
@@ -11,6 +12,9 @@ interface ProfilePanelProps {
 
 export const ProfilePanel: React.FC<ProfilePanelProps> = ({ onClose }) => {
   const { userProgress, currentCurriculum, logout } = useApp();
+  const currentUser = auth.currentUser;
+  const displayName = currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Ecorp Scholar';
+  const displayEmail = currentUser?.email || 'Prompt Engineer';
   const allLessons = currentCurriculum.flatMap((m) => m.lessons);
   const completionPercent = Math.round(
     (userProgress.completedLessons.length / allLessons.length) * 100
@@ -35,8 +39,12 @@ export const ProfilePanel: React.FC<ProfilePanelProps> = ({ onClose }) => {
               <User className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h2 className="text-base font-extrabold text-white">Ecorp Scholar</h2>
-              <p className="text-xs text-blue-300 font-mono">Prompt Engineer</p>
+              <h2 className="text-base font-extrabold text-white truncate max-w-[200px]" title={displayName}>
+                {displayName}
+              </h2>
+              <p className="text-xs text-blue-300 font-mono truncate max-w-[200px]" title={displayEmail}>
+                {displayEmail}
+              </p>
               <div className="flex items-center gap-1.5 mt-1">
                 <Flame className="h-3.5 w-3.5 text-orange-400" />
                 <span className="text-xs text-slate-300">{userProgress.streakDays} day streak</span>

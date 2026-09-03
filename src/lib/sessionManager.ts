@@ -5,19 +5,20 @@ export const SESSION_EXPIRED_KEY = 'ecorp_session_expired';
 
 /**
  * Checks if the user's session has expired due to inactivity.
- * Returns true if no activity is recorded or if elapsed time >= SESSION_TIMEOUT_MS.
+ * Returns true if an activity record exists and elapsed time >= SESSION_TIMEOUT_MS.
+ * If no activity record is present yet (e.g. fresh sign-in), returns false.
  */
 export function isSessionExpired(): boolean {
   if (typeof window === 'undefined') return false;
   try {
     const lastActivityStr = localStorage.getItem(LAST_ACTIVITY_KEY);
     if (!lastActivityStr) {
-      // If there's no activity record at all, treat as expired
-      return true;
+      // A new or fresh authentication does not have an expired session
+      return false;
     }
     const lastActivity = parseInt(lastActivityStr, 10);
     if (isNaN(lastActivity) || lastActivity <= 0) {
-      return true;
+      return false;
     }
     const elapsed = Date.now() - lastActivity;
     return elapsed >= SESSION_TIMEOUT_MS;
