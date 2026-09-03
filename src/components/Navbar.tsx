@@ -52,6 +52,8 @@ export const Navbar: React.FC = () => {
     hasRealApiAvailable,
     aiMode,
     setAiMode,
+    setPrompt,
+    setSystemInstruction,
     t,
     logout,
     setActiveLessonId,
@@ -467,7 +469,13 @@ export const Navbar: React.FC = () => {
               return (
                 <button
                   key={item.id}
-                  onClick={() => { setActiveTab(item.id); }}
+                  onClick={() => {
+                    if (item.id === "playground" && activeTab !== "playground") {
+                      setPrompt("");
+                      setSystemInstruction("");
+                    }
+                    setActiveTab(item.id);
+                  }}
                   className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all duration-150 ${
                     isActive
                       ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25"
@@ -489,7 +497,13 @@ export const Navbar: React.FC = () => {
               return (
                 <button
                   key={item.id}
-                  onClick={() => { setActiveTab(item.id); }}
+                  onClick={() => {
+                    if (item.id === "playground" && activeTab !== "playground") {
+                      setPrompt("");
+                      setSystemInstruction("");
+                    }
+                    setActiveTab(item.id);
+                  }}
                   title={item.label}
                   className={`flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-all duration-150 ${
                     isActive
@@ -652,9 +666,13 @@ export const Navbar: React.FC = () => {
                     return (
                       <button
                         key={item.id}
-                        onClick={() => { 
-                          setActiveTab(item.id); 
-                          setMobileMenuOpen(false); 
+                        onClick={() => {
+                          if (item.id === "playground" && activeTab !== "playground") {
+                            setPrompt("");
+                            setSystemInstruction("");
+                          }
+                          setActiveTab(item.id);
+                          setMobileMenuOpen(false);
                         }}
                         className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all ${
                           isActive

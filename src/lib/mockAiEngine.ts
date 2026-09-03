@@ -16,6 +16,8 @@ export function generateMockAiResponse(
 
   // Check for techniques
   const isJson = /json|schema|key-value|serialize/i.test(lower);
+  const isSecurity = /security|cve|iam|privilege|vulnerability/i.test(lower);
+  const isDeployment = /harbor|node|deployment|nginx|reverse proxy/i.test(lower);
   const isCoT = /step[- ]by[- ]step|reasoning|scratchpad|deduce|algebraic|calculate/i.test(lower);
   const isRole = /act as|you are a|you are an|persona|expert/i.test(lower);
   const isDelimited = /(<{1,2}[a-z_-]+>{1,2}|"{3}|`{3}|---)/i.test(prompt);
@@ -25,6 +27,8 @@ export function generateMockAiResponse(
   const isReAct = /thought:|action:|observation:|react protocol/i.test(lower);
 
   if (isJson) detectedKeywords.push("JSON Formatting");
+  if (isSecurity) detectedKeywords.push("Security Audit");
+  if (isDeployment) detectedKeywords.push("Deployment");
   if (isCoT) detectedKeywords.push("Chain-of-Thought");
   if (isRole) detectedKeywords.push("Role & Persona");
   if (isDelimited) detectedKeywords.push("Delimiters");
@@ -112,7 +116,37 @@ Final Answer: The billing service outage is caused by commit 8f2a1b9 in release 
     };
   }
 
-  if (isJson || lower.includes("json")) {
+  if (isSecurity) {
+    return {
+      text: `### Vulnerability Assessment: IAM Policy
+Verified findings based on provided policy snippet:
+- [CRITICAL] Wildcard resource grant "s3:*" found in Statement[0]. Remediation: Apply least privilege by scoping to specific ARN prefixes.
+- [HIGH] Privilege escalation risk via "iam:PassRole" on "*" resources. Remediation: Restrict to authorized EC2/Lambda execution roles only.
+
+No conversational filler included as requested.`,
+      detectedKeywords,
+      latencyMs: 250,
+      simulatedTokens: 120
+    };
+  }
+
+  if (isDeployment) {
+    return {
+      text: `### Production Deployment: Harbor Node
+Step-by-step production deployment guidance:
+1. Initialize node: Ensure harbor-init is configured with persistent volume claims.
+2. Configure ingress: Apply helm chart with appropriate TLS certificate references.
+3. Verify readiness: Perform health checks on the core service endpoints.
+4. Scale: Deploy to targeted worker nodes using labels.
+
+Ensure configuration is reviewed in staging before production rollout.`,
+      detectedKeywords,
+      latencyMs: 300,
+      simulatedTokens: 150
+    };
+  }
+
+  if (isJson && !isSecurity) {
     return {
       text: `{
   "status": "success",
@@ -134,7 +168,7 @@ Final Answer: The billing service outage is caused by commit 8f2a1b9 in release 
     };
   }
 
-  if (isCoT || lower.includes("equation") || lower.includes("bat and a ball")) {
+  if ((isCoT && (lower.includes("lines") || lower.includes("equation") || lower.includes("sum"))) || lower.includes("bat and a ball")) {
     return {
       text: `### Step 1: Define Variables
 Let $A$ = Number of lines written by Dev A

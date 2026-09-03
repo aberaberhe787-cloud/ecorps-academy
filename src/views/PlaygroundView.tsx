@@ -313,7 +313,14 @@ export const PlaygroundView: React.FC = () => {
           {/* Sub-Nav Pills */}
           <div className="flex items-center gap-1 rounded-xl border border-slate-800 bg-slate-900/80 p-1 overflow-x-auto scrollbar-hide max-w-[calc(100vw-140px)] sm:max-w-none">
             {[
-              { id: "sandbox", label: t.playground.tabSandbox, icon: Terminal, onClick: () => { setPlaygroundSubTab("sandbox"); setIsComparisonMode(false); } },
+              { id: "sandbox", label: t.playground.tabSandbox, icon: Terminal, onClick: () => { 
+                if (playgroundSubTab === "missions") {
+                  setPrompt("");
+                  setSystemInstruction("");
+                }
+                setPlaygroundSubTab("sandbox"); 
+                setIsComparisonMode(false); 
+              } },
               { id: "missions", label: `${t.playground.tabMissions} (5)`, icon: Target, onClick: () => { setPlaygroundSubTab("missions"); setIsComparisonMode(false); } },
               { id: "ctf", label: "CTF Labs", icon: ShieldAlert, onClick: () => { setPlaygroundSubTab("ctf"); setIsComparisonMode(false); } },
               { id: "comparison", label: t.playground.tabComparison, icon: Columns2, onClick: () => { setPlaygroundSubTab("comparison"); setIsComparisonMode(true); } },
