@@ -129,7 +129,7 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
 
     // Execute prompt in live model engine
     try {
-      const execResult = await executeCurrentPrompt(userPrompt);
+      const execResult = await executeCurrentPrompt(userPrompt, "", true);
       setTestOutput(execResult.output);
     } catch (err) {
       setTestOutput("Execution completed with local simulator fallback.");

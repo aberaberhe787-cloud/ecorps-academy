@@ -1,0 +1,17 @@
+{
+  "name": "Ecorp Academy",
+  "short_name": "EcorpAcademy",
+  "description": "Interactive Prompt Engineering Academy & Laboratory",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050a19",
+  "theme_color": "#050a19",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

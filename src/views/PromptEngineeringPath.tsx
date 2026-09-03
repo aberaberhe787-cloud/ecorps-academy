@@ -38,7 +38,7 @@ export const PromptEngineeringPath: React.FC = () => {
   const runPractice = async () => {
     if (!practicePrompt.trim()) return;
     setIsPracticing(true);
-    const result = await executeCurrentPrompt(practicePrompt);
+    const result = await executeCurrentPrompt(practicePrompt, "", true);
     setPracticeOutput(result.output);
     setPracticeScore(analyzePrompt(practicePrompt).score);
     setIsPracticing(false);

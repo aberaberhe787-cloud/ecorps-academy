@@ -5,9 +5,10 @@ import { getFunctions, httpsCallable } from 'firebase/functions';
 import { analyzePrompt } from '../lib/promptAnalyzer';
 
 export const AssessmentView: React.FC = () => {
-  const { userProgress, setActiveTab, addXp } = useApp();
-  const [submission, setSubmission] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'pass' | 'fail'>('idle');
+  const { userProgress, setActiveTab, completeAssessment } = useApp();
+  const previouslyPassed = (userProgress.completedAssessments || []).includes('prompt-foundations-final');
+  const [submission, setSubmission] = useState(previouslyPassed ? (userProgress.missionEvidence?.['prompt-foundations-final'] || '') : '');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'pass' | 'fail'>(previouslyPassed ? 'pass' : 'idle');
   const [result, setResult] = useState<any>(null);
 
   const handleSubmit = async () => {
@@ -28,7 +29,7 @@ export const AssessmentView: React.FC = () => {
       setResult(data);
       if (data.status === 'PASS') {
         setStatus('pass');
-        addXp(150);
+        completeAssessment('prompt-foundations-final', submission);
       } else {
         setStatus('fail');
       }
@@ -59,7 +60,7 @@ export const AssessmentView: React.FC = () => {
 
       if (isPass) {
         setStatus('pass');
-        addXp(150);
+        completeAssessment('prompt-foundations-final', submission);
       } else {
         setStatus('fail');
       }

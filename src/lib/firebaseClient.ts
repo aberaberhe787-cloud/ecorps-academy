@@ -91,6 +91,9 @@ export function subscribeToUserDoc(
     (error) => {
       if (import.meta.env.DEV) {
         console.error(`[ECORP:PERSISTENCE] SNAPSHOT_ERROR path=users/${uid}`, error);
+      } else {
+        const code = (error as any)?.code || 'snapshot_error';
+        console.error(`[ECORP:PERSISTENCE] SNAPSHOT_ERROR code=${code}`);
       }
       if (onError) {
         onError(error);
@@ -110,7 +113,11 @@ export async function readUserDoc(uid: string): Promise<{ exists: boolean; data:
     return { exists: false, data: null };
   } catch (error: any) {
     const code = error?.code || 'unknown_error';
-    console.error(`[ECORP:PERSISTENCE] FIRESTORE_READ_ERROR path=users/${uid} code=${code}`, error);
+    if (import.meta.env.DEV) {
+      console.error(`[ECORP:PERSISTENCE] FIRESTORE_READ_ERROR path=users/${uid} code=${code}`, error);
+    } else {
+      console.error(`[ECORP:PERSISTENCE] FIRESTORE_READ_ERROR code=${code}`);
+    }
     return { exists: false, data: null, error, code };
   }
 }

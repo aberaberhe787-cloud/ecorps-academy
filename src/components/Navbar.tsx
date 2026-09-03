@@ -34,7 +34,6 @@ import { EcorpLogo } from "./EcorpLogo";
 import { CertificateGenerator } from "./CertificateGenerator";
 import { auth } from "../lib/firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { ProfilePanel } from "./profile/ProfilePanel";
 import { motion, AnimatePresence } from "motion/react";
 import {
   buildGlobalSearchIndex,
@@ -64,7 +63,6 @@ export const Navbar: React.FC = () => {
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchCategory, setSearchCategory] = useState<'all' | SearchItemType>('all');
@@ -516,7 +514,6 @@ export const Navbar: React.FC = () => {
               <button
                 onClick={() => { 
                   setAccountOpen((s) => !s); 
-                  setProfileOpen(false); 
                   setResetStatus(null);
                 }}
                 className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center hover:opacity-90 transition-opacity border border-blue-400/40 shadow-sm"
@@ -689,7 +686,6 @@ export const Navbar: React.FC = () => {
       </AnimatePresence>
       
       {/* Drawer & Panels */}
-      {profileOpen && <ProfilePanel onClose={() => setProfileOpen(false)} />}
     </>
   );
 };

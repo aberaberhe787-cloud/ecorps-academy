@@ -24,7 +24,13 @@ import {
   onAuthStateChanged as firebaseOnAuthStateChanged
 } from "../lib/firebaseClient";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import { clearSessionActivity } from "../lib/sessionManager";
+import {
+  clearSessionActivity,
+  isSessionExpired,
+  recordUserActivity,
+  markSessionExpired,
+} from "../lib/sessionManager";
+import { logger } from "../lib/logger";
 
 interface AppContextType {
   activeTab: NavTab;
@@ -60,7 +66,7 @@ interface AppContextType {
   isExecuting: boolean;
   lastResult: ExecutionResult | null;
   executionHistory: ExecutionResult[];
-  executeCurrentPrompt: (customPrompt?: string) => Promise<ExecutionResult>;
+  executeCurrentPrompt: (customPrompt?: string, customSystemInstruction?: string, isolated?: boolean) => Promise<ExecutionResult>;
   clearOutput: () => void;
   
   // Comparison Mode
@@ -88,6 +94,7 @@ interface AppContextType {
   retrySync: () => Promise<void>;
   markLessonComplete: (lessonId: string) => void;
   addXp: (amount: number) => void;
+  completeAssessment: (assessmentId: string, submission: string) => void;
   saveCustomPrompt: (title: string, promptText: string) => void;
   deleteCustomPrompt: (id: string) => void;
   toggleBookmarkPattern: (patternId: string) => void;
@@ -123,6 +130,8 @@ const USERS_COLLECTION = "users";
 const initialProgress: UserProgress = {
   completedLessons: [],
   completedMissions: [],
+  completedAssessments: [],
+  missionEvidence: {},
   missionScores: {},
   bookmarkedPatterns: [],
   savedCustomPrompts: [],
@@ -207,6 +216,14 @@ function loadCachedProgress(uid?: string | null): UserProgress {
               ...(result.completedMissions || []),
               ...(Array.isArray(parsedUid.completedMissions) ? parsedUid.completedMissions : [])
             ])),
+            completedAssessments: Array.from(new Set([
+              ...(result.completedAssessments || []),
+              ...(Array.isArray(parsedUid.completedAssessments) ? parsedUid.completedAssessments : [])
+            ])),
+            missionEvidence: {
+              ...(result.missionEvidence || {}),
+              ...(parsedUid.missionEvidence || {})
+            },
             xp: Math.max(result.xp || 0, parsedUid.xp || 0, initialProgress.xp),
             streakDays: Math.max(result.streakDays || 1, parsedUid.streakDays || 1),
           };
@@ -321,7 +338,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (typeof window === 'undefined') return;
 
     const handleOnline = () => {
-      console.log('[ECORP:CONNECTIVITY] Internet connectivity restored');
+      logger.info('ECORP:CONNECTIVITY', 'Internet connectivity restored', 'Internet connectivity restored');
       setIsOnline(true);
       setPersistenceStatus('synced');
       const user = auth.currentUser;
@@ -331,7 +348,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     const handleOffline = () => {
-      console.log('[ECORP:CONNECTIVITY] Internet connectivity lost: preserving all data locally');
+      logger.info('ECORP:CONNECTIVITY', 'Internet connectivity lost: preserving all data locally', 'Internet connectivity lost: preserving all data locally');
       setIsOnline(false);
       setPersistenceStatus('offline');
       try {
@@ -366,7 +383,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Offline check: Immediately safeguard data in local storage without failing destructively
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
-      console.log(`[ECORP:PERSISTENCE] OFFLINE_SAFEGUARD: Progress stored locally uid=${uid}`);
+      logger.debug('ECORP:PERSISTENCE', `OFFLINE_SAFEGUARD: Progress stored locally uid=${uid}`);
       try {
         localStorage.setItem(getStorageKeyForUid(uid), JSON.stringify(progressToPersist));
         localStorage.setItem(STORAGE_KEY, JSON.stringify(progressToPersist));
@@ -379,12 +396,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     if (!currentUser || currentUser.uid !== uid) {
-      console.warn(`[ECORP:PERSISTENCE] WRITE_ABORTED uid_mismatch opId=${opId} reason=${reason} authUid=${currentUser?.uid} targetUid=${uid}`);
+      logger.warn('ECORP:PERSISTENCE', `WRITE_ABORTED uid_mismatch opId=${opId} reason=${reason} authUid=${currentUser?.uid} targetUid=${uid}`, 'WRITE_ABORTED');
       return { success: false, error: 'User UID mismatch or unauthenticated' };
     }
 
     if (!options?.force && (persistenceLifecycle.current === 'hydrating' || persistenceLifecycle.current === 'loggingOut')) {
-      console.warn(`[ECORP:PERSISTENCE] WRITE_BLOCKED_BY_LIFECYCLE opId=${opId} state=${persistenceLifecycle.current}`);
+      logger.warn('ECORP:PERSISTENCE', `WRITE_BLOCKED_BY_LIFECYCLE opId=${opId} state=${persistenceLifecycle.current}`, 'WRITE_BLOCKED_BY_LIFECYCLE');
       return { success: false, error: `Blocked by lifecycle state: ${persistenceLifecycle.current}` };
     }
 
@@ -398,7 +415,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const remoteData = existingSnap.data();
           const remoteLessons = Array.isArray(remoteData?.completedLessons) ? remoteData.completedLessons : [];
           if (remoteLessons.length > 0) {
-            console.warn(`[ECORP:PERSISTENCE] ABORT_EMPTY_WRITE: Prevented overwriting ${remoteLessons.length} existing remote lessons with empty list`);
+            logger.warn('ECORP:PERSISTENCE', `ABORT_EMPTY_WRITE: Prevented overwriting ${remoteLessons.length} existing remote lessons with empty list`, 'ABORT_EMPTY_WRITE');
             return { success: false, error: 'Prevented destructive write of empty lessons over existing remote data' };
           }
         }
@@ -408,7 +425,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const xp = progressToPersist.xp;
     const timestamp = new Date().toISOString();
 
-    console.log(`[ECORP:PERSISTENCE] WRITE_STARTED uid=${uid} path=users/${uid} opId=${opId} reason=${reason} xp=${xp} lessons=${lessonsCount} missions=${missionsCount} time=${timestamp}`);
+    logger.info('ECORP:PERSISTENCE', `WRITE_STARTED uid=${uid} path=users/${uid} opId=${opId} reason=${reason} xp=${xp} lessons=${lessonsCount} missions=${missionsCount} time=${timestamp}`);
     setPersistenceStatus('saving');
 
     try {
@@ -427,6 +444,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         lessons: lessonsMap,
         completedMissions: progressToPersist.completedMissions,
         missionScores: progressToPersist.missionScores,
+        completedAssessments: progressToPersist.completedAssessments || [],
+        missionEvidence: progressToPersist.missionEvidence || {},
         bookmarkedPatterns: progressToPersist.bookmarkedPatterns,
         savedCustomPrompts: progressToPersist.savedCustomPrompts,
         achievements: progressToPersist.achievements,
@@ -446,14 +465,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         console.warn("Could not cache user progress locally", cacheErr);
       }
 
-      console.log(`[ECORP:PERSISTENCE] WRITE_SUCCESS uid=${uid} path=users/${uid} opId=${opId} reason=${reason} xp=${xp} lessons=${lessonsCount} missions=${missionsCount} time=${new Date().toISOString()}`);
+      logger.info('ECORP:PERSISTENCE', `WRITE_SUCCESS uid=${uid} path=users/${uid} opId=${opId} reason=${reason} xp=${xp} lessons=${lessonsCount} missions=${missionsCount} time=${new Date().toISOString()}`);
       setIsOnline(true);
       setPersistenceStatus('synced');
       return { success: true };
     } catch (err: any) {
       const code = err?.code || 'unknown_error';
       const message = err?.message || String(err);
-      console.error(`[ECORP:PERSISTENCE] WRITE_FAILED uid=${uid} path=users/${uid} opId=${opId} reason=${reason} code=${code} message=${message}`);
+      logger.error('ECORP:PERSISTENCE', err, `WRITE_FAILED opId=${opId}`);
       
       const isNetwork = !navigator.onLine ||
         code.includes('unavailable') ||
@@ -505,7 +524,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const targetUid = user?.uid || firestoreUserId.current;
     const currentProgress = latestUserProgressRef.current;
 
-    console.log(`[ECORP:PERSISTENCE] LOGOUT_STARTED uid=${targetUid || 'none'}`);
+    logger.info('ECORP:PERSISTENCE', `LOGOUT_STARTED uid=${targetUid || 'none'}`, 'LOGOUT_STARTED');
     persistenceLifecycle.current = 'loggingOut';
 
     // 1. Cancel pending debounce timer
@@ -516,13 +535,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // 2. Perform final awaited flush write only if user has lessons/progress to save
     if (user && targetUid && currentProgress && currentProgress.completedLessons.length > 0) {
-      console.log(`[ECORP:PERSISTENCE] LOGOUT_FLUSH_STARTED uid=${targetUid}`);
+      logger.info('ECORP:PERSISTENCE', `LOGOUT_FLUSH_STARTED uid=${targetUid}`, 'LOGOUT_FLUSH_STARTED');
       try {
         const flushResult = await persistUserProgress(targetUid, currentProgress, { force: true, reason: 'logout_flush' });
         if (flushResult.success) {
-          console.log(`[ECORP:PERSISTENCE] LOGOUT_FLUSH_SUCCESS uid=${targetUid}`);
+          logger.info('ECORP:PERSISTENCE', `LOGOUT_FLUSH_SUCCESS uid=${targetUid}`, 'LOGOUT_FLUSH_SUCCESS');
         } else {
-          console.error(`[ECORP:PERSISTENCE] LOGOUT_FLUSH_FAILED uid=${targetUid} code=${flushResult.code} error=${flushResult.error}`);
+          logger.error('ECORP:PERSISTENCE', { code: flushResult.code, error: flushResult.error }, 'LOGOUT_FLUSH_FAILED');
         }
       } catch (e) {
         console.warn('Logout flush error', e);
@@ -533,15 +552,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (activeUnsubscribeRef.current) {
       activeUnsubscribeRef.current();
       activeUnsubscribeRef.current = null;
-      console.log(`[ECORP:PERSISTENCE] LISTENER_DETACHED uid=${targetUid || 'none'}`);
+      logger.info('ECORP:PERSISTENCE', `LISTENER_DETACHED uid=${targetUid || 'none'}`, 'LISTENER_DETACHED');
     }
 
     // 4. Call Firebase signOut
     try {
       await fbSignOut();
-      console.log('[ECORP:PERSISTENCE] AUTH_SIGNOUT');
+      logger.info('ECORP:PERSISTENCE', 'AUTH_SIGNOUT', 'AUTH_SIGNOUT');
     } catch (signOutErr) {
-      console.error('[ECORP:PERSISTENCE] SIGNOUT_ERROR', signOutErr);
+      logger.error('ECORP:PERSISTENCE', signOutErr, 'SIGNOUT_ERROR');
     }
 
     // 5. Clear session activity timestamp
@@ -654,11 +673,11 @@ Provide:
       if (activeUnsubscribeRef.current) {
         activeUnsubscribeRef.current();
         activeUnsubscribeRef.current = null;
-        console.log(`[ECORP:PERSISTENCE] LISTENER_DETACHED uid=${firestoreUserId.current || 'none'}`);
+        logger.info('ECORP:PERSISTENCE', `LISTENER_DETACHED uid=${firestoreUserId.current || 'none'}`, 'LISTENER_DETACHED');
       }
 
       if (!user) {
-        console.log('[ECORP:PERSISTENCE] AUTH_UNAUTHENTICATED');
+        logger.info('ECORP:PERSISTENCE', 'AUTH_UNAUTHENTICATED', 'AUTH_UNAUTHENTICATED');
         firestoreUserId.current = null;
         persistenceLifecycle.current = 'idle';
         const cached = loadCachedProgress(null);
@@ -668,7 +687,7 @@ Provide:
         return;
       }
 
-      console.log(`[ECORP:PERSISTENCE] AUTH_READY uid=${user.uid} email=${user.email || 'none'}`);
+      logger.info('ECORP:PERSISTENCE', `AUTH_READY uid=${user.uid} email=${user.email || 'none'}`, 'AUTH_READY');
       firestoreUserId.current = user.uid;
       persistenceLifecycle.current = 'hydrating';
 
@@ -679,14 +698,14 @@ Provide:
         setUserProgress(cached);
       }
 
-      console.log(`[ECORP:PERSISTENCE] HYDRATION_START uid=${user.uid}`);
+      logger.info('ECORP:PERSISTENCE', `HYDRATION_START uid=${user.uid}`, 'HYDRATION_START');
       try {
         const readResult = await readUserDoc(user.uid);
 
         if (readResult.error) {
           // PHASE 2 CASE C: READ_ERROR
           // Forbidden to initialize or overwrite on error
-          console.error(`[ECORP:PERSISTENCE] HYDRATION_ERROR uid=${user.uid} code=${readResult.code} message=${readResult.error?.message}`);
+          logger.error('ECORP:PERSISTENCE', readResult.error, 'HYDRATION_ERROR');
           persistenceLifecycle.current = 'error';
           setPersistenceStatus('offline');
           return;
@@ -746,6 +765,19 @@ Provide:
             ...(data.missionScores && typeof data.missionScores === "object" ? data.missionScores : {}),
           };
 
+          const mergedEvidence = {
+            ...(cachedState.missionEvidence || {}),
+            ...(progressNested.missionEvidence || {}),
+            ...(data.missionEvidence && typeof data.missionEvidence === "object" ? data.missionEvidence : {}),
+          };
+
+          const mergedAssessments = Array.from(new Set([
+            ...(Array.isArray(data.completedAssessments) ? data.completedAssessments : []),
+            ...(Array.isArray(progressNested.completedAssessments) ? progressNested.completedAssessments : []),
+            ...(cachedState.completedAssessments || []),
+            ...(legacyCached.completedAssessments || []),
+          ]));
+
           const mergedBookmarks = Array.from(new Set([
             ...(Array.isArray(data.bookmarkedPatterns) ? data.bookmarkedPatterns : []),
             ...(Array.isArray(progressNested.bookmarkedPatterns) ? progressNested.bookmarkedPatterns : []),
@@ -775,6 +807,8 @@ Provide:
             completedLessons: mergedLessons,
             completedMissions: mergedMissions,
             missionScores: mergedScores,
+            completedAssessments: mergedAssessments,
+            missionEvidence: mergedEvidence,
             bookmarkedPatterns: mergedBookmarks,
             savedCustomPrompts: uniquePrompts,
             xp: maxXP,
@@ -810,12 +844,12 @@ Provide:
             }
           }
 
-          console.log(`[ECORP:PERSISTENCE] HYDRATION_SUCCESS uid=${user.uid} xp=${cloudProgress.xp} lessons=${cloudProgress.completedLessons.length} missions=${cloudProgress.completedMissions.length}`);
+          logger.info('ECORP:PERSISTENCE', `HYDRATION_SUCCESS uid=${user.uid} xp=${cloudProgress.xp} lessons=${cloudProgress.completedLessons.length} missions=${cloudProgress.completedMissions.length}`, 'HYDRATION_SUCCESS');
           persistenceLifecycle.current = 'ready';
           setPersistenceStatus('synced');
         } else {
           // PHASE 2 CASE B: SUCCESS_MISSING
-          console.log(`[ECORP:PERSISTENCE] HYDRATION_MISSING uid=${user.uid}`);
+          logger.info('ECORP:PERSISTENCE', `HYDRATION_MISSING uid=${user.uid}`, 'HYDRATION_MISSING');
           const legacyCached = loadCachedProgress(null);
           const cachedState = loadCachedProgress(user.uid);
           const initialLessons = Array.from(new Set([
@@ -850,6 +884,8 @@ Provide:
             lessons: lessonsMap,
             completedMissions: initialUserProgress.completedMissions,
             missionScores: initialUserProgress.missionScores,
+            completedAssessments: initialUserProgress.completedAssessments || [],
+            missionEvidence: initialUserProgress.missionEvidence || {},
             bookmarkedPatterns: initialUserProgress.bookmarkedPatterns,
             savedCustomPrompts: initialUserProgress.savedCustomPrompts,
             achievements: initialUserProgress.achievements,
@@ -858,7 +894,7 @@ Provide:
 
           try {
             await setDoc(doc(db, USERS_COLLECTION, user.uid), newUserData, { merge: true });
-            console.log(`[ECORP:PERSISTENCE] NEW_USER_INITIALIZED uid=${user.uid}`);
+            logger.info('ECORP:PERSISTENCE', `NEW_USER_INITIALIZED uid=${user.uid}`, 'NEW_USER_INITIALIZED');
           } catch (createErr) {
             console.warn("Could not create initial user document in Firestore", createErr);
           }
@@ -902,6 +938,8 @@ Provide:
               completedLessons: merged2,
               completedMissions: Array.isArray(docData.completedMissions) ? docData.completedMissions : currentProg.completedMissions,
               missionScores: docData.missionScores && typeof docData.missionScores === "object" ? docData.missionScores : currentProg.missionScores,
+              completedAssessments: Array.isArray(docData.completedAssessments) ? docData.completedAssessments : currentProg.completedAssessments,
+              missionEvidence: docData.missionEvidence && typeof docData.missionEvidence === "object" ? docData.missionEvidence : currentProg.missionEvidence,
               bookmarkedPatterns: Array.isArray(docData.bookmarkedPatterns) ? docData.bookmarkedPatterns : currentProg.bookmarkedPatterns,
               savedCustomPrompts: Array.isArray(docData.savedCustomPrompts) ? docData.savedCustomPrompts : currentProg.savedCustomPrompts,
               xp: Math.max(
@@ -925,7 +963,7 @@ Provide:
               return;
             }
 
-            console.log(`[ECORP:PERSISTENCE] SNAPSHOT_RECEIVED uid=${user.uid} xp=${nextProgress.xp} lessons=${nextProgress.completedLessons.length} missions=${nextProgress.completedMissions.length}`);
+            logger.debug('ECORP:PERSISTENCE', `SNAPSHOT_RECEIVED uid=${user.uid} xp=${nextProgress.xp} lessons=${nextProgress.completedLessons.length} missions=${nextProgress.completedMissions.length}`);
             lastSyncedFingerprint.current = incomingFingerprint;
             setUserProgress(nextProgress);
 
@@ -934,13 +972,13 @@ Provide:
             } catch {}
           },
           (snapshotError) => {
-            console.error(`[ECORP:PERSISTENCE] SNAPSHOT_LISTENER_ERROR uid=${user.uid}`, snapshotError);
+            logger.error('ECORP:PERSISTENCE', snapshotError, 'SNAPSHOT_LISTENER_ERROR');
           }
         );
 
-        console.log(`[ECORP:PERSISTENCE] LISTENER_ATTACHED uid=${user.uid}`);
+        logger.info('ECORP:PERSISTENCE', `LISTENER_ATTACHED uid=${user.uid}`, 'LISTENER_ATTACHED');
       } catch (error) {
-        console.error(`[ECORP:PERSISTENCE] HYDRATION_UNEXPECTED_ERROR uid=${user.uid}`, error);
+        logger.error('ECORP:PERSISTENCE', error, 'HYDRATION_UNEXPECTED_ERROR');
         persistenceLifecycle.current = 'error';
         setPersistenceStatus('offline');
       }
@@ -981,7 +1019,7 @@ Provide:
       return;
     }
 
-    console.log(`[ECORP:PERSISTENCE] WRITE_SCHEDULED uid=${user.uid} xp=${userProgress.xp}`);
+    logger.debug('ECORP:PERSISTENCE', `WRITE_SCHEDULED uid=${user.uid} xp=${userProgress.xp}`);
 
     if (syncTimerRef.current !== null) {
       window.clearTimeout(syncTimerRef.current);
@@ -1000,6 +1038,55 @@ Provide:
     };
   }, [userProgress]);
 
+  // Inactivity & Session Timeout monitoring (authoritative 25m warning, 30m expiration)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const checkSession = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      if (isSessionExpired()) {
+        logger.info('ECORP:PERSISTENCE', `SESSION_TIMEOUT: Inactivity logout triggered uid=${user.uid}`, 'SESSION_TIMEOUT');
+        markSessionExpired();
+        await logout();
+      }
+    };
+
+    const handleActivity = () => {
+      if (auth.currentUser) {
+        recordUserActivity();
+      }
+    };
+
+    const activityEvents = ['mousedown', 'keydown', 'touchstart', 'scroll'];
+    activityEvents.forEach((evt) => {
+      window.addEventListener(evt, handleActivity, { passive: true });
+    });
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        void checkSession();
+      }
+    };
+
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', checkSession);
+    window.addEventListener('pageshow', checkSession);
+
+    const sessionCheckInterval = window.setInterval(checkSession, 10000);
+
+    return () => {
+      activityEvents.forEach((evt) => {
+        window.removeEventListener(evt, handleActivity);
+      });
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', checkSession);
+      window.removeEventListener('pageshow', checkSession);
+      window.clearInterval(sessionCheckInterval);
+    };
+  }, []);
+
   // Check health endpoint for backend / real Gemini API availability
   useEffect(() => {
     fetch("/api/health")
@@ -1015,8 +1102,9 @@ Provide:
       });
   }, []);
 
-  const executeCurrentPrompt = async (customPrompt?: string): Promise<ExecutionResult> => {
+  const executeCurrentPrompt = async (customPrompt?: string, customSystemInstruction?: string, isolated?: boolean): Promise<ExecutionResult> => {
     const textToExecute = customPrompt !== undefined ? customPrompt : prompt;
+    const sysToExecute = customSystemInstruction !== undefined ? customSystemInstruction : systemInstruction;
     setIsExecuting(true);
     const startTime = Date.now();
 
@@ -1035,7 +1123,7 @@ Provide:
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             prompt: textToExecute,
-            systemInstruction,
+            systemInstruction: sysToExecute,
             temperature,
             topP
           })
@@ -1052,14 +1140,14 @@ Provide:
         }
       } catch (err: any) {
         console.warn("Falling back to Mock AI Engine due to error:", err);
-        const mock = generateMockAiResponse(textToExecute, systemInstruction, temperature);
+        const mock = generateMockAiResponse(textToExecute, sysToExecute, temperature);
         resultText = mock.text;
         duration = Date.now() - startTime;
       }
     } else {
       // Simulate brief network delay for realism
       await new Promise((r) => setTimeout(r, 400));
-      const mock = generateMockAiResponse(textToExecute, systemInstruction, temperature);
+      const mock = generateMockAiResponse(textToExecute, sysToExecute, temperature);
       resultText = mock.text;
       duration = Date.now() - startTime;
       tokenCount = analysis.tokenEstimate + mock.simulatedTokens;
@@ -1068,7 +1156,7 @@ Provide:
     const execResult: ExecutionResult = {
       id: "exec-" + Date.now() + "-" + Math.random().toString(36).substring(2, 7),
       prompt: textToExecute,
-      systemInstruction,
+      systemInstruction: sysToExecute,
       output: resultText,
       timestamp: Date.now(),
       durationMs: Math.max(120, duration),
@@ -1080,8 +1168,10 @@ Provide:
     };
 
     setIsExecuting(false);
-    setLastResult(execResult);
-    setExecutionHistory((prev) => [execResult, ...prev.slice(0, 19)]);
+    if (!isolated) {
+      setLastResult(execResult);
+      setExecutionHistory((prev) => [execResult, ...prev.slice(0, 19)]);
+    }
 
     // Award small XP for practicing
     setUserProgress((prev) => ({
@@ -1289,6 +1379,7 @@ Provide:
           ...prev,
           completedMissions: completed,
           missionScores: { ...prev.missionScores, [missionId]: Math.max(prev.missionScores[missionId] || 0, score) },
+          missionEvidence: { ...(prev.missionEvidence || {}), [missionId]: submittedPrompt },
           xp: isAlreadyCompleted ? prev.xp : prev.xp + xpEarned
         };
       });
@@ -1322,6 +1413,19 @@ Provide:
       ...prev,
       xp: prev.xp + amount
     }));
+  };
+
+  const completeAssessment = (assessmentId: string, submission: string) => {
+    setUserProgress((prev) => {
+      const isAlreadyCompleted = (prev.completedAssessments || []).includes(assessmentId);
+      const nextAssessments = isAlreadyCompleted ? (prev.completedAssessments || []) : [...(prev.completedAssessments || []), assessmentId];
+      return processUserActivity({
+        ...prev,
+        completedAssessments: nextAssessments,
+        missionEvidence: { ...(prev.missionEvidence || {}), [assessmentId]: submission },
+        xp: isAlreadyCompleted ? prev.xp : prev.xp + 150
+      });
+    });
   };
 
   const saveCustomPrompt = (title: string, promptText: string) => {
@@ -1421,6 +1525,7 @@ Provide:
         retrySync,
         markLessonComplete,
         addXp,
+        completeAssessment,
         saveCustomPrompt,
         deleteCustomPrompt,
         toggleBookmarkPattern,

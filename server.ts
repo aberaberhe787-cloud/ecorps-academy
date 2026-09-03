@@ -276,21 +276,19 @@ Evaluate the prompt and return JSON strictly matching:
 
   app.get("/robots.txt", (req, res) => {
     res.type("text/plain");
-    res.send("User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: /sitemap.xml\n");
+    res.send("User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: https://ecorps-academy.vercel.app/sitemap.xml\n");
   });
 
   app.get("/sitemap.xml", (req, res) => {
     res.type("application/xml");
     const sitemapContent = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
-  <url><loc>/?tab=foundations</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>/?tab=curriculum</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>/?tab=patterns</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>/?tab=playground</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>/?tab=missions</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>/?tab=resources</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>/?tab=profile</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url>
+    <loc>https://ecorps-academy.vercel.app/</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
 </urlset>`;
     res.send(sitemapContent);
   });

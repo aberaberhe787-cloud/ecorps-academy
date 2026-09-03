@@ -27,7 +27,8 @@ export const MissionsPanel: React.FC = () => {
     isEvaluatingMission,
     missionResult,
     evaluateMission,
-    userProgress
+    userProgress,
+    clearOutput
   } = useApp();
 
   const [revealedHints, setRevealedHints] = useState<{ [missionId: string]: number }>({});
@@ -38,12 +39,25 @@ export const MissionsPanel: React.FC = () => {
 
   const handleSelectMission = (mission: Mission) => {
     setActiveMissionId(mission.id);
+    clearOutput();
+    if (userProgress.missionEvidence && userProgress.missionEvidence[mission.id]) {
+      setPrompt(userProgress.missionEvidence[mission.id]);
+    } else {
+      setPrompt(mission.initialPrompt);
+    }
+    if (mission.systemInstruction) {
+      setSystemInstruction(mission.systemInstruction);
+    } else {
+      setSystemInstruction("");
+    }
   };
 
   const handleLoadInitialPrompt = () => {
     setPrompt(selectedMission.initialPrompt);
     if (selectedMission.systemInstruction) {
       setSystemInstruction(selectedMission.systemInstruction);
+    } else {
+      setSystemInstruction("");
     }
   };
 
@@ -130,6 +144,22 @@ export const MissionsPanel: React.FC = () => {
 
           {/* Quick Actions */}
           <div className="flex items-center gap-2">
+            {isCompleted && userProgress.missionEvidence && userProgress.missionEvidence[selectedMission.id] && (
+              <button
+                onClick={() => {
+                  setPrompt(userProgress.missionEvidence![selectedMission.id]);
+                  if (selectedMission.systemInstruction) {
+                    setSystemInstruction(selectedMission.systemInstruction);
+                  } else {
+                    setSystemInstruction("");
+                  }
+                }}
+                className="flex items-center gap-1.5 rounded-lg border border-emerald-700 bg-emerald-900/40 px-3 py-1.5 text-xs font-medium text-emerald-300 hover:bg-emerald-800/60 hover:text-white transition-colors"
+              >
+                <Award className="h-3.5 w-3.5" />
+                <span>Load Winning Evidence</span>
+              </button>
+            )}
             <button
               id="load-starter-prompt-btn"
               onClick={handleLoadInitialPrompt}

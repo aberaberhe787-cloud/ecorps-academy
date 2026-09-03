@@ -23,6 +23,7 @@ import { auth } from "./lib/firebase";
 import { DashboardHeader } from "./components/DashboardHeader";
 import { RequireAuth } from "./components/RequireAuth";
 import { NetworkStatusToast } from "./components/NetworkStatusIndicator";
+import { SessionInactivityWarning } from "./components/SessionInactivityWarning";
 
 const MainContent: React.FC = () => {
   const { activeTab } = useApp();
@@ -94,6 +95,7 @@ export default function App() {
       <ThemeProvider>
         <AuthGate />
         <NetworkStatusToast />
+        <SessionInactivityWarning />
       </ThemeProvider>
     </AppProvider>
   );
