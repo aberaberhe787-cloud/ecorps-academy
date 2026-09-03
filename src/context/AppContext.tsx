@@ -84,6 +84,8 @@ interface AppContextType {
   // User Progress
   userProgress: UserProgress;
   persistenceStatus: 'synced' | 'saving' | 'offline' | 'error';
+  isOnline: boolean;
+  retrySync: () => Promise<void>;
   markLessonComplete: (lessonId: string) => void;
   addXp: (amount: number) => void;
   saveCustomPrompt: (title: string, promptText: string) => void;
@@ -295,6 +297,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return loadCachedProgress(null);
   });
   const [persistenceStatus, setPersistenceStatus] = useState<PersistenceStatus>('synced');
+  const [isOnline, setIsOnline] = useState<boolean>(() => {
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
+      return navigator.onLine;
+    }
+    return true;
+  });
 
   const persistenceLifecycle = useRef<PersistenceLifecycle>('idle');
   const firestoreUserId = useRef<string | null>(null);
@@ -308,6 +316,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     latestUserProgressRef.current = userProgress;
   }, [userProgress]);
 
+  // Monitor network online/offline state to prevent data loss and auto-sync when reconnected
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleOnline = () => {
+      console.log('[ECORP:CONNECTIVITY] Internet connectivity restored');
+      setIsOnline(true);
+      setPersistenceStatus('synced');
+      const user = auth.currentUser;
+      if (user && firestoreUserId.current === user.uid) {
+        void persistUserProgress(user.uid, latestUserProgressRef.current, { force: true, reason: 'online_reconnect' });
+      }
+    };
+
+    const handleOffline = () => {
+      console.log('[ECORP:CONNECTIVITY] Internet connectivity lost: preserving all data locally');
+      setIsOnline(false);
+      setPersistenceStatus('offline');
+      try {
+        const uid = firestoreUserId.current;
+        if (uid) {
+          localStorage.setItem(getStorageKeyForUid(uid), JSON.stringify(latestUserProgressRef.current));
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(latestUserProgressRef.current));
+      } catch (cacheErr) {
+        console.warn('Failed local offline cache write', cacheErr);
+      }
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   // Single Authoritative Persistence Pipeline
   const persistUserProgress = async (
     uid: string,
@@ -317,6 +363,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const currentUser = auth.currentUser;
     const opId = `op-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const reason = options?.reason || 'auto_sync';
+
+    // Offline check: Immediately safeguard data in local storage without failing destructively
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      console.log(`[ECORP:PERSISTENCE] OFFLINE_SAFEGUARD: Progress stored locally uid=${uid}`);
+      try {
+        localStorage.setItem(getStorageKeyForUid(uid), JSON.stringify(progressToPersist));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(progressToPersist));
+      } catch (cacheErr) {
+        console.warn("Could not cache user progress locally", cacheErr);
+      }
+      setIsOnline(false);
+      setPersistenceStatus('offline');
+      return { success: false, error: 'Offline: progress safely saved locally', code: 'offline' };
+    }
 
     if (!currentUser || currentUser.uid !== uid) {
       console.warn(`[ECORP:PERSISTENCE] WRITE_ABORTED uid_mismatch opId=${opId} reason=${reason} authUid=${currentUser?.uid} targetUid=${uid}`);
@@ -381,18 +441,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       try {
         localStorage.setItem(getStorageKeyForUid(uid), JSON.stringify(progressToPersist));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(progressToPersist));
       } catch (cacheErr) {
         console.warn("Could not cache user progress locally", cacheErr);
       }
 
       console.log(`[ECORP:PERSISTENCE] WRITE_SUCCESS uid=${uid} path=users/${uid} opId=${opId} reason=${reason} xp=${xp} lessons=${lessonsCount} missions=${missionsCount} time=${new Date().toISOString()}`);
+      setIsOnline(true);
       setPersistenceStatus('synced');
       return { success: true };
     } catch (err: any) {
       const code = err?.code || 'unknown_error';
       const message = err?.message || String(err);
       console.error(`[ECORP:PERSISTENCE] WRITE_FAILED uid=${uid} path=users/${uid} opId=${opId} reason=${reason} code=${code} message=${message}`);
-      setPersistenceStatus('error');
+      
+      const isNetwork = !navigator.onLine ||
+        code.includes('unavailable') ||
+        code.includes('network') ||
+        message.toLowerCase().includes('offline') ||
+        message.toLowerCase().includes('network') ||
+        message.toLowerCase().includes('failed to fetch');
+
+      if (isNetwork) {
+        setIsOnline(false);
+        setPersistenceStatus('offline');
+      } else {
+        setPersistenceStatus('error');
+      }
       return { success: false, error: message, code };
     }
   };
@@ -401,6 +476,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const currentUser = auth.currentUser;
     if (!currentUser) return;
     await persistUserProgress(currentUser.uid, latestUserProgressRef.current, { reason: 'manual_sync' });
+  };
+
+  const retrySync = async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+    setPersistenceStatus('saving');
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      setPersistenceStatus('offline');
+      setIsOnline(false);
+      return;
+    }
+    try {
+      const res = await fetch('/api/health').catch(() => null);
+      if (res && res.ok) {
+        setIsOnline(true);
+      }
+    } catch {}
+    const result = await persistUserProgress(currentUser.uid, latestUserProgressRef.current, { force: true, reason: 'retry_sync' });
+    if (result.success) {
+      setIsOnline(true);
+      setPersistenceStatus('synced');
+    }
   };
 
   const logout = async () => {
@@ -1320,6 +1417,8 @@ Provide:
         isDarkMode,
         userProgress,
         persistenceStatus,
+        isOnline,
+        retrySync,
         markLessonComplete,
         addXp,
         saveCustomPrompt,

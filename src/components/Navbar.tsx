@@ -26,6 +26,7 @@ import {
   Layers,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { NetworkStatusBadge } from "./NetworkStatusIndicator";
 import { useApp } from "../context/AppContext";
 import { NavTab } from "../types";
 import { GoogleTranslate } from "./GoogleTranslate";
@@ -507,6 +508,7 @@ export const Navbar: React.FC = () => {
 
           {/* Right Side Controls */}
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+            <NetworkStatusBadge />
             <ThemeToggle />
             
             {/* Auth Buttons / Account Menu */}

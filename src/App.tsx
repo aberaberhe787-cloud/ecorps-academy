@@ -22,6 +22,7 @@ import { LoginPage } from "./components/LoginPage";
 import { auth } from "./lib/firebase";
 import { DashboardHeader } from "./components/DashboardHeader";
 import { RequireAuth } from "./components/RequireAuth";
+import { NetworkStatusToast } from "./components/NetworkStatusIndicator";
 
 const MainContent: React.FC = () => {
   const { activeTab } = useApp();
@@ -92,6 +93,7 @@ export default function App() {
     <AppProvider>
       <ThemeProvider>
         <AuthGate />
+        <NetworkStatusToast />
       </ThemeProvider>
     </AppProvider>
   );
