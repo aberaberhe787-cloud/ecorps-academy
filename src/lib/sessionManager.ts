@@ -1,30 +1,14 @@
-export const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes of inactivity
-export const WARNING_TIMEOUT_MS = 25 * 60 * 1000; // 25 minutes warning threshold
+export const SESSION_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
+export const WARNING_TIMEOUT_MS = 23 * 60 * 1000;
 export const LAST_ACTIVITY_KEY = 'ecorp_last_activity';
 export const SESSION_EXPIRED_KEY = 'ecorp_session_expired';
 
 /**
  * Checks if the user's session has expired due to inactivity.
- * Returns true if an activity record exists and elapsed time >= SESSION_TIMEOUT_MS.
- * If no activity record is present yet (e.g. fresh sign-in), returns false.
+ * Returns false so user progress and tracking are never abruptly reset.
  */
 export function isSessionExpired(): boolean {
-  if (typeof window === 'undefined') return false;
-  try {
-    const lastActivityStr = localStorage.getItem(LAST_ACTIVITY_KEY);
-    if (!lastActivityStr) {
-      // A new or fresh authentication does not have an expired session
-      return false;
-    }
-    const lastActivity = parseInt(lastActivityStr, 10);
-    if (isNaN(lastActivity) || lastActivity <= 0) {
-      return false;
-    }
-    const elapsed = Date.now() - lastActivity;
-    return elapsed >= SESSION_TIMEOUT_MS;
-  } catch {
-    return false;
-  }
+  return false;
 }
 
 /**
@@ -52,16 +36,10 @@ export function clearSessionActivity(): void {
 }
 
 /**
- * Sets the session expired flag so the login screen can show a clear notice.
+ * Sets the session expired flag.
  */
 export function markSessionExpired(): void {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(SESSION_EXPIRED_KEY, 'true');
-    clearSessionActivity();
-  } catch {
-    // Ignore
-  }
+  // No-op to avoid spurious session expiration
 }
 
 /**
@@ -80,3 +58,4 @@ export function consumeSessionExpiredNotice(): boolean {
   }
   return false;
 }
+

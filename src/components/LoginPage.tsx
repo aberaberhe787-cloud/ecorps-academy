@@ -74,9 +74,7 @@ export const LoginPage: React.FC = () => {
   const [sessionNotice, setSessionNotice] = useState('');
 
   useEffect(() => {
-    if (consumeSessionExpiredNotice()) {
-      setSessionNotice('Your previous session expired due to inactivity. Please sign in again to continue.');
-    }
+    // No session expiry notice needed
   }, []);
 
   useEffect(() => {
@@ -102,12 +100,11 @@ export const LoginPage: React.FC = () => {
     setResetSuccess('');
     setSessionNotice('');
     setIsSubmitting(true);
-    // Pre-record user activity so subsequent auth callbacks see fresh activity
     recordUserActivity();
 
     try {
       try {
-        await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+        await setPersistence(auth, browserLocalPersistence);
       } catch (persistErr) {
         console.warn('Could not set auth persistence mode', persistErr);
       }
@@ -137,12 +134,11 @@ export const LoginPage: React.FC = () => {
     setResetSuccess('');
     setSessionNotice('');
     setIsSubmitting(true);
-    // Pre-record user activity so subsequent auth callbacks see fresh activity
     recordUserActivity();
 
     try {
       try {
-        await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+        await setPersistence(auth, browserLocalPersistence);
       } catch (persistErr) {
         console.warn('Could not set auth persistence mode', persistErr);
       }

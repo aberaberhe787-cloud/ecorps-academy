@@ -20,7 +20,6 @@ import { PromptEngineeringPath, FOUNDATION_LESSONS } from "./views/PromptEnginee
 import { AssessmentView } from "./views/AssessmentView";
 import { LoginPage } from "./components/LoginPage";
 import { auth } from "./lib/firebase";
-import { isSessionExpired, markSessionExpired, recordUserActivity } from "./lib/sessionManager";
 import { DashboardHeader } from "./components/DashboardHeader";
 import { RequireAuth } from "./components/RequireAuth";
 
@@ -67,88 +66,19 @@ const AppShell: React.FC = () => {
 };
 
 const AuthGate: React.FC = () => {
-  const { setActiveTab } = useApp();
   const [user, setUser] = React.useState<any>(null);
   const [isAuthLoading, setIsAuthLoading] = React.useState(true);
 
   React.useEffect(() => {
-    // Dedicated session expiration enforcement handler
-    const enforceSessionExpiration = async () => {
-      if (auth.currentUser && isSessionExpired()) {
-        console.log('[ECORP:AUTH] Inactivity timeout detected -> signing out');
-        markSessionExpired();
-        try {
-          await auth.signOut();
-        } catch (signOutErr) {
-          console.warn('[ECORP:AUTH] SignOut failed', signOutErr);
-        }
-        setUser(null);
-        setIsAuthLoading(false);
-      }
-    };
-
-    const unsubscribe = auth.onAuthStateChanged(async (nextUser: any) => {
-      if (nextUser) {
-        // CRITICAL: Check session expiration FIRST before accepting auth state
-        if (isSessionExpired()) {
-          console.log('[ECORP:AUTH] Session expired on startup / resume -> signing out');
-          markSessionExpired();
-          try {
-            await auth.signOut();
-          } catch (signOutErr) {
-            console.warn('[ECORP:AUTH] SignOut failed', signOutErr);
-          }
-          setUser(null);
-          setIsAuthLoading(false);
-          return;
-        }
-
-        try {
-          // Perform silent token refresh only after verifying session is valid
-          await nextUser.getIdToken(false);
-          recordUserActivity();
-          setUser(nextUser);
-          setIsAuthLoading(false);
-        } catch (tokenErr) {
-          console.warn('[ECORP:AUTH] Silent token refresh failed:', tokenErr);
-          if (isSessionExpired()) {
-            markSessionExpired();
-            try {
-              await auth.signOut();
-            } catch {}
-            setUser(null);
-            setIsAuthLoading(false);
-            return;
-          }
-          setUser(nextUser);
-          setIsAuthLoading(false);
-        }
-      } else {
-        setUser(null);
-        setIsAuthLoading(false);
-      }
+    const unsubscribe = auth.onAuthStateChanged((nextUser: any) => {
+      setUser(nextUser);
+      setIsAuthLoading(false);
     });
-
-    // Handle mobile phone lock/unlock, tab visibility changes, and bfcache restores
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        enforceSessionExpiration();
-      }
-    };
-
-    document.addEventListener('visibilitychange', onVisibilityChange);
-    window.addEventListener('pageshow', enforceSessionExpiration);
-    window.addEventListener('focus', enforceSessionExpiration);
-    const interval = window.setInterval(enforceSessionExpiration, 15000);
 
     return () => {
       unsubscribe();
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-      window.removeEventListener('pageshow', enforceSessionExpiration);
-      window.removeEventListener('focus', enforceSessionExpiration);
-      window.clearInterval(interval);
     };
-  }, [setActiveTab]);
+  }, []);
 
   if (isAuthLoading) {
     return <div className="flex min-h-screen items-center justify-center bg-[#050a19] text-sm text-slate-400">Loading your learning space...</div>;

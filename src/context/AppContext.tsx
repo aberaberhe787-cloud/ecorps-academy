@@ -23,13 +23,8 @@ import {
   signOut as fbSignOut,
   onAuthStateChanged as firebaseOnAuthStateChanged
 } from "../lib/firebaseClient";
-import { doc, setDoc } from "firebase/firestore";
-import {
-  isSessionExpired,
-  recordUserActivity,
-  clearSessionActivity,
-  markSessionExpired,
-} from "../lib/sessionManager";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { clearSessionActivity } from "../lib/sessionManager";
 
 interface AppContextType {
   activeTab: NavTab;
@@ -154,11 +149,9 @@ function getUtcDateString(date: Date = new Date()): string {
 
 function computeDailyStreak(lastDateStr?: string, existingStreak = 1): { streak: number; date: string } {
   const todayStr = getUtcDateString();
-  if (!lastDateStr) {
-    return { streak: Math.max(1, existingStreak), date: todayStr };
-  }
-  if (lastDateStr === todayStr) {
-    return { streak: Math.max(1, existingStreak), date: todayStr };
+  const streakBase = Math.max(1, existingStreak);
+  if (!lastDateStr || lastDateStr === todayStr) {
+    return { streak: streakBase, date: todayStr };
   }
   const lastDate = new Date(lastDateStr + "T00:00:00Z");
   const todayDate = new Date(todayStr + "T00:00:00Z");
@@ -166,11 +159,9 @@ function computeDailyStreak(lastDateStr?: string, existingStreak = 1): { streak:
   const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
   
   if (diffDays === 1) {
-    return { streak: Math.max(1, existingStreak) + 1, date: todayStr };
-  } else if (diffDays > 1) {
-    return { streak: 1, date: todayStr };
+    return { streak: streakBase + 1, date: todayStr };
   }
-  return { streak: Math.max(1, existingStreak), date: todayStr };
+  return { streak: streakBase, date: todayStr };
 }
 
 function getStorageKeyForUid(uid?: string | null): string {
@@ -179,17 +170,76 @@ function getStorageKeyForUid(uid?: string | null): string {
 
 function loadCachedProgress(uid?: string | null): UserProgress {
   try {
-    const key = getStorageKeyForUid(uid);
-    const saved = localStorage.getItem(key);
-    if (saved) {
-      return { ...initialProgress, ...JSON.parse(saved) };
+    let result: UserProgress = { ...initialProgress };
+    let hasLoaded = false;
+
+    // 1. Check legacy key first (guest or existing progress)
+    const legacy = localStorage.getItem(STORAGE_KEY);
+    if (legacy) {
+      try {
+        const parsed = JSON.parse(legacy);
+        result = {
+          ...result,
+          ...parsed,
+          completedLessons: Array.isArray(parsed.completedLessons) ? parsed.completedLessons : [],
+          completedMissions: Array.isArray(parsed.completedMissions) ? parsed.completedMissions : [],
+        };
+        hasLoaded = true;
+      } catch {}
     }
-    // Backward-compatibility fallback to legacy global key for guests
-    if (!uid) {
-      const legacy = localStorage.getItem(STORAGE_KEY);
-      if (legacy) {
-        return { ...initialProgress, ...JSON.parse(legacy) };
+
+    // 2. Check UID-specific key if UID provided
+    if (uid) {
+      const saved = localStorage.getItem(getStorageKeyForUid(uid));
+      if (saved) {
+        try {
+          const parsedUid = JSON.parse(saved);
+          result = {
+            ...result,
+            ...parsedUid,
+            completedLessons: Array.from(new Set([
+              ...(result.completedLessons || []),
+              ...(Array.isArray(parsedUid.completedLessons) ? parsedUid.completedLessons : [])
+            ])),
+            completedMissions: Array.from(new Set([
+              ...(result.completedMissions || []),
+              ...(Array.isArray(parsedUid.completedMissions) ? parsedUid.completedMissions : [])
+            ])),
+            xp: Math.max(result.xp || 0, parsedUid.xp || 0, initialProgress.xp),
+            streakDays: Math.max(result.streakDays || 1, parsedUid.streakDays || 1),
+          };
+          hasLoaded = true;
+        } catch {}
       }
+    }
+
+    // 3. Scan other promptlab progress keys in localStorage if any exist
+    if (typeof window !== 'undefined') {
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('promptlab_user_progress_')) {
+            const raw = localStorage.getItem(k);
+            if (raw) {
+              const p = JSON.parse(raw);
+              if (Array.isArray(p.completedLessons) && p.completedLessons.length > 0) {
+                result.completedLessons = Array.from(new Set([...result.completedLessons, ...p.completedLessons]));
+                hasLoaded = true;
+              }
+              if (typeof p.xp === 'number' && p.xp > result.xp) {
+                result.xp = p.xp;
+              }
+              if (typeof p.streakDays === 'number' && p.streakDays > result.streakDays) {
+                result.streakDays = p.streakDays;
+              }
+            }
+          }
+        }
+      } catch {}
+    }
+
+    if (hasLoaded) {
+      return result;
     }
   } catch (e) {
     console.warn("Could not load cached progress from localStorage", e);
@@ -280,6 +330,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const lessonsCount = progressToPersist.completedLessons.length;
     const missionsCount = progressToPersist.completedMissions.length;
+    // Safety check: Prevent accidental empty writes over existing remote data
+    if (lessonsCount === 0) {
+      try {
+        const existingSnap = await getDoc(doc(db, USERS_COLLECTION, uid));
+        if (existingSnap.exists()) {
+          const remoteData = existingSnap.data();
+          const remoteLessons = Array.isArray(remoteData?.completedLessons) ? remoteData.completedLessons : [];
+          if (remoteLessons.length > 0) {
+            console.warn(`[ECORP:PERSISTENCE] ABORT_EMPTY_WRITE: Prevented overwriting ${remoteLessons.length} existing remote lessons with empty list`);
+            return { success: false, error: 'Prevented destructive write of empty lessons over existing remote data' };
+          }
+        }
+      } catch {}
+    }
+
     const xp = progressToPersist.xp;
     const timestamp = new Date().toISOString();
 
@@ -305,6 +370,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         bookmarkedPatterns: progressToPersist.bookmarkedPatterns,
         savedCustomPrompts: progressToPersist.savedCustomPrompts,
         achievements: progressToPersist.achievements,
+        // Also save progress object for backward-compatibility with progressUtils
+        progress: progressToPersist,
       };
 
       // Set last synced fingerprint BEFORE await to prevent local loop
@@ -350,14 +417,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       syncTimerRef.current = null;
     }
 
-    // 2. Perform final awaited flush write if authenticated
-    if (user && targetUid) {
+    // 2. Perform final awaited flush write only if user has lessons/progress to save
+    if (user && targetUid && currentProgress && currentProgress.completedLessons.length > 0) {
       console.log(`[ECORP:PERSISTENCE] LOGOUT_FLUSH_STARTED uid=${targetUid}`);
-      const flushResult = await persistUserProgress(targetUid, currentProgress, { force: true, reason: 'logout_flush' });
-      if (flushResult.success) {
-        console.log(`[ECORP:PERSISTENCE] LOGOUT_FLUSH_SUCCESS uid=${targetUid}`);
-      } else {
-        console.error(`[ECORP:PERSISTENCE] LOGOUT_FLUSH_FAILED uid=${targetUid} code=${flushResult.code} error=${flushResult.error}`);
+      try {
+        const flushResult = await persistUserProgress(targetUid, currentProgress, { force: true, reason: 'logout_flush' });
+        if (flushResult.success) {
+          console.log(`[ECORP:PERSISTENCE] LOGOUT_FLUSH_SUCCESS uid=${targetUid}`);
+        } else {
+          console.error(`[ECORP:PERSISTENCE] LOGOUT_FLUSH_FAILED uid=${targetUid} code=${flushResult.code} error=${flushResult.error}`);
+        }
+      } catch (e) {
+        console.warn('Logout flush error', e);
       }
     }
 
@@ -379,11 +450,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // 5. Clear session activity timestamp
     clearSessionActivity();
 
-    // 6. Reset local authenticated state to clean initial guest state
+    // 6. Reset local state to cached local state (NEVER reset to zero!)
     firestoreUserId.current = null;
     persistenceLifecycle.current = 'idle';
-    lastSyncedFingerprint.current = getProgressFingerprint(initialProgress);
-    setUserProgress(initialProgress);
+    const cached = loadCachedProgress(null);
+    lastSyncedFingerprint.current = getProgressFingerprint(cached);
+    setUserProgress(cached);
     setPersistenceStatus('synced');
     setActiveTab("home");
   };
@@ -480,44 +552,6 @@ Provide:
     // Connect to emulators if explicitly requested via environment variable
     try { useEmulatorsIfDev(); } catch {}
 
-    // Inactivity Monitor - Robust Timestamp-based
-    const checkSession = async () => {
-      if (auth.currentUser && isSessionExpired()) {
-        console.log('[ECORP:PERSISTENCE] SESSION_TIMEOUT: Inactivity logout triggered');
-        markSessionExpired();
-        await logout();
-      }
-    };
-
-    // Update on activity with throttling, but NEVER refresh if session already expired
-    let lastActivityWrite = 0;
-    const handleUserActivity = () => {
-      if (!auth.currentUser) return;
-      if (isSessionExpired()) {
-        checkSession();
-        return;
-      }
-      const now = Date.now();
-      if (now - lastActivityWrite > 3000) { // Throttle writes to every 3s
-        lastActivityWrite = now;
-        recordUserActivity();
-      }
-    };
-
-    const activityEvents = ['mousedown', 'keydown', 'touchstart', 'scroll', 'pointerdown'];
-    activityEvents.forEach(event => window.addEventListener(event, handleUserActivity, { passive: true }));
-    
-    // Check periodically + on mobile phone resume / visibility / focus / pageshow
-    const interval = window.setInterval(checkSession, 15000); // Check every 15s
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        checkSession();
-      }
-    };
-    document.addEventListener('visibilitychange', onVisibilityChange);
-    window.addEventListener('focus', checkSession);
-    window.addEventListener('pageshow', checkSession);
-
     const unsubscribeAuth = firebaseOnAuthStateChanged(auth, async (user) => {
       // Detach existing listener if user changed
       if (activeUnsubscribeRef.current) {
@@ -530,32 +564,11 @@ Provide:
         console.log('[ECORP:PERSISTENCE] AUTH_UNAUTHENTICATED');
         firestoreUserId.current = null;
         persistenceLifecycle.current = 'idle';
-        lastSyncedFingerprint.current = getProgressFingerprint(initialProgress);
-        setUserProgress(initialProgress);
+        const cached = loadCachedProgress(null);
+        lastSyncedFingerprint.current = getProgressFingerprint(cached);
+        setUserProgress(cached);
         setPersistenceStatus('synced');
         return;
-      }
-
-      // CRITICAL: Check session expiration FIRST before silent token refresh or activity recording
-      if (isSessionExpired()) {
-        console.log(`[ECORP:PERSISTENCE] SESSION_EXPIRED_ON_STARTUP uid=${user.uid}`);
-        markSessionExpired();
-        await logout();
-        return;
-      }
-
-      // Perform silent token refresh
-      try {
-        await user.getIdToken(false);
-        recordUserActivity();
-      } catch (tokenErr) {
-        console.warn(`[ECORP:PERSISTENCE] Silent token refresh failed for uid=${user.uid}`, tokenErr);
-        if (isSessionExpired()) {
-          console.log(`[ECORP:PERSISTENCE] SESSION_EXPIRED_ON_STARTUP uid=${user.uid}`);
-          markSessionExpired();
-          await logout();
-          return;
-        }
       }
 
       console.log(`[ECORP:PERSISTENCE] AUTH_READY uid=${user.uid} email=${user.email || 'none'}`);
@@ -585,28 +598,94 @@ Provide:
         if (readResult.exists && readResult.data) {
           // PHASE 2 CASE A: SUCCESS_EXISTS
           const data = readResult.data;
+          const progressNested = (data.progress && typeof data.progress === 'object') ? data.progress : {};
+
+          const legacyCached = loadCachedProgress(null);
+          const cachedState = loadCachedProgress(user.uid);
+
           const existingStreak = typeof data.currentStreak === 'number'
             ? data.currentStreak
-            : (typeof data.streakDays === 'number' ? data.streakDays : 1);
-          const streakResult = computeDailyStreak(data.lastActivityDate || data.lastLoginDate, existingStreak);
+            : (typeof data.streakDays === 'number'
+                ? data.streakDays
+                : (typeof progressNested.streakDays === 'number' ? progressNested.streakDays : 1));
+
+          const maxExistingStreak = Math.max(
+            existingStreak,
+            cachedState.streakDays || 1,
+            legacyCached.streakDays || 1,
+            1
+          );
+
+          const streakResult = computeDailyStreak(
+            data.lastActivityDate || data.lastLoginDate || progressNested.lastActivityDate,
+            maxExistingStreak
+          );
 
           const arrayFromDoc = Array.isArray(data.completedLessons) ? data.completedLessons : [];
+          const arrayFromNested = Array.isArray(progressNested.completedLessons) ? progressNested.completedLessons : [];
           const mapKeys = data.lessons && typeof data.lessons === 'object'
             ? Object.keys(data.lessons).filter(k => data.lessons[k])
             : [];
-          const mergedLessons = Array.from(new Set([...arrayFromDoc, ...mapKeys]));
+
+          // Merge completed lessons from ALL sources so NOTHING is ever lost
+          const mergedLessons = Array.from(new Set([
+            ...arrayFromDoc,
+            ...arrayFromNested,
+            ...mapKeys,
+            ...(cachedState.completedLessons || []),
+            ...(legacyCached.completedLessons || []),
+          ]));
+
+          const mergedMissions = Array.from(new Set([
+            ...(Array.isArray(data.completedMissions) ? data.completedMissions : []),
+            ...(Array.isArray(progressNested.completedMissions) ? progressNested.completedMissions : []),
+            ...(cachedState.completedMissions || []),
+            ...(legacyCached.completedMissions || []),
+          ]));
+
+          const mergedScores = {
+            ...(cachedState.missionScores || {}),
+            ...(progressNested.missionScores || {}),
+            ...(data.missionScores && typeof data.missionScores === "object" ? data.missionScores : {}),
+          };
+
+          const mergedBookmarks = Array.from(new Set([
+            ...(Array.isArray(data.bookmarkedPatterns) ? data.bookmarkedPatterns : []),
+            ...(Array.isArray(progressNested.bookmarkedPatterns) ? progressNested.bookmarkedPatterns : []),
+            ...(cachedState.bookmarkedPatterns || []),
+            ...(legacyCached.bookmarkedPatterns || []),
+          ]));
+
+          const allPrompts = [
+            ...(cachedState.savedCustomPrompts || []),
+            ...(Array.isArray(progressNested.savedCustomPrompts) ? progressNested.savedCustomPrompts : []),
+            ...(Array.isArray(data.savedCustomPrompts) ? data.savedCustomPrompts : []),
+          ];
+          const uniquePrompts = Array.from(new Map(allPrompts.map(p => [p.id, p])).values());
+
+          const maxXP = Math.max(
+            typeof data.xp === "number" ? data.xp : 0,
+            typeof progressNested.xp === "number" ? progressNested.xp : 0,
+            cachedState.xp || 0,
+            legacyCached.xp || 0,
+            initialProgress.xp
+          );
+
+          const finalStreak = Math.max(streakResult.streak, maxExistingStreak);
 
           const cloudProgress: UserProgress = {
             ...initialProgress,
             completedLessons: mergedLessons,
-            completedMissions: Array.isArray(data.completedMissions) ? data.completedMissions : [],
-            missionScores: data.missionScores && typeof data.missionScores === "object" ? data.missionScores : {},
-            bookmarkedPatterns: Array.isArray(data.bookmarkedPatterns) ? data.bookmarkedPatterns : [],
-            savedCustomPrompts: Array.isArray(data.savedCustomPrompts) ? data.savedCustomPrompts : [],
-            xp: typeof data.xp === "number" ? data.xp : initialProgress.xp,
-            streakDays: streakResult.streak,
+            completedMissions: mergedMissions,
+            missionScores: mergedScores,
+            bookmarkedPatterns: mergedBookmarks,
+            savedCustomPrompts: uniquePrompts,
+            xp: maxXP,
+            streakDays: finalStreak,
             lastActivityDate: streakResult.date,
-            achievements: Array.isArray(data.achievements) ? data.achievements : [],
+            achievements: Array.isArray(data.achievements)
+              ? data.achievements
+              : (Array.isArray(progressNested.achievements) ? progressNested.achievements : (cachedState.achievements || [])),
           };
 
           const cloudFingerprint = getProgressFingerprint(cloudProgress);
@@ -620,13 +699,13 @@ Provide:
           }
 
           // Persist updated streak and lastLoginDate to Firestore
-          if (streakResult.streak !== existingStreak || streakResult.date !== data.lastLoginDate) {
+          if (finalStreak !== existingStreak || streakResult.date !== data.lastLoginDate) {
             try {
               await setDoc(doc(db, USERS_COLLECTION, user.uid), {
                 displayName: user.displayName || data.displayName || "Ecorp Scholar",
                 photoURL: user.photoURL || data.photoURL || null,
-                currentStreak: streakResult.streak,
-                streakDays: streakResult.streak,
+                currentStreak: finalStreak,
+                streakDays: finalStreak,
                 lastLoginDate: streakResult.date,
               }, { merge: true });
             } catch (updateErr) {
@@ -640,24 +719,44 @@ Provide:
         } else {
           // PHASE 2 CASE B: SUCCESS_MISSING
           console.log(`[ECORP:PERSISTENCE] HYDRATION_MISSING uid=${user.uid}`);
+          const legacyCached = loadCachedProgress(null);
+          const cachedState = loadCachedProgress(user.uid);
+          const initialLessons = Array.from(new Set([
+            ...(cachedState.completedLessons || []),
+            ...(legacyCached.completedLessons || []),
+          ]));
+          const initialStreak = Math.max(cachedState.streakDays || 1, legacyCached.streakDays || 1, 1);
+          const initialXP = Math.max(cachedState.xp || 0, legacyCached.xp || 0, initialProgress.xp);
           const todayUtc = getUtcDateString();
+
+          const initialUserProgress: UserProgress = {
+            ...initialProgress,
+            ...cachedState,
+            completedLessons: initialLessons,
+            streakDays: initialStreak,
+            xp: initialXP,
+            lastActivityDate: todayUtc,
+          };
+
+          const lessonsMap = Object.fromEntries(initialLessons.map(id => [id, true]));
           const newUserData = {
             displayName: user.displayName || "Ecorp Scholar",
             photoURL: user.photoURL || null,
-            curriculumProgress: 0,
-            completedLessonCount: 0,
+            curriculumProgress: initialLessons.length,
+            completedLessonCount: initialLessons.length,
             curriculumProgressPercent: 0,
-            currentStreak: 1,
-            streakDays: 1,
+            currentStreak: initialStreak,
+            streakDays: initialStreak,
             lastActivityDate: todayUtc,
-            xp: initialProgress.xp,
-            completedLessons: [],
-            lessons: {},
-            completedMissions: [],
-            missionScores: {},
-            bookmarkedPatterns: [],
-            savedCustomPrompts: [],
-            achievements: [],
+            xp: initialXP,
+            completedLessons: initialLessons,
+            lessons: lessonsMap,
+            completedMissions: initialUserProgress.completedMissions,
+            missionScores: initialUserProgress.missionScores,
+            bookmarkedPatterns: initialUserProgress.bookmarkedPatterns,
+            savedCustomPrompts: initialUserProgress.savedCustomPrompts,
+            achievements: initialUserProgress.achievements,
+            progress: initialUserProgress,
           };
 
           try {
@@ -667,10 +766,10 @@ Provide:
             console.warn("Could not create initial user document in Firestore", createErr);
           }
 
-          lastSyncedFingerprint.current = getProgressFingerprint(initialProgress);
-          setUserProgress(initialProgress);
+          lastSyncedFingerprint.current = getProgressFingerprint(initialUserProgress);
+          setUserProgress(initialUserProgress);
           try {
-            localStorage.setItem(getStorageKeyForUid(user.uid), JSON.stringify(initialProgress));
+            localStorage.setItem(getStorageKeyForUid(user.uid), JSON.stringify(initialUserProgress));
           } catch (e) {
             console.warn("Could not cache initial progress locally", e);
           }
@@ -684,14 +783,23 @@ Provide:
           user.uid,
           (docData) => {
             if (!docData || auth.currentUser?.uid !== user.uid) return;
-            
+
+            const progressNested = (docData.progress && typeof docData.progress === 'object') ? docData.progress : {};
             const arrayFromDoc2 = Array.isArray(docData.completedLessons) ? docData.completedLessons : [];
+            const nestedFromDoc2 = Array.isArray(progressNested.completedLessons) ? progressNested.completedLessons : [];
             const mapKeys2 = docData.lessons && typeof docData.lessons === 'object'
               ? Object.keys(docData.lessons).filter(k => docData.lessons[k])
               : [];
-            const merged2 = Array.from(new Set([...arrayFromDoc2, ...mapKeys2]));
 
             const currentProg = latestUserProgressRef.current;
+            // Always union with current completed lessons to never lose progress
+            const merged2 = Array.from(new Set([
+              ...(currentProg.completedLessons || []),
+              ...arrayFromDoc2,
+              ...nestedFromDoc2,
+              ...mapKeys2,
+            ]));
+
             const nextProgress: UserProgress = {
               ...currentProg,
               completedLessons: merged2,
@@ -699,8 +807,17 @@ Provide:
               missionScores: docData.missionScores && typeof docData.missionScores === "object" ? docData.missionScores : currentProg.missionScores,
               bookmarkedPatterns: Array.isArray(docData.bookmarkedPatterns) ? docData.bookmarkedPatterns : currentProg.bookmarkedPatterns,
               savedCustomPrompts: Array.isArray(docData.savedCustomPrompts) ? docData.savedCustomPrompts : currentProg.savedCustomPrompts,
-              xp: typeof docData.xp === "number" ? docData.xp : currentProg.xp,
-              streakDays: typeof docData.currentStreak === "number" ? docData.currentStreak : (typeof docData.streakDays === "number" ? docData.streakDays : currentProg.streakDays),
+              xp: Math.max(
+                currentProg.xp || 0,
+                typeof docData.xp === "number" ? docData.xp : 0,
+                typeof progressNested.xp === "number" ? progressNested.xp : 0
+              ),
+              streakDays: Math.max(
+                currentProg.streakDays || 1,
+                typeof docData.currentStreak === "number" ? docData.currentStreak : 1,
+                typeof docData.streakDays === "number" ? docData.streakDays : 1,
+                typeof progressNested.streakDays === "number" ? progressNested.streakDays : 1
+              ),
               lastActivityDate: typeof docData.lastActivityDate === "string" ? docData.lastActivityDate : currentProg.lastActivityDate,
               achievements: Array.isArray(docData.achievements) ? docData.achievements : currentProg.achievements,
             };
@@ -738,11 +855,6 @@ Provide:
         activeUnsubscribeRef.current();
         activeUnsubscribeRef.current = null;
       }
-      activityEvents.forEach(event => window.removeEventListener(event, handleUserActivity));
-      window.clearInterval(interval);
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-      window.removeEventListener('focus', checkSession);
-      window.removeEventListener('pageshow', checkSession);
     };
   }, []);
 
