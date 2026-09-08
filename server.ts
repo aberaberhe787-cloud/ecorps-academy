@@ -14,10 +14,9 @@ dotenv.config();
 // Supported text models for resilience and fallback
 const CANDIDATE_MODELS = [
   "gemini-3.5-flash",
-  "gemini-3.6-flash",
-  "gemini-3.7-flash",
   "gemini-3.1-flash-lite",
-  "gemini-3.5-flash-lite",
+  "gemini-flash-latest",
+  "gemini-3.8-flash",
 ];
 
 // Lazy database initialization
@@ -66,12 +65,24 @@ async function generateWithRetry(
           err?.statusCode ||
           (errMessage.includes("503") ? 503 : errMessage.includes("429") ? 429 : 0);
 
+        const isQuotaExhausted =
+          statusCode === 429 ||
+          errMessage.includes("Quota exceeded") ||
+          errMessage.includes("RESOURCE_EXHAUSTED") ||
+          errMessage.includes("rate-limits");
+
+        if (isQuotaExhausted) {
+          console.warn(
+            `[Gemini Fallback] Model ${modelName} reached quota limit (${statusCode}). Switching immediately to next candidate model.`
+          );
+          // Don't retry the exhausted model, immediately advance to next candidate model
+          break;
+        }
+
         const isRetryable =
           statusCode === 503 ||
-          statusCode === 429 ||
           errMessage.includes("high demand") ||
           errMessage.includes("UNAVAILABLE") ||
-          errMessage.includes("RESOURCE_EXHAUSTED") ||
           errMessage.includes("temporarily unavailable") ||
           errMessage.includes("overloaded");
 
@@ -176,8 +187,9 @@ async function startServer() {
   app.post("/api/gemini/generate", async (req, res) => {
     const startTime = Date.now();
     const requestId = "req_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 9);
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
     try {
-      const { prompt, systemInstruction, temperature, topP } = req.body;
+      const { prompt, systemInstruction, temperature, topP } = req.body || {};
       if (!prompt || typeof prompt !== "string") {
         return res.status(400).json({ success: false, error: "Prompt is required", executionMode: "error", requestId });
       }
@@ -224,22 +236,25 @@ async function startServer() {
     } catch (error: any) {
       console.error("Gemini Generate Error:", error?.message || error);
       const latencyMs = Date.now() - startTime;
-      return res.status(500).json({
-        success: false,
-        error: error?.message || "Gemini execution failed. Your prompt was not evaluated.",
-        executionMode: "error",
-        provider: "Google Gemini",
-        latencyMs,
-        requestId,
-      });
+      if (!res.headersSent) {
+        return res.status(500).json({
+          success: false,
+          error: error?.message || "Gemini execution failed. Your prompt was not evaluated.",
+          executionMode: "error",
+          provider: "Google Gemini",
+          latencyMs,
+          requestId,
+        });
+      }
     }
   });
 
   app.post("/api/gemini/evaluate", async (req, res) => {
     const startTime = Date.now();
     const requestId = "eval_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 9);
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
     try {
-      const { prompt, rubric, missionContext, type } = req.body;
+      const { prompt, rubric, missionContext, type } = req.body || {};
       if (!prompt || typeof prompt !== "string") {
         return res.status(400).json({ success: false, error: "Prompt is required", executionMode: "error", requestId });
       }
@@ -357,14 +372,16 @@ Return RAW JSON ONLY adhering strictly to this schema:
     } catch (error: any) {
       console.error("Gemini Evaluate Error:", error?.message || error);
       const latencyMs = Date.now() - startTime;
-      return res.status(500).json({
-        success: false,
-        error: error?.message || "Gemini evaluation unavailable. Your prompt was not evaluated.",
-        executionMode: "error",
-        provider: "Google Gemini",
-        latencyMs,
-        requestId,
-      });
+      if (!res.headersSent) {
+        return res.status(500).json({
+          success: false,
+          error: error?.message || "Gemini evaluation unavailable. Your prompt was not evaluated.",
+          executionMode: "error",
+          provider: "Google Gemini",
+          latencyMs,
+          requestId,
+        });
+      }
     }
   });
 
@@ -396,7 +413,7 @@ Return RAW JSON ONLY adhering strictly to this schema:
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.get("*", (req, res) => {
+    app.get("*all", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
   }

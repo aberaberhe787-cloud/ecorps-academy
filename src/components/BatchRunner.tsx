@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Copy, ListTree, RefreshCcw, FastForward } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { callGeminiGenerate } from '../lib/geminiApi';
 
 interface BatchRunnerProps {
   promptTemplate: string;
@@ -50,22 +51,13 @@ export const BatchRunner: React.FC<BatchRunnerProps> = ({ promptTemplate, system
       });
 
       try {
-        const response = await fetch('/api/gemini/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: hydratedPrompt,
-            systemInstruction: systemInstruction ? systemInstruction.trim() : undefined,
-            temperature: 0.7
-          })
+        const data = await callGeminiGenerate({
+          prompt: hydratedPrompt,
+          systemInstruction: systemInstruction ? systemInstruction.trim() : undefined,
+          temperature: 0.7
         });
 
-        const data = await response.json();
-        if (data.success && data.text) {
-          newResults[i] = data.text;
-        } else {
-          newResults[i] = `[Execution Error: ${data.error || 'Failed to generate'}]`;
-        }
+        newResults[i] = data.text || '';
       } catch (err: any) {
         newResults[i] = `[Execution Error: ${err?.message || 'Network error'}]`;
       }

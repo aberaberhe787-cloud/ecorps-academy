@@ -35,6 +35,10 @@ import {
   markStreakEvaluatedToday,
   isStreakAlreadyEvaluatedToday,
 } from "../lib/userStreakService";
+import {
+  callGeminiGenerate,
+  callGeminiEvaluate,
+} from "../lib/geminiApi";
 
 interface AppContextType {
   activeTab: NavTab;
@@ -1147,15 +1151,19 @@ Provide:
     const sysToExecute = customSystemInstruction !== undefined ? customSystemInstruction : systemInstruction;
 
     // Stale protection & request lifecycle
-    activeAbortControllerRef.current?.abort();
-    const controller = new AbortController();
-    activeAbortControllerRef.current = controller;
-    const currentSeq = ++activeExecutionIdRef.current;
+    let controller: AbortController;
+    let currentSeq = 0;
+    if (!isolated) {
+      activeAbortControllerRef.current?.abort();
+      controller = new AbortController();
+      activeAbortControllerRef.current = controller;
+      currentSeq = ++activeExecutionIdRef.current;
+      setLastResult(null); // Clear stale output immediately so user doesn't see old response
+    } else {
+      controller = new AbortController();
+    }
 
     setIsExecuting(true);
-    if (!isolated) {
-      setLastResult(null); // Clear stale output immediately so user doesn't see old response
-    }
     const startTime = Date.now();
     const analysis = analyzePrompt(textToExecute);
 
@@ -1170,40 +1178,32 @@ Provide:
     let requestId: string | undefined = undefined;
 
     try {
-      const response = await fetch("/api/gemini/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const data = await callGeminiGenerate({
+        prompt: textToExecute,
+        systemInstruction: sysToExecute ? sysToExecute.trim() : undefined,
+        temperature,
+        topP,
         signal: controller.signal,
-        body: JSON.stringify({
-          prompt: textToExecute,
-          systemInstruction: sysToExecute ? sysToExecute.trim() : undefined,
-          temperature,
-          topP,
-        }),
       });
 
-      const data = await response.json();
-
-      // Check if another execution was started while this was in-flight
-      if (currentSeq !== activeExecutionIdRef.current) {
+      // Check if another execution was started while this was in-flight (for non-isolated)
+      if (!isolated && currentSeq !== activeExecutionIdRef.current) {
         return {} as ExecutionResult;
       }
 
-      if (!response.ok || !data.success || !data.text) {
-        throw new Error(data.error || `Gemini execution failed with status ${response.status}`);
-      }
-
-      resultText = data.text;
+      resultText = data.text || "";
       modelName = data.model || "Google Gemini";
       duration = data.latencyMs ?? (Date.now() - startTime);
-      tokenCount = data.usage?.candidatesTokenCount || (data.usage?.totalTokens ? Math.max(1, data.usage.totalTokens - (data.usage.promptTokens || 0)) : (analysis.tokenEstimate + 100));
+      tokenCount =
+        data.usage?.candidatesTokenCount ||
+        (data.usage?.totalTokens ? Math.max(1, data.usage.totalTokens - (data.usage.promptTokens || 0)) : analysis.tokenEstimate + 100);
       status = "success";
       executionMode = "real";
       provider = data.provider || "Google Gemini";
       requestId = data.requestId;
     } catch (err: any) {
       // If aborted because a newer prompt was submitted, do nothing
-      if (err?.name === "AbortError" || currentSeq !== activeExecutionIdRef.current) {
+      if (err?.name === "AbortError" || controller.signal.aborted || (!isolated && currentSeq !== activeExecutionIdRef.current)) {
         return {} as ExecutionResult;
       }
       console.error("Real Gemini execution error:", err);
@@ -1234,7 +1234,7 @@ Provide:
       requestId,
     };
 
-    if (currentSeq === activeExecutionIdRef.current) {
+    if (isolated || currentSeq === activeExecutionIdRef.current) {
       setIsExecuting(false);
       if (!isolated) {
         setLastResult(execResult);
@@ -1244,7 +1244,7 @@ Provide:
       }
 
       // Award XP only on successful real execution
-      if (status === "success") {
+      if (status === "success" && !isolated) {
         setUserProgress((prev) => ({
           ...prev,
           xp: prev.xp + 5,
@@ -1272,29 +1272,20 @@ Provide:
 
     const fetchA = async () => {
       try {
-        const responseA = await fetch("/api/gemini/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            prompt: prompt,
-            systemInstruction: systemInstruction ? systemInstruction.trim() : undefined,
-            temperature,
-            topP,
-          }),
+        const dataA = await callGeminiGenerate({
+          prompt,
+          systemInstruction: systemInstruction ? systemInstruction.trim() : undefined,
+          temperature,
+          topP,
         });
-        const dataA = await responseA.json();
         if (seqA !== activeComparisonSeqARef.current) return;
-
-        if (!responseA.ok || !dataA.success || !dataA.text) {
-          throw new Error(dataA.error || `Variant A execution failed with status ${responseA.status}`);
-        }
 
         const durationA = dataA.latencyMs ?? (Date.now() - startTimeA);
         const execResultA: ExecutionResult = {
           id: "exec-comp-a-" + Date.now(),
-          prompt: prompt,
+          prompt,
           systemInstruction,
-          output: dataA.text,
+          output: dataA.text || "",
           timestamp: Date.now(),
           durationMs: Math.max(10, durationA),
           tokenCount: dataA.usage?.candidatesTokenCount || (analysisA.tokenEstimate + 80),
@@ -1311,7 +1302,7 @@ Provide:
         if (seqA !== activeComparisonSeqARef.current) return;
         const execResultA: ExecutionResult = {
           id: "exec-comp-a-" + Date.now(),
-          prompt: prompt,
+          prompt,
           systemInstruction,
           output: "",
           timestamp: Date.now(),
@@ -1331,29 +1322,20 @@ Provide:
 
     const fetchB = async () => {
       try {
-        const responseB = await fetch("/api/gemini/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            prompt: comparisonPromptB,
-            systemInstruction: systemInstruction ? systemInstruction.trim() : undefined,
-            temperature,
-            topP,
-          }),
+        const dataB = await callGeminiGenerate({
+          prompt: comparisonPromptB,
+          systemInstruction: systemInstruction ? systemInstruction.trim() : undefined,
+          temperature,
+          topP,
         });
-        const dataB = await responseB.json();
         if (seqB !== activeComparisonSeqBRef.current) return;
-
-        if (!responseB.ok || !dataB.success || !dataB.text) {
-          throw new Error(dataB.error || `Variant B execution failed with status ${responseB.status}`);
-        }
 
         const durationB = dataB.latencyMs ?? (Date.now() - startTimeB);
         const execResultB: ExecutionResult = {
           id: "exec-comp-b-" + Date.now(),
           prompt: comparisonPromptB,
           systemInstruction,
-          output: dataB.text,
+          output: dataB.text || "",
           timestamp: Date.now(),
           durationMs: Math.max(10, durationB),
           tokenCount: dataB.usage?.candidatesTokenCount || (analysisB.tokenEstimate + 80),
@@ -1407,34 +1389,24 @@ Provide:
     }
 
     try {
-      const response = await fetch("/api/gemini/evaluate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "mission",
-          missionId,
-          prompt: submittedPrompt,
-          rubric: {
-            title: mission.title,
-            objective: mission.objective,
-            targetCriteria: mission.targetCriteria,
-            minPassingScore: 70,
-            difficulty: mission.difficulty,
-          },
-        }),
+      const data = await callGeminiEvaluate({
+        type: "mission",
+        missionId,
+        prompt: submittedPrompt,
+        rubric: {
+          title: mission.title,
+          objective: mission.objective,
+          targetCriteria: mission.targetCriteria,
+          minPassingScore: 70,
+          difficulty: mission.difficulty,
+        },
       });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || `Gemini evaluation failed with status ${response.status}`);
-      }
 
       // Application-side boundary validation
       const score = Math.max(0, Math.min(100, Math.round(Number(data.score) || 0)));
       const passed = typeof data.passed === "boolean" ? data.passed : score >= 70;
-      const validGrade: MissionEvaluationResult["grade"] = ["S", "A", "B", "C", "D"].includes(data.grade)
-        ? data.grade
+      const validGrade: MissionEvaluationResult["grade"] = ["S", "A", "B", "C", "D"].includes(data.grade as any)
+        ? (data.grade as any)
         : score >= 90 ? "S" : score >= 80 ? "A" : score >= 65 ? "B" : score >= 50 ? "C" : "D";
 
       const criteriaChecks = Array.isArray(data.criteria) && data.criteria.length > 0

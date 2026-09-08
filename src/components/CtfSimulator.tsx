@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShieldAlert, Terminal, Lock, Key, Cpu, Flag } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { callGeminiGenerate } from '../lib/geminiApi';
 
 export const CtfSimulator: React.FC = () => {
   const [prompt, setPrompt] = useState("");
@@ -19,22 +20,13 @@ export const CtfSimulator: React.FC = () => {
     setSuccess(null);
     
     try {
-      const response = await fetch('/api/gemini/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt,
-          systemInstruction: SYSTEM_PROMPT,
-          temperature: 0.7
-        })
+      const data = await callGeminiGenerate({
+        prompt,
+        systemInstruction: SYSTEM_PROMPT,
+        temperature: 0.7
       });
 
-      const data = await response.json();
-      if (!response.ok || !data.success || !data.text) {
-        throw new Error(data.error || 'Execution failed');
-      }
-
-      const finalOutput = data.text;
+      const finalOutput = data.text || '';
       setOutput(finalOutput);
       setIsExecuting(false);
 

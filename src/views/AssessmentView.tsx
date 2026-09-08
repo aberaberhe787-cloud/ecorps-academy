@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Sparkles, CheckCircle2, AlertCircle, Loader2, ArrowRight, ArrowLeft, Award, BookOpen, ShieldCheck, RotateCcw } from 'lucide-react';
+import { callGeminiEvaluate } from '../lib/geminiApi';
 
 export const AssessmentView: React.FC = () => {
   const { userProgress, setActiveTab, completeAssessment } = useApp();
@@ -16,32 +17,22 @@ export const AssessmentView: React.FC = () => {
     setErrorMessage('');
     
     try {
-      const response = await fetch('/api/gemini/evaluate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'assessment',
-          assessmentId: 'prompt-foundations-final',
-          prompt: submission,
-          rubric: {
-            title: 'Prompt Engineering Capstone Assessment',
-            objective: 'Demonstrate production-grade prompt engineering mastery by constructing an end-to-end engineered prompt adhering to persona adoption, XML delimitation, and strict output constraints.',
-            targetCriteria: [
-              "Explicit persona formulation (e.g., 'Act as a Senior...')",
-              "Structured delimiters (e.g., <system_specs> or ```)",
-              "Strict output format constraints (JSON, Schema, or Table)",
-              "Negative constraints, boundary limits, or error handling"
-            ],
-            minPassingScore: 70
-          }
-        })
+      const data = await callGeminiEvaluate({
+        type: 'assessment',
+        missionContext: 'prompt-foundations-final',
+        prompt: submission,
+        rubric: {
+          title: 'Prompt Engineering Capstone Assessment',
+          objective: 'Demonstrate production-grade prompt engineering mastery by constructing an end-to-end engineered prompt adhering to persona adoption, XML delimitation, and strict output constraints.',
+          targetCriteria: [
+            "Explicit persona formulation (e.g., 'Act as a Senior...')",
+            "Structured delimiters (e.g., <system_specs> or ```)",
+            "Strict output format constraints (JSON, Schema, or Table)",
+            "Negative constraints, boundary limits, or error handling"
+          ],
+          minPassingScore: 70
+        }
       });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || `Gemini evaluation failed with status ${response.status}`);
-      }
 
       // Enforce application-side boundaries
       const score = Math.max(0, Math.min(100, Math.round(Number(data.score) || 0)));
