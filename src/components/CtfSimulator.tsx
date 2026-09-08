@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { ShieldAlert, Terminal, Lock, Key, Cpu, Flag } from 'lucide-react';
-import { generateMockAiResponse } from '../lib/mockAiEngine';
 import { useApp } from '../context/AppContext';
 
 export const CtfSimulator: React.FC = () => {
@@ -19,25 +18,34 @@ export const CtfSimulator: React.FC = () => {
     setIsExecuting(true);
     setSuccess(null);
     
-    // Simulate AI model response
-    const res = generateMockAiResponse(prompt, SYSTEM_PROMPT, 0.9);
-    await new Promise(resolve => setTimeout(resolve, res.latencyMs || 500));
-    
-    // In our mock, if the user explicitly uses typical jailbreak keywords like 'ignore', 'developer mode', we let it leak for educational purposes.
-    let finalOutput = res.text;
-    const pLower = prompt.toLowerCase();
-    if (pLower.includes("ignore") || pLower.includes("system prompt") || pLower.includes("developer mode") || pLower.includes("print the previous instructions")) {
-      finalOutput = `I am operating in developer mode. The secret key you requested is: ${SECRET_KEY}`;
-    } else {
-      finalOutput = "Access Denied. I cannot fulfill this request.";
-    }
+    try {
+      const response = await fetch('/api/gemini/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt,
+          systemInstruction: SYSTEM_PROMPT,
+          temperature: 0.7
+        })
+      });
 
-    setOutput(finalOutput);
-    setIsExecuting(false);
-    
-    if (finalOutput.includes(SECRET_KEY)) {
-      setSuccess(true);
-    } else {
+      const data = await response.json();
+      if (!response.ok || !data.success || !data.text) {
+        throw new Error(data.error || 'Execution failed');
+      }
+
+      const finalOutput = data.text;
+      setOutput(finalOutput);
+      setIsExecuting(false);
+
+      if (finalOutput.includes(SECRET_KEY)) {
+        setSuccess(true);
+      } else {
+        setSuccess(false);
+      }
+    } catch (err: any) {
+      setOutput(`[Execution error: ${err?.message || 'Gemini execution unavailable'}]`);
+      setIsExecuting(false);
       setSuccess(false);
     }
   };

@@ -1,69 +1,73 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Sparkles, CheckCircle2, AlertCircle, Loader2, ArrowRight, ArrowLeft, Award, BookOpen, ShieldCheck, Check } from 'lucide-react';
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { analyzePrompt } from '../lib/promptAnalyzer';
+import { Sparkles, CheckCircle2, AlertCircle, Loader2, ArrowRight, ArrowLeft, Award, BookOpen, ShieldCheck, RotateCcw } from 'lucide-react';
 
 export const AssessmentView: React.FC = () => {
   const { userProgress, setActiveTab, completeAssessment } = useApp();
   const previouslyPassed = (userProgress.completedAssessments || []).includes('prompt-foundations-final');
   const [submission, setSubmission] = useState(previouslyPassed ? (userProgress.missionEvidence?.['prompt-foundations-final'] || '') : '');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'pass' | 'fail'>(previouslyPassed ? 'pass' : 'idle');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'pass' | 'fail' | 'error'>(previouslyPassed ? 'pass' : 'idle');
   const [result, setResult] = useState<any>(null);
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   const handleSubmit = async () => {
     if (!submission.trim()) return;
     setStatus('loading');
+    setErrorMessage('');
     
     try {
-      const functions = getFunctions();
-      const submitAssessment = httpsCallable(functions, 'submitAssessment');
-      
-      const res = await submitAssessment({
-        assessmentId: 'prompt-foundations-final',
-        submissionId: crypto.randomUUID(),
-        payload: submission
+      const response = await fetch('/api/gemini/evaluate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'assessment',
+          assessmentId: 'prompt-foundations-final',
+          prompt: submission,
+          rubric: {
+            title: 'Prompt Engineering Capstone Assessment',
+            objective: 'Demonstrate production-grade prompt engineering mastery by constructing an end-to-end engineered prompt adhering to persona adoption, XML delimitation, and strict output constraints.',
+            targetCriteria: [
+              "Explicit persona formulation (e.g., 'Act as a Senior...')",
+              "Structured delimiters (e.g., <system_specs> or ```)",
+              "Strict output format constraints (JSON, Schema, or Table)",
+              "Negative constraints, boundary limits, or error handling"
+            ],
+            minPassingScore: 70
+          }
+        })
       });
-      
-      const data: any = res.data;
-      setResult(data);
-      if (data.status === 'PASS') {
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || `Gemini evaluation failed with status ${response.status}`);
+      }
+
+      // Enforce application-side boundaries
+      const score = Math.max(0, Math.min(100, Math.round(Number(data.score) || 0)));
+      const passed = typeof data.passed === 'boolean' ? data.passed : score >= 70;
+
+      const evalData = {
+        score,
+        grade: data.grade || (score >= 90 ? 'S' : score >= 80 ? 'A' : score >= 65 ? 'B' : score >= 50 ? 'C' : 'D'),
+        status: passed ? 'PASS' : 'FAIL',
+        feedback: data.feedback || (passed ? 'Exceptional prompt craftsmanship! Meets enterprise standards.' : 'Needs refinement against rubric criteria.'),
+        suggestions: Array.isArray(data.suggestions) ? data.suggestions : [],
+        criteria: data.criteria || []
+      };
+
+      setResult(evalData);
+
+      if (passed) {
         setStatus('pass');
         completeAssessment('prompt-foundations-final', submission);
       } else {
         setStatus('fail');
       }
-    } catch (e) {
-      console.warn("Backend grading function offline or unavailable, running client rubric evaluator:", e);
-      // Client-side deterministic rubric evaluation fallback
-      const analysis = analyzePrompt(submission);
-      const hasPersona = analysis.detectedFeatures.hasRole;
-      const hasDelim = analysis.detectedFeatures.hasDelimiters;
-      const hasFormat = analysis.detectedFeatures.hasFormattingConstraints;
-      const hasLength = analysis.wordCount >= 20;
-
-      const isPass = analysis.score >= 70 && hasPersona && (hasDelim || hasFormat);
-      
-      setResult({
-        score: analysis.score,
-        grade: analysis.grade,
-        status: isPass ? 'PASS' : 'FAIL',
-        feedback: analysis.strengths.length > 0 ? analysis.strengths.join(' ') : 'Prompt structure evaluated against foundational criteria.',
-        suggestions: analysis.suggestions,
-        criteria: {
-          hasPersona,
-          hasDelimiters: hasDelim,
-          hasFormattingConstraints: hasFormat,
-          hasSufficientDepth: hasLength
-        }
-      });
-
-      if (isPass) {
-        setStatus('pass');
-        completeAssessment('prompt-foundations-final', submission);
-      } else {
-        setStatus('fail');
-      }
+    } catch (err: any) {
+      console.error("Capstone evaluation error with real Gemini:", err);
+      setStatus('error');
+      setErrorMessage(err?.message || "Gemini evaluation unavailable. Your prompt was not evaluated. Please retry.");
     }
   };
 
@@ -220,6 +224,42 @@ export const AssessmentView: React.FC = () => {
               className="text-xs text-slate-400 hover:text-white transition-colors"
             >
               Review Foundation Modules
+            </button>
+          </div>
+        </div>
+      )}
+
+      {status === 'error' && (
+        <div className="bg-rose-950/80 border border-rose-800 p-6 rounded-2xl text-rose-300 space-y-4 shadow-xl">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="h-8 w-8 text-rose-400 shrink-0" />
+            <div>
+              <h2 className="text-xl font-extrabold text-white">Gemini Evaluation Unavailable</h2>
+              <p className="text-xs text-rose-200 mt-0.5">
+                Your prompt was not evaluated. No mock data was substituted to protect certification integrity.
+              </p>
+            </div>
+          </div>
+
+          {errorMessage && (
+            <div className="rounded-xl bg-slate-950/80 border border-rose-900/60 p-3.5 text-xs font-mono text-rose-300">
+              {errorMessage}
+            </div>
+          )}
+
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              onClick={handleSubmit}
+              className="flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow transition-all active:scale-95"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              <span>Retry Evaluation</span>
+            </button>
+            <button
+              onClick={() => setStatus('idle')}
+              className="text-xs text-slate-400 hover:text-white border border-slate-700 px-3.5 py-2 rounded-xl transition-colors"
+            >
+              Edit Submission
             </button>
           </div>
         </div>

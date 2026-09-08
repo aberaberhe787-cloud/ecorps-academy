@@ -581,15 +581,31 @@ export const PlaygroundView: React.FC = () => {
             {isComparisonMode ? (
               <div className="space-y-4">
                 <div className="h-[280px]">
-                  <TerminalOutput result={lastResult} isExecuting={isExecuting} title="Variant A: Engineered" badge="OPTIMIZED" />
+                  <TerminalOutput
+                    result={lastResult}
+                    isExecuting={isExecuting}
+                    title="Variant A: Engineered"
+                    badge="OPTIMIZED"
+                    onRetry={() => executeComparison()}
+                  />
                 </div>
                 <div className="h-[280px]">
-                  <TerminalOutput result={comparisonResultB} isExecuting={isExecuting} title="Variant B: Baseline" badge="BASELINE" />
+                  <TerminalOutput
+                    result={comparisonResultB}
+                    isExecuting={isExecuting}
+                    title="Variant B: Baseline"
+                    badge="BASELINE"
+                    onRetry={() => executeComparison()}
+                  />
                 </div>
               </div>
             ) : (
               <div className="h-[580px]">
-                <TerminalOutput result={lastResult} isExecuting={isExecuting} />
+                <TerminalOutput
+                  result={lastResult}
+                  isExecuting={isExecuting}
+                  onRetry={() => executeCurrentPrompt()}
+                />
               </div>
             )}
           </div>

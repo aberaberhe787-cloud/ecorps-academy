@@ -13,9 +13,11 @@ dotenv.config();
 
 // Supported text models for resilience and fallback
 const CANDIDATE_MODELS = [
-  "gemini-3.8-flash",
-  "gemini-flash-latest",
-  "gemini-2.5-flash",
+  "gemini-3.5-flash",
+  "gemini-3.6-flash",
+  "gemini-3.7-flash",
+  "gemini-3.1-flash-lite",
+  "gemini-3.5-flash-lite",
 ];
 
 // Lazy database initialization
@@ -177,21 +179,21 @@ async function startServer() {
     try {
       const { prompt, systemInstruction, temperature, topP } = req.body;
       if (!prompt || typeof prompt !== "string") {
-        return res.status(400).json({ error: "Prompt is required", executionMode: "error", requestId });
+        return res.status(400).json({ success: false, error: "Prompt is required", executionMode: "error", requestId });
       }
 
       const ai = getGeminiClient();
       if (!ai) {
         return res.status(503).json({
-          error: "Gemini API key not configured on server",
+          success: false,
+          error: "Gemini execution unavailable. GEMINI_API_KEY is not configured on server.",
           executionMode: "error",
-          provider: "google",
+          provider: "Google Gemini",
           requestId,
         });
       }
 
       const { response, usedModel } = await generateWithRetry(ai, {
-        model: "gemini-3.8-flash",
         contents: prompt,
         config: {
           systemInstruction: systemInstruction || undefined,
@@ -204,26 +206,29 @@ async function startServer() {
       const usageMetadata = (response as any).usageMetadata;
 
       return res.json({
-        text: response.text || "No response generated.",
+        success: true,
+        text: response.text || "",
         executionMode: "real",
-        provider: "google",
+        provider: "Google Gemini",
         model: usedModel,
         latencyMs,
         requestId,
-        usage: {
-          promptTokens: usageMetadata?.promptTokenCount ?? Math.max(1, Math.round(prompt.length / 4)),
-          candidatesTokenCount: usageMetadata?.candidatesTokenCount ?? (response.text ? Math.max(1, Math.round(response.text.length / 4)) : 0),
-          totalTokens: usageMetadata?.totalTokenCount,
-        },
+        ...(usageMetadata ? {
+          usage: {
+            promptTokens: usageMetadata.promptTokenCount,
+            candidatesTokenCount: usageMetadata.candidatesTokenCount,
+            totalTokens: usageMetadata.totalTokenCount,
+          }
+        } : {})
       });
     } catch (error: any) {
       console.error("Gemini Generate Error:", error?.message || error);
       const latencyMs = Date.now() - startTime;
       return res.status(500).json({
-        error: error.message || "Failed to generate AI response",
+        success: false,
+        error: error?.message || "Gemini execution failed. Your prompt was not evaluated.",
         executionMode: "error",
-        provider: "google",
-        model: "gemini-3.8-flash",
+        provider: "Google Gemini",
         latencyMs,
         requestId,
       });
@@ -234,46 +239,72 @@ async function startServer() {
     const startTime = Date.now();
     const requestId = "eval_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 9);
     try {
-      const { prompt, missionContext } = req.body;
+      const { prompt, rubric, missionContext, type } = req.body;
       if (!prompt || typeof prompt !== "string") {
-        return res.status(400).json({ error: "Prompt is required", executionMode: "error", requestId });
+        return res.status(400).json({ success: false, error: "Prompt is required", executionMode: "error", requestId });
       }
 
       const ai = getGeminiClient();
       if (!ai) {
         return res.status(503).json({
-          error: "Gemini API key not configured on server",
+          success: false,
+          error: "Gemini evaluation unavailable. GEMINI_API_KEY is not configured on server.",
           executionMode: "error",
-          provider: "google",
+          provider: "Google Gemini",
           requestId,
         });
       }
 
-      const evaluationPrompt = `You are a world-class AI Prompt Engineering instructor.
-Analyze the following prompt submitted by a student for the task: "${missionContext || "General prompt engineering evaluation"}".
+      const taskTitle = rubric?.title || missionContext || "Prompt Engineering Assessment";
+      const taskObjective = rubric?.objective || "Construct an enterprise-grade prompt meeting all required criteria";
+      let criteriaList = "";
+      if (Array.isArray(rubric?.targetCriteria)) {
+        criteriaList = rubric.targetCriteria.map((c: string, idx: number) => `${idx + 1}. ${c}`).join("\n");
+      } else if (Array.isArray(rubric?.criteria)) {
+        criteriaList = rubric.criteria.map((c: string, idx: number) => `${idx + 1}. ${c}`).join("\n");
+      } else {
+        criteriaList = "1. Clear persona & role definition\n2. Delimiters separating context\n3. Explicit output structure\n4. Negative constraints or edge cases handled";
+      }
 
-Student Prompt:
+      const evaluationPrompt = `You are an expert AI Prompt Engineering Rubric Evaluator at Ecorp Academy.
+Evaluate the student's submitted prompt against the authoritative curriculum criteria.
+
+Task: ${taskTitle}
+Objective: ${taskObjective}
+Target Criteria:
+${criteriaList}
+
+Student Submission:
 """
 ${prompt}
 """
 
-Evaluate the prompt and return JSON strictly matching:
+Instructions:
+1. Objectively determine if each target criterion is passed or failed based on the student submission.
+2. Provide a score from 0 to 100 representing holistic compliance. An empty or weak submission must receive a low score. A well-engineered prompt meeting all criteria should receive a high score (>= 70).
+3. Provide concise, constructive pedagogical feedback.
+
+Return RAW JSON ONLY adhering strictly to this schema:
 {
-  "score": 85,
-  "grade": "A",
-  "detectedTechniques": ["Role Prompting", "Delimiters"],
-  "strengths": ["Clear role assignment", "Includes contextual constraints"],
-  "weaknesses": ["Lacks few-shot examples"],
-  "improvedPrompt": "Act as an expert...",
-  "explanation": "Adding few-shot examples and explicit formatting guarantees deterministic outputs."
+  "score": <number 0-100>,
+  "grade": <"S" | "A" | "B" | "C" | "D">,
+  "passed": <boolean>,
+  "feedback": "<overall summary>",
+  "criteria": [
+    {
+      "criteria": "<criterion description>",
+      "passed": <boolean>,
+      "feedback": "<brief explanation for pass or fail>"
+    }
+  ],
+  "suggestions": ["<actionable improvement suggestion>"]
 }`;
 
       const { response, usedModel } = await generateWithRetry(ai, {
-        model: "gemini-3.8-flash",
         contents: evaluationPrompt,
         config: {
           responseMimeType: "application/json",
-          temperature: 0.2,
+          temperature: 0.1,
         },
       });
 
@@ -281,16 +312,45 @@ Evaluate the prompt and return JSON strictly matching:
       try {
         parsed = JSON.parse(response.text || "{}");
       } catch {
-        parsed = { raw: response.text };
+        const jsonMatch = response.text?.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            parsed = JSON.parse(jsonMatch[0]);
+          } catch {}
+        }
+      }
+
+      if (!parsed || typeof parsed !== "object") {
+        throw new Error("Invalid structured evaluation format from model");
+      }
+
+      const minPassingScore = typeof rubric?.minPassingScore === "number" ? rubric.minPassingScore : 70;
+      let rawScore = typeof parsed.score === "number" ? parsed.score : 0;
+      const score = Math.max(0, Math.min(100, Math.round(rawScore)));
+      const passed = typeof parsed.passed === "boolean" ? parsed.passed : score >= minPassingScore;
+
+      let grade = parsed.grade;
+      if (!["S", "A", "B", "C", "D"].includes(grade)) {
+        if (score >= 90) grade = "S";
+        else if (score >= 80) grade = "A";
+        else if (score >= 65) grade = "B";
+        else if (score >= 50) grade = "C";
+        else grade = "D";
       }
 
       const latencyMs = Date.now() - startTime;
 
       return res.json({
-        ...parsed,
+        success: true,
         executionMode: "real",
-        provider: "google",
+        provider: "Google Gemini",
         model: usedModel,
+        score,
+        grade,
+        passed,
+        feedback: typeof parsed.feedback === "string" ? parsed.feedback : "Prompt evaluated against rubric.",
+        criteria: Array.isArray(parsed.criteria) ? parsed.criteria : [],
+        suggestions: Array.isArray(parsed.suggestions) ? parsed.suggestions : [],
         latencyMs,
         requestId,
       });
@@ -298,9 +358,10 @@ Evaluate the prompt and return JSON strictly matching:
       console.error("Gemini Evaluate Error:", error?.message || error);
       const latencyMs = Date.now() - startTime;
       return res.status(500).json({
-        error: error.message || "Failed to evaluate prompt",
+        success: false,
+        error: error?.message || "Gemini evaluation unavailable. Your prompt was not evaluated.",
         executionMode: "error",
-        provider: "google",
+        provider: "Google Gemini",
         latencyMs,
         requestId,
       });

@@ -8,7 +8,6 @@ import {
   Mission,
   CurriculumModule
 } from "../types";
-import { generateMockAiResponse } from "../lib/mockAiEngine";
 import { missions } from "../data/missionsData";
 import { analyzePrompt } from "../lib/promptAnalyzer";
 import { translations, Language, I18nTranslations } from "../i18n/translations";
@@ -614,7 +613,12 @@ Provide:
   const [aiMode, setAiMode] = useState<"mock" | "real">("real");
   const [hasRealApiAvailable, setHasRealApiAvailable] = useState<boolean>(true);
 
-  // Execution state
+  // Execution state & request lifecycle protection refs
+  const activeExecutionIdRef = useRef<number>(0);
+  const activeAbortControllerRef = useRef<AbortController | null>(null);
+  const activeComparisonSeqARef = useRef<number>(0);
+  const activeComparisonSeqBRef = useRef<number>(0);
+
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
   const [lastResult, setLastResult] = useState<ExecutionResult | null>(null);
   const [executionHistory, setExecutionHistory] = useState<ExecutionResult[]>([]);
@@ -1134,61 +1138,82 @@ Provide:
       });
   }, []);
 
-  const executeCurrentPrompt = async (customPrompt?: string, customSystemInstruction?: string, isolated?: boolean): Promise<ExecutionResult> => {
+  const executeCurrentPrompt = async (
+    customPrompt?: string,
+    customSystemInstruction?: string,
+    isolated?: boolean
+  ): Promise<ExecutionResult> => {
     const textToExecute = customPrompt !== undefined ? customPrompt : prompt;
     const sysToExecute = customSystemInstruction !== undefined ? customSystemInstruction : systemInstruction;
-    setIsExecuting(true);
-    const startTime = Date.now();
 
+    // Stale protection & request lifecycle
+    activeAbortControllerRef.current?.abort();
+    const controller = new AbortController();
+    activeAbortControllerRef.current = controller;
+    const currentSeq = ++activeExecutionIdRef.current;
+
+    setIsExecuting(true);
+    if (!isolated) {
+      setLastResult(null); // Clear stale output immediately so user doesn't see old response
+    }
+    const startTime = Date.now();
     const analysis = analyzePrompt(textToExecute);
 
     let resultText = "";
-    let isMock = false;
-    let modelName = "gemini-3.8-flash";
+    let modelName = "Google Gemini";
     let duration = 0;
     let tokenCount = analysis.tokenEstimate;
     let status: "success" | "error" = "success";
     let errorMessage: string | undefined = undefined;
     let executionMode: "real" | "mock" | "error" = "real";
-    let provider = "google";
+    let provider = "Google Gemini";
     let requestId: string | undefined = undefined;
 
     try {
       const response = await fetch("/api/gemini/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
           prompt: textToExecute,
           systemInstruction: sysToExecute ? sysToExecute.trim() : undefined,
           temperature,
-          topP
-        })
+          topP,
+        }),
       });
 
       const data = await response.json();
 
-      if (!response.ok || data.error || !data.text) {
-        throw new Error(data.error || `AI execution failed with status ${response.status}`);
+      // Check if another execution was started while this was in-flight
+      if (currentSeq !== activeExecutionIdRef.current) {
+        return {} as ExecutionResult;
+      }
+
+      if (!response.ok || !data.success || !data.text) {
+        throw new Error(data.error || `Gemini execution failed with status ${response.status}`);
       }
 
       resultText = data.text;
-      isMock = false;
-      modelName = data.model || "gemini-3.8-flash";
+      modelName = data.model || "Google Gemini";
       duration = data.latencyMs ?? (Date.now() - startTime);
       tokenCount = data.usage?.candidatesTokenCount || (data.usage?.totalTokens ? Math.max(1, data.usage.totalTokens - (data.usage.promptTokens || 0)) : (analysis.tokenEstimate + 100));
       status = "success";
-      executionMode = (data.executionMode as "real") || "real";
-      provider = data.provider || "google";
+      executionMode = "real";
+      provider = data.provider || "Google Gemini";
       requestId = data.requestId;
     } catch (err: any) {
+      // If aborted because a newer prompt was submitted, do nothing
+      if (err?.name === "AbortError" || currentSeq !== activeExecutionIdRef.current) {
+        return {} as ExecutionResult;
+      }
       console.error("Real Gemini execution error:", err);
       duration = Date.now() - startTime;
       status = "error";
       executionMode = "error";
-      errorMessage = err?.message || "AI execution unavailable. Please retry.";
-      resultText = `### AI Execution Unavailable\n\n**Error:** ${errorMessage}\n\n*Zero Mock Fallback Protocol Active*: Mock data was not substituted to protect curriculum integrity. Please verify your connection or retry in a few moments.`;
-      isMock = false;
-      modelName = "gemini-3.8-flash";
+      errorMessage = err?.message || "Gemini execution failed. Your prompt was not evaluated.";
+      resultText = "";
+      modelName = "Google Gemini";
+      provider = "Google Gemini";
     }
 
     const execResult: ExecutionResult = {
@@ -1199,109 +1224,171 @@ Provide:
       timestamp: Date.now(),
       durationMs: Math.max(10, duration),
       tokenCount,
-      isMock,
+      isMock: false,
       model: modelName,
       status,
       errorMessage,
       detectedTechniques: analysis.techniqueBadges,
       executionMode,
       provider,
-      requestId
+      requestId,
     };
 
-    setIsExecuting(false);
-    if (!isolated) {
-      setLastResult(execResult);
-      setExecutionHistory((prev) => [execResult, ...prev.slice(0, 19)]);
-    }
+    if (currentSeq === activeExecutionIdRef.current) {
+      setIsExecuting(false);
+      if (!isolated) {
+        setLastResult(execResult);
+        if (status === "success") {
+          setExecutionHistory((prev) => [execResult, ...prev.slice(0, 19)]);
+        }
+      }
 
-    // Award XP only on successful real execution
-    if (status === "success") {
-      setUserProgress((prev) => ({
-        ...prev,
-        xp: prev.xp + 5
-      }));
+      // Award XP only on successful real execution
+      if (status === "success") {
+        setUserProgress((prev) => ({
+          ...prev,
+          xp: prev.xp + 5,
+        }));
+      }
     }
 
     return execResult;
   };
 
   const executeComparison = async () => {
+    // Clear outputs immediately
+    setLastResult(null);
+    setComparisonResultB(null);
     setIsExecuting(true);
-    // Execute Variant A with exact prompt
-    await executeCurrentPrompt(prompt);
-    
-    // Execute Variant B with exact comparisonPromptB
-    const startTimeB = Date.now();
+
+    const seqA = ++activeComparisonSeqARef.current;
+    const seqB = ++activeComparisonSeqBRef.current;
+
+    const analysisA = analyzePrompt(prompt);
     const analysisB = analyzePrompt(comparisonPromptB);
-    let resultTextB = "";
-    let isMockB = false;
-    let modelNameB = "gemini-3.8-flash";
-    let durationB = 0;
-    let tokenCountB = analysisB.tokenEstimate;
-    let statusB: "success" | "error" = "success";
-    let errorMessageB: string | undefined = undefined;
-    let executionModeB: "real" | "mock" | "error" = "real";
-    let providerB = "google";
-    let requestIdB: string | undefined = undefined;
 
-    try {
-      const responseB = await fetch("/api/gemini/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: comparisonPromptB,
-          systemInstruction: systemInstruction ? systemInstruction.trim() : undefined,
-          temperature,
-          topP
-        })
-      });
+    const startTimeA = Date.now();
+    const startTimeB = Date.now();
 
-      const dataB = await responseB.json();
+    const fetchA = async () => {
+      try {
+        const responseA = await fetch("/api/gemini/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt: prompt,
+            systemInstruction: systemInstruction ? systemInstruction.trim() : undefined,
+            temperature,
+            topP,
+          }),
+        });
+        const dataA = await responseA.json();
+        if (seqA !== activeComparisonSeqARef.current) return;
 
-      if (!responseB.ok || dataB.error || !dataB.text) {
-        throw new Error(dataB.error || `Variant B AI execution failed with status ${responseB.status}`);
+        if (!responseA.ok || !dataA.success || !dataA.text) {
+          throw new Error(dataA.error || `Variant A execution failed with status ${responseA.status}`);
+        }
+
+        const durationA = dataA.latencyMs ?? (Date.now() - startTimeA);
+        const execResultA: ExecutionResult = {
+          id: "exec-comp-a-" + Date.now(),
+          prompt: prompt,
+          systemInstruction,
+          output: dataA.text,
+          timestamp: Date.now(),
+          durationMs: Math.max(10, durationA),
+          tokenCount: dataA.usage?.candidatesTokenCount || (analysisA.tokenEstimate + 80),
+          isMock: false,
+          model: dataA.model || "Google Gemini",
+          status: "success",
+          detectedTechniques: analysisA.techniqueBadges,
+          executionMode: "real",
+          provider: dataA.provider || "Google Gemini",
+          requestId: dataA.requestId,
+        };
+        setLastResult(execResultA);
+      } catch (err: any) {
+        if (seqA !== activeComparisonSeqARef.current) return;
+        const execResultA: ExecutionResult = {
+          id: "exec-comp-a-" + Date.now(),
+          prompt: prompt,
+          systemInstruction,
+          output: "",
+          timestamp: Date.now(),
+          durationMs: Date.now() - startTimeA,
+          tokenCount: 0,
+          isMock: false,
+          model: "Google Gemini",
+          status: "error",
+          errorMessage: err?.message || "Gemini execution failed. Your prompt was not evaluated.",
+          detectedTechniques: analysisA.techniqueBadges,
+          executionMode: "error",
+          provider: "Google Gemini",
+        };
+        setLastResult(execResultA);
       }
-
-      resultTextB = dataB.text;
-      isMockB = false;
-      modelNameB = dataB.model || "gemini-3.8-flash";
-      durationB = dataB.latencyMs ?? (Date.now() - startTimeB);
-      tokenCountB = dataB.usage?.candidatesTokenCount || (dataB.usage?.totalTokens ? Math.max(1, dataB.usage.totalTokens - (dataB.usage.promptTokens || 0)) : (analysisB.tokenEstimate + 100));
-      statusB = "success";
-      executionModeB = (dataB.executionMode as "real") || "real";
-      providerB = dataB.provider || "google";
-      requestIdB = dataB.requestId;
-    } catch (err: any) {
-      console.error("Variant B Gemini execution error:", err);
-      durationB = Date.now() - startTimeB;
-      statusB = "error";
-      executionModeB = "error";
-      errorMessageB = err?.message || "AI execution unavailable for Variant B. Please retry.";
-      resultTextB = `### Variant B Execution Unavailable\n\n**Error:** ${errorMessageB}\n\n*Zero Mock Fallback Protocol Active*: Real Gemini could not complete Variant B.`;
-      isMockB = false;
-      modelNameB = "gemini-3.8-flash";
-    }
-
-    const execResultB: ExecutionResult = {
-      id: "exec-comp-b-" + Date.now(),
-      prompt: comparisonPromptB,
-      systemInstruction,
-      output: resultTextB,
-      timestamp: Date.now(),
-      durationMs: Math.max(10, durationB),
-      tokenCount: tokenCountB,
-      isMock: isMockB,
-      model: modelNameB,
-      status: statusB,
-      errorMessage: errorMessageB,
-      detectedTechniques: analysisB.techniqueBadges,
-      executionMode: executionModeB,
-      provider: providerB,
-      requestId: requestIdB
     };
 
-    setComparisonResultB(execResultB);
+    const fetchB = async () => {
+      try {
+        const responseB = await fetch("/api/gemini/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt: comparisonPromptB,
+            systemInstruction: systemInstruction ? systemInstruction.trim() : undefined,
+            temperature,
+            topP,
+          }),
+        });
+        const dataB = await responseB.json();
+        if (seqB !== activeComparisonSeqBRef.current) return;
+
+        if (!responseB.ok || !dataB.success || !dataB.text) {
+          throw new Error(dataB.error || `Variant B execution failed with status ${responseB.status}`);
+        }
+
+        const durationB = dataB.latencyMs ?? (Date.now() - startTimeB);
+        const execResultB: ExecutionResult = {
+          id: "exec-comp-b-" + Date.now(),
+          prompt: comparisonPromptB,
+          systemInstruction,
+          output: dataB.text,
+          timestamp: Date.now(),
+          durationMs: Math.max(10, durationB),
+          tokenCount: dataB.usage?.candidatesTokenCount || (analysisB.tokenEstimate + 80),
+          isMock: false,
+          model: dataB.model || "Google Gemini",
+          status: "success",
+          detectedTechniques: analysisB.techniqueBadges,
+          executionMode: "real",
+          provider: dataB.provider || "Google Gemini",
+          requestId: dataB.requestId,
+        };
+        setComparisonResultB(execResultB);
+      } catch (err: any) {
+        if (seqB !== activeComparisonSeqBRef.current) return;
+        const execResultB: ExecutionResult = {
+          id: "exec-comp-b-" + Date.now(),
+          prompt: comparisonPromptB,
+          systemInstruction,
+          output: "",
+          timestamp: Date.now(),
+          durationMs: Date.now() - startTimeB,
+          tokenCount: 0,
+          isMock: false,
+          model: "Google Gemini",
+          status: "error",
+          errorMessage: err?.message || "Gemini execution failed. Your prompt was not evaluated.",
+          detectedTechniques: analysisB.techniqueBadges,
+          executionMode: "error",
+          provider: "Google Gemini",
+        };
+        setComparisonResultB(execResultB);
+      }
+    };
+
+    await Promise.all([fetchA(), fetchB()]);
     setIsExecuting(false);
   };
 
@@ -1313,136 +1400,97 @@ Provide:
   const evaluateMission = async (missionId: string, submittedPrompt: string): Promise<MissionEvaluationResult> => {
     setIsEvaluatingMission(true);
     const mission = missions.find((m) => m.id === missionId);
-    
+
     if (!mission) {
       setIsEvaluatingMission(false);
       throw new Error("Mission not found");
     }
 
-    const analysis = analyzePrompt(submittedPrompt);
-    const lower = submittedPrompt.toLowerCase();
+    try {
+      const response = await fetch("/api/gemini/evaluate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "mission",
+          missionId,
+          prompt: submittedPrompt,
+          rubric: {
+            title: mission.title,
+            objective: mission.objective,
+            targetCriteria: mission.targetCriteria,
+            minPassingScore: 70,
+            difficulty: mission.difficulty,
+          },
+        }),
+      });
 
-    // Check criteria
-    const criteriaChecks = mission.targetCriteria.map((crit, idx) => {
-      let passed = false;
-      let feedback = "";
+      const data = await response.json();
 
-      if (idx === 0) {
-        if (mission.validator.requiresRole) {
-          passed = analysis.detectedFeatures.hasRole;
-          feedback = passed
-            ? "Strong persona definition detected."
-            : "Missing persona formulation (e.g. 'Act as a Senior Copywriter...').";
-        } else {
-          passed = analysis.wordCount >= 20;
-          feedback = passed ? "Clear objective formulated." : "Prompt needs more detail.";
-        }
-      } else if (idx === 1) {
-        if (mission.validator.requiresDelimiters) {
-          passed = analysis.detectedFeatures.hasDelimiters;
-          feedback = passed
-            ? "Clean delimiter boundaries used (XML or triple quotes)."
-            : "Wrap input text in tags like <customer_review> or triple quotes.";
-        } else {
-          passed = lower.includes("audience") || lower.includes("for") || lower.includes("team") || analysis.wordCount >= 25;
-          feedback = passed ? "Audience parameters defined." : "Specify who the target audience is.";
-        }
-      } else if (idx === 2) {
-        if (mission.validator.requiresOutputFormat) {
-          passed = analysis.detectedFeatures.hasFormattingConstraints;
-          feedback = passed
-            ? "Explicit output structure specified."
-            : "Specify clear output format (e.g. JSON schema or bulleted structure).";
-        } else {
-          passed = analysis.wordCount >= 35;
-          feedback = passed ? "Structural detail achieved." : "Provide structural section requirements.";
-        }
-      } else if (idx === 3) {
-        if (mission.validator.requiresFewShot) {
-          passed = analysis.detectedFeatures.hasFewShot;
-          feedback = passed
-            ? "Few-shot input/output demonstration pairs verified."
-            : "Include 2-3 input/output demonstration pairs before the query.";
-        } else if (mission.validator.requiresCoT) {
-          passed = analysis.detectedFeatures.hasChainOfThought;
-          feedback = passed
-            ? "Chain-of-Thought deduction steps mandated."
-            : "Force step-by-step reasoning or a scratchpad deduction block.";
-        } else {
-          passed = submittedPrompt.length >= mission.validator.minCharLength;
-          feedback = passed ? "Length and boundary constraints met." : "Prompt is too brief to constrain output.";
-        }
-      } else {
-        passed = analysis.score >= 60;
-        feedback = passed ? "High overall prompt engineering fidelity." : "Add further precision to eliminate ambiguity.";
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || `Gemini evaluation failed with status ${response.status}`);
       }
 
-      return {
-        criteria: crit,
+      // Application-side boundary validation
+      const score = Math.max(0, Math.min(100, Math.round(Number(data.score) || 0)));
+      const passed = typeof data.passed === "boolean" ? data.passed : score >= 70;
+      const validGrade: MissionEvaluationResult["grade"] = ["S", "A", "B", "C", "D"].includes(data.grade)
+        ? data.grade
+        : score >= 90 ? "S" : score >= 80 ? "A" : score >= 65 ? "B" : score >= 50 ? "C" : "D";
+
+      const criteriaChecks = Array.isArray(data.criteria) && data.criteria.length > 0
+        ? data.criteria.map((c: any) => ({
+            criteria: String(c.criteria || "Criterion evaluation"),
+            passed: Boolean(c.passed),
+            feedback: String(c.feedback || ""),
+          }))
+        : mission.targetCriteria.map((c) => ({
+            criteria: c,
+            passed,
+            feedback: passed ? "Target criterion satisfied." : "Criterion not met.",
+          }));
+
+      const xpEarned = passed ? 100 : 25;
+      const generalFeedback = data.feedback || (passed ? "Strong prompt craftsmanship! Meets enterprise standards." : "Needs refinement against rubric criteria.");
+
+      const evaluationResult: MissionEvaluationResult = {
+        missionId,
+        score,
+        grade: validGrade,
         passed,
-        feedback
+        criteriaChecks,
+        generalFeedback,
+        xpEarned,
       };
-    });
 
-    const passedCount = criteriaChecks.filter((c) => c.passed).length;
-    const totalCount = criteriaChecks.length;
-    let score = Math.round((passedCount / totalCount) * 70 + (analysis.score * 0.3));
-    score = Math.min(100, Math.max(25, score));
+      if (passed) {
+        confetti({
+          particleCount: 80,
+          spread: 60,
+          origin: { y: 0.6 },
+        });
+        setUserProgress((prev) => {
+          const isAlreadyCompleted = prev.completedMissions.includes(missionId);
+          const completed = isAlreadyCompleted
+            ? prev.completedMissions
+            : [...prev.completedMissions, missionId];
+          return {
+            ...prev,
+            completedMissions: completed,
+            missionScores: { ...prev.missionScores, [missionId]: Math.max(prev.missionScores[missionId] || 0, score) },
+            missionEvidence: { ...(prev.missionEvidence || {}), [missionId]: submittedPrompt },
+            xp: isAlreadyCompleted ? prev.xp : prev.xp + xpEarned,
+          };
+        });
+      }
 
-    let grade: MissionEvaluationResult["grade"] = "D";
-    if (score >= 90) grade = "S";
-    else if (score >= 80) grade = "A";
-    else if (score >= 65) grade = "B";
-    else if (score >= 50) grade = "C";
-
-    const passed = score >= 70;
-    const xpEarned = passed ? 100 : 25;
-
-    let generalFeedback = "";
-    if (grade === "S") {
-      generalFeedback = "Exceptional prompt craftsmanship! Your prompt meets enterprise production standards with zero ambiguity.";
-    } else if (grade === "A") {
-      generalFeedback = "Great job! Strong structural framing with clear constraints. Ready for mission completion.";
-    } else if (grade === "B") {
-      generalFeedback = "Solid attempt! A few constraints or formatting specifications could be tightened up.";
-    } else {
-      generalFeedback = "Needs refinement. Review the hints and target criteria to add required techniques.";
+      setIsEvaluatingMission(false);
+      setMissionResult(evaluationResult);
+      return evaluationResult;
+    } catch (err: any) {
+      setIsEvaluatingMission(false);
+      console.error("Mission evaluation error with Gemini:", err);
+      throw new Error(err?.message || "Gemini evaluation unavailable. Your prompt was not evaluated.");
     }
-
-    const evaluationResult: MissionEvaluationResult = {
-      missionId,
-      score,
-      grade,
-      passed,
-      criteriaChecks,
-      generalFeedback,
-      xpEarned
-    };
-
-    if (passed) {
-      confetti({
-        particleCount: 80,
-        spread: 60,
-        origin: { y: 0.6 }
-      });
-      setUserProgress((prev) => {
-        const isAlreadyCompleted = prev.completedMissions.includes(missionId);
-        const completed = isAlreadyCompleted
-          ? prev.completedMissions
-          : [...prev.completedMissions, missionId];
-        return {
-          ...prev,
-          completedMissions: completed,
-          missionScores: { ...prev.missionScores, [missionId]: Math.max(prev.missionScores[missionId] || 0, score) },
-          missionEvidence: { ...(prev.missionEvidence || {}), [missionId]: submittedPrompt },
-          xp: isAlreadyCompleted ? prev.xp : prev.xp + xpEarned
-        };
-      });
-    }
-
-    setIsEvaluatingMission(false);
-    setMissionResult(evaluationResult);
-    return evaluationResult;
   };
 
   const processUserActivity = (prev: UserProgress): UserProgress => {

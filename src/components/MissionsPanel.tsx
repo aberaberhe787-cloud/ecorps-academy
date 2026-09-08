@@ -11,7 +11,8 @@ import {
   ChevronRight,
   Zap,
   Target,
-  Award
+  Award,
+  AlertCircle
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { missions } from "../data/missionsData";
@@ -33,6 +34,7 @@ export const MissionsPanel: React.FC = () => {
 
   const [revealedHints, setRevealedHints] = useState<{ [missionId: string]: number }>({});
   const [showSolutionModal, setShowSolutionModal] = useState(false);
+  const [evalError, setEvalError] = useState<string | null>(null);
 
   const selectedMission: Mission =
     missions.find((m) => m.id === activeMissionId) || missions[0];
@@ -40,6 +42,7 @@ export const MissionsPanel: React.FC = () => {
   const handleSelectMission = (mission: Mission) => {
     setActiveMissionId(mission.id);
     clearOutput();
+    setEvalError(null);
     if (userProgress.missionEvidence && userProgress.missionEvidence[mission.id]) {
       setPrompt(userProgress.missionEvidence[mission.id]);
     } else {
@@ -72,7 +75,12 @@ export const MissionsPanel: React.FC = () => {
   };
 
   const handleRunEvaluation = async () => {
-    await evaluateMission(selectedMission.id, prompt);
+    setEvalError(null);
+    try {
+      await evaluateMission(selectedMission.id, prompt);
+    } catch (err: any) {
+      setEvalError(err?.message || "Gemini evaluation unavailable. Your prompt was not evaluated.");
+    }
   };
 
   const getDifficultyColor = (diff: string) => {
@@ -250,6 +258,17 @@ export const MissionsPanel: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Evaluation Error Banner */}
+        {evalError && (
+          <div className="mt-4 rounded-xl border border-rose-800/80 bg-rose-950/40 p-4 text-rose-200 space-y-2 animate-in fade-in">
+            <div className="flex items-center gap-2 font-bold text-white text-xs">
+              <AlertCircle className="h-4 w-4 text-rose-400 shrink-0" />
+              <span>Gemini Evaluation Unavailable</span>
+            </div>
+            <p className="text-xs text-rose-300">{evalError}</p>
+          </div>
+        )}
 
         {/* Evaluation Results Breakdown Banner */}
         {missionResult && missionResult.missionId === selectedMission.id && (

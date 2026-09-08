@@ -6,10 +6,9 @@ import {
   Clock,
   Cpu,
   Layers,
-  ExternalLink,
-  ChevronDown,
-  ChevronUp,
-  Sparkles
+  Sparkles,
+  AlertTriangle,
+  RotateCcw
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { ExecutionResult } from "../types";
@@ -19,19 +18,21 @@ interface TerminalOutputProps {
   isExecuting: boolean;
   title?: string;
   badge?: string;
+  onRetry?: () => void;
 }
 
 export const TerminalOutput: React.FC<TerminalOutputProps> = ({
   result,
   isExecuting,
   title = "AI Execution Output",
-  badge
+  badge,
+  onRetry
 }) => {
   const [copied, setCopied] = useState(false);
   const [viewRaw, setViewRaw] = useState(false);
 
   const handleCopy = () => {
-    if (!result) return;
+    if (!result?.output) return;
     navigator.clipboard.writeText(result.output);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -57,7 +58,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
 
         {/* Action Controls */}
         <div className="flex items-center gap-2">
-          {result && (
+          {!isExecuting && result && result.status === "success" && (
             <>
               <button
                 id="toggle-raw-btn"
@@ -79,44 +80,45 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
         </div>
       </div>
 
-      {/* Execution Status / Metrics Bar */}
-      {result && (
+      {/* Execution Status / Metrics Bar (Only shown when not executing and result exists) */}
+      {!isExecuting && result && (
         <div className="flex flex-wrap items-center justify-between border-b border-slate-800/80 bg-slate-950/40 px-4 py-1.5 text-[11px] text-slate-400 font-mono gap-y-1">
           <div className="flex flex-wrap items-center gap-3">
             {result.status === "error" ? (
-              <span className="rounded bg-rose-950/80 px-2 py-0.5 font-mono text-[10px] text-rose-300 border border-rose-700/50 font-semibold">
-                EXECUTION ERROR
-              </span>
-            ) : result.isMock ? (
-              <span className="rounded bg-amber-950/80 px-2 py-0.5 font-mono text-[10px] text-amber-300 border border-amber-700/50 font-semibold">
-                MODE: MOCK
+              <span className="rounded bg-rose-950/80 px-2 py-0.5 font-mono text-[10px] text-rose-300 border border-rose-700/50 font-semibold flex items-center gap-1">
+                <AlertTriangle className="h-3 w-3 text-rose-400" />
+                EXECUTION FAILED
               </span>
             ) : (
               <span className="rounded bg-emerald-950/80 px-2 py-0.5 font-mono text-[10px] text-emerald-300 border border-emerald-700/50 font-semibold flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                MODE: REAL
+                GOOGLE GEMINI
               </span>
             )}
 
             <span className="text-slate-400">
-              Provider: <span className="text-slate-200 font-medium">{result.provider || (result.isMock ? "Local Heuristics" : "Google Gemini")}</span>
+              Provider: <span className="text-slate-200 font-medium">{result.provider || "Google Gemini"}</span>
             </span>
 
-            <span className="flex items-center gap-1 text-slate-300">
-              <Cpu className="h-3.5 w-3.5 text-blue-400" />
-              {result.model}
-            </span>
+            {result.model && (
+              <span className="flex items-center gap-1 text-slate-300">
+                <Cpu className="h-3.5 w-3.5 text-blue-400" />
+                {result.model}
+              </span>
+            )}
             <span className="flex items-center gap-1">
               <Clock className="h-3.5 w-3.5 text-amber-400" />
               {result.durationMs}ms
             </span>
-            <span className="flex items-center gap-1">
-              <Layers className="h-3.5 w-3.5 text-indigo-400" />
-              ~{result.tokenCount} tokens
-            </span>
+            {result.status === "success" && result.tokenCount > 0 && (
+              <span className="flex items-center gap-1">
+                <Layers className="h-3.5 w-3.5 text-indigo-400" />
+                ~{result.tokenCount} tokens
+              </span>
+            )}
           </div>
 
-          {result.detectedTechniques && result.detectedTechniques.length > 0 && (
+          {result.detectedTechniques && result.detectedTechniques.length > 0 && result.status === "success" && (
             <div className="flex items-center gap-1.5">
               <Sparkles className="h-3 w-3 text-blue-400" />
               <span className="text-slate-400">Techniques:</span>
@@ -137,11 +139,39 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
               <Zap className="absolute inset-0 m-auto h-4 w-4 text-blue-400 animate-pulse" />
             </div>
             <div>
-              <p className="font-mono text-sm font-semibold text-slate-200">Executing Prompt...</p>
+              <p className="font-mono text-sm font-semibold text-slate-200">Gemini is processing your prompt...</p>
               <p className="text-xs text-slate-400 mt-1">Calling Google Gemini model via secure backend gateway</p>
             </div>
           </div>
-        ) : result ? (
+        ) : result?.status === "error" ? (
+          <div className="rounded-xl border border-rose-800/60 bg-rose-950/30 p-6 text-rose-200 space-y-4 my-auto">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-6 w-6 text-rose-400 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <h4 className="text-base font-bold text-white">Gemini execution failed.</h4>
+                <p className="text-xs text-rose-300">Your prompt was not evaluated.</p>
+              </div>
+            </div>
+
+            {result.errorMessage && (
+              <div className="rounded-lg bg-slate-950/80 p-3 text-xs font-mono text-rose-300 border border-rose-900/50 break-words">
+                {result.errorMessage}
+              </div>
+            )}
+
+            {onRetry && (
+              <div className="pt-2">
+                <button
+                  onClick={onRetry}
+                  className="inline-flex items-center gap-2 rounded-lg bg-rose-600 hover:bg-rose-500 px-4 py-2 text-xs font-semibold text-white shadow transition-all active:scale-95"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  <span>Retry Execution</span>
+                </button>
+              </div>
+            )}
+          </div>
+        ) : result?.status === "success" ? (
           viewRaw ? (
             <pre className="font-mono text-xs text-slate-300 whitespace-pre-wrap select-text leading-relaxed">
               {result.output}
