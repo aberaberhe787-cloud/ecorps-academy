@@ -174,6 +174,9 @@ export interface ExecutionResult {
   status: "idle" | "loading" | "success" | "error";
   errorMessage?: string;
   detectedTechniques?: string[];
+  executionMode?: "real" | "mock" | "error";
+  provider?: string;
+  requestId?: string;
 }
 
 export interface MissionEvaluationResult {
@@ -189,6 +192,7 @@ export interface MissionEvaluationResult {
 export interface Achievement {
   id: string;
   title: string;
+  description?: string;
   icon: string;
   earnedAt: number;
 }

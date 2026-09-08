@@ -31,6 +31,11 @@ import {
   markSessionExpired,
 } from "../lib/sessionManager";
 import { logger } from "../lib/logger";
+import {
+  evaluateUserDailyStreak,
+  markStreakEvaluatedToday,
+  isStreakAlreadyEvaluatedToday,
+} from "../lib/userStreakService";
 
 interface AppContextType {
   activeTab: NavTab;
@@ -161,10 +166,14 @@ function getUtcDateString(date: Date = new Date()): string {
 function computeDailyStreak(lastDateStr?: string, existingStreak = 1): { streak: number; date: string } {
   const todayStr = getUtcDateString();
   const streakBase = Math.max(1, existingStreak);
-  if (!lastDateStr || lastDateStr === todayStr) {
+  if (!lastDateStr) {
     return { streak: streakBase, date: todayStr };
   }
-  const lastDate = new Date(lastDateStr + "T00:00:00Z");
+  const cleanDateStr = lastDateStr.slice(0, 10);
+  if (cleanDateStr === todayStr) {
+    return { streak: streakBase, date: todayStr };
+  }
+  const lastDate = new Date(cleanDateStr + "T00:00:00Z");
   const todayDate = new Date(todayStr + "T00:00:00Z");
   const diffTime = todayDate.getTime() - lastDate.getTime();
   const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
@@ -439,6 +448,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         currentStreak: progressToPersist.streakDays,
         streakDays: progressToPersist.streakDays,
         lastActivityDate: progressToPersist.lastActivityDate,
+        lastLoginDate: progressToPersist.lastActivityDate,
         xp: progressToPersist.xp,
         completedLessons: progressToPersist.completedLessons,
         lessons: lessonsMap,
@@ -601,8 +611,8 @@ Provide:
   );
   const [temperature, setTemperature] = useState<number>(0.3);
   const [topP, setTopP] = useState<number>(0.95);
-  const [aiMode, setAiMode] = useState<"mock" | "real">("mock");
-  const [hasRealApiAvailable, setHasRealApiAvailable] = useState<boolean>(false);
+  const [aiMode, setAiMode] = useState<"mock" | "real">("real");
+  const [hasRealApiAvailable, setHasRealApiAvailable] = useState<boolean>(true);
 
   // Execution state
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
@@ -732,10 +742,21 @@ Provide:
             1
           );
 
-          const streakResult = computeDailyStreak(
-            data.lastActivityDate || data.lastLoginDate || progressNested.lastActivityDate,
-            maxExistingStreak
-          );
+          // Collect all recorded login and activity dates across Firestore doc, nested progress, and local caches
+          const rawCandidateDates = [
+            typeof data.lastLoginDate === 'string' ? data.lastLoginDate : null,
+            typeof data.lastActivityDate === 'string' ? data.lastActivityDate : null,
+            typeof progressNested.lastLoginDate === 'string' ? progressNested.lastLoginDate : null,
+            typeof progressNested.lastActivityDate === 'string' ? progressNested.lastActivityDate : null,
+            typeof cachedState.lastActivityDate === 'string' ? cachedState.lastActivityDate : null,
+            typeof legacyCached.lastActivityDate === 'string' ? legacyCached.lastActivityDate : null,
+          ];
+
+          const streakResult = evaluateUserDailyStreak({
+            uid: user.uid,
+            candidateDates: rawCandidateDates,
+            currentStreak: maxExistingStreak,
+          });
 
           const arrayFromDoc = Array.isArray(data.completedLessons) ? data.completedLessons : [];
           const arrayFromNested = Array.isArray(progressNested.completedLessons) ? progressNested.completedLessons : [];
@@ -800,7 +821,7 @@ Provide:
             initialProgress.xp
           );
 
-          const finalStreak = Math.max(streakResult.streak, maxExistingStreak);
+          const finalStreak = streakResult.streak;
 
           const cloudProgress: UserProgress = {
             ...initialProgress,
@@ -829,8 +850,14 @@ Provide:
             console.warn("Could not cache user progress locally", e);
           }
 
-          // Persist updated streak and lastLoginDate to Firestore
-          if (finalStreak !== existingStreak || streakResult.date !== data.lastLoginDate) {
+          // Persist updated streak, lastLoginDate, and lastActivityDate to Firestore
+          const storedLoginDate = typeof data.lastLoginDate === 'string' ? data.lastLoginDate.slice(0, 10) : '';
+          const storedActivityDate = typeof data.lastActivityDate === 'string' ? data.lastActivityDate.slice(0, 10) : '';
+          if (
+            finalStreak !== existingStreak ||
+            streakResult.date !== storedLoginDate ||
+            streakResult.date !== storedActivityDate
+          ) {
             try {
               await setDoc(doc(db, USERS_COLLECTION, user.uid), {
                 displayName: user.displayName || data.displayName || "Ecorp Scholar",
@@ -838,6 +865,7 @@ Provide:
                 currentStreak: finalStreak,
                 streakDays: finalStreak,
                 lastLoginDate: streakResult.date,
+                lastActivityDate: streakResult.date,
               }, { merge: true });
             } catch (updateErr) {
               console.warn("Could not update login streak in Firestore", updateErr);
@@ -859,6 +887,7 @@ Provide:
           const initialStreak = Math.max(cachedState.streakDays || 1, legacyCached.streakDays || 1, 1);
           const initialXP = Math.max(cachedState.xp || 0, legacyCached.xp || 0, initialProgress.xp);
           const todayUtc = getUtcDateString();
+          markStreakEvaluatedToday(user.uid, todayUtc);
 
           const initialUserProgress: UserProgress = {
             ...initialProgress,
@@ -879,6 +908,7 @@ Provide:
             currentStreak: initialStreak,
             streakDays: initialStreak,
             lastActivityDate: todayUtc,
+            lastLoginDate: todayUtc,
             xp: initialXP,
             completedLessons: initialLessons,
             lessons: lessonsMap,
@@ -953,7 +983,9 @@ Provide:
                 typeof docData.streakDays === "number" ? docData.streakDays : 1,
                 typeof progressNested.streakDays === "number" ? progressNested.streakDays : 1
               ),
-              lastActivityDate: typeof docData.lastActivityDate === "string" ? docData.lastActivityDate : currentProg.lastActivityDate,
+              lastActivityDate: typeof docData.lastActivityDate === "string"
+                ? docData.lastActivityDate
+                : (typeof docData.lastLoginDate === "string" ? docData.lastLoginDate : currentProg.lastActivityDate),
               achievements: Array.isArray(docData.achievements) ? docData.achievements : currentProg.achievements,
             };
 
@@ -1111,46 +1143,52 @@ Provide:
     const analysis = analyzePrompt(textToExecute);
 
     let resultText = "";
-    let isMock = true;
-    let modelName = "Mock AI Engine (Keywords & Heuristics)";
-    let duration = 300;
-    let tokenCount = analysis.tokenEstimate + 120;
+    let isMock = false;
+    let modelName = "gemini-3.8-flash";
+    let duration = 0;
+    let tokenCount = analysis.tokenEstimate;
+    let status: "success" | "error" = "success";
+    let errorMessage: string | undefined = undefined;
+    let executionMode: "real" | "mock" | "error" = "real";
+    let provider = "google";
+    let requestId: string | undefined = undefined;
 
-    if (aiMode === "real" && hasRealApiAvailable) {
-      try {
-        const response = await fetch("/api/gemini/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            prompt: textToExecute,
-            systemInstruction: sysToExecute,
-            temperature,
-            topP
-          })
-        });
-        const data = await response.json();
-        if (data.text) {
-          resultText = data.text;
-          isMock = false;
-          modelName = data.model || "gemini-3.7-flash";
-          duration = Date.now() - startTime;
-          tokenCount = (data.usage?.candidatesTokenCount || 100) + analysis.tokenEstimate;
-        } else {
-          throw new Error(data.error || "Failed real AI execution");
-        }
-      } catch (err: any) {
-        console.warn("Falling back to Mock AI Engine due to error:", err);
-        const mock = generateMockAiResponse(textToExecute, sysToExecute, temperature);
-        resultText = mock.text;
-        duration = Date.now() - startTime;
+    try {
+      const response = await fetch("/api/gemini/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: textToExecute,
+          systemInstruction: sysToExecute ? sysToExecute.trim() : undefined,
+          temperature,
+          topP
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data.error || !data.text) {
+        throw new Error(data.error || `AI execution failed with status ${response.status}`);
       }
-    } else {
-      // Simulate brief network delay for realism
-      await new Promise((r) => setTimeout(r, 400));
-      const mock = generateMockAiResponse(textToExecute, sysToExecute, temperature);
-      resultText = mock.text;
+
+      resultText = data.text;
+      isMock = false;
+      modelName = data.model || "gemini-3.8-flash";
+      duration = data.latencyMs ?? (Date.now() - startTime);
+      tokenCount = data.usage?.candidatesTokenCount || (data.usage?.totalTokens ? Math.max(1, data.usage.totalTokens - (data.usage.promptTokens || 0)) : (analysis.tokenEstimate + 100));
+      status = "success";
+      executionMode = (data.executionMode as "real") || "real";
+      provider = data.provider || "google";
+      requestId = data.requestId;
+    } catch (err: any) {
+      console.error("Real Gemini execution error:", err);
       duration = Date.now() - startTime;
-      tokenCount = analysis.tokenEstimate + mock.simulatedTokens;
+      status = "error";
+      executionMode = "error";
+      errorMessage = err?.message || "AI execution unavailable. Please retry.";
+      resultText = `### AI Execution Unavailable\n\n**Error:** ${errorMessage}\n\n*Zero Mock Fallback Protocol Active*: Mock data was not substituted to protect curriculum integrity. Please verify your connection or retry in a few moments.`;
+      isMock = false;
+      modelName = "gemini-3.8-flash";
     }
 
     const execResult: ExecutionResult = {
@@ -1159,12 +1197,16 @@ Provide:
       systemInstruction: sysToExecute,
       output: resultText,
       timestamp: Date.now(),
-      durationMs: Math.max(120, duration),
+      durationMs: Math.max(10, duration),
       tokenCount,
       isMock,
       model: modelName,
-      status: "success",
-      detectedTechniques: analysis.techniqueBadges
+      status,
+      errorMessage,
+      detectedTechniques: analysis.techniqueBadges,
+      executionMode,
+      provider,
+      requestId
     };
 
     setIsExecuting(false);
@@ -1173,63 +1215,72 @@ Provide:
       setExecutionHistory((prev) => [execResult, ...prev.slice(0, 19)]);
     }
 
-    // Award small XP for practicing
-    setUserProgress((prev) => ({
-      ...prev,
-      xp: prev.xp + 5
-    }));
+    // Award XP only on successful real execution
+    if (status === "success") {
+      setUserProgress((prev) => ({
+        ...prev,
+        xp: prev.xp + 5
+      }));
+    }
 
     return execResult;
   };
 
   const executeComparison = async () => {
     setIsExecuting(true);
-    // Execute Variant A
+    // Execute Variant A with exact prompt
     await executeCurrentPrompt(prompt);
     
-    // Execute Variant B
+    // Execute Variant B with exact comparisonPromptB
     const startTimeB = Date.now();
     const analysisB = analyzePrompt(comparisonPromptB);
     let resultTextB = "";
-    let isMockB = true;
-    let modelNameB = "Mock AI Engine (Baseline)";
-    let durationB = 300;
-    let tokenCountB = analysisB.tokenEstimate + 100;
+    let isMockB = false;
+    let modelNameB = "gemini-3.8-flash";
+    let durationB = 0;
+    let tokenCountB = analysisB.tokenEstimate;
+    let statusB: "success" | "error" = "success";
+    let errorMessageB: string | undefined = undefined;
+    let executionModeB: "real" | "mock" | "error" = "real";
+    let providerB = "google";
+    let requestIdB: string | undefined = undefined;
 
-    if (aiMode === "real" && hasRealApiAvailable) {
-      try {
-        const response = await fetch("/api/gemini/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            prompt: comparisonPromptB,
-            systemInstruction,
-            temperature,
-            topP
-          })
-        });
-        const data = await response.json();
-        if (data.text) {
-          resultTextB = data.text;
-          isMockB = false;
-          modelNameB = data.model || "gemini-3.7-flash";
-          durationB = Date.now() - startTimeB;
-          tokenCountB = (data.usage?.candidatesTokenCount || 100) + analysisB.tokenEstimate;
-        } else {
-          throw new Error(data.error || "Failed real AI execution");
-        }
-      } catch (err: any) {
-        console.warn("Falling back to Mock AI Engine for Variant B:", err);
-        const mockB = generateMockAiResponse(comparisonPromptB, systemInstruction, temperature);
-        resultTextB = mockB.text;
-        durationB = Date.now() - startTimeB;
+    try {
+      const responseB = await fetch("/api/gemini/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: comparisonPromptB,
+          systemInstruction: systemInstruction ? systemInstruction.trim() : undefined,
+          temperature,
+          topP
+        })
+      });
+
+      const dataB = await responseB.json();
+
+      if (!responseB.ok || dataB.error || !dataB.text) {
+        throw new Error(dataB.error || `Variant B AI execution failed with status ${responseB.status}`);
       }
-    } else {
-      await new Promise((r) => setTimeout(r, 350));
-      const mockB = generateMockAiResponse(comparisonPromptB, systemInstruction, temperature);
-      resultTextB = mockB.text;
+
+      resultTextB = dataB.text;
+      isMockB = false;
+      modelNameB = dataB.model || "gemini-3.8-flash";
+      durationB = dataB.latencyMs ?? (Date.now() - startTimeB);
+      tokenCountB = dataB.usage?.candidatesTokenCount || (dataB.usage?.totalTokens ? Math.max(1, dataB.usage.totalTokens - (dataB.usage.promptTokens || 0)) : (analysisB.tokenEstimate + 100));
+      statusB = "success";
+      executionModeB = (dataB.executionMode as "real") || "real";
+      providerB = dataB.provider || "google";
+      requestIdB = dataB.requestId;
+    } catch (err: any) {
+      console.error("Variant B Gemini execution error:", err);
       durationB = Date.now() - startTimeB;
-      tokenCountB = analysisB.tokenEstimate + mockB.simulatedTokens;
+      statusB = "error";
+      executionModeB = "error";
+      errorMessageB = err?.message || "AI execution unavailable for Variant B. Please retry.";
+      resultTextB = `### Variant B Execution Unavailable\n\n**Error:** ${errorMessageB}\n\n*Zero Mock Fallback Protocol Active*: Real Gemini could not complete Variant B.`;
+      isMockB = false;
+      modelNameB = "gemini-3.8-flash";
     }
 
     const execResultB: ExecutionResult = {
@@ -1238,12 +1289,16 @@ Provide:
       systemInstruction,
       output: resultTextB,
       timestamp: Date.now(),
-      durationMs: Math.max(100, durationB),
+      durationMs: Math.max(10, durationB),
       tokenCount: tokenCountB,
       isMock: isMockB,
       model: modelNameB,
-      status: "success",
-      detectedTechniques: analysisB.techniqueBadges
+      status: statusB,
+      errorMessage: errorMessageB,
+      detectedTechniques: analysisB.techniqueBadges,
+      executionMode: executionModeB,
+      provider: providerB,
+      requestId: requestIdB
     };
 
     setComparisonResultB(execResultB);
@@ -1391,11 +1446,20 @@ Provide:
   };
 
   const processUserActivity = (prev: UserProgress): UserProgress => {
-    const { streak, date } = computeDailyStreak(prev.lastActivityDate, prev.streakDays);
-    if (streak === prev.streakDays && date === prev.lastActivityDate) {
+    const todayStr = getUtcDateString();
+    if (prev.lastActivityDate && prev.lastActivityDate.slice(0, 10) === todayStr) {
       return prev;
     }
-    return { ...prev, streakDays: streak, lastActivityDate: date };
+    const streakResult = evaluateUserDailyStreak({
+      uid: firestoreUserId.current || "guest",
+      candidateDates: [prev.lastActivityDate],
+      currentStreak: prev.streakDays,
+      todayStr,
+    });
+    if (streakResult.streak === prev.streakDays && streakResult.date === prev.lastActivityDate) {
+      return prev;
+    }
+    return { ...prev, streakDays: streakResult.streak, lastActivityDate: streakResult.date };
   };
 
   const markLessonComplete = (lessonId: string) => {

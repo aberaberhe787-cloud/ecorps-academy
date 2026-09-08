@@ -81,8 +81,27 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
 
       {/* Execution Status / Metrics Bar */}
       {result && (
-        <div className="flex flex-wrap items-center justify-between border-b border-slate-800/80 bg-slate-950/40 px-4 py-1.5 text-[11px] text-slate-400 font-mono">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-between border-b border-slate-800/80 bg-slate-950/40 px-4 py-1.5 text-[11px] text-slate-400 font-mono gap-y-1">
+          <div className="flex flex-wrap items-center gap-3">
+            {result.status === "error" ? (
+              <span className="rounded bg-rose-950/80 px-2 py-0.5 font-mono text-[10px] text-rose-300 border border-rose-700/50 font-semibold">
+                EXECUTION ERROR
+              </span>
+            ) : result.isMock ? (
+              <span className="rounded bg-amber-950/80 px-2 py-0.5 font-mono text-[10px] text-amber-300 border border-amber-700/50 font-semibold">
+                MODE: MOCK
+              </span>
+            ) : (
+              <span className="rounded bg-emerald-950/80 px-2 py-0.5 font-mono text-[10px] text-emerald-300 border border-emerald-700/50 font-semibold flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                MODE: REAL
+              </span>
+            )}
+
+            <span className="text-slate-400">
+              Provider: <span className="text-slate-200 font-medium">{result.provider || (result.isMock ? "Local Heuristics" : "Google Gemini")}</span>
+            </span>
+
             <span className="flex items-center gap-1 text-slate-300">
               <Cpu className="h-3.5 w-3.5 text-blue-400" />
               {result.model}
@@ -119,7 +138,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
             </div>
             <div>
               <p className="font-mono text-sm font-semibold text-slate-200">Executing Prompt...</p>
-              <p className="text-xs text-slate-400 mt-1">Applying heuristics, reasoning patterns, and schema validation</p>
+              <p className="text-xs text-slate-400 mt-1">Calling Google Gemini model via secure backend gateway</p>
             </div>
           </div>
         ) : result ? (
@@ -139,7 +158,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
             <Cpu className="h-8 w-8 text-slate-600" />
             <p className="text-sm font-medium text-slate-400">Terminal Awaiting Execution</p>
             <p className="text-xs max-w-xs text-slate-500">
-              Click <span className="font-mono text-blue-400">"Run Prompt"</span> to simulate AI model generation and inspect the resulting output.
+              Click <span className="font-mono text-blue-400">"Run Prompt"</span> to execute your prompt with real Google Gemini and inspect the resulting output.
             </p>
           </div>
         )}

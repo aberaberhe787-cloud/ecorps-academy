@@ -13,9 +13,9 @@ dotenv.config();
 
 // Supported text models for resilience and fallback
 const CANDIDATE_MODELS = [
-  "gemini-3.7-flash",
+  "gemini-3.8-flash",
   "gemini-flash-latest",
-  "gemini-3.1-flash-lite",
+  "gemini-2.5-flash",
 ];
 
 // Lazy database initialization
@@ -39,7 +39,7 @@ async function generateWithRetry(
     config?: any;
     model?: string;
   },
-  maxRetries = 3
+  maxRetries = 2
 ) {
   let lastError: any = null;
   const modelsToTry = params.model
@@ -78,8 +78,7 @@ async function generateWithRetry(
         );
 
         if (isRetryable && attempt < maxRetries - 1) {
-          // Exponential backoff with jitter
-          const delayMs = Math.pow(2, attempt) * 1000 + Math.floor(Math.random() * 500);
+          const delayMs = Math.min(800, (attempt + 1) * 300 + Math.floor(Math.random() * 200));
           await new Promise((resolve) => setTimeout(resolve, delayMs));
           continue;
         }
@@ -173,22 +172,26 @@ async function startServer() {
   });
 
   app.post("/api/gemini/generate", async (req, res) => {
+    const startTime = Date.now();
+    const requestId = "req_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 9);
     try {
       const { prompt, systemInstruction, temperature, topP } = req.body;
-      if (!prompt) {
-        return res.status(400).json({ error: "Prompt is required" });
+      if (!prompt || typeof prompt !== "string") {
+        return res.status(400).json({ error: "Prompt is required", executionMode: "error", requestId });
       }
 
       const ai = getGeminiClient();
       if (!ai) {
         return res.status(503).json({
           error: "Gemini API key not configured on server",
-          useMock: true,
+          executionMode: "error",
+          provider: "google",
+          requestId,
         });
       }
 
       const { response, usedModel } = await generateWithRetry(ai, {
-        model: "gemini-3.7-flash",
+        model: "gemini-3.8-flash",
         contents: prompt,
         config: {
           systemInstruction: systemInstruction || undefined,
@@ -197,35 +200,52 @@ async function startServer() {
         },
       });
 
+      const latencyMs = Date.now() - startTime;
+      const usageMetadata = (response as any).usageMetadata;
+
       return res.json({
         text: response.text || "No response generated.",
-        usage: {
-          promptTokens: Math.round(prompt.length / 4),
-          candidatesTokenCount: Math.round((response.text?.length || 0) / 4),
-        },
+        executionMode: "real",
+        provider: "google",
         model: usedModel,
+        latencyMs,
+        requestId,
+        usage: {
+          promptTokens: usageMetadata?.promptTokenCount ?? Math.max(1, Math.round(prompt.length / 4)),
+          candidatesTokenCount: usageMetadata?.candidatesTokenCount ?? (response.text ? Math.max(1, Math.round(response.text.length / 4)) : 0),
+          totalTokens: usageMetadata?.totalTokenCount,
+        },
       });
     } catch (error: any) {
-      console.error("Gemini Generate Error:", error);
+      console.error("Gemini Generate Error:", error?.message || error);
+      const latencyMs = Date.now() - startTime;
       return res.status(500).json({
         error: error.message || "Failed to generate AI response",
-        useMock: true,
+        executionMode: "error",
+        provider: "google",
+        model: "gemini-3.8-flash",
+        latencyMs,
+        requestId,
       });
     }
   });
 
   app.post("/api/gemini/evaluate", async (req, res) => {
+    const startTime = Date.now();
+    const requestId = "eval_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 9);
     try {
       const { prompt, missionContext } = req.body;
-      if (!prompt) {
-        return res.status(400).json({ error: "Prompt is required" });
+      if (!prompt || typeof prompt !== "string") {
+        return res.status(400).json({ error: "Prompt is required", executionMode: "error", requestId });
       }
 
       const ai = getGeminiClient();
       if (!ai) {
         return res.status(503).json({
           error: "Gemini API key not configured on server",
-          useMock: true,
+          executionMode: "error",
+          provider: "google",
+          requestId,
         });
       }
 
@@ -248,8 +268,8 @@ Evaluate the prompt and return JSON strictly matching:
   "explanation": "Adding few-shot examples and explicit formatting guarantees deterministic outputs."
 }`;
 
-      const { response } = await generateWithRetry(ai, {
-        model: "gemini-3.7-flash",
+      const { response, usedModel } = await generateWithRetry(ai, {
+        model: "gemini-3.8-flash",
         contents: evaluationPrompt,
         config: {
           responseMimeType: "application/json",
@@ -257,19 +277,32 @@ Evaluate the prompt and return JSON strictly matching:
         },
       });
 
-      let parsed = null;
+      let parsed: any = null;
       try {
         parsed = JSON.parse(response.text || "{}");
       } catch {
         parsed = { raw: response.text };
       }
 
-      return res.json(parsed);
+      const latencyMs = Date.now() - startTime;
+
+      return res.json({
+        ...parsed,
+        executionMode: "real",
+        provider: "google",
+        model: usedModel,
+        latencyMs,
+        requestId,
+      });
     } catch (error: any) {
-      console.error("Gemini Evaluate Error:", error);
+      console.error("Gemini Evaluate Error:", error?.message || error);
+      const latencyMs = Date.now() - startTime;
       return res.status(500).json({
         error: error.message || "Failed to evaluate prompt",
-        useMock: true,
+        executionMode: "error",
+        provider: "google",
+        latencyMs,
+        requestId,
       });
     }
   });
