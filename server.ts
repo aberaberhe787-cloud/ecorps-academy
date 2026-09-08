@@ -1,6 +1,5 @@
 import express from "express";
 import path from "path";
-import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -405,6 +404,8 @@ Return RAW JSON ONLY adhering strictly to this schema:
 export async function startServer() {
   const PORT = 3000;
   if (process.env.NODE_ENV !== "production") {
+    const viteName = "vite";
+    const { createServer: createViteServer } = await import(/* @vite-ignore */ viteName);
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
