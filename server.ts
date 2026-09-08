@@ -105,13 +105,11 @@ async function generateWithRetry(
   throw lastError || new Error("All Gemini API attempts and candidate models exhausted");
 }
 
-async function startServer() {
-  const app = express();
-  const PORT = 3000;
+export const app = express();
 
-  app.use(express.json());
-  app.use(cors({ origin: process.env.FRONTEND_URL?.split(",").map((origin) => origin.trim()) || true, credentials: false }));
-  app.use('/api', apiRouter);
+app.use(express.json());
+app.use(cors({ origin: process.env.FRONTEND_URL?.split(",").map((origin) => origin.trim()) || true, credentials: false }));
+app.use('/api', apiRouter);
 
   const getGeminiClient = () => {
     if (!process.env.GEMINI_API_KEY) {
@@ -404,6 +402,8 @@ Return RAW JSON ONLY adhering strictly to this schema:
     res.send(sitemapContent);
   });
 
+export async function startServer() {
+  const PORT = 3000;
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -423,4 +423,6 @@ Return RAW JSON ONLY adhering strictly to this schema:
   });
 }
 
-startServer();
+if (process.env.NODE_ENV !== "test" && !process.env.VERCEL) {
+  startServer();
+}
