@@ -49,55 +49,40 @@ export const HomeView: React.FC = () => {
     <div className="app-view space-y-8 sm:space-y-12 lg:space-y-14 py-6 sm:py-8 pb-12">
       {/* Learner control center */}
       <section className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-2xl border border-blue-900/60 bg-slate-900/90 p-4 sm:p-5 lg:p-6 shadow-xl">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-blue-400">Learning Hub</p>
-              <h2 className="mt-1 text-xl sm:text-2xl font-bold text-white">Your learning command center</h2>
-              <p className="mt-1 text-xs sm:text-sm text-slate-400">Resume a lesson, practice a skill, or review your progress.</p>
+        <div className="rounded-2xl border border-blue-900/60 bg-slate-900/90 p-4 sm:p-5 lg:p-6 shadow-xl text-center">
+          <h2 className="text-2xl font-bold text-white mb-4">Your Learning Command Center</h2>
+          <button type="button" onClick={() => setActiveTab("foundations")} className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-2 text-sm font-semibold text-white hover:bg-blue-500">
+            <Play className="h-4 w-4" /> PRACTICE TODAY
+          </button>
+
+          <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
+            {/* Column 1 (Active Module) */}
+            <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+              <p className="text-xs text-slate-400">Active Module</p>
+              <h3 className="mt-2 text-sm font-bold text-white">{nextFoundation?.title || nextLesson?.title || "All lessons complete"}</h3>
+              <div className="mt-3 h-2 rounded-full bg-slate-800"><div className="h-full rounded-full bg-blue-500" style={{ width: `${totalTrackedLessons ? (totalCompletedLessons / totalTrackedLessons) * 100 : 0}%` }} /></div>
+              <p className="mt-1 text-xs text-slate-400">Step {totalCompletedLessons + 1} of {totalTrackedLessons}</p>
+              <button onClick={() => nextFoundation ? setActiveTab("foundations") : setActiveTab("curriculum")} className="mt-3 w-full rounded-lg bg-slate-800 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700">Resume Lesson</button>
             </div>
-            <button type="button" onClick={() => setActiveTab("foundations")} className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 shrink-0">
-              <Play className="h-4 w-4" /> Practice today
-            </button>
-          </div>
 
-          <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr] gap-3 sm:gap-4">
-            <button
-              type="button"
-              onClick={() => nextFoundation ? setActiveTab("foundations") : setActiveTab("curriculum")}
-              className="group relative rounded-xl border-2 border-blue-500/80 bg-gradient-to-br from-blue-950/80 via-slate-900 to-indigo-950/50 p-4 text-left shadow-[0_0_25px_rgba(59,130,246,0.2)] hover:border-blue-400 hover:shadow-[0_0_30px_rgba(59,130,246,0.35)] transition-all duration-200"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/20 border border-blue-400/40 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-300">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" /> Next Action
-                </span>
-                <span className="text-[11px] font-mono text-slate-400">Step {totalCompletedLessons + 1} of {totalTrackedLessons}</span>
+            {/* Column 2 (Metrics & Goals) */}
+            <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+              <p className="text-xs text-slate-400">Metrics & Goals</p>
+              <div className="mt-2 flex gap-4">
+                <div><p className="text-[10px] text-slate-400">Overall Progress</p><p className="text-lg font-bold text-white">{totalCompletedLessons}/12</p></div>
+                <div><p className="text-[10px] text-slate-400">Weekly Goal</p><p className="text-lg font-bold text-emerald-400">{weeklyGoal}/5</p></div>
+                <div><p className="text-[10px] text-slate-400">Streak/XP</p><p className="text-lg font-bold text-amber-300">{userProgress.streakDays} days</p></div>
               </div>
-              <h3 className="mt-2 text-base sm:text-lg font-extrabold text-white group-hover:text-blue-200 transition-colors">
-                {nextFoundation?.title || nextLesson?.title || "All lessons complete"}
-              </h3>
-              <p className="mt-1 text-xs text-slate-300">
-                {nextFoundation ? "Prompt Engineering Foundations" : nextLesson?.moduleTitle || "Curriculum Track"}
-              </p>
-              <div className="mt-4 flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-300 group-hover:translate-x-1 transition-transform">
-                  <span>Resume Current Topic</span>
-                  <ArrowRight className="h-3.5 w-3.5 text-blue-400" />
-                </span>
-                <span className="rounded-lg bg-blue-600 px-3 py-1 text-xs font-bold text-white shadow-md group-hover:bg-blue-500 transition-colors">
-                  Continue &rarr;
-                </span>
-              </div>
-            </button>
-            <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4"><p className="text-xs text-slate-400">Overall progress</p><p className="mt-2 text-xl sm:text-2xl font-bold text-white">{totalCompletedLessons}/{totalTrackedLessons}</p><div className="mt-3 h-2 rounded-full bg-slate-800"><div className="h-full rounded-full bg-blue-500" style={{ width: `${totalTrackedLessons ? (totalCompletedLessons / totalTrackedLessons) * 100 : 0}%` }} /></div></div>
-            <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4"><p className="text-xs text-slate-400">Weekly goal</p><p className="mt-2 text-xl sm:text-2xl font-bold text-emerald-400">{weeklyGoal}/5</p><p className="mt-2 text-xs text-slate-400">Lessons completed</p></div>
-            <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4"><p className="text-xs text-slate-400">Streak and XP</p><p className="mt-2 text-base sm:text-lg font-bold text-amber-300">{userProgress.streakDays} days</p><p className="text-xs text-slate-400">{userProgress.xp} XP earned</p></div>
-          </div>
+              <button onClick={() => setActiveTab("curriculum")} className="mt-3 w-full rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">Continue</button>
+            </div>
 
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-            <button type="button" onClick={() => setActiveTab("foundations")} className="rounded-xl border border-slate-800 p-4 text-left hover:border-amber-500/60"><p className="text-xs font-semibold text-amber-300">Recommended next</p><p className="mt-1 text-sm font-bold text-white">{nextFoundation?.title || "Review Foundations"}</p><p className="mt-1 text-xs text-slate-400">Build the next prompt skill.</p></button>
-            <button type="button" onClick={() => openSandbox("saved")} className="rounded-xl border border-slate-800 p-4 text-left hover:border-blue-500/60"><p className="text-xs font-semibold text-blue-300">Your library</p><p className="mt-1 text-sm font-bold text-white">{userProgress.savedCustomPrompts.length} saved prompts</p><p className="mt-1 text-xs text-slate-400">{userProgress.bookmarkedPatterns.length} bookmarked patterns</p></button>
-            <button type="button" onClick={() => setActiveTab("profile")} className="rounded-xl border border-slate-800 p-4 text-left hover:border-emerald-500/60"><p className="text-xs font-semibold text-emerald-300">Achievements</p><p className="mt-1 text-sm font-bold text-white">{userProgress.achievements.length} badges earned</p><p className="mt-1 text-xs text-slate-400">View certificates and milestones.</p></button>
+            {/* Column 3 (Saved & Library) */}
+            <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+              <p className="text-xs text-slate-400">Saved & Library</p>
+              <p className="mt-2 text-sm font-bold text-white">{userProgress.savedCustomPrompts.length} saved prompts</p>
+              <p className="text-sm font-bold text-white">{userProgress.bookmarkedPatterns.length} bookmarked patterns</p>
+              <button onClick={() => openSandbox("saved")} className="mt-3 w-full rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500">Continue</button>
+            </div>
           </div>
         </div>
       </section>
