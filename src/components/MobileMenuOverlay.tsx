@@ -19,6 +19,7 @@ import {
   Languages,
   LogOut,
   ChevronRight,
+  ArrowRight,
   Shield,
   Zap,
 } from "lucide-react";
