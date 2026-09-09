@@ -27,10 +27,14 @@ import {
   Filter,
   RotateCcw,
   Compass,
+  Download,
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { curriculumModules } from "../data/lessonsData";
 import { Lesson, CurriculumModule, BloomsTaxonomyLevel } from "../types";
+import { exportLessonToPdf } from "../lib/lessonPdfExporter";
+import { LessonAudioPlayer } from "../components/lms/LessonAudioPlayer";
+import { LessonScratchpad } from "../components/lms/LessonScratchpad";
 import { LearningPathway } from "../components/lms/LearningPathway";
 import { ConceptCard } from "../components/lms/ConceptCard";
 import { ActiveRecallQuiz } from "../components/lms/ActiveRecallQuiz";
@@ -660,6 +664,16 @@ export const CurriculumView: React.FC = () => {
 
                 <div className="flex items-center gap-2.5">
                   <button
+                    id="lesson-export-pdf-top-btn"
+                    onClick={() => exportLessonToPdf(currentLesson)}
+                    className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/90 px-3.5 py-2 text-xs font-semibold text-slate-200 hover:text-white hover:border-slate-600 transition-all"
+                    title="Export clean, print-friendly study guide PDF"
+                  >
+                    <Download className="h-3.5 w-3.5 text-emerald-400" />
+                    <span>Export PDF</span>
+                  </button>
+
+                  <button
                     id="lesson-try-sandbox-top-btn"
                     onClick={handleTryInPlayground}
                     className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/90 px-3.5 py-2 text-xs font-semibold text-slate-200 hover:text-white hover:border-slate-600 transition-all"
@@ -713,6 +727,15 @@ export const CurriculumView: React.FC = () => {
                   {currentLesson.objective || currentLesson.conceptSummary}
                 </p>
               </div>
+
+              {/* Web Speech API Lesson Audio Player */}
+              <LessonAudioPlayer lesson={currentLesson} />
+
+              {/* Offline IndexedDB Lesson Notes Scratchpad */}
+              <LessonScratchpad
+                lessonId={currentLesson.id}
+                lessonTitle={currentLesson.title}
+              />
             </div>
 
             {/* =================================================================== */}

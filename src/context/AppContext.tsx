@@ -43,6 +43,7 @@ import {
   robustApiFetch,
   isPageResumedAfterLongIdle,
 } from "../lib/apiErrorHandler";
+import { evaluateUserAchievements } from "../lib/achievementEngine";
 import {
   loadUserPreferences,
   savePreference,
@@ -163,6 +164,7 @@ const initialProgress: UserProgress = {
   xp: 120, // Initial welcome XP
   streakDays: 1,
   lastActivityDate: getUtcDateString(),
+  loginHistory: [getUtcDateString()],
   achievements: []
 };
 
@@ -479,6 +481,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         streakDays: progressToPersist.streakDays,
         lastActivityDate: progressToPersist.lastActivityDate,
         lastLoginDate: progressToPersist.lastActivityDate,
+        loginHistory: progressToPersist.loginHistory || [progressToPersist.lastActivityDate.slice(0, 10)],
         xp: progressToPersist.xp,
         completedLessons: progressToPersist.completedLessons,
         lessons: lessonsMap,
@@ -902,7 +905,16 @@ Provide:
 
           const finalStreak = streakResult.streak;
 
-          const cloudProgress: UserProgress = {
+          const rawLoginHistory = Array.isArray(data.loginHistory)
+            ? data.loginHistory
+            : (Array.isArray(progressNested.loginHistory) ? progressNested.loginHistory : []);
+          const mergedLoginHistory = Array.from(new Set([
+            ...rawLoginHistory,
+            streakResult.date,
+            ...(cachedState.loginHistory || [])
+          ])).sort();
+
+          const baseCloudProgress: UserProgress = {
             ...initialProgress,
             completedLessons: mergedLessons,
             completedMissions: mergedMissions,
@@ -914,12 +926,20 @@ Provide:
             xp: maxXP,
             streakDays: finalStreak,
             lastActivityDate: streakResult.date,
+            loginHistory: mergedLoginHistory,
             achievements: Array.isArray(data.achievements)
               ? data.achievements
               : (Array.isArray(progressNested.achievements) ? progressNested.achievements : (cachedState.achievements || [])),
             lastLessonId: data.lastLessonId || progressNested.lastLessonId || cachedState.lastLessonId || undefined,
             lastModuleId: data.lastModuleId || progressNested.lastModuleId || cachedState.lastModuleId || undefined,
             curriculumProgressPercent: Math.min(100, Math.round((mergedLessons.length / 16) * 100)),
+          };
+
+          // Check for any milestones that should be unlocked
+          const { allAchievements } = evaluateUserAchievements(baseCloudProgress);
+          const cloudProgress: UserProgress = {
+            ...baseCloudProgress,
+            achievements: allAchievements,
           };
 
           const cloudFingerprint = getProgressFingerprint(cloudProgress);
@@ -948,6 +968,7 @@ Provide:
                 streakDays: finalStreak,
                 lastLoginDate: streakResult.date,
                 lastActivityDate: streakResult.date,
+                loginHistory: mergedLoginHistory,
               }, { merge: true });
             } catch (updateErr) {
               console.warn("Could not update login streak in Firestore", updateErr);
@@ -1552,19 +1573,29 @@ Provide:
 
   const processUserActivity = (prev: UserProgress): UserProgress => {
     const todayStr = getUtcDateString();
-    if (prev.lastActivityDate && prev.lastActivityDate.slice(0, 10) === todayStr) {
-      return prev;
-    }
     const streakResult = evaluateUserDailyStreak({
       uid: firestoreUserId.current || "guest",
       candidateDates: [prev.lastActivityDate],
       currentStreak: prev.streakDays,
       todayStr,
     });
-    if (streakResult.streak === prev.streakDays && streakResult.date === prev.lastActivityDate) {
-      return prev;
-    }
-    return { ...prev, streakDays: streakResult.streak, lastActivityDate: streakResult.date };
+    const currentHistory = Array.isArray(prev.loginHistory) ? prev.loginHistory : [];
+    const updatedHistory = Array.from(new Set([...currentHistory, todayStr])).sort();
+
+    const updatedProgress: UserProgress = {
+      ...prev,
+      streakDays: streakResult.streak,
+      lastActivityDate: streakResult.date,
+      loginHistory: updatedHistory,
+    };
+
+    const { allAchievements, newAchievements } = evaluateUserAchievements(updatedProgress);
+
+    return {
+      ...updatedProgress,
+      achievements: allAchievements,
+      xp: updatedProgress.xp + (newAchievements.length * 100),
+    };
   };
 
   const totalCurriculumLessons = 16;

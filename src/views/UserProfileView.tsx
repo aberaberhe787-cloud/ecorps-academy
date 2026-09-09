@@ -17,6 +17,8 @@ import {
 import { useApp } from '../context/AppContext';
 import { auth } from '../lib/firebase';
 import { BadgeComponent } from '../components/profile/BadgeComponent';
+import { DailyStreakCounter } from '../components/profile/DailyStreakCounter';
+import { MILESTONE_DEFINITIONS } from '../lib/achievementEngine';
 import { ProgressRing } from '../components/profile/ProgressRing';
 import { FOUNDATION_LESSONS } from './PromptEngineeringPath';
 import { curriculumModules } from '../data/lessonsData';
@@ -35,7 +37,7 @@ interface UserProfileViewProps {
 }
 
 export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPath }) => {
-  const { userProgress, setActiveTab } = useApp();
+  const { userProgress, setActiveTab, isOnline } = useApp();
   
   // Build both tracks from system source data
   const foundationsTrack: LearningPath = {
@@ -213,6 +215,14 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
         </div>
       </div>
 
+      {/* Daily Academy Streak & Attendance Counter (Firestore Sync) */}
+      <DailyStreakCounter
+        streakDays={userProgress.streakDays}
+        loginHistory={userProgress.loginHistory}
+        lastActivityDate={userProgress.lastActivityDate}
+        isOnline={isOnline}
+      />
+
       {/* Multi-Track Overview Cards */}
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
@@ -389,15 +399,31 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
             <span>Mastery Achievements</span>
           </h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {userProgress.achievements && userProgress.achievements.length > 0 ? (
-              userProgress.achievements.map((achievement) => (
-                <BadgeComponent key={achievement.id} achievement={achievement} />
-              ))
-            ) : (
-              <p className="col-span-full text-xs text-slate-500 py-4 text-center">
-                No achievements unlocked yet. Complete lessons and quizzes to earn badges!
-              </p>
-            )}
+            {MILESTONE_DEFINITIONS.map((def) => {
+              const unlocked = userProgress.achievements?.find((a) => a.id === def.id);
+              if (unlocked) {
+                return (
+                  <BadgeComponent
+                    key={def.id}
+                    achievement={unlocked}
+                    isLocked={false}
+                  />
+                );
+              }
+              return (
+                <BadgeComponent
+                  key={def.id}
+                  achievement={{
+                    id: def.id,
+                    title: def.title,
+                    description: def.description,
+                    icon: def.icon,
+                    earnedAt: 0,
+                  }}
+                  isLocked={true}
+                />
+              );
+            })}
           </div>
         </section>
 

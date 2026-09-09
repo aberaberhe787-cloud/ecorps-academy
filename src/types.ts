@@ -208,6 +208,7 @@ export interface UserProgress {
   xp: number;
   streakDays: number;
   lastActivityDate: string;
+  loginHistory?: string[];
   achievements: Achievement[];
   lastLessonId?: string;
   lastModuleId?: string;
