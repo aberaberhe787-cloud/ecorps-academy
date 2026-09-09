@@ -521,79 +521,81 @@ export const Navbar: React.FC = () => {
 
           {/* Right Side Controls */}
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-            <NetworkStatusBadge />
-            <ThemeToggle />
-            
-            {/* Auth Buttons / Account Menu */}
-            <div ref={accountMenuRef} className="relative">
-              <button
-                onClick={() => { 
-                  setAccountOpen((s) => !s); 
-                  setResetStatus(null);
-                }}
-                className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center hover:opacity-90 transition-opacity border border-blue-400/40 shadow-sm"
-                aria-label="Open account menu"
-                aria-expanded={accountOpen}
-              >
-                <User className="h-4 w-4 text-white" />
-              </button>
+            <div className="hidden md:flex items-center gap-1 sm:gap-2">
+              <NetworkStatusBadge />
+              <ThemeToggle />
+              
+              {/* Auth Buttons / Account Menu */}
+              <div ref={accountMenuRef} className="relative">
+                <button
+                  onClick={() => { 
+                    setAccountOpen((s) => !s); 
+                    setResetStatus(null);
+                  }}
+                  className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center hover:opacity-90 transition-opacity border border-blue-400/40 shadow-sm"
+                  aria-label="Open account menu"
+                  aria-expanded={accountOpen}
+                >
+                  <User className="h-4 w-4 text-white" />
+                </button>
 
-              {accountOpen && (
-                <div className="absolute right-0 mt-2 w-60 rounded-xl bg-slate-950 border border-slate-800 shadow-2xl z-50 p-2 text-xs animate-in fade-in duration-100">
-                  <div className="px-3 py-2 border-b border-slate-800/80 mb-1">
-                    <p className="font-semibold text-white truncate">
-                      {auth.currentUser?.displayName || auth.currentUser?.email?.split('@')[0] || "Scholar"}
-                    </p>
-                    <p className="text-[11px] text-slate-400 truncate">
-                      {auth.currentUser?.email || "Authenticated User"}
-                    </p>
-                    <div className="mt-1.5 flex items-center justify-between text-[11px] font-mono text-blue-400">
-                      <span>Level {level}</span>
-                      <span>{userProgress.xp} XP</span>
+                {accountOpen && (
+                  <div className="absolute right-0 mt-2 w-60 rounded-xl bg-slate-950 border border-slate-800 shadow-2xl z-50 p-2 text-xs animate-in fade-in duration-100">
+                    <div className="px-3 py-2 border-b border-slate-800/80 mb-1">
+                      <p className="font-semibold text-white truncate">
+                        {auth.currentUser?.displayName || auth.currentUser?.email?.split('@')[0] || "Scholar"}
+                      </p>
+                      <p className="text-[11px] text-slate-400 truncate">
+                        {auth.currentUser?.email || "Authenticated User"}
+                      </p>
+                      <div className="mt-1.5 flex items-center justify-between text-[11px] font-mono text-blue-400">
+                        <span>Level {level}</span>
+                        <span>{userProgress.xp} XP</span>
+                      </div>
                     </div>
+
+                    {resetStatus && (
+                      <div className="mb-2 p-2 rounded-lg bg-blue-950/60 border border-blue-800/80 text-[11px] text-blue-300">
+                        {resetStatus}
+                      </div>
+                    )}
+
+                    <button
+                      className="w-full text-left px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-900 rounded-lg transition-colors flex items-center justify-between"
+                      onClick={() => {
+                        setAccountOpen(false);
+                        setActiveTab("profile");
+                      }}
+                    >
+                      <span>Academic Dashboard</span>
+                      <ArrowRight className="h-3.5 w-3.5 text-slate-500" />
+                    </button>
+
+                    <button
+                      className="w-full text-left px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-900 rounded-lg transition-colors"
+                      onClick={handlePasswordReset}
+                    >
+                      Send Password Reset Link
+                    </button>
+
+                    <div className="border-t border-slate-800/80 my-1"></div>
+
+                    <button
+                      className="w-full text-left px-3 py-2 text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 rounded-lg transition-colors font-medium"
+                      onClick={async () => {
+                        setAccountOpen(false);
+                        try {
+                          await logout();
+                        } catch (e) {
+                          console.error('Logout from account menu failed', e);
+                        }
+                      }}
+                    >
+                      Log Out
+                    </button>
                   </div>
-
-                  {resetStatus && (
-                    <div className="mb-2 p-2 rounded-lg bg-blue-950/60 border border-blue-800/80 text-[11px] text-blue-300">
-                      {resetStatus}
-                    </div>
-                  )}
-
-                  <button
-                    className="w-full text-left px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-900 rounded-lg transition-colors flex items-center justify-between"
-                    onClick={() => {
-                      setAccountOpen(false);
-                      setActiveTab("profile");
-                    }}
-                  >
-                    <span>Academic Dashboard</span>
-                    <ArrowRight className="h-3.5 w-3.5 text-slate-500" />
-                  </button>
-
-                  <button
-                    className="w-full text-left px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-900 rounded-lg transition-colors"
-                    onClick={handlePasswordReset}
-                  >
-                    Send Password Reset Link
-                  </button>
-
-                  <div className="border-t border-slate-800/80 my-1"></div>
-
-                  <button
-                    className="w-full text-left px-3 py-2 text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 rounded-lg transition-colors font-medium"
-                    onClick={async () => {
-                      setAccountOpen(false);
-                      try {
-                        await logout();
-                      } catch (e) {
-                        console.error('Logout from account menu failed', e);
-                      }
-                    }}
-                  >
-                    Log Out
-                  </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             <button

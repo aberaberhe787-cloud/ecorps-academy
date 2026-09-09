@@ -580,7 +580,7 @@ export const PlaygroundView: React.FC = () => {
           <div className={`${isComparisonMode ? "lg:col-span-6" : "lg:col-span-5"} space-y-4`}>
             {isComparisonMode ? (
               <div className="space-y-4">
-                <div className="h-[280px]">
+                <div className="min-h-[280px]">
                   <TerminalOutput
                     result={lastResult}
                     isExecuting={isExecuting}
@@ -589,7 +589,7 @@ export const PlaygroundView: React.FC = () => {
                     onRetry={() => executeComparison()}
                   />
                 </div>
-                <div className="h-[280px]">
+                <div className="min-h-[280px]">
                   <TerminalOutput
                     result={comparisonResultB}
                     isExecuting={isExecuting}
@@ -600,7 +600,7 @@ export const PlaygroundView: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="h-[580px]">
+              <div className="min-h-[400px] h-full">
                 <TerminalOutput
                   result={lastResult}
                   isExecuting={isExecuting}

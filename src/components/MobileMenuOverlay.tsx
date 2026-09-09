@@ -295,6 +295,40 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
               <div className="pt-4 space-y-3">
                 <div className="px-1">
                   <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400">
+                    Account & System
+                  </span>
+                </div>
+
+                {/* Auth Actions */}
+                <div className="p-3 rounded-xl bg-slate-900/70 border border-slate-800/80 space-y-2">
+                  <button
+                    className="w-full text-left px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-900 rounded-lg transition-colors flex items-center justify-between"
+                    onClick={() => {
+                      onClose();
+                      setActiveTab("profile");
+                    }}
+                  >
+                    <span>Academic Dashboard</span>
+                    <ArrowRight className="h-3.5 w-3.5 text-slate-500" />
+                  </button>
+                  
+                  <button
+                    className="w-full text-left px-3 py-2 text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 rounded-lg transition-colors font-medium"
+                    onClick={async () => {
+                      onClose();
+                      try {
+                        await logout();
+                      } catch (e) {
+                        console.error('Logout failed', e);
+                      }
+                    }}
+                  >
+                    Log Out
+                  </button>
+                </div>
+
+                <div className="px-1">
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400">
                     Preferences & Controls
                   </span>
                 </div>
