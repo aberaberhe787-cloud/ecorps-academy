@@ -600,7 +600,7 @@ export const Navbar: React.FC = () => {
 
             <button
               id="mobile-menu-toggle-btn"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => setMobileMenuOpen(prev => !prev)}
               className="md:hidden p-2 text-slate-300 hover:text-white rounded-lg hover:bg-slate-900 border border-transparent hover:border-slate-800 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label="Toggle navigation menu"
               aria-expanded={mobileMenuOpen}
