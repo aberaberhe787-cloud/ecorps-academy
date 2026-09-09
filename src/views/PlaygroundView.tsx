@@ -93,7 +93,7 @@ const SideDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
 
       {/* Drawer Panel */}
       <div
-        className={`fixed top-0 right-0 z-40 h-full w-full max-w-sm bg-slate-950 border-l border-slate-800 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 z-40 h-full w-full max-w-sm bg-slate-950 border-l border-slate-800 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out overscroll-contain ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >

@@ -174,7 +174,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 260 }}
-            className="fixed inset-y-0 right-0 w-full max-w-sm sm:max-w-md bg-slate-950 border-l border-slate-800/90 shadow-2xl flex flex-col justify-between overflow-hidden"
+            className="fixed inset-y-0 right-0 w-full max-w-sm sm:max-w-md bg-slate-950 border-l border-slate-800/90 shadow-2xl flex flex-col justify-between overflow-hidden overscroll-contain"
           >
             {/* Top Bar / Header */}
             <div className="shrink-0 flex items-center justify-between px-4 py-3.5 border-b border-slate-800/90 bg-slate-950/95">
