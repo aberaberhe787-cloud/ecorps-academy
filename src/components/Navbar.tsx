@@ -32,6 +32,7 @@ import { NavTab } from "../types";
 import { GoogleTranslate } from "./GoogleTranslate";
 import { EcorpLogo } from "./EcorpLogo";
 import { CertificateGenerator } from "./CertificateGenerator";
+import { MobileMenuOverlay } from "./MobileMenuOverlay";
 import { auth } from "../lib/firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { motion, AnimatePresence } from "motion/react";
@@ -596,112 +597,27 @@ export const Navbar: React.FC = () => {
             </div>
 
             <button
+              id="mobile-menu-toggle-btn"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-1.5 sm:p-2 text-slate-300 hover:text-white"
+              className="md:hidden p-2 text-slate-300 hover:text-white rounded-lg hover:bg-slate-900 border border-transparent hover:border-slate-800 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label="Toggle navigation menu"
               aria-expanded={mobileMenuOpen}
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 w-5" />
             </button>
           </div>
         </nav>
       </header>
       
-      {/* Mobile Menu Drawer */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMobileMenuOpen(false)}
-              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs md:hidden"
-              aria-hidden="true"
-            />
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 right-0 z-[60] w-72 max-w-[85vw] bg-slate-950 border-l border-slate-800 p-5 sm:p-6 md:hidden overflow-y-auto flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-6 pb-3 border-b border-slate-800">
-                  <div className="flex items-center gap-2">
-                    <EcorpLogo size="sm" />
-                    <span className="font-mono font-bold text-white text-sm">
-                      {t.nav.brandName}
-                    </span>
-                  </div>
-                  <button 
-                    onClick={() => setMobileMenuOpen(false)} 
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-                    aria-label="Close navigation menu"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
-
-                {/* Mobile Search Trigger in Drawer */}
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    setSearchOpen(true);
-                    setTimeout(() => searchInputRef.current?.focus(), 150);
-                  }}
-                  className="w-full mb-3 flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 hover:text-white hover:border-slate-700 transition-colors shadow-inner"
-                >
-                  <div className="flex items-center gap-2">
-                    <Search className="h-4 w-4 text-blue-400" />
-                    <span>Search academy content...</span>
-                  </div>
-                  <kbd className="text-[10px] font-mono px-1.5 py-0.5 bg-slate-800 rounded text-slate-400 border border-slate-700">⌘K</kbd>
-                </button>
-
-                <div className="flex flex-col gap-1.5">
-                  {navItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = activeTab === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => {
-                          if (item.id === "playground" && activeTab !== "playground") {
-                            setPrompt("");
-                            setSystemInstruction("");
-                          }
-                          setActiveTab(item.id);
-                          setMobileMenuOpen(false);
-                        }}
-                        className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all ${
-                          isActive
-                            ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25"
-                            : "text-slate-300 hover:bg-slate-800/80 hover:text-white"
-                        }`}
-                      >
-                        <Icon className={`h-4 w-4 ${isActive ? "text-white" : "text-slate-400"}`} />
-                        <span>{item.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="pt-4 mt-6 border-t border-slate-800/80 text-xs text-slate-400 space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-400">Level {level}</span>
-                  <span className="text-blue-400 font-mono font-semibold">{userProgress.xp} XP</span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-400">Streak</span>
-                  <span className="text-amber-400 font-semibold">{userProgress.streakDays} days 🔥</span>
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {/* Responsive Mobile Menu Overlay */}
+      <MobileMenuOverlay
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        onOpenSearch={() => {
+          setSearchOpen(true);
+          setTimeout(() => searchInputRef.current?.focus(), 100);
+        }}
+      />
       
       {/* Drawer & Panels */}
     </>

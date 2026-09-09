@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import "../theme.css"; // make sure theme.css is imported
+import "../theme.css";
+import { loadUserPreferences, savePreference, subscribeToPreferences, type ThemeMode } from "../lib/userPreferences";
 
-type Theme = "light" | "dark" | "system";
+type Theme = ThemeMode;
 
 type ThemeContextValue = {
   theme: Theme;
@@ -19,7 +20,7 @@ export function useTheme() {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>((localStorage.getItem("ecorp_theme") as Theme) || "system");
+  const [theme, setThemeState] = useState<Theme>(() => loadUserPreferences().theme);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -35,9 +36,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       root.classList.toggle("dark", prefersDark);
       root.classList.toggle("light", !prefersDark);
     }
-
-    localStorage.setItem("ecorp_theme", theme);
   }, [theme]);
+
+  const setTheme = (newTheme: Theme) => {
+    setThemeState(newTheme);
+    savePreference("theme", newTheme);
+  };
+
+  useEffect(() => {
+    const unsubscribe = subscribeToPreferences((prefs) => {
+      if (prefs.theme) {
+        setThemeState(prefs.theme);
+      }
+    });
+    return unsubscribe;
+  }, []);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>

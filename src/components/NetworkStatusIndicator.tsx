@@ -8,9 +8,11 @@ import {
   X,
   ShieldCheck,
   Loader2,
-  HardDrive
+  HardDrive,
+  AlertTriangle
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
+import { subscribeToApiErrors, type ApiErrorInfo } from "../lib/apiErrorHandler";
 
 /**
  * Compact status badge for the Navbar / Header
@@ -89,9 +91,29 @@ export const NetworkStatusToast: React.FC = () => {
   const [isDismissed, setIsDismissed] = useState(false);
   const [showRestoredNotice, setShowRestoredNotice] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
+  const [activeApiError, setActiveApiError] = useState<ApiErrorInfo | null>(null);
+  const [isApiRetrying, setIsApiRetrying] = useState(false);
   const previousOnlineRef = useRef<boolean>(isOnline);
 
   const isOffline = !isOnline || persistenceStatus === "offline";
+
+  // Subscribe to API error events from the robust fetch wrapper
+  useEffect(() => {
+    const unsubscribe = subscribeToApiErrors((error) => {
+      setActiveApiError(error);
+      setIsDismissed(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  // Auto-dismiss API error toast after 10 seconds if not currently retrying
+  useEffect(() => {
+    if (!activeApiError || isApiRetrying) return;
+    const timer = window.setTimeout(() => {
+      setActiveApiError(null);
+    }, 10000);
+    return () => window.clearTimeout(timer);
+  }, [activeApiError, isApiRetrying]);
 
   // Watch for transitions from offline -> online
   useEffect(() => {
@@ -125,8 +147,8 @@ export const NetworkStatusToast: React.FC = () => {
     }
   };
 
-  // Determine what to display
-  const isVisible = (isOffline && !isDismissed) || showRestoredNotice;
+  // Determine what to display: API error takes immediate precedence, then restore notice, then offline warning
+  const isVisible = !!activeApiError || (isOffline && !isDismissed) || showRestoredNotice;
 
   return (
     <AnimatePresence>
@@ -141,7 +163,93 @@ export const NetworkStatusToast: React.FC = () => {
           transition={{ duration: 0.25, ease: "easeOut" }}
           className="fixed bottom-4 right-4 z-50 max-w-sm sm:max-w-md w-[calc(100vw-2rem)] pointer-events-auto"
         >
-          {showRestoredNotice ? (
+          {activeApiError ? (
+            /* API ERROR NOTIFICATION (405, 500, RESUME-RELATED) */
+            <div className={`rounded-2xl border ${
+              activeApiError.status === 405
+                ? "border-amber-500/50 ring-amber-500/20"
+                : "border-rose-500/50 ring-rose-500/20"
+            } bg-slate-950/95 p-4 text-white shadow-2xl backdrop-blur-xl dark:bg-slate-900/95 ring-1`}>
+              <div className="flex items-start gap-3">
+                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
+                  activeApiError.status === 405
+                    ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                    : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
+                } mt-0.5`}>
+                  {activeApiError.status === 405 ? (
+                    <RefreshCw className="h-5 w-5" />
+                  ) : (
+                    <AlertTriangle className="h-5 w-5" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <h4 className={`text-sm font-semibold ${
+                        activeApiError.status === 405 ? "text-amber-300" : "text-rose-300"
+                      }`}>
+                        {activeApiError.title}
+                      </h4>
+                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium ${
+                        activeApiError.status === 405
+                          ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                          : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                      }`}>
+                        {activeApiError.status ? `HTTP ${activeApiError.status}` : "Network Drop"}
+                      </span>
+                    </div>
+                    <button
+                      id="dismiss-api-error-toast-btn"
+                      onClick={() => setActiveApiError(null)}
+                      className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800/60 transition-colors"
+                      aria-label="Dismiss error notice"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <p className="mt-1.5 text-xs text-slate-300 leading-relaxed">
+                    {activeApiError.message}
+                  </p>
+
+                  <div className="mt-3 flex items-center justify-between gap-2 pt-2 border-t border-slate-800">
+                    <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono">
+                      <ShieldCheck className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                      <span>Data & progress safe</span>
+                    </div>
+
+                    <button
+                      id="retry-api-toast-btn"
+                      onClick={async () => {
+                        setIsApiRetrying(true);
+                        try {
+                          if (activeApiError.retry) {
+                            await activeApiError.retry();
+                          } else {
+                            await retrySync();
+                          }
+                          setActiveApiError(null);
+                        } catch {
+                          // Failures are automatically handled and redisplayed
+                        } finally {
+                          setIsApiRetrying(false);
+                        }
+                      }}
+                      disabled={isApiRetrying}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium ${
+                        activeApiError.status === 405
+                          ? "bg-amber-500 hover:bg-amber-400 text-slate-950"
+                          : "bg-rose-600 hover:bg-rose-500 text-white"
+                      } transition-colors shadow-sm disabled:opacity-60`}
+                    >
+                      <RefreshCw className={`h-3 w-3 ${isApiRetrying ? "animate-spin" : ""}`} />
+                      <span>{isApiRetrying ? "Retrying..." : "Retry Request"}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : showRestoredNotice ? (
             /* CONNECTION RESTORED NOTICE */
             <div className="rounded-2xl border border-emerald-500/40 bg-slate-950/95 p-4 text-white shadow-2xl backdrop-blur-xl dark:border-emerald-500/40 dark:bg-slate-900/95">
               <div className="flex items-start gap-3">

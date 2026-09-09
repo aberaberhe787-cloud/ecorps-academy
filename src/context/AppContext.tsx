@@ -39,6 +39,17 @@ import {
   callGeminiGenerate,
   callGeminiEvaluate,
 } from "../lib/geminiApi";
+import {
+  robustApiFetch,
+  isPageResumedAfterLongIdle,
+} from "../lib/apiErrorHandler";
+import {
+  loadUserPreferences,
+  savePreference,
+  saveUserPreferences,
+  subscribeToPreferences,
+  type UserPreferences,
+} from "../lib/userPreferences";
 
 interface AppContextType {
   activeTab: NavTab;
@@ -118,6 +129,10 @@ interface AppContextType {
   // LMS Focus / Distraction-free mode
   isDistractionFreeMode: boolean;
   setIsDistractionFreeMode: (v: boolean) => void;
+
+  // User Preferences Persistence
+  userPreferences: UserPreferences;
+  updateUserPreferences: (partial: Partial<UserPreferences>) => void;
   
   // Helper to load into playground
   loadIntoPlayground: (options: {
@@ -285,8 +300,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [activeMissionId, setActiveMissionId] = useState<string | null>(null);
   const [playgroundSubTab, setPlaygroundSubTab] = useState<"sandbox" | "missions" | "comparison" | "history" | "saved" | "ctf">("sandbox");
+  
+  // Persistent user preferences layer (theme, distraction-free mode, language, AI mode, sampling)
+  const initialPrefsRef = useRef<UserPreferences>(loadUserPreferences());
+  const [userPreferences, setUserPreferencesState] = useState<UserPreferences>(() => initialPrefsRef.current);
+
   const [theme, setThemeState] = useState<'dark' | 'light' | 'system'>(() => {
-    return (localStorage.getItem('ecorp_theme') as 'dark' | 'light' | 'system') || 'system';
+    return initialPrefsRef.current.theme;
   });
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -315,7 +335,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const setTheme = (newTheme: 'dark' | 'light' | 'system') => {
     setThemeState(newTheme);
-    localStorage.setItem('ecorp_theme', newTheme);
+    const updated = savePreference('theme', newTheme);
+    setUserPreferencesState(updated);
   };
 
   // Progress state & Persistence Lifecycle
@@ -520,7 +541,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     try {
-      const res = await fetch('/api/health').catch(() => null);
+      const res = await robustApiFetch('/api/health').catch(() => null);
       if (res && res.ok) {
         setIsOnline(true);
       }
@@ -612,10 +633,28 @@ Provide:
   const [systemInstruction, setSystemInstruction] = useState<string>(
     "You are an expert prompt engineer and senior software mentor. Respond with high precision and structured clarity."
   );
-  const [temperature, setTemperature] = useState<number>(0.3);
-  const [topP, setTopP] = useState<number>(0.95);
-  const [aiMode, setAiMode] = useState<"mock" | "real">("real");
+  const [temperature, setTemperatureState] = useState<number>(() => initialPrefsRef.current.temperature);
+  const [topP, setTopPState] = useState<number>(() => initialPrefsRef.current.topP);
+  const [aiMode, setAiModeState] = useState<"mock" | "real">(() => initialPrefsRef.current.aiMode);
   const [hasRealApiAvailable, setHasRealApiAvailable] = useState<boolean>(true);
+
+  const setTemperature = (tVal: number) => {
+    setTemperatureState(tVal);
+    const updated = savePreference('temperature', tVal);
+    setUserPreferencesState(updated);
+  };
+
+  const setTopP = (pVal: number) => {
+    setTopPState(pVal);
+    const updated = savePreference('topP', pVal);
+    setUserPreferencesState(updated);
+  };
+
+  const setAiMode = (m: "mock" | "real") => {
+    setAiModeState(m);
+    const updated = savePreference('aiMode', m);
+    setUserPreferencesState(updated);
+  };
 
   // Execution state & request lifecycle protection refs
   const activeExecutionIdRef = useRef<number>(0);
@@ -634,30 +673,53 @@ Provide:
   );
   const [comparisonResultB, setComparisonResultB] = useState<ExecutionResult | null>(null);
 
-  // LMS Focus / Distraction-free mode
-  const [isDistractionFreeMode, setIsDistractionFreeMode] = useState<boolean>(false);
+  // LMS Focus / Distraction-free mode persisted in localStorage
+  const [isDistractionFreeMode, setIsDistractionFreeModeState] = useState<boolean>(() => {
+    return initialPrefsRef.current.isDistractionFreeMode;
+  });
 
-  // Language state defaults to English until the user selects another language.
+  const setIsDistractionFreeMode = (v: boolean) => {
+    setIsDistractionFreeModeState(v);
+    const updated = savePreference('isDistractionFreeMode', v);
+    setUserPreferencesState(updated);
+  };
+
+  // Language state defaults to saved preference or English
   const [language, setLanguageState] = useState<Language>(() => {
-    try {
-      const savedLang = localStorage.getItem("ecorp_academy_lang");
-      if (savedLang === "en" || savedLang === "am") {
-        return savedLang;
-      }
-    } catch {
-      // fallback
-    }
-    return "en";
+    return initialPrefsRef.current.language;
   });
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    try {
-      localStorage.setItem("ecorp_academy_lang", lang);
-    } catch {
-      // ignore
-    }
+    const updated = savePreference('language', lang);
+    setUserPreferencesState(updated);
   };
+
+  // Bulk preference updater
+  const updateUserPreferences = (partial: Partial<UserPreferences>) => {
+    if (partial.theme !== undefined) setThemeState(partial.theme);
+    if (partial.isDistractionFreeMode !== undefined) setIsDistractionFreeModeState(partial.isDistractionFreeMode);
+    if (partial.language !== undefined) setLanguageState(partial.language);
+    if (partial.aiMode !== undefined) setAiModeState(partial.aiMode);
+    if (partial.temperature !== undefined) setTemperatureState(partial.temperature);
+    if (partial.topP !== undefined) setTopPState(partial.topP);
+    const updated = saveUserPreferences(partial);
+    setUserPreferencesState(updated);
+  };
+
+  // Cross-tab and window preference synchronization
+  useEffect(() => {
+    const unsubscribe = subscribeToPreferences((updated) => {
+      setUserPreferencesState(updated);
+      setThemeState(updated.theme);
+      setIsDistractionFreeModeState(updated.isDistractionFreeMode);
+      setLanguageState(updated.language);
+      setAiModeState(updated.aiMode);
+      setTemperatureState(updated.temperature);
+      setTopPState(updated.topP);
+    });
+    return unsubscribe;
+  }, []);
 
   const t = translations[language];
   const currentCurriculum = language === "am" ? amharicCurriculumModules : curriculumModules;
@@ -1107,6 +1169,17 @@ Provide:
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         void checkSession();
+        // Warm up and verify backend health when user resumes page after idle/hours
+        if (isPageResumedAfterLongIdle()) {
+          robustApiFetch("/api/health", { silent: true, autoRetryOnce: true })
+            .then((r) => r.json())
+            .then((data) => {
+              if (data && data.hasGeminiKey) {
+                setHasRealApiAvailable(true);
+              }
+            })
+            .catch(() => {});
+        }
       }
     };
 
@@ -1129,7 +1202,7 @@ Provide:
 
   // Check health endpoint for backend / real Gemini API availability
   useEffect(() => {
-    fetch("/api/health")
+    robustApiFetch("/api/health")
       .then((r) => r.json())
       .then((data) => {
         if (data && data.hasGeminiKey) {
@@ -1621,6 +1694,8 @@ Provide:
         setSelectedResourceFilter,
         isDistractionFreeMode,
         setIsDistractionFreeMode,
+        userPreferences,
+        updateUserPreferences,
         language,
         setLanguage,
         t,

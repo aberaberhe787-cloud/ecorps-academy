@@ -1,3 +1,5 @@
+import { robustApiFetch } from "./apiErrorHandler";
+
 /**
  * Resilient API client for server-side Google Gemini endpoints
  * Protects against truncated streams, empty bodies, network interruptions, and JSON parsing syntax errors.
@@ -48,7 +50,7 @@ export async function safeFetchJson<T = any>(
   options: RequestInit = {}
 ): Promise<{ ok: boolean; status: number; data: T | null; error?: string; aborted?: boolean }> {
   try {
-    const response = await fetch(url, options);
+    const response = await robustApiFetch(url, options);
 
     // Read body text first before attempting JSON parsing
     const rawText = await response.text();
