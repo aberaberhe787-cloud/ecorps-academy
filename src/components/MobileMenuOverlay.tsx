@@ -145,12 +145,16 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
   const progressPercent = Math.min(100, Math.round((currentLevelXp / 500) * 100));
 
   const handleNavClick = (tabId: NavTab) => {
-    if (tabId === "playground" && activeTab !== "playground") {
-      setPrompt("");
-      setSystemInstruction("");
+    try {
+      if (tabId === "playground" && activeTab !== "playground") {
+        setPrompt("");
+        setSystemInstruction("");
+      }
+      setActiveTab(tabId);
+      onClose();
+    } catch (error) {
+      console.error("Error in handleNavClick:", error);
     }
-    setActiveTab(tabId);
-    onClose();
   };
 
   return (
@@ -164,7 +168,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
+            className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[9998]"
             aria-hidden="true"
           />
 
@@ -174,7 +178,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 260 }}
-            className="fixed inset-y-0 right-0 w-full max-w-sm sm:max-w-md bg-slate-950 border-l border-slate-800/90 shadow-2xl flex flex-col justify-between overflow-hidden overscroll-contain"
+            className="fixed inset-y-0 right-0 w-full max-w-sm sm:max-w-md bg-slate-950 border-l border-slate-800/90 shadow-2xl flex flex-col justify-between overflow-hidden overscroll-contain z-[9999]"
           >
             {/* Top Bar / Header */}
             <div className="shrink-0 flex items-center justify-between px-4 py-3.5 border-b border-slate-800/90 bg-slate-950/95">
