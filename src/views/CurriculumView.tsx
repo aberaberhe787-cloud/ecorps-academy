@@ -20,7 +20,13 @@ import {
   ChevronRight,
   Code2,
   FileCheck2,
-  Check
+  Check,
+  Search,
+  GitBranch,
+  Cloud,
+  Filter,
+  RotateCcw,
+  Compass,
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { curriculumModules } from "../data/lessonsData";
@@ -33,6 +39,7 @@ import { LMSFocusHeader } from "../components/lms/LMSFocusHeader";
 import { LessonProgressStepper } from "../components/lms/LessonProgressStepper";
 import { EcorpLogo } from "../components/EcorpLogo";
 import { CertificateGenerator } from "../components/CertificateGenerator";
+import { InteractiveSkillTree } from "../components/lms/InteractiveSkillTree";
 
 const BLOOM_COLORS: Record<BloomsTaxonomyLevel, { bg: string; text: string; border: string }> = {
   Remembering: { bg: "bg-slate-800", text: "text-slate-300", border: "border-slate-700" },
@@ -48,6 +55,10 @@ export const CurriculumView: React.FC = () => {
     activeLessonId,
     setActiveLessonId,
     userProgress,
+    curriculumProgressPercent,
+    resumeCurriculum,
+    persistenceStatus,
+    isOnline,
     markLessonComplete,
     addXp,
     loadIntoPlayground,
@@ -76,10 +87,62 @@ export const CurriculumView: React.FC = () => {
   const [readConceptIds, setReadConceptIds] = useState<string[]>([]);
   const [passedCheckpointIds, setPassedCheckpointIds] = useState<string[]>([]);
   const [selectedBloomFilter, setSelectedBloomFilter] = useState<BloomsTaxonomyLevel | "All">("All");
-  const [viewMode, setViewMode] = useState<"syllabus" | "lesson">(
+  const [viewMode, setViewMode] = useState<"syllabus" | "skilltree" | "lesson">(
     activeLessonId ? "lesson" : "syllabus"
   );
   const [showCaseStudy, setShowCaseStudy] = useState<boolean>(true);
+
+  // Curriculum Search and Filtering states
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [difficultyFilter, setDifficultyFilter] = useState<string>("All");
+  const [statusFilter, setStatusFilter] = useState<"All" | "completed" | "uncompleted">("All");
+
+  // Determine target lesson to resume
+  const targetResumeLesson = React.useMemo(() => {
+    if (userProgress.lastLessonId) {
+      const found = allLessons.find((l) => l.id === userProgress.lastLessonId);
+      if (found) return found;
+    }
+    return allLessons.find((l) => !userProgress.completedLessons.includes(l.id)) || allLessons[0];
+  }, [userProgress.lastLessonId, userProgress.completedLessons, allLessons]);
+
+  // Filtered modules for syllabus view
+  const filteredModules = React.useMemo(() => {
+    return currentCurriculum
+      .map((m) => {
+        const matchingLessons = m.lessons.filter((l) => {
+          const matchesSearch =
+            !searchQuery.trim() ||
+            l.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            l.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            l.conceptSummary.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (l.objective || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (l.bloomTaxonomyFocus || "").toLowerCase().includes(searchQuery.toLowerCase());
+
+          const matchesDifficulty =
+            difficultyFilter === "All" || l.difficulty === difficultyFilter;
+
+          const isLessonDone = userProgress.completedLessons.includes(l.id);
+          const matchesStatus =
+            statusFilter === "All" ||
+            (statusFilter === "completed" && isLessonDone) ||
+            (statusFilter === "uncompleted" && !isLessonDone);
+
+          return matchesSearch && matchesDifficulty && matchesStatus;
+        });
+
+        return {
+          ...m,
+          lessons: matchingLessons,
+        };
+      })
+      .filter((m) => m.lessons.length > 0);
+  }, [currentCurriculum, searchQuery, difficultyFilter, statusFilter, userProgress.completedLessons]);
+
+  const totalMatchingLessons = filteredModules.reduce(
+    (acc, m) => acc + m.lessons.length,
+    0
+  );
 
   // Sync viewMode if activeLessonId changes
   useEffect(() => {
@@ -217,7 +280,201 @@ export const CurriculumView: React.FC = () => {
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-6">
         {/* ========================================================================= */}
-        {/* VIEW MODE 1: SYLLABUS & LEARNING PATHWAY OVERVIEW                         */}
+        {/* GLOBAL CURRICULUM CONTROLS: PROGRESS TRACKER, SYNC STATUS & VIEW SELECTOR  */}
+        {/* ========================================================================= */}
+        <div className="space-y-4">
+          {/* Firestore Progress Tracking & Quick Resume Card */}
+          <div className="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900 to-blue-950/40 p-5 shadow-xl backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-2 flex-1">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="flex items-center gap-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 text-xs font-bold text-blue-300">
+                  <GraduationCap className="h-4 w-4 text-blue-400" />
+                  Curriculum Progress
+                </span>
+
+                {/* Real-time Firestore Sync Badge */}
+                <div className="flex items-center gap-1.5 rounded-md bg-slate-950/80 border border-slate-800 px-2.5 py-1 text-[11px] font-mono">
+                  {persistenceStatus === "saving" ? (
+                    <>
+                      <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
+                      <span className="text-amber-300">Saving to Firestore...</span>
+                    </>
+                  ) : persistenceStatus === "synced" ? (
+                    <>
+                      <Cloud className="h-3.5 w-3.5 text-emerald-400" />
+                      <span className="text-emerald-400 font-semibold">Firestore Synced ✓</span>
+                    </>
+                  ) : !isOnline || persistenceStatus === "offline" ? (
+                    <>
+                      <span className="h-2 w-2 rounded-full bg-slate-400" />
+                      <span className="text-slate-400">Offline Cached</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="h-2 w-2 rounded-full bg-rose-400" />
+                      <span className="text-rose-400">Sync Retrying</span>
+                    </>
+                  )}
+                </div>
+
+                <span className="text-xs text-slate-400 font-mono">
+                  {userProgress.completedLessons.length} / {allLessons.length} Lessons Mastered ({curriculumProgressPercent}%)
+                </span>
+              </div>
+
+              {/* Animated Progress Bar */}
+              <div className="h-2 w-full max-w-xl overflow-hidden rounded-full bg-slate-800">
+                <div
+                  className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 transition-all duration-500"
+                  style={{ width: `${curriculumProgressPercent}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Quick Resume Action Button */}
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                id="curriculum-resume-hero-btn"
+                onClick={() => {
+                  handleSelectLesson(targetResumeLesson);
+                }}
+                className="flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-900/30 transition-all"
+              >
+                <Play className="h-3.5 w-3.5 fill-white" />
+                <span>Resume Lesson: {targetResumeLesson.title}</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Navigation Mode Switcher & Search Bar */}
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* View Mode Buttons */}
+            <div className="flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-950 p-1 shrink-0">
+              <button
+                id="view-skilltree-tab"
+                onClick={() => setViewMode("skilltree")}
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                  viewMode === "skilltree"
+                    ? "bg-blue-600 text-white shadow-md"
+                    : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                }`}
+              >
+                <GitBranch className="h-3.5 w-3.5" />
+                <span>Interactive Skill Tree</span>
+              </button>
+
+              <button
+                id="view-syllabus-tab"
+                onClick={() => setViewMode("syllabus")}
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                  viewMode === "syllabus"
+                    ? "bg-blue-600 text-white shadow-md"
+                    : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                }`}
+              >
+                <BookOpen className="h-3.5 w-3.5" />
+                <span>Syllabus Pathway</span>
+              </button>
+
+              {activeLessonId && (
+                <button
+                  id="view-active-lesson-tab"
+                  onClick={() => setViewMode("lesson")}
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                    viewMode === "lesson"
+                      ? "bg-indigo-600 text-white shadow-md"
+                      : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                  }`}
+                >
+                  <Code2 className="h-3.5 w-3.5" />
+                  <span>Study Mode</span>
+                </button>
+              )}
+            </div>
+
+            {/* Curriculum Search & Filter Bar */}
+            <div className="flex flex-1 items-center gap-2 max-w-2xl">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Filter lessons by topic, keyword, or concepts (e.g., delimiters, few-shot, injection)..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950 pl-9 pr-8 py-1.5 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2.5 top-2 text-xs text-slate-400 hover:text-white"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+
+              {/* Difficulty filter */}
+              <select
+                value={difficultyFilter}
+                onChange={(e) => setDifficultyFilter(e.target.value)}
+                className="rounded-xl border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-xs text-slate-300 focus:border-blue-500 focus:outline-none"
+              >
+                <option value="All">All Levels</option>
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+              </select>
+
+              {/* Status filter */}
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as any)}
+                className="rounded-xl border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-xs text-slate-300 focus:border-blue-500 focus:outline-none"
+              >
+                <option value="All">All Status</option>
+                <option value="completed">Completed</option>
+                <option value="uncompleted">In Progress</option>
+              </select>
+            </div>
+          </div>
+
+          {searchQuery && (
+            <div className="flex items-center justify-between text-xs text-slate-400 px-1 font-mono">
+              <span>
+                Filtering for: <strong className="text-blue-300">"{searchQuery}"</strong> ({totalMatchingLessons} matching lessons)
+              </span>
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setDifficultyFilter("All");
+                  setStatusFilter("All");
+                }}
+                className="text-blue-400 hover:underline"
+              >
+                Reset Filters
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* ========================================================================= */}
+        {/* VIEW MODE 1: VISUAL INTERACTIVE SKILL TREE                                */}
+        {/* ========================================================================= */}
+        {viewMode === "skilltree" && (
+          <div className="animate-in fade-in duration-300" id="lms-skill-tree-view">
+            <InteractiveSkillTree
+              modules={currentCurriculum}
+              completedLessonIds={userProgress.completedLessons}
+              activeLessonId={activeLessonId}
+              onSelectLesson={handleSelectLesson}
+              searchFilter={searchQuery}
+            />
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* VIEW MODE 2: SYLLABUS & LEARNING PATHWAY OVERVIEW                         */}
         {/* ========================================================================= */}
         {viewMode === "syllabus" && (
           <div className="space-y-8 animate-in fade-in duration-300" id="lms-syllabus-view">
@@ -356,7 +613,7 @@ export const CurriculumView: React.FC = () => {
               </div>
 
               <LearningPathway
-                modules={currentCurriculum}
+                modules={filteredModules}
                 currentLessonId={currentLesson.id}
                 completedLessonIds={userProgress.completedLessons}
                 onSelectLesson={handleSelectLesson}

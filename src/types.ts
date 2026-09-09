@@ -200,13 +200,18 @@ export interface Achievement {
 export interface UserProgress {
   completedLessons: string[];
   completedMissions: string[];
-  completedAssessments?: string[];  missionEvidence?: Record<string, string>;  missionScores: Record<string, number>;
+  completedAssessments?: string[];
+  missionEvidence?: Record<string, string>;
+  missionScores: Record<string, number>;
   bookmarkedPatterns: string[];
   savedCustomPrompts: { id: string; title: string; prompt: string; createdAt: number }[];
   xp: number;
   streakDays: number;
   lastActivityDate: string;
   achievements: Achievement[];
+  lastLessonId?: string;
+  lastModuleId?: string;
+  curriculumProgressPercent?: number;
 }
 
 export interface GlossaryTerm {

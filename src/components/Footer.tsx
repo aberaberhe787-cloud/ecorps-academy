@@ -119,7 +119,7 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-4 text-[11px] text-slate-500">
+        <div className="mt-8 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center sm:justify-between text-center sm:text-left gap-4 text-[11px] text-slate-500">
           <p>© 2026 Ecorp Acadamy. {t.footer.copyright}</p>
           <div className="flex items-center gap-4">
             <span>{t.footer.designedFor}</span>

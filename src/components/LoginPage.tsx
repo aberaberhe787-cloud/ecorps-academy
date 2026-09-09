@@ -451,7 +451,7 @@ export const LoginPage: React.FC = () => {
       </div>
 
       {/* Footer Features Bar */}
-      <footer className="mx-auto flex max-w-[1180px] flex-wrap items-center justify-center gap-x-6 gap-y-1.5 py-2.5 sm:py-3 text-[10px] sm:text-xs text-slate-500">
+      <footer className="mx-auto flex max-w-[1180px] flex-col sm:flex-row items-center justify-center gap-y-2.5 sm:gap-y-1.5 gap-x-6 py-2.5 sm:py-3 text-[10px] sm:text-xs text-slate-500">
         <span className="flex items-center gap-1.5">
           <BookOpen className="h-3.5 w-3.5 text-blue-400" />
           <strong className="text-blue-300">10+</strong> Interactive Lessons

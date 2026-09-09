@@ -1,0 +1,82 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Learner profile, curriculum lesson progress tracking, and achievement state",
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "description": "User's public display name"
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "Profile picture URL"
+        },
+        "xp": {
+          "type": "number",
+          "description": "Total academic XP earned"
+        },
+        "streakDays": {
+          "type": "number",
+          "description": "Consecutive days of active prompt learning"
+        },
+        "completedLessons": {
+          "type": "array",
+          "description": "List of completed curriculum lesson identifiers"
+        },
+        "completedLessonCount": {
+          "type": "number",
+          "description": "Total number of completed curriculum lessons"
+        },
+        "curriculumProgressPercent": {
+          "type": "number",
+          "description": "Percentage (0-100) of curriculum completed"
+        },
+        "lastLessonId": {
+          "type": "string",
+          "description": "Identifier of the last opened or completed lesson to resume from"
+        },
+        "lastModuleId": {
+          "type": "string",
+          "description": "Identifier of the last module the user engaged with"
+        },
+        "lastActivityDate": {
+          "type": "string",
+          "description": "ISO timestamp of the most recent user activity"
+        },
+        "completedMissions": {
+          "type": "array",
+          "description": "List of passed challenge mission IDs"
+        },
+        "missionScores": {
+          "type": "object",
+          "description": "High score dictionary keyed by mission ID"
+        },
+        "completedAssessments": {
+          "type": "array",
+          "description": "List of validated certification assessment IDs"
+        },
+        "bookmarkedPatterns": {
+          "type": "array",
+          "description": "Bookmarked prompt pattern IDs"
+        },
+        "savedCustomPrompts": {
+          "type": "array",
+          "description": "Custom prompt drafts saved by the user"
+        },
+        "achievements": {
+          "type": "array",
+          "description": "Earned achievement badges"
+        }
+      },
+      "required": ["xp", "streakDays", "completedLessons"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Learner document storing overall profile and curriculum progress"
+    }
+  }
+}

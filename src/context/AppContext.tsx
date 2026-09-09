@@ -108,6 +108,8 @@ interface AppContextType {
 
   // User Progress
   userProgress: UserProgress;
+  curriculumProgressPercent: number;
+  resumeCurriculum: () => string | null;
   persistenceStatus: 'synced' | 'saving' | 'offline' | 'error';
   isOnline: boolean;
   retrySync: () => Promise<void>;
@@ -463,12 +465,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     try {
       const lessonsMap = Object.fromEntries(progressToPersist.completedLessons.map(id => [id, true]));
+      const totalCurriculumLessons = 16;
+      const progressPercent = Math.min(100, Math.round((lessonsCount / totalCurriculumLessons) * 100));
       const payload = {
         displayName: currentUser.displayName || "Ecorp Scholar",
         photoURL: currentUser.photoURL || null,
         curriculumProgress: lessonsCount,
         completedLessonCount: lessonsCount,
-        curriculumProgressPercent: 0,
+        curriculumProgressPercent: progressPercent,
+        lastLessonId: progressToPersist.lastLessonId || null,
+        lastModuleId: progressToPersist.lastModuleId || null,
         currentStreak: progressToPersist.streakDays,
         streakDays: progressToPersist.streakDays,
         lastActivityDate: progressToPersist.lastActivityDate,
@@ -484,7 +490,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         savedCustomPrompts: progressToPersist.savedCustomPrompts,
         achievements: progressToPersist.achievements,
         // Also save progress object for backward-compatibility with progressUtils
-        progress: progressToPersist,
+        progress: {
+          ...progressToPersist,
+          curriculumProgressPercent: progressPercent,
+        },
       };
 
       // Set last synced fingerprint BEFORE await to prevent local loop
@@ -908,6 +917,9 @@ Provide:
             achievements: Array.isArray(data.achievements)
               ? data.achievements
               : (Array.isArray(progressNested.achievements) ? progressNested.achievements : (cachedState.achievements || [])),
+            lastLessonId: data.lastLessonId || progressNested.lastLessonId || cachedState.lastLessonId || undefined,
+            lastModuleId: data.lastModuleId || progressNested.lastModuleId || cachedState.lastModuleId || undefined,
+            curriculumProgressPercent: Math.min(100, Math.round((mergedLessons.length / 16) * 100)),
           };
 
           const cloudFingerprint = getProgressFingerprint(cloudProgress);
@@ -1555,12 +1567,51 @@ Provide:
     return { ...prev, streakDays: streakResult.streak, lastActivityDate: streakResult.date };
   };
 
+  const totalCurriculumLessons = 16;
+  const curriculumProgressPercent = Math.min(
+    100,
+    Math.round((userProgress.completedLessons.length / totalCurriculumLessons) * 100)
+  );
+
+  const resumeCurriculum = (): string | null => {
+    const allLessons = currentCurriculum.flatMap((m) => m.lessons);
+    const allLessonIds = allLessons.map((l) => l.id);
+    let targetLessonId: string | null = null;
+
+    if (userProgress.lastLessonId && allLessonIds.includes(userProgress.lastLessonId)) {
+      targetLessonId = userProgress.lastLessonId;
+    } else {
+      const firstIncomplete = allLessonIds.find(
+        (id) => !userProgress.completedLessons.includes(id)
+      );
+      targetLessonId = firstIncomplete || allLessonIds[0] || null;
+    }
+
+    if (targetLessonId) {
+      setActiveLessonId(targetLessonId);
+      setActiveTab("curriculum");
+    }
+    return targetLessonId;
+  };
+
   const markLessonComplete = (lessonId: string) => {
     // Optimistic local update with duplicate completion protection
     setUserProgress((prev) => {
-      if (prev.completedLessons.includes(lessonId)) return prev;
-      confetti({ particleCount: 50, spread: 50, origin: { y: 0.7 } });
-      const next = { ...prev, completedLessons: [...prev.completedLessons, lessonId], xp: prev.xp + 40 };
+      const isAlreadyDone = prev.completedLessons.includes(lessonId);
+      if (!isAlreadyDone) {
+        confetti({ particleCount: 50, spread: 50, origin: { y: 0.7 } });
+      }
+      const updatedLessons = isAlreadyDone
+        ? prev.completedLessons
+        : [...prev.completedLessons, lessonId];
+      const percent = Math.min(100, Math.round((updatedLessons.length / totalCurriculumLessons) * 100));
+      const next = {
+        ...prev,
+        completedLessons: updatedLessons,
+        xp: isAlreadyDone ? prev.xp : prev.xp + 40,
+        lastLessonId: lessonId,
+        curriculumProgressPercent: percent,
+      };
       return processUserActivity(next);
     });
   };
@@ -1677,6 +1728,8 @@ Provide:
         setTheme,
         isDarkMode,
         userProgress,
+        curriculumProgressPercent,
+        resumeCurriculum,
         persistenceStatus,
         isOnline,
         retrySync,

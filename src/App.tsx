@@ -24,6 +24,7 @@ import { DashboardHeader } from "./components/DashboardHeader";
 import { RequireAuth } from "./components/RequireAuth";
 import { NetworkStatusToast } from "./components/NetworkStatusIndicator";
 import { SessionInactivityWarning } from "./components/SessionInactivityWarning";
+import { GlobalShortcutsHandler } from "./components/GlobalShortcutsHandler";
 
 const MainContent: React.FC = () => {
   const { activeTab } = useApp();
@@ -94,6 +95,7 @@ export default function App() {
     <AppProvider>
       <ThemeProvider>
         <AuthGate />
+        <GlobalShortcutsHandler />
         <NetworkStatusToast />
         <SessionInactivityWarning />
       </ThemeProvider>

@@ -9,6 +9,7 @@ export const ResourcesView: React.FC = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGlossaryCategory, setSelectedGlossaryCategory] = useState("All");
+  const [selectedResourceSection, setSelectedResourceSection] = useState<"All" | "guides" | "glossary" | "saved">("All");
   const [copiedPromptId, setCopiedPromptId] = useState<string | null>(null);
 
   // Sync when selectedResourceFilter is triggered from Global Search
@@ -26,9 +27,27 @@ export const ResourcesView: React.FC = () => {
   const filteredGlossary = glossaryTerms.filter((item) => {
     const matchesCat = selectedGlossaryCategory === "All" || item.category === selectedGlossaryCategory;
     const matchesSearch =
+      !searchTerm.trim() ||
       item.term.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.definition.toLowerCase().includes(searchTerm.toLowerCase());
+      item.definition.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.example && item.example.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesCat && matchesSearch;
+  });
+
+  const filteredGuides = externalLearningResources.filter((res) => {
+    if (!searchTerm.trim()) return true;
+    const q = searchTerm.toLowerCase();
+    return (
+      res.title.toLowerCase().includes(q) ||
+      res.description.toLowerCase().includes(q) ||
+      res.type.toLowerCase().includes(q)
+    );
+  });
+
+  const filteredSavedPrompts = userProgress.savedCustomPrompts.filter((saved) => {
+    if (!searchTerm.trim()) return true;
+    const q = searchTerm.toLowerCase();
+    return saved.title.toLowerCase().includes(q) || saved.prompt.toLowerCase().includes(q);
   });
 
   const handleCopyText = (text: string, id: string) => {
@@ -48,6 +67,81 @@ export const ResourcesView: React.FC = () => {
         <p className="mt-1 text-xs text-slate-400">
           {t.resources.subtitle}
         </p>
+
+        {/* Unified Resource Search Bar */}
+        <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/90 p-4 shadow-xl space-y-3">
+          <div className="relative">
+            <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search authoritative guides, research papers, prompt engineering glossary, and saved prompts..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 pl-10 pr-10 py-2.5 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="absolute right-3 top-2.5 rounded px-1.5 py-0.5 text-xs text-slate-400 hover:text-white bg-slate-800"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="flex items-center gap-1.5 overflow-x-auto">
+              <button
+                onClick={() => setSelectedResourceSection("All")}
+                className={`rounded-lg px-2.5 py-1 font-medium transition-all ${
+                  selectedResourceSection === "All"
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+                }`}
+              >
+                All Resources
+              </button>
+              <button
+                onClick={() => setSelectedResourceSection("guides")}
+                className={`rounded-lg px-2.5 py-1 font-medium transition-all ${
+                  selectedResourceSection === "guides"
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+                }`}
+              >
+                Guides & Papers ({filteredGuides.length})
+              </button>
+              <button
+                onClick={() => setSelectedResourceSection("glossary")}
+                className={`rounded-lg px-2.5 py-1 font-medium transition-all ${
+                  selectedResourceSection === "glossary"
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+                }`}
+              >
+                Glossary ({filteredGlossary.length})
+              </button>
+              {userProgress.savedCustomPrompts.length > 0 && (
+                <button
+                  onClick={() => setSelectedResourceSection("saved")}
+                  className={`rounded-lg px-2.5 py-1 font-medium transition-all ${
+                    selectedResourceSection === "saved"
+                      ? "bg-blue-600 text-white shadow-sm"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+                  }`}
+                >
+                  My Saved ({filteredSavedPrompts.length})
+                </button>
+              )}
+            </div>
+
+            {searchTerm && (
+              <span className="text-[11px] font-mono text-blue-400">
+                Found {filteredGuides.length} guides &bull; {filteredGlossary.length} glossary terms
+              </span>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Prompt of the Day Spotlight */}
@@ -115,14 +209,14 @@ export const ResourcesView: React.FC = () => {
       </div>
 
       {/* Saved Custom Prompts Section */}
-      {userProgress.savedCustomPrompts.length > 0 && (
+      {userProgress.savedCustomPrompts.length > 0 && (selectedResourceSection === "All" || selectedResourceSection === "saved") && (
         <div className="space-y-3">
           <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-            <FileText className="h-4 w-4 text-blue-400" /> My Saved Prompts ({userProgress.savedCustomPrompts.length})
+            <FileText className="h-4 w-4 text-blue-400" /> My Saved Prompts ({filteredSavedPrompts.length})
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {userProgress.savedCustomPrompts.map((saved) => (
+            {filteredSavedPrompts.map((saved) => (
               <div key={saved.id} className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 flex flex-col justify-between space-y-3">
                 <div>
                   <div className="flex items-center justify-between text-xs">
@@ -163,6 +257,7 @@ export const ResourcesView: React.FC = () => {
       )}
 
       {/* Interactive Glossary Section */}
+      {(selectedResourceSection === "All" || selectedResourceSection === "glossary") && (
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
           <div>
@@ -232,15 +327,17 @@ export const ResourcesView: React.FC = () => {
           ))}
         </div>
       </div>
+      )}
 
       {/* External Curated Guides */}
+      {(selectedResourceSection === "All" || selectedResourceSection === "guides") && (
       <div className="space-y-3">
         <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-          <ExternalLink className="h-4 w-4 text-blue-400" /> Authoritative Reference Guides
+          <ExternalLink className="h-4 w-4 text-blue-400" /> Authoritative Reference Guides ({filteredGuides.length})
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {externalLearningResources.map((res, i) => (
+          {filteredGuides.map((res, i) => (
             <a
               key={i}
               href={res.url}
@@ -265,6 +362,7 @@ export const ResourcesView: React.FC = () => {
           ))}
         </div>
       </div>
+      )}
     </div>
   );
 };
