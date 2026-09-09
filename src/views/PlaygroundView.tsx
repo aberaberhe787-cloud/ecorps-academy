@@ -527,11 +527,11 @@ export const PlaygroundView: React.FC = () => {
               </div>
 
               {/* Execution Bar */}
-              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-800 bg-slate-950/70 px-4 py-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-slate-800 bg-slate-950/70 px-4 py-3">
                 <button
                   id="clear-prompt-btn"
                   onClick={() => setPrompt("")}
-                  className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-200"
+                  className="flex items-center justify-center gap-1 text-xs text-slate-400 hover:text-slate-200 py-2 sm:py-0"
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
                   <span>Reset</span>
@@ -540,7 +540,7 @@ export const PlaygroundView: React.FC = () => {
                   id="run-prompt-btn"
                   onClick={() => isComparisonMode ? executeComparison() : executeCurrentPrompt()}
                   disabled={isExecuting || !prompt.trim()}
-                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-5 py-2 text-xs font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Play className="h-4 w-4 fill-white" />
                   <span>{isExecuting ? "Generating..." : isComparisonMode ? "Run A/B Benchmark" : "Run Prompt"}</span>

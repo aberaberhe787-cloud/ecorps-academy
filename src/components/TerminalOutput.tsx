@@ -82,7 +82,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
 
       {/* Execution Status / Metrics Bar (Only shown when not executing and result exists) */}
       {!isExecuting && result && (
-        <div className="flex flex-wrap items-center justify-between border-b border-slate-800/80 bg-slate-950/40 px-4 py-1.5 text-[11px] text-slate-400 font-mono gap-y-1">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-800/80 bg-slate-950/40 px-4 py-2 text-[11px] text-slate-400 font-mono gap-y-2">
           <div className="flex flex-wrap items-center gap-3">
             {result.status === "error" ? (
               <span className="rounded bg-rose-950/80 px-2 py-0.5 font-mono text-[10px] text-rose-300 border border-rose-700/50 font-semibold flex items-center gap-1">
