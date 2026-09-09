@@ -406,7 +406,7 @@ export const CurriculumView: React.FC = () => {
                   placeholder="Filter lessons by topic, keyword, or concepts (e.g., delimiters, few-shot, injection)..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-xl border border-slate-700 bg-slate-950 pl-9 pr-8 py-1.5 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all"
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950 pl-9 pr-8 py-1.5 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all z-10"
                 />
                 {searchQuery && (
                   <button
