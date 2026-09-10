@@ -177,9 +177,9 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <main className="login-page min-h-screen bg-[#050a19] px-2.5 py-2.5 sm:px-6 sm:py-5 md:py-6 lg:px-10 lg:py-8 text-slate-100 flex flex-col justify-between">
-      {/* Mobile Top Brand Bar - Compact, sticky branding on small screens (< 768px) */}
-      <header className="md:hidden flex items-center justify-between mb-2 px-1">
+    <main className="login-page min-h-screen bg-[#050a19] px-2.5 py-2 sm:px-6 sm:py-5 md:py-6 lg:px-10 lg:py-8 text-slate-100 flex flex-col justify-between w-full max-w-full overflow-x-hidden">
+      {/* Mobile Top Brand Bar - Compact branding on small screens (< 768px) */}
+      <header className="md:hidden flex items-center justify-between mb-2 px-0.5 w-full max-w-md mx-auto">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-400/50 bg-blue-950/80 shadow-sm shadow-blue-950/50">
             <WandSparkles className="h-4 w-4 text-blue-400" />
@@ -195,15 +195,15 @@ export const LoginPage: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Responsive Container: Grid with mobile (<768px) first order on form, side-by-side on md/lg */}
-      <div className="mx-auto w-full max-w-[1180px] grid grid-cols-1 md:grid-cols-2 rounded-[20px] md:rounded-[24px] border border-slate-800/80 bg-[#080e20]/95 shadow-2xl shadow-black/40 overflow-hidden md:min-h-[580px]">
+      {/* Main Responsive Container: Clean unified card on mobile (<768px), side-by-side 2-column grid on desktop (>=768px) */}
+      <div className="mx-auto w-full max-w-md md:max-w-[1180px] md:grid md:grid-cols-2 rounded-2xl md:rounded-[24px] border border-slate-800/80 bg-[#080e20]/95 shadow-2xl shadow-black/40 overflow-hidden md:min-h-[580px] my-auto">
         
-        {/* SIGN-IN FORM: Positioned FIRST on mobile (< 768px) for instant above-the-fold CTA access */}
+        {/* SIGN-IN FORM: Focused, clean single card on mobile; right column on desktop */}
         <section
           id="auth-form-section"
-          className="order-1 md:order-2 relative flex w-full items-center justify-center px-2.5 py-3 sm:px-6 sm:py-6 md:px-8 md:py-8 lg:px-10"
+          className="w-full md:order-2 relative flex items-center justify-center p-3 sm:p-6 md:p-8 lg:p-10"
         >
-          <div className="w-full max-w-md rounded-xl sm:rounded-2xl border border-indigo-500/40 bg-[#0c142a]/95 p-3.5 sm:p-6 md:p-7 shadow-[0_0_35px_rgba(37,99,235,.08)]">
+          <div className="w-full max-w-full sm:max-w-md rounded-xl md:rounded-2xl md:border md:border-indigo-500/40 md:bg-[#0c142a]/95 p-0.5 sm:p-2 md:p-7 md:shadow-[0_0_35px_rgba(37,99,235,.08)]">
             <div className="text-center">
               <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-slate-100">
                 {isSignUp ? 'Create your account' : 'Welcome back'}
@@ -214,27 +214,27 @@ export const LoginPage: React.FC = () => {
             </div>
 
             {sessionNotice && (
-              <div className="mt-3 flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-2 text-xs text-amber-300">
+              <div className="mt-2.5 sm:mt-3 flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-2 text-xs text-amber-300">
                 <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-400" />
                 <span>{sessionNotice}</span>
               </div>
             )}
 
             {resetSuccess && (
-              <div className="mt-3 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-2 text-xs text-emerald-300">
+              <div className="mt-2.5 sm:mt-3 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-2 text-xs text-emerald-300">
                 <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
                 <span>{resetSuccess}</span>
               </div>
             )}
 
             {/* Quick 1-Click Social Sign In */}
-            <div className="mt-3 sm:mt-4 grid grid-cols-2 gap-2">
+            <div className="mt-2.5 sm:mt-4 grid grid-cols-2 gap-1.5 sm:gap-2">
               <button
                 type="button"
                 id="google-signin-button"
                 onClick={() => handleProviderAuth(new GoogleAuthProvider())}
                 disabled={isSubmitting}
-                className="flex min-h-[42px] sm:min-h-[44px] items-center justify-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/80 py-2 px-2.5 text-xs font-medium text-slate-200 hover:border-slate-500 hover:bg-slate-800/80 transition active:scale-[0.98]"
+                className="flex min-h-[40px] sm:min-h-[44px] items-center justify-center gap-1.5 sm:gap-2 rounded-xl border border-slate-700/80 bg-slate-900/80 py-2 px-2 text-xs font-medium text-slate-200 hover:border-slate-500 hover:bg-slate-800/80 transition active:scale-[0.98]"
               >
                 <span className="font-bold text-blue-400 text-sm leading-none">G</span>
                 <span>Google</span>
@@ -244,25 +244,25 @@ export const LoginPage: React.FC = () => {
                 id="github-signin-button"
                 onClick={() => handleProviderAuth(new GithubAuthProvider())}
                 disabled={isSubmitting}
-                className="flex min-h-[42px] sm:min-h-[44px] items-center justify-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/80 py-2 px-2.5 text-xs font-medium text-slate-200 hover:border-slate-500 hover:bg-slate-800/80 transition active:scale-[0.98]"
+                className="flex min-h-[40px] sm:min-h-[44px] items-center justify-center gap-1.5 sm:gap-2 rounded-xl border border-slate-700/80 bg-slate-900/80 py-2 px-2 text-xs font-medium text-slate-200 hover:border-slate-500 hover:bg-slate-800/80 transition active:scale-[0.98]"
               >
                 <Github className="h-3.5 w-3.5 text-slate-300" />
                 <span>GitHub</span>
               </button>
             </div>
 
-            <div className="my-3 flex items-center gap-2.5 text-[9px] sm:text-[10px] uppercase font-mono tracking-wider text-slate-500">
+            <div className="my-2.5 sm:my-3 flex items-center gap-2 text-[9px] sm:text-[10px] uppercase font-mono tracking-wider text-slate-500">
               <span className="h-px flex-1 bg-slate-800" />
               <span>or with email</span>
               <span className="h-px flex-1 bg-slate-800" />
             </div>
 
-            <form onSubmit={handleEmailAuth} className="space-y-2.5 sm:space-y-3.5">
+            <form onSubmit={handleEmailAuth} className="space-y-2 sm:space-y-3">
               {isSignUp && (
                 <label className="block">
                   <span className="mb-1 block text-[11px] font-medium text-slate-300">Full name</span>
                   <div className="relative">
-                    <UserRound className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
+                    <UserRound className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500 pointer-events-none" />
                     <input
                       type="text"
                       value={name}
@@ -278,7 +278,7 @@ export const LoginPage: React.FC = () => {
               <label className="block">
                 <span className="mb-1 block text-[11px] font-medium text-slate-300">Email address</span>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
+                  <Mail className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500 pointer-events-none" />
                   <input
                     type="email"
                     value={email}
@@ -294,20 +294,20 @@ export const LoginPage: React.FC = () => {
               <label className="block">
                 <span className="mb-1 block text-[11px] font-medium text-slate-300">Password</span>
                 <div className="relative">
-                  <LockKeyhole className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
+                  <LockKeyhole className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500 pointer-events-none" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     placeholder="••••••••••••"
-                    className="login-input pr-10 text-xs sm:text-sm py-2 sm:py-2.5"
+                    className="login-input pr-9 sm:pr-10 text-xs sm:text-sm py-2 sm:py-2.5"
                     autoComplete={isSignUp ? 'new-password' : 'current-password'}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 p-1"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 p-1"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -316,7 +316,7 @@ export const LoginPage: React.FC = () => {
               </label>
 
               {!isSignUp && (
-                <div className="flex items-center justify-between text-[11px]">
+                <div className="flex flex-wrap items-center justify-between gap-1 text-[11px]">
                   <label className="flex items-center gap-1.5 text-slate-400 cursor-pointer select-none">
                     <input
                       type="checkbox"
@@ -347,14 +347,14 @@ export const LoginPage: React.FC = () => {
                 type="submit"
                 id="primary-auth-submit-btn"
                 disabled={isSubmitting}
-                className="flex w-full min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-lg shadow-blue-900/30 transition hover:brightness-110 active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
+                className="flex w-full min-h-[42px] sm:min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-blue-900/30 transition hover:brightness-110 active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
               >
                 {isSubmitting ? 'Authenticating...' : isSignUp ? 'Create Account' : 'Sign In'}
                 <ArrowRight className="h-4 w-4" />
               </button>
             </form>
 
-            <p className="mt-3.5 sm:mt-4 text-center text-xs text-slate-400">
+            <p className="mt-2.5 sm:mt-4 text-center text-xs text-slate-400">
               {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
               <button
                 type="button"
@@ -371,12 +371,12 @@ export const LoginPage: React.FC = () => {
           </div>
         </section>
 
-        {/* MARKETING CONTENT: Placed below the form on mobile (order-2 md:order-1), side-by-side on desktop */}
+        {/* MARKETING CONTENT: Hidden on mobile (<768px) for a focused login experience; displayed on desktop (>=768px) */}
         <section
           id="marketing-info-section"
-          className="order-2 md:order-1 relative flex flex-col justify-between overflow-hidden px-4 py-5 sm:px-6 sm:py-6 md:px-8 md:py-8 lg:px-10 lg:py-9 border-t md:border-t-0 md:border-r border-slate-800/60"
+          className="hidden md:flex md:order-1 relative flex-col justify-between overflow-hidden px-6 py-6 md:px-8 md:py-8 lg:px-10 lg:py-9 md:border-r border-slate-800/60"
         >
-          <div className="pointer-events-none absolute -bottom-32 -left-10 h-80 w-[520px] rounded-full bg-blue-600/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-32 -left-10 h-80 w-72 sm:w-96 md:w-[520px] max-w-full rounded-full bg-blue-600/10 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 left-0 h-32 w-full opacity-50 [background-image:linear-gradient(135deg,transparent_45%,rgba(37,99,235,.3)_46%,transparent_47%),linear-gradient(45deg,transparent_45%,rgba(124,58,237,.25)_46%,transparent_47%)] [background-size:38px_38px]" />
 
           {/* Desktop/Tablet brand banner */}
@@ -451,7 +451,7 @@ export const LoginPage: React.FC = () => {
       </div>
 
       {/* Footer Features Bar */}
-      <footer className="mx-auto flex max-w-[1180px] flex-col md:flex-row items-center justify-center gap-y-2.5 md:gap-y-1.5 gap-x-6 py-2.5 md:py-3 text-[10px] md:text-xs text-slate-500">
+      <footer className="mx-auto flex w-full max-w-[1180px] flex-wrap items-center justify-center gap-x-3 sm:gap-x-4 gap-y-1.5 py-2 sm:py-3 text-[10px] sm:text-xs text-slate-500 text-center px-1">
         <span className="flex items-center gap-1.5">
           <BookOpen className="h-3.5 w-3.5 text-blue-400" />
           <strong className="text-blue-300">10+</strong> Interactive Lessons

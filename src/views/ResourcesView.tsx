@@ -57,9 +57,9 @@ export const ResourcesView: React.FC = () => {
   };
 
   return (
-    <div className="app-view mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6 sm:space-y-8 pb-20 sm:pb-6">
+    <div className="app-view w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 space-y-3.5 sm:space-y-8 pb-20 sm:pb-6 overflow-x-hidden">
       {/* Header */}
-      <div className="border-b border-slate-800 pb-5">
+      <div className="border-b border-slate-800 pb-3 sm:pb-5">
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-blue-400" />
           <h1 className="text-xl font-bold tracking-tight text-white">{t.resources.title}</h1>
@@ -145,7 +145,7 @@ export const ResourcesView: React.FC = () => {
       </div>
 
       {/* Prompt of the Day Spotlight */}
-      <div className="rounded-2xl border border-indigo-500/40 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 p-6 shadow-xl backdrop-blur-md">
+      <div className="rounded-2xl border border-indigo-500/40 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 p-3.5 sm:p-6 shadow-xl backdrop-blur-md">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
           <div className="flex items-center gap-2">
             <span className="flex items-center gap-1.5 rounded-md bg-indigo-500/20 border border-indigo-500/30 px-2.5 py-0.5 text-xs font-bold text-indigo-300">

@@ -93,7 +93,7 @@ const SideDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
 
       {/* Drawer Panel */}
       <div
-        className={`fixed top-0 right-0 z-40 h-full w-full max-w-sm bg-slate-950 border-l border-slate-800 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out overscroll-contain ${
+        className={`fixed top-0 right-0 z-40 h-full w-full max-w-[320px] sm:max-w-sm bg-slate-950 border-l border-slate-800 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out overscroll-contain ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -297,21 +297,21 @@ export const PlaygroundView: React.FC = () => {
   const totalDrawerItems = executionHistory.length + userProgress.savedCustomPrompts.length;
 
   return (
-    <div className="app-view mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6 pb-24 md:pb-6">
+    <div className="app-view w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 space-y-3 sm:space-y-6 pb-20 md:pb-6 overflow-x-hidden">
 
       {/* Header & Sub Navigation */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 border-b border-slate-800 pb-3 sm:pb-4 w-full">
         <div>
           <div className="flex items-center gap-2">
             <Terminal className="h-5 w-5 text-blue-400" />
             <h1 className="text-xl font-bold tracking-tight text-white">{t.playground.title}</h1>
           </div>
-          <p className="mt-1 text-xs text-slate-400">{t.playground.subtitle}</p>
+          <p className="mt-0.5 sm:mt-1 text-xs text-slate-400">{t.playground.subtitle}</p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
           {/* Sub-Nav Pills */}
-          <div className="flex items-center gap-1 rounded-xl border border-slate-800 bg-slate-900/80 p-1 overflow-x-auto scrollbar-hide max-w-[calc(100vw-140px)] sm:max-w-none">
+          <div className="flex items-center gap-1 rounded-xl border border-slate-800 bg-slate-900/80 p-1 overflow-x-auto no-scrollbar max-w-full touch-pan-x">
             {[
               { id: "sandbox", label: t.playground.tabSandbox, icon: Terminal, onClick: () => { 
                 if (playgroundSubTab === "missions") {
@@ -333,7 +333,7 @@ export const PlaygroundView: React.FC = () => {
                   key={tab.id}
                   id={`tab-${tab.id}`}
                   onClick={tab.onClick}
-                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-1.5 rounded-lg px-2.5 sm:px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
                     isActive
                       ? isCtf ? "bg-rose-600 text-white shadow-sm" : "bg-blue-600 text-white shadow-sm"
                       : "text-slate-400 hover:text-slate-200"
@@ -352,7 +352,7 @@ export const PlaygroundView: React.FC = () => {
             id="open-drawer-btn"
             onClick={() => setDrawerOpen(true)}
             title="History & Saved Prompts"
-            className="relative flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-300 hover:border-blue-500 hover:text-white transition-all shrink-0"
+            className="relative flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-900 px-2.5 sm:px-3 py-2 text-xs font-semibold text-slate-300 hover:border-blue-500 hover:text-white transition-all shrink-0"
           >
             <PanelRightOpen className="h-4 w-4 text-blue-400" />
             <span className="hidden sm:inline">Library</span>
@@ -373,18 +373,18 @@ export const PlaygroundView: React.FC = () => {
 
       {/* Main Dual Pane (Sandbox + Comparison) */}
       {(playgroundSubTab === "sandbox" || playgroundSubTab === "comparison") && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 w-full max-w-full">
 
           {/* Left Column: Prompt Editor */}
-          <div className={`${isComparisonMode ? "lg:col-span-6" : "lg:col-span-7"} space-y-4`}>
+          <div className={`${isComparisonMode ? "lg:col-span-6" : "lg:col-span-7"} space-y-3 sm:space-y-4 w-full max-w-full`}>
 
             {/* Starter Presets Bar */}
             {playgroundSubTab === "sandbox" && !isComparisonMode && (
-              <div className="rounded-xl border border-slate-800/80 bg-slate-900/60 p-2.5 flex flex-col sm:flex-row items-start sm:items-center gap-2">
+              <div className="rounded-xl border border-slate-800/80 bg-slate-900/60 p-2 sm:p-2.5 flex flex-col sm:flex-row items-start sm:items-center gap-1.5 sm:gap-2 w-full max-w-full overflow-hidden">
                 <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1.5 whitespace-nowrap pl-1 shrink-0">
                   <Zap className="h-3.5 w-3.5 text-amber-400" /> Presets:
                 </span>
-                <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar sm:flex-wrap items-center gap-2 max-w-full pb-1">
+                <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar sm:flex-wrap items-center gap-1.5 sm:gap-2 w-full max-w-full pb-1 touch-pan-x">
                   {STARTER_PRESETS.map((preset, idx) => {
                     const Icon = preset.icon;
                     return (
@@ -413,16 +413,16 @@ export const PlaygroundView: React.FC = () => {
             <PromptHelperBar onInsertText={handleInsertSnippet} />
 
             {/* Editor Container */}
-            <div className="rounded-xl border border-slate-800 bg-slate-900/90 shadow-xl backdrop-blur-md overflow-hidden">
+            <div className="w-full max-w-full rounded-xl border border-slate-800 bg-slate-900/90 shadow-xl backdrop-blur-md overflow-hidden">
               {/* Editor Header */}
-              <div className="flex items-center justify-between border-b border-slate-800 bg-slate-950/70 px-4 py-2.5">
+              <div className="flex items-center justify-between border-b border-slate-800 bg-slate-950/70 px-3 sm:px-4 py-2 sm:py-2.5">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-xs font-semibold text-slate-300">
                     {isComparisonMode ? "Variant A — Engineered" : "User Prompt Input"}
                   </span>
                   <span className="text-[11px] text-slate-500 font-mono">{prompt.length} chars</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <button
                     id="toggle-system-prompt-btn"
                     onClick={() => setShowSystemPrompt(!showSystemPrompt)}
@@ -515,23 +515,23 @@ export const PlaygroundView: React.FC = () => {
               )}
 
               {/* Main Textarea */}
-              <div className="p-3">
+              <div className="p-2.5 sm:p-3">
                 <textarea
                   id="main-prompt-editor"
-                  rows={isComparisonMode ? 10 : 12}
+                  rows={isComparisonMode ? 7 : 9}
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="Enter your prompt here... Use delimiters like <context>, personas like 'Act as...', and explicit instructions."
-                  className="w-full resize-y rounded-lg bg-slate-950/80 p-3.5 font-mono text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500/50 leading-relaxed border border-slate-800/80"
+                  className="w-full resize-y rounded-lg bg-slate-950/80 p-3 font-mono text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500/50 leading-relaxed border border-slate-800/80"
                 />
               </div>
 
               {/* Execution Bar */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-slate-800 bg-slate-950/70 px-4 py-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 border-t border-slate-800 bg-slate-950/70 px-3 sm:px-4 py-2.5 sm:py-3">
                 <button
                   id="clear-prompt-btn"
                   onClick={() => setPrompt("")}
-                  className="flex items-center justify-center gap-1 text-xs text-slate-400 hover:text-slate-200 py-2 sm:py-0"
+                  className="flex items-center justify-center gap-1 text-xs text-slate-400 hover:text-slate-200 py-1.5 sm:py-0"
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
                   <span>Reset</span>
@@ -540,7 +540,7 @@ export const PlaygroundView: React.FC = () => {
                   id="run-prompt-btn"
                   onClick={() => isComparisonMode ? executeComparison() : executeCurrentPrompt()}
                   disabled={isExecuting || !prompt.trim()}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Play className="h-4 w-4 fill-white" />
                   <span>{isExecuting ? "Generating..." : isComparisonMode ? "Run A/B Benchmark" : "Execute Prompt"}</span>
@@ -559,14 +559,14 @@ export const PlaygroundView: React.FC = () => {
 
             {/* Comparison Variant B Editor */}
             {isComparisonMode && (
-              <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-4 space-y-3">
+              <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-4 space-y-2.5 sm:space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-2">
                   <span className="font-mono text-xs font-semibold text-rose-400">Variant B — Baseline / Naive</span>
                   <span className="text-[11px] text-slate-500 font-mono">{comparisonPromptB.length} chars</span>
                 </div>
                 <textarea
                   id="comparison-prompt-b-editor"
-                  rows={6}
+                  rows={5}
                   value={comparisonPromptB}
                   onChange={(e) => setComparisonPromptB(e.target.value)}
                   placeholder="Enter naive or unconstrained prompt for A/B comparison..."
@@ -577,7 +577,7 @@ export const PlaygroundView: React.FC = () => {
           </div>
 
           {/* Right Column: Output */}
-          <div className={`${isComparisonMode ? "lg:col-span-6" : "lg:col-span-5"} space-y-4`}>
+          <div className={`${isComparisonMode ? "lg:col-span-6" : "lg:col-span-5"} space-y-3 sm:space-y-4 w-full max-w-full`}>
             {isComparisonMode ? (
               <div className="space-y-4">
                 <div className="min-h-[280px]">
@@ -617,11 +617,11 @@ export const PlaygroundView: React.FC = () => {
 
       {/* Sticky Bottom Action Bar for Mobile (< 768px) */}
       {(playgroundSubTab === "sandbox" || playgroundSubTab === "comparison") && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 border-t border-slate-800 backdrop-blur-md px-4 py-3 md:hidden flex items-center justify-between gap-3 shadow-2xl">
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 border-t border-slate-800 backdrop-blur-md px-3 py-2 sm:px-4 sm:py-3 md:hidden flex items-center justify-between gap-2 shadow-2xl">
           <button
             id="mobile-clear-prompt-btn"
             onClick={() => setPrompt("")}
-            className="flex items-center justify-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 px-3 py-2.5 rounded-xl border border-slate-800 bg-slate-900"
+            className="flex items-center justify-center gap-1 text-xs text-slate-400 hover:text-slate-200 px-2.5 py-2 rounded-xl border border-slate-800 bg-slate-900 shrink-0"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             <span>Reset</span>
@@ -630,7 +630,7 @@ export const PlaygroundView: React.FC = () => {
             id="mobile-execute-prompt-btn"
             onClick={() => isComparisonMode ? executeComparison() : executeCurrentPrompt()}
             disabled={isExecuting || !prompt.trim()}
-            className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-500/25 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+            className="flex-1 min-w-0 flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-3 py-2 text-xs font-bold text-white shadow-lg shadow-blue-500/25 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[42px]"
           >
             <Play className="h-3.5 w-3.5 fill-white shrink-0" />
             <span className="truncate">{isExecuting ? "Generating..." : isComparisonMode ? "Run Benchmark" : "Execute Prompt"}</span>

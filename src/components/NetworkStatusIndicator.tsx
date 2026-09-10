@@ -161,7 +161,7 @@ export const NetworkStatusToast: React.FC = () => {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
           transition={{ duration: 0.25, ease: "easeOut" }}
-          className="fixed bottom-4 right-4 z-50 max-w-sm sm:max-w-md w-[calc(100vw-2rem)] pointer-events-auto"
+          className="fixed bottom-4 right-4 left-4 sm:left-auto z-50 max-w-sm sm:max-w-md pointer-events-auto"
         >
           {activeApiError ? (
             /* API ERROR NOTIFICATION (405, 500, RESUME-RELATED) */

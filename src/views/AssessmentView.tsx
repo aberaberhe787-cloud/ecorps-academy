@@ -63,7 +63,7 @@ export const AssessmentView: React.FC = () => {
   };
 
   return (
-    <div className="px-3 sm:px-6 lg:px-8 py-4 sm:py-8 max-w-4xl mx-auto space-y-5 sm:space-y-6 animate-in fade-in duration-200 pb-20 sm:pb-8">
+    <div className="w-full max-w-4xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-8 space-y-3.5 sm:space-y-6 animate-in fade-in duration-200 pb-20 sm:pb-8 overflow-x-hidden">
       {/* Breadcrumb Navigation */}
       <div className="flex items-center justify-between gap-4">
         <button
@@ -78,7 +78,7 @@ export const AssessmentView: React.FC = () => {
         </span>
       </div>
 
-      <div className="border-b border-slate-800 pb-4">
+      <div className="border-b border-slate-800 pb-3 sm:pb-4">
         <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-blue-400">
           <ShieldCheck className="h-4 w-4" /> Comprehensive Evaluation
         </div>

@@ -45,8 +45,8 @@ export const PromptEngineeringPath: React.FC = () => {
   };
 
   return (
-    <div className="app-view foundation-page mx-auto max-w-7xl space-y-4 sm:space-y-6 px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 sm:pb-6">
-      <header className="rounded-2xl border border-blue-900/60 bg-gradient-to-br from-blue-950/80 to-slate-950 p-4 sm:p-6">
+    <div className="app-view foundation-page w-full max-w-7xl mx-auto space-y-3 sm:space-y-6 px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 pb-20 sm:pb-6 overflow-x-hidden">
+      <header className="rounded-2xl border border-blue-900/60 bg-gradient-to-br from-blue-950/80 to-slate-950 p-3.5 sm:p-6">
         <div className="flex items-center gap-2 text-blue-300"><Sparkles className="h-5 w-5" /><span className="text-xs font-bold uppercase tracking-widest">Learning Path</span></div>
         <h1 className="mt-3 text-2xl sm:text-3xl font-black text-white">Prompt Engineering Foundations</h1>
         <p className="mt-2 max-w-2xl text-xs sm:text-sm text-slate-300">Learn why prompts work, then test each principle in a live comparison lab.</p>
@@ -56,9 +56,9 @@ export const PromptEngineeringPath: React.FC = () => {
         <nav className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar gap-2 pb-2 lg:block lg:space-y-2" aria-label="Foundations lessons">
           {FOUNDATION_LESSONS.map((lesson, index) => { const completed = userProgress.completedLessons.includes(lesson.id); return <button key={lesson.id} type="button" onClick={() => setActiveId(lesson.id)} className={`shrink-0 snap-start flex items-center gap-2.5 sm:gap-3 rounded-xl border p-2.5 sm:p-3 text-left transition whitespace-nowrap lg:whitespace-normal lg:w-full ${activeId === lesson.id ? 'border-blue-500 bg-blue-950/50' : 'border-slate-800 bg-slate-900/60 hover:border-slate-700'}`}><span className="text-xs text-slate-500 font-mono">0{index + 1}</span>{completed ? <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" /> : <Circle className="h-4 w-4 text-slate-500 shrink-0" />}<span className="text-xs sm:text-sm font-semibold text-slate-200">{lesson.title}</span></button>; })}
         </nav>
-        <main className="space-y-6">
+        <main className="space-y-4 sm:space-y-6">
           {completedCount >= FOUNDATION_LESSONS.length && (
-            <div className="rounded-2xl border-2 border-emerald-500/60 bg-gradient-to-r from-emerald-950/80 via-slate-900 to-teal-950/80 p-5 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="rounded-2xl border-2 border-emerald-500/60 bg-gradient-to-r from-emerald-950/80 via-slate-900 to-teal-950/80 p-4 sm:p-5 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono">
                   <Award className="h-4 w-4" /> Capstone Pathway Unlocked
@@ -77,7 +77,7 @@ export const PromptEngineeringPath: React.FC = () => {
               </button>
             </div>
           )}
-          <article className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 space-y-6">
+          <article className="rounded-2xl border border-slate-800 bg-slate-900/80 p-3.5 sm:p-6 space-y-4 sm:space-y-6">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold text-blue-300">

@@ -95,9 +95,9 @@ export const PatternLibraryView: React.FC = () => {
   const isBookmarked = userProgress.bookmarkedPatterns.includes(activePattern.id);
 
   return (
-    <div className="app-view mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6 pb-20 sm:pb-6">
+    <div className="app-view w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 space-y-3 sm:space-y-6 pb-20 sm:pb-6 overflow-x-hidden">
       {/* Header */}
-      <div className="border-b border-slate-800 pb-5">
+      <div className="border-b border-slate-800 pb-3 sm:pb-5">
         <div className="flex items-center gap-2">
           <Grid3X3 className="h-5 w-5 text-blue-400" />
           <h1 className="text-xl font-bold tracking-tight text-white">{t.patterns.title}</h1>
@@ -141,7 +141,7 @@ export const PatternLibraryView: React.FC = () => {
       </div>
 
       {/* Main Grid: Patterns List + Interactive Template Filler */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8">
         {/* Left Column: Pattern Grid/List (5 cols) */}
         <div className="lg:col-span-5 space-y-3">
           <div className="flex items-center justify-between text-xs text-slate-400 font-mono">

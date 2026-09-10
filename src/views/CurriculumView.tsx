@@ -282,7 +282,7 @@ export const CurriculumView: React.FC = () => {
         />
       )}
 
-      <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6">
+      <div className="w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 space-y-3 sm:space-y-6 overflow-x-hidden">
         {/* ========================================================================= */}
         {/* GLOBAL CURRICULUM CONTROLS: PROGRESS TRACKER, SYNC STATUS & VIEW SELECTOR  */}
         {/* ========================================================================= */}
