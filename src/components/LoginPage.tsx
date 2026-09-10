@@ -177,9 +177,9 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <main className="login-page min-h-screen bg-[#050a19] px-3.5 py-3 sm:px-6 sm:py-5 md:py-6 lg:px-10 lg:py-8 text-slate-100 flex flex-col justify-between">
+    <main className="login-page min-h-screen bg-[#050a19] px-2.5 py-2.5 sm:px-6 sm:py-5 md:py-6 lg:px-10 lg:py-8 text-slate-100 flex flex-col justify-between">
       {/* Mobile Top Brand Bar - Compact, sticky branding on small screens (< 768px) */}
-      <header className="md:hidden flex items-center justify-between mb-2.5 px-1">
+      <header className="md:hidden flex items-center justify-between mb-2 px-1">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-400/50 bg-blue-950/80 shadow-sm shadow-blue-950/50">
             <WandSparkles className="h-4 w-4 text-blue-400" />
@@ -201,9 +201,9 @@ export const LoginPage: React.FC = () => {
         {/* SIGN-IN FORM: Positioned FIRST on mobile (< 768px) for instant above-the-fold CTA access */}
         <section
           id="auth-form-section"
-          className="order-1 md:order-2 relative flex w-full items-center justify-center px-3.5 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8 lg:px-10"
+          className="order-1 md:order-2 relative flex w-full items-center justify-center px-2.5 py-3 sm:px-6 sm:py-6 md:px-8 md:py-8 lg:px-10"
         >
-          <div className="w-full max-w-md rounded-xl sm:rounded-2xl border border-indigo-500/40 bg-[#0c142a]/95 p-4 sm:p-6 md:p-7 shadow-[0_0_35px_rgba(37,99,235,.08)]">
+          <div className="w-full max-w-md rounded-xl sm:rounded-2xl border border-indigo-500/40 bg-[#0c142a]/95 p-3.5 sm:p-6 md:p-7 shadow-[0_0_35px_rgba(37,99,235,.08)]">
             <div className="text-center">
               <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-slate-100">
                 {isSignUp ? 'Create your account' : 'Welcome back'}
@@ -228,13 +228,13 @@ export const LoginPage: React.FC = () => {
             )}
 
             {/* Quick 1-Click Social Sign In */}
-            <div className="mt-3.5 sm:mt-4 grid grid-cols-2 gap-2">
+            <div className="mt-3 sm:mt-4 grid grid-cols-2 gap-2">
               <button
                 type="button"
                 id="google-signin-button"
                 onClick={() => handleProviderAuth(new GoogleAuthProvider())}
                 disabled={isSubmitting}
-                className="flex min-h-[40px] sm:min-h-[44px] items-center justify-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/80 py-2 px-3 text-xs font-medium text-slate-200 hover:border-slate-500 hover:bg-slate-800/80 transition active:scale-[0.98]"
+                className="flex min-h-[42px] sm:min-h-[44px] items-center justify-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/80 py-2 px-2.5 text-xs font-medium text-slate-200 hover:border-slate-500 hover:bg-slate-800/80 transition active:scale-[0.98]"
               >
                 <span className="font-bold text-blue-400 text-sm leading-none">G</span>
                 <span>Google</span>
@@ -244,7 +244,7 @@ export const LoginPage: React.FC = () => {
                 id="github-signin-button"
                 onClick={() => handleProviderAuth(new GithubAuthProvider())}
                 disabled={isSubmitting}
-                className="flex min-h-[40px] sm:min-h-[44px] items-center justify-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/80 py-2 px-3 text-xs font-medium text-slate-200 hover:border-slate-500 hover:bg-slate-800/80 transition active:scale-[0.98]"
+                className="flex min-h-[42px] sm:min-h-[44px] items-center justify-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/80 py-2 px-2.5 text-xs font-medium text-slate-200 hover:border-slate-500 hover:bg-slate-800/80 transition active:scale-[0.98]"
               >
                 <Github className="h-3.5 w-3.5 text-slate-300" />
                 <span>GitHub</span>

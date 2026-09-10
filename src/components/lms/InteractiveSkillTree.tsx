@@ -175,9 +175,9 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Skill Tree Header & Progress Tracker */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl backdrop-blur-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-5 shadow-xl backdrop-blur-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-500/20 text-blue-400">
@@ -244,7 +244,7 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
           return (
             <div
               key={t.tier}
-              className={`rounded-2xl border bg-gradient-to-r ${t.color} p-5 space-y-4 transition-all`}
+              className={`rounded-2xl border bg-gradient-to-r ${t.color} p-3.5 sm:p-5 space-y-4 transition-all`}
             >
               {/* Tier Header */}
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
@@ -267,7 +267,7 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
               </div>
 
               {/* Tier Skill Nodes Grid with Connection Connectors */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 relative">
                 {tierNodes.map((node, nodeIdx) => {
                   const isCompleted = completedLessonIds.includes(node.lesson.id);
                   const isUnlocked = isNodeUnlocked(node);

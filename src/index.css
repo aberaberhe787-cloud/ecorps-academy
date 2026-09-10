@@ -15,6 +15,8 @@
     background-color: var(--bg-primary);
     color: var(--text-primary);
     scroll-behavior: smooth;
+    overflow-x: hidden;
+    max-width: 100vw;
   }
 
   /* Global Keyboard Focus ring standards for accessibility */
@@ -82,6 +84,8 @@ body {
   position: static !important;
   background-color: var(--bg-primary);
   color: var(--text-primary);
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 .login-input {
@@ -135,5 +139,25 @@ body {
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(59, 130, 246, 0.8);
+}
+
+/* Utility to hide scrollbar while keeping touch and mouse-wheel scrolling smooth */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Touch-Event Isolation: embedded textareas and code editor blocks do not trap vertical touch scrolling unless focused */
+textarea:not(:focus),
+pre:not(:focus) {
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+}
+
+textarea:focus {
+  touch-action: auto;
 }
 

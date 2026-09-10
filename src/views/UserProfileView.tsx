@@ -182,9 +182,9 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
   };
 
   return (
-    <div className="app-view mx-auto max-w-5xl space-y-8 p-4 sm:p-6 animate-in fade-in duration-200">
+    <div className="app-view mx-auto max-w-5xl space-y-6 sm:space-y-8 px-3 sm:px-6 py-4 sm:py-6 animate-in fade-in duration-200 pb-20 sm:pb-6">
       {/* Learner Profile Header */}
-      <div className="flex flex-col items-center gap-6 rounded-2xl border border-slate-800 bg-slate-900/90 p-6 md:flex-row shadow-xl">
+      <div className="flex flex-col items-center gap-4 sm:gap-6 rounded-2xl border border-slate-800 bg-slate-900/90 p-4 sm:p-6 md:flex-row shadow-xl">
         <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-4xl text-white font-bold shadow-lg shadow-blue-900/30">
           {photoUrl ? <img src={photoUrl} alt="" className="h-full w-full object-cover" /> : userName[0]}
         </div>

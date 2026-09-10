@@ -61,7 +61,7 @@ const AppShell: React.FC = () => {
     isDistractionFreeMode && activeTab === "curriculum" && !!activeLessonId;
 
   return (
-    <div className="flex min-h-screen flex-col w-full overflow-x-hidden bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-blue-600 selection:text-white font-sans antialiased">
+    <div className="flex min-h-screen flex-col w-full overflow-x-clip bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-blue-600 selection:text-white font-sans antialiased">
       {!hideGlobalChrome && <Navbar />}
       <MainContent />
       {!hideGlobalChrome && <Footer />}

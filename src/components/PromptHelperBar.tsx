@@ -54,8 +54,8 @@ export const PromptHelperBar: React.FC<PromptHelperBarProps> = ({ onInsertText }
   }));
 
   return (
-    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-      <span className="text-slate-400 font-medium text-[11px] whitespace-nowrap mr-1 flex items-center gap-1">
+    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar snap-x">
+      <span className="text-slate-400 font-medium text-[11px] whitespace-nowrap mr-1 flex items-center gap-1 shrink-0">
         <Plus className="h-3 w-3 text-blue-400" /> Quick Inject:
       </span>
       {[...snippets, ...patternSnippets].map((snip, idx) => {
@@ -65,7 +65,7 @@ export const PromptHelperBar: React.FC<PromptHelperBarProps> = ({ onInsertText }
             key={idx}
             type="button"
             onClick={() => onInsertText(snip.snippet)}
-            className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-slate-800 bg-slate-900/80 px-2.5 py-1 text-slate-300 transition-all active:scale-95 ${snip.color}`}
+            className={`shrink-0 snap-start flex items-center gap-1.5 whitespace-nowrap rounded-lg border border-slate-800 bg-slate-900/80 px-2.5 py-1 text-slate-300 transition-all active:scale-95 ${snip.color}`}
             title={`Insert ${snip.label}`}
           >
             <Icon className="h-3.5 w-3.5" />

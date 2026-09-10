@@ -28,20 +28,20 @@ export const PromptQualityMeter: React.FC<PromptQualityMeterProps> = ({
   };
 
   return (
-    <div id="prompt-quality-meter" className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 backdrop-blur-sm">
+    <div id="prompt-quality-meter" className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 sm:p-4 backdrop-blur-sm">
       {/* Header with Score and Grade */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-blue-400" />
-          <h3 className="text-sm font-semibold text-slate-200">Real-Time Prompt Quality Score</h3>
+          <Sparkles className="h-4 w-4 text-blue-400 shrink-0" />
+          <h3 className="text-xs sm:text-sm font-semibold text-slate-200">Real-Time Prompt Quality Score</h3>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400 font-mono">
-            {analysis.wordCount} words • ~{analysis.tokenEstimate} tokens
+        <div className="flex items-center justify-between sm:justify-end gap-2">
+          <span className="text-[11px] sm:text-xs text-slate-400 font-mono">
+            {analysis.wordCount} words • ~{analysis.tokenEstimate} tok
           </span>
           <div
             id="prompt-grade-badge"
-            className={`flex items-center justify-center rounded-lg border px-2.5 py-0.5 font-mono text-xs font-bold ${getScoreColor(
+            className={`flex items-center justify-center rounded-lg border px-2 py-0.5 font-mono text-[11px] sm:text-xs font-bold ${getScoreColor(
               analysis.score
             )}`}
           >

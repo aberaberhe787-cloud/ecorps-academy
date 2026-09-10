@@ -282,13 +282,13 @@ export const CurriculumView: React.FC = () => {
         />
       )}
 
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-6">
+      <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6">
         {/* ========================================================================= */}
         {/* GLOBAL CURRICULUM CONTROLS: PROGRESS TRACKER, SYNC STATUS & VIEW SELECTOR  */}
         {/* ========================================================================= */}
         <div className="space-y-4">
           {/* Firestore Progress Tracking & Quick Resume Card */}
-          <div className="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900 to-blue-950/40 p-5 shadow-xl backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900 to-blue-950/40 p-3.5 sm:p-5 shadow-xl backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-2 flex-1">
               <div className="flex flex-wrap items-center gap-3">
                 <span className="flex items-center gap-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 text-xs font-bold text-blue-300">
@@ -336,25 +336,25 @@ export const CurriculumView: React.FC = () => {
             </div>
 
             {/* Quick Resume Action Button */}
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto">
               <button
                 id="curriculum-resume-hero-btn"
                 onClick={() => {
                   handleSelectLesson(targetResumeLesson);
                 }}
-                className="flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-900/30 transition-all"
+                className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-900/30 transition-all w-full sm:w-auto"
               >
-                <Play className="h-3.5 w-3.5 fill-white" />
-                <span>Resume Lesson: {targetResumeLesson.title}</span>
-                <ArrowRight className="h-3.5 w-3.5" />
+                <Play className="h-3.5 w-3.5 fill-white shrink-0" />
+                <span className="truncate">Resume Lesson: {targetResumeLesson.title}</span>
+                <ArrowRight className="h-3.5 w-3.5 shrink-0" />
               </button>
             </div>
           </div>
 
           {/* Navigation Mode Switcher & Search Bar */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-3 sm:p-4 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
             {/* View Mode Buttons */}
-            <div className="flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-950 p-1 shrink-0">
+            <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-950 p-1 shrink-0">
               <button
                 id="view-skilltree-tab"
                 onClick={() => setViewMode("skilltree")}
@@ -398,8 +398,8 @@ export const CurriculumView: React.FC = () => {
             </div>
 
             {/* Curriculum Search & Filter Bar */}
-            <div className="flex flex-1 items-center gap-2 max-w-2xl">
-              <div className="relative flex-1">
+            <div className="flex flex-wrap sm:flex-nowrap flex-1 items-center gap-2 max-w-2xl w-full">
+              <div className="relative flex-1 min-w-[180px]">
                 <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
                 <input
                   type="text"
@@ -481,9 +481,9 @@ export const CurriculumView: React.FC = () => {
         {/* VIEW MODE 2: SYLLABUS & LEARNING PATHWAY OVERVIEW                         */}
         {/* ========================================================================= */}
         {viewMode === "syllabus" && (
-          <div className="space-y-8 animate-in fade-in duration-300" id="lms-syllabus-view">
+          <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300" id="lms-syllabus-view">
             {/* Academic LMS Hero Section */}
-            <div className="rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 via-slate-950 to-slate-950 p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+            <div className="rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900/90 via-slate-950 to-slate-950 p-4 sm:p-8 shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 right-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-blue-600/10 blur-3xl pointer-events-none" />
               <div className="absolute bottom-0 left-1/3 -mb-16 h-48 w-48 rounded-full bg-indigo-600/10 blur-3xl pointer-events-none" />
 
@@ -529,9 +529,9 @@ export const CurriculumView: React.FC = () => {
                   {t.curriculum.trackDescription}
                 </p>
 
-                {/* 4 Pedagogical Pillars */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3">
-                  <button type="button" onClick={() => handlePillarClick("lesson-concepts-section")} className="rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-blue-500/60 hover:bg-blue-950/30">
+                {/* 4 Pedagogical Pillars - Swipeable carousel on mobile */}
+                <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar pb-2 sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3">
+                  <button type="button" onClick={() => handlePillarClick("lesson-concepts-section")} className="shrink-0 w-[82vw] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-blue-500/60 hover:bg-blue-950/30">
                     <div className="text-xs font-bold text-blue-300 flex items-center gap-1.5">
                       <span className="flex h-5 w-5 items-center justify-center rounded bg-blue-950 text-[11px] font-mono text-blue-400 font-bold">1</span>
                       {t.curriculum.pillarMicroTitle}
@@ -541,7 +541,7 @@ export const CurriculumView: React.FC = () => {
                     </p>
                   </button>
 
-                  <button type="button" onClick={() => handlePillarClick("lesson-quizzes-section")} className="rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-emerald-500/60 hover:bg-emerald-950/30">
+                  <button type="button" onClick={() => handlePillarClick("lesson-quizzes-section")} className="shrink-0 w-[82vw] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-emerald-500/60 hover:bg-emerald-950/30">
                     <div className="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
                       <span className="flex h-5 w-5 items-center justify-center rounded bg-emerald-950 text-[11px] font-mono text-emerald-400 font-bold">2</span>
                       {t.curriculum.pillarRecallTitle}
@@ -551,7 +551,7 @@ export const CurriculumView: React.FC = () => {
                     </p>
                   </button>
 
-                  <button type="button" onClick={() => handlePillarClick("lesson-case-study-section")} className="rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-amber-500/60 hover:bg-amber-950/30">
+                  <button type="button" onClick={() => handlePillarClick("lesson-case-study-section")} className="shrink-0 w-[82vw] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-amber-500/60 hover:bg-amber-950/30">
                     <div className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
                       <span className="flex h-5 w-5 items-center justify-center rounded bg-amber-950 text-[11px] font-mono text-amber-400 font-bold">3</span>
                       {t.curriculum.pillarBloomTitle}
@@ -561,7 +561,7 @@ export const CurriculumView: React.FC = () => {
                     </p>
                   </button>
 
-                  <button type="button" onClick={() => handlePillarClick("lesson-sandbox-section")} className="rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-purple-500/60 hover:bg-purple-950/30">
+                  <button type="button" onClick={() => handlePillarClick("lesson-sandbox-section")} className="shrink-0 w-[82vw] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-purple-500/60 hover:bg-purple-950/30">
                     <div className="text-xs font-bold text-purple-300 flex items-center gap-1.5">
                       <span className="flex h-5 w-5 items-center justify-center rounded bg-purple-950 text-[11px] font-mono text-purple-400 font-bold">4</span>
                       {t.curriculum.pillarSandboxTitle}
@@ -638,7 +638,7 @@ export const CurriculumView: React.FC = () => {
         {viewMode === "lesson" && (
           <div className="space-y-8 animate-in fade-in duration-300" id="lms-active-lesson-view">
             {/* Lesson Banner & Objective */}
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/90 p-6 sm:p-8 shadow-2xl backdrop-blur-md space-y-4">
+            <div className="rounded-3xl border border-slate-800 bg-slate-900/90 p-4 sm:p-8 shadow-2xl backdrop-blur-md space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
@@ -924,7 +924,7 @@ export const CurriculumView: React.FC = () => {
             {/* =================================================================== */}
             {/* LESSON COMPLETION / FOOTER NAVIGATION                               */}
             {/* =================================================================== */}
-            <div id="lesson-mastery-section" className="rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl flex flex-wrap items-center justify-between gap-4 scroll-mt-24">
+            <div id="lesson-mastery-section" className="rounded-2xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-5 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 scroll-mt-24">
               <div>
                 {prevLesson ? (
                   <button

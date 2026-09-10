@@ -210,9 +210,9 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
       </div>
 
       {/* Challenge Stage Stepper Bar */}
-      <div className="px-5 py-3 border-b border-slate-800/70 bg-slate-950/60 flex items-center justify-between gap-2 overflow-x-auto">
-        <div className="flex items-center gap-2 text-xs font-mono">
-          <span className="text-slate-400 font-bold">Lab Steps:</span>
+      <div className="px-3 sm:px-5 py-2.5 sm:py-3 border-b border-slate-800/70 bg-slate-950/60 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-mono shrink-0">
+          <span className="text-slate-400 font-bold hidden sm:inline">Lab Steps:</span>
 
           <button
             onClick={() => setActiveStep(1)}
@@ -281,7 +281,7 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
       </div>
 
       {/* Main Content Area */}
-      <div className="p-5 sm:p-6 space-y-5">
+      <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-5">
         {/* Task Objective / Directive */}
         <div className="rounded-xl border border-indigo-900/50 bg-gradient-to-r from-indigo-950/30 to-slate-950/60 p-4 space-y-2">
           <div className="text-xs font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-2 font-mono">
@@ -457,21 +457,21 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
         </div>
 
         {/* Action Controls */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
           <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono">
-            <Cpu className="h-3.5 w-3.5 text-blue-400" />
+            <Cpu className="h-3.5 w-3.5 text-blue-400 shrink-0" />
             <span>AI Execution Engine:</span>
             <span className="rounded bg-blue-950 border border-blue-800 px-1.5 py-0.5 text-blue-300 font-bold">
               {aiMode.toUpperCase()}
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               id={`run-validate-sandbox-${challenge.id}`}
               onClick={handleRunAndValidate}
               disabled={isExecuting || !userPrompt.trim()}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-900/30 hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
+              className="w-full sm:w-auto justify-center flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-900/30 hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
             >
               {isExecuting ? (
                 <>

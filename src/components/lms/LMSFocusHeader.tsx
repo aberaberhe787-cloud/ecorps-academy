@@ -38,15 +38,15 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
   return (
     <div
       id="lms-focus-header"
-      className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/95 backdrop-blur-xl px-4 py-3 shadow-md"
+      className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/95 backdrop-blur-xl px-3 sm:px-4 py-2 sm:py-3 shadow-md"
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 sm:gap-4">
         {/* Left: Exit button & Title */}
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             id="exit-lesson-btn"
             onClick={onExitLesson}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:border-blue-500 hover:bg-slate-800 hover:text-white transition-all shrink-0"
+            className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-300 hover:border-blue-500 hover:bg-slate-800 hover:text-white transition-all shrink-0 min-h-[36px]"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Syllabus Overview</span>
@@ -54,11 +54,11 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
           </button>
 
           <div className="min-w-0 truncate">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] font-bold text-blue-400 bg-blue-950 px-1.5 py-0.2 rounded border border-blue-800/60 shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="font-mono text-[10px] font-bold text-blue-400 bg-blue-950 px-1.5 py-0.5 rounded border border-blue-800/60 shrink-0">
                 {currentModule?.code || "MODULE"}
               </span>
-              <span className="text-xs font-bold text-white truncate">
+              <span className="text-xs font-bold text-white truncate max-w-[120px] sm:max-w-[240px]">
                 {currentLesson.title}
               </span>
             </div>
@@ -80,15 +80,15 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
         </div>
 
         {/* Right: Streak, XP, and Distraction-free toggle */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {/* Streak */}
-          <div className="flex items-center gap-1 rounded-lg bg-orange-500/10 border border-orange-500/30 px-2.5 py-1 text-xs font-semibold text-orange-300">
+          <div className="flex items-center gap-1 rounded-lg bg-orange-500/10 border border-orange-500/30 px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-semibold text-orange-300">
             <Flame className="h-3.5 w-3.5 text-orange-400 fill-orange-400/20" />
-            <span>{streakDays}d Streak</span>
+            <span>{streakDays}d</span>
           </div>
 
           {/* XP */}
-          <div className="flex items-center gap-1 rounded-lg bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 text-xs font-semibold text-amber-300 font-mono">
+          <div className="flex items-center gap-1 rounded-lg bg-amber-500/10 border border-amber-500/30 px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-semibold text-amber-300 font-mono">
             <Sparkles className="h-3.5 w-3.5 text-amber-400" />
             <span>{totalXp} XP</span>
           </div>

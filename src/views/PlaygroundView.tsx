@@ -297,7 +297,7 @@ export const PlaygroundView: React.FC = () => {
   const totalDrawerItems = executionHistory.length + userProgress.savedCustomPrompts.length;
 
   return (
-    <div className="app-view mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-6">
+    <div className="app-view mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6 pb-24 md:pb-6">
 
       {/* Header & Sub Navigation */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
@@ -384,7 +384,7 @@ export const PlaygroundView: React.FC = () => {
                 <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1.5 whitespace-nowrap pl-1 shrink-0">
                   <Zap className="h-3.5 w-3.5 text-amber-400" /> Presets:
                 </span>
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar sm:flex-wrap items-center gap-2 max-w-full pb-1">
                   {STARTER_PRESETS.map((preset, idx) => {
                     const Icon = preset.icon;
                     return (
@@ -392,7 +392,7 @@ export const PlaygroundView: React.FC = () => {
                         key={idx}
                         id={`preset-btn-${idx + 1}`}
                         onClick={() => handleLoadPreset(preset)}
-                        className="flex items-center gap-1.5 rounded-lg border border-slate-800 bg-slate-950 px-2.5 py-1 text-[11px] font-medium text-slate-300 hover:border-blue-500 hover:text-blue-300 whitespace-nowrap transition-all"
+                        className="shrink-0 snap-start flex items-center gap-1.5 rounded-lg border border-slate-800 bg-slate-950 px-2.5 py-1 text-[11px] font-medium text-slate-300 hover:border-blue-500 hover:text-blue-300 whitespace-nowrap transition-all"
                       >
                         <Icon className="h-3 w-3 text-blue-400" />
                         <span>{preset.name}</span>
@@ -543,7 +543,7 @@ export const PlaygroundView: React.FC = () => {
                   className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Play className="h-4 w-4 fill-white" />
-                  <span>{isExecuting ? "Generating..." : isComparisonMode ? "Run A/B Benchmark" : "Run Prompt"}</span>
+                  <span>{isExecuting ? "Generating..." : isComparisonMode ? "Run A/B Benchmark" : "Execute Prompt"}</span>
                 </button>
               </div>
             </div>
@@ -614,6 +614,29 @@ export const PlaygroundView: React.FC = () => {
 
       {/* Slide-out Drawer */}
       <SideDrawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} />
+
+      {/* Sticky Bottom Action Bar for Mobile (< 768px) */}
+      {(playgroundSubTab === "sandbox" || playgroundSubTab === "comparison") && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 border-t border-slate-800 backdrop-blur-md px-4 py-3 md:hidden flex items-center justify-between gap-3 shadow-2xl">
+          <button
+            id="mobile-clear-prompt-btn"
+            onClick={() => setPrompt("")}
+            className="flex items-center justify-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 px-3 py-2.5 rounded-xl border border-slate-800 bg-slate-900"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            <span>Reset</span>
+          </button>
+          <button
+            id="mobile-execute-prompt-btn"
+            onClick={() => isComparisonMode ? executeComparison() : executeCurrentPrompt()}
+            disabled={isExecuting || !prompt.trim()}
+            className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-500/25 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+          >
+            <Play className="h-3.5 w-3.5 fill-white shrink-0" />
+            <span className="truncate">{isExecuting ? "Generating..." : isComparisonMode ? "Run Benchmark" : "Execute Prompt"}</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -95,7 +95,7 @@ export const PatternLibraryView: React.FC = () => {
   const isBookmarked = userProgress.bookmarkedPatterns.includes(activePattern.id);
 
   return (
-    <div className="app-view mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-6">
+    <div className="app-view mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6 pb-20 sm:pb-6">
       {/* Header */}
       <div className="border-b border-slate-800 pb-5">
         <div className="flex items-center gap-2">
@@ -122,7 +122,7 @@ export const PatternLibraryView: React.FC = () => {
           </div>
 
           {/* Category Tabs */}
-          <div className="flex items-center gap-1 overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/70 p-1">
+          <div className="flex items-center gap-1 overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/70 p-1 no-scrollbar max-w-full">
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -215,9 +215,9 @@ export const PatternLibraryView: React.FC = () => {
 
         {/* Right Column: Interactive Variable Customizer & Live Output (7 cols) */}
         <div className="lg:col-span-7 space-y-5">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 shadow-xl backdrop-blur-md space-y-5">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 sm:p-6 shadow-xl backdrop-blur-md space-y-5">
             {/* Header */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="rounded-md bg-blue-950 border border-blue-800 px-2 py-0.5 font-mono text-xs text-blue-300">
@@ -225,23 +225,23 @@ export const PatternLibraryView: React.FC = () => {
                   </span>
                   <span className="text-xs text-slate-400 font-mono">{activePattern.variables.length} Dynamic Variables</span>
                 </div>
-                <h2 className="mt-1.5 text-xl font-bold text-white">{activePattern.title}</h2>
+                <h2 className="mt-1.5 text-lg sm:text-xl font-bold text-white">{activePattern.title}</h2>
                 <p className="mt-0.5 text-xs text-slate-300">{activePattern.description}</p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                 <button
                   id="pattern-copy-btn"
                   onClick={handleCopy}
-                  className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition-colors min-h-[38px]"
                 >
                   {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                  <span>{copied ? "Copied Prompt!" : "Copy"}</span>
+                  <span>{copied ? "Copied!" : "Copy"}</span>
                 </button>
                 <button
                   id="pattern-load-sandbox-btn"
                   onClick={handleLoadInPlayground}
-                  className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-md hover:brightness-110 active:scale-95"
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-3.5 py-2 text-xs font-semibold text-white shadow-md hover:brightness-110 active:scale-95 min-h-[38px]"
                 >
                   <Play className="h-3.5 w-3.5 fill-white" />
                   <span>Test in Sandbox</span>

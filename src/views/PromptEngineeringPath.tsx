@@ -45,16 +45,16 @@ export const PromptEngineeringPath: React.FC = () => {
   };
 
   return (
-    <div className="app-view foundation-page mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
-      <header className="rounded-2xl border border-blue-900/60 bg-gradient-to-br from-blue-950/80 to-slate-950 p-6">
+    <div className="app-view foundation-page mx-auto max-w-7xl space-y-4 sm:space-y-6 px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 sm:pb-6">
+      <header className="rounded-2xl border border-blue-900/60 bg-gradient-to-br from-blue-950/80 to-slate-950 p-4 sm:p-6">
         <div className="flex items-center gap-2 text-blue-300"><Sparkles className="h-5 w-5" /><span className="text-xs font-bold uppercase tracking-widest">Learning Path</span></div>
-        <h1 className="mt-3 text-3xl font-black text-white">Prompt Engineering Foundations</h1>
-        <p className="mt-2 max-w-2xl text-slate-300">Learn why prompts work, then test each principle in a live comparison lab.</p>
-        <div className="mt-5 flex items-center gap-3"><div className="h-2 max-w-sm flex-1 overflow-hidden rounded-full bg-slate-800"><div className="h-full bg-blue-500 transition-all" style={{ width: `${(completedCount / FOUNDATION_LESSONS.length) * 100}%` }} /></div><span className="text-sm text-blue-200">{completedCount}/{FOUNDATION_LESSONS.length} complete</span></div>
+        <h1 className="mt-3 text-2xl sm:text-3xl font-black text-white">Prompt Engineering Foundations</h1>
+        <p className="mt-2 max-w-2xl text-xs sm:text-sm text-slate-300">Learn why prompts work, then test each principle in a live comparison lab.</p>
+        <div className="mt-4 sm:mt-5 flex items-center gap-3"><div className="h-2 max-w-sm flex-1 overflow-hidden rounded-full bg-slate-800"><div className="h-full bg-blue-500 transition-all" style={{ width: `${(completedCount / FOUNDATION_LESSONS.length) * 100}%` }} /></div><span className="text-xs sm:text-sm text-blue-200 font-mono">{completedCount}/{FOUNDATION_LESSONS.length} complete</span></div>
       </header>
-      <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-        <nav className="space-y-2" aria-label="Foundations lessons">
-          {FOUNDATION_LESSONS.map((lesson, index) => { const completed = userProgress.completedLessons.includes(lesson.id); return <button key={lesson.id} type="button" onClick={() => setActiveId(lesson.id)} className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition ${activeId === lesson.id ? 'border-blue-500 bg-blue-950/50' : 'border-slate-800 bg-slate-900/60 hover:border-slate-700'}`}><span className="text-xs text-slate-500">0{index + 1}</span>{completed ? <CheckCircle2 className="h-4 w-4 text-emerald-400" /> : <Circle className="h-4 w-4 text-slate-500" />}<span className="text-sm font-semibold text-slate-200">{lesson.title}</span></button>; })}
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-[280px_1fr]">
+        <nav className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar gap-2 pb-2 lg:block lg:space-y-2" aria-label="Foundations lessons">
+          {FOUNDATION_LESSONS.map((lesson, index) => { const completed = userProgress.completedLessons.includes(lesson.id); return <button key={lesson.id} type="button" onClick={() => setActiveId(lesson.id)} className={`shrink-0 snap-start flex items-center gap-2.5 sm:gap-3 rounded-xl border p-2.5 sm:p-3 text-left transition whitespace-nowrap lg:whitespace-normal lg:w-full ${activeId === lesson.id ? 'border-blue-500 bg-blue-950/50' : 'border-slate-800 bg-slate-900/60 hover:border-slate-700'}`}><span className="text-xs text-slate-500 font-mono">0{index + 1}</span>{completed ? <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" /> : <Circle className="h-4 w-4 text-slate-500 shrink-0" />}<span className="text-xs sm:text-sm font-semibold text-slate-200">{lesson.title}</span></button>; })}
         </nav>
         <main className="space-y-6">
           {completedCount >= FOUNDATION_LESSONS.length && (

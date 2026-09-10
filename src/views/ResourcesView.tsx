@@ -57,7 +57,7 @@ export const ResourcesView: React.FC = () => {
   };
 
   return (
-    <div className="app-view mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-8">
+    <div className="app-view mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6 sm:space-y-8 pb-20 sm:pb-6">
       {/* Header */}
       <div className="border-b border-slate-800 pb-5">
         <div className="flex items-center gap-2">
@@ -69,7 +69,7 @@ export const ResourcesView: React.FC = () => {
         </p>
 
         {/* Unified Resource Search Bar */}
-        <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/90 p-4 shadow-xl space-y-3">
+        <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-4 shadow-xl space-y-3">
           <div className="relative">
             <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
             <input
@@ -77,7 +77,7 @@ export const ResourcesView: React.FC = () => {
               placeholder="Search authoritative guides, research papers, prompt engineering glossary, and saved prompts..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-xl border border-slate-700 bg-slate-950 pl-10 pr-10 py-2.5 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all z-50"
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 pl-10 pr-10 py-2.5 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all"
             />
             {searchTerm && (
               <button
@@ -90,7 +90,7 @@ export const ResourcesView: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-            <div className="flex items-center gap-1.5 overflow-x-auto">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-full">
               <button
                 onClick={() => setSelectedResourceSection("All")}
                 className={`rounded-lg px-2.5 py-1 font-medium transition-all ${

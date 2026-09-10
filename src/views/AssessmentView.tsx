@@ -63,7 +63,7 @@ export const AssessmentView: React.FC = () => {
   };
 
   return (
-    <div className="p-4 sm:p-8 max-w-4xl mx-auto space-y-6 animate-in fade-in duration-200">
+    <div className="px-3 sm:px-6 lg:px-8 py-4 sm:py-8 max-w-4xl mx-auto space-y-5 sm:space-y-6 animate-in fade-in duration-200 pb-20 sm:pb-8">
       {/* Breadcrumb Navigation */}
       <div className="flex items-center justify-between gap-4">
         <button
@@ -114,18 +114,18 @@ export const AssessmentView: React.FC = () => {
               placeholder="Act as a Senior Cloud Security Architect. Analyze the following configuration inside <config>...</config>. Return a JSON response with keys: 'risk_level', 'vulnerabilities', and 'remediation_steps'. Do not include markdown preamble."
             />
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <button
               onClick={handleSubmit}
               disabled={!submission.trim()}
-              className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed px-5 py-2.5 rounded-xl text-xs font-bold text-white shadow-lg transition-all active:scale-95"
+              className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed px-5 py-3 rounded-xl text-xs font-bold text-white shadow-lg transition-all active:scale-95 min-h-[44px]"
             >
               <span>Submit for Official Assessment</span> <ArrowRight className="h-4 w-4" />
             </button>
             <button
               type="button"
               onClick={() => setSubmission("Act as a Senior System Architect. Analyze the requirements inside <system_specs>\nHigh-traffic distributed payment processor with 99.99% uptime\n</system_specs>.\nReturn the architectural blueprint strictly formatted as a JSON object with keys: 'components', 'database_choice', and 'failover_strategy'. Never include conversational preamble.")}
-              className="text-xs text-slate-400 hover:text-blue-300 underline font-mono"
+              className="text-xs text-slate-400 hover:text-blue-300 underline font-mono text-center sm:text-right py-1"
             >
               Insert exemplar prompt template
             </button>
@@ -162,17 +162,17 @@ export const AssessmentView: React.FC = () => {
             <p className="text-slate-300">{result?.feedback || "Your engineered prompt demonstrated high precision, structured role clarity, and constraint fidelity."}</p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
             <button
               onClick={() => setActiveTab('profile')}
-              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md transition-all active:scale-95"
+              className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-md transition-all active:scale-95 min-h-[44px]"
             >
               <Award className="h-4 w-4" />
               <span>View Verified Certificate on Dashboard &rarr;</span>
             </button>
             <button
               onClick={() => { setStatus('idle'); setSubmission(''); }}
-              className="text-xs font-semibold text-emerald-300 hover:text-white border border-emerald-800 px-3.5 py-2 rounded-xl transition-colors"
+              className="text-xs font-semibold text-emerald-300 hover:text-white border border-emerald-800 px-3.5 py-2.5 rounded-xl transition-colors text-center min-h-[40px] flex items-center justify-center"
             >
               Submit Another Prompt Artifact
             </button>

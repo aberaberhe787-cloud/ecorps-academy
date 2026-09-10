@@ -46,7 +46,7 @@ export const HomeView: React.FC = () => {
   };
 
   return (
-    <div className="app-view space-y-8 sm:space-y-12 lg:space-y-14 py-6 sm:py-8 pb-12">
+    <div className="app-view space-y-6 sm:space-y-10 lg:space-y-14 py-4 sm:py-8 pb-24 sm:pb-12">
       {/* Learner control center */}
       <section className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
         <div className="rounded-2xl border border-blue-900/60 bg-slate-900/90 p-4 sm:p-5 lg:p-6 shadow-xl text-center">
@@ -178,7 +178,7 @@ export const HomeView: React.FC = () => {
               value={quickPrompt}
               onChange={(e) => setQuickPrompt(e.target.value)}
               placeholder={t.home.quickTryPlaceholder}
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 p-3 font-mono text-xs text-slate-200 focus:border-blue-500 focus:outline-none"
+              className="w-full rounded-xl border border-slate-800 bg-slate-950 p-3 font-mono text-xs text-slate-200 focus:border-blue-500 focus:outline-none touch-pan-y overscroll-contain focus:touch-auto"
             />
           </div>
 
@@ -215,8 +215,8 @@ export const HomeView: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5 cursor-pointer hover:bg-slate-800 transition-colors" onClick={() => setActiveTab("curriculum")}>
+        <div className="flex overflow-x-auto snap-x snap-mandatory flex-nowrap gap-3 pb-2 pt-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4 no-scrollbar touch-pan-x">
+          <div className="min-w-[260px] max-w-[280px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink rounded-2xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5 cursor-pointer hover:bg-slate-800 transition-colors" onClick={() => setActiveTab("curriculum")}>
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 mb-3">
               <Layers className="h-4 w-4" />
             </div>
@@ -224,7 +224,7 @@ export const HomeView: React.FC = () => {
             <p className="mt-1.5 text-xs text-slate-400 leading-relaxed">{t.home.pillar1Desc}</p>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5 cursor-pointer hover:bg-slate-800 transition-colors" onClick={() => setActiveTab("curriculum")}>
+          <div className="min-w-[260px] max-w-[280px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink rounded-2xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5 cursor-pointer hover:bg-slate-800 transition-colors" onClick={() => setActiveTab("curriculum")}>
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mb-3">
               <CheckCircle2 className="h-4 w-4" />
             </div>
@@ -232,7 +232,7 @@ export const HomeView: React.FC = () => {
             <p className="mt-1.5 text-xs text-slate-400 leading-relaxed">{t.home.pillar2Desc}</p>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5 cursor-pointer hover:bg-slate-800 transition-colors" onClick={() => setActiveTab("curriculum")}>
+          <div className="min-w-[260px] max-w-[280px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink rounded-2xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5 cursor-pointer hover:bg-slate-800 transition-colors" onClick={() => setActiveTab("curriculum")}>
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400 mb-3">
               <Cpu className="h-4 w-4" />
             </div>
@@ -240,7 +240,7 @@ export const HomeView: React.FC = () => {
             <p className="mt-1.5 text-xs text-slate-400 leading-relaxed">{t.home.pillar3Desc}</p>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5 cursor-pointer hover:bg-slate-800 transition-colors" onClick={() => setActiveTab("playground")}>
+          <div className="min-w-[260px] max-w-[280px] sm:min-w-0 sm:max-w-none snap-start shrink-0 sm:shrink rounded-2xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5 cursor-pointer hover:bg-slate-800 transition-colors" onClick={() => setActiveTab("playground")}>
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 mb-3">
               <Terminal className="h-4 w-4" />
             </div>
@@ -275,7 +275,7 @@ export const HomeView: React.FC = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="flex overflow-x-auto snap-x snap-mandatory flex-nowrap gap-3 pb-2 pt-1 -mx-4 px-4 sm:mx-0 sm:px-0 md:grid md:grid-cols-2 lg:grid-cols-4 sm:gap-4 no-scrollbar touch-pan-x">
           {currentCurriculum.slice(0, 4).map((mod) => {
             const completedInMod = mod.lessons.filter((l) =>
               userProgress.completedLessons.includes(l.id)
@@ -287,7 +287,7 @@ export const HomeView: React.FC = () => {
               <div
                 key={mod.id}
                 onClick={() => setActiveTab("curriculum")}
-                className="group relative flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/60 p-5 hover:border-slate-700 hover:bg-slate-900 transition-all cursor-pointer"
+                className="group relative flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5 hover:border-slate-700 hover:bg-slate-900 transition-all cursor-pointer min-w-[260px] max-w-[280px] md:min-w-0 md:max-w-none snap-start shrink-0 md:shrink"
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -353,11 +353,11 @@ export const HomeView: React.FC = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="flex overflow-x-auto snap-x snap-mandatory flex-nowrap gap-3 pb-2 pt-1 -mx-4 px-4 sm:mx-0 sm:px-0 md:grid md:grid-cols-2 lg:grid-cols-3 sm:gap-4 no-scrollbar touch-pan-x">
           {promptPatterns.slice(0, 3).map((pat) => (
             <div
               key={pat.id}
-              className="group flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/60 p-5 hover:border-slate-700 hover:bg-slate-900 transition-all"
+              className="group flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5 hover:border-slate-700 hover:bg-slate-900 transition-all min-w-[260px] max-w-[280px] md:min-w-0 md:max-w-none snap-start shrink-0 md:shrink"
             >
               <div>
                 <div className="flex items-center justify-between mb-3">
@@ -493,6 +493,23 @@ export const HomeView: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Sticky Bottom Action Bar for Mobile (< 768px) */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 border-t border-slate-800 backdrop-blur-md px-4 py-3 md:hidden flex items-center justify-between gap-3 shadow-2xl">
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] uppercase font-mono tracking-wider text-blue-400 font-bold">Prompt Mastery</p>
+          <p className="text-xs text-slate-300 font-semibold truncate">Continue your learning path</p>
+        </div>
+        <button
+          id="mobile-sticky-practice-today-btn"
+          type="button"
+          onClick={() => setActiveTab("foundations")}
+          className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-500/25 active:scale-95 shrink-0 min-h-[44px]"
+        >
+          <Play className="h-3.5 w-3.5 fill-white shrink-0" />
+          <span>PRACTICE TODAY</span>
+        </button>
+      </div>
     </div>
   );
 };
