@@ -177,9 +177,9 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <main className="login-page min-h-screen bg-[#050a19] px-0 sm:px-6 py-2 sm:py-5 md:py-6 lg:px-10 lg:py-8 text-slate-100 flex flex-col justify-between w-full max-w-full overflow-x-hidden">
+    <main className="login-page min-h-screen md:min-h-[100dvh] bg-[#050a19] px-4 py-6 sm:px-8 sm:py-12 md:px-10 md:py-8 text-slate-100 flex flex-col justify-between w-full max-w-full overflow-x-hidden">
       {/* Mobile Top Brand Bar - Compact branding on small screens (< 768px) */}
-      <header className="md:hidden flex items-center justify-between mb-2 px-4 sm:px-0 w-full max-w-md mx-auto">
+      <header className="md:hidden flex items-center justify-between mb-4 px-0 w-full max-w-md mx-auto">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-400/50 bg-blue-950/80 shadow-sm shadow-blue-950/50">
             <WandSparkles className="h-4 w-4 text-blue-400" />
@@ -196,14 +196,14 @@ export const LoginPage: React.FC = () => {
       </header>
 
       {/* Main Responsive Container: Clean unified card on mobile (<768px), side-by-side 2-column grid on desktop (>=768px) */}
-      <div className="mx-auto w-full max-w-md md:max-w-[1180px] md:grid md:grid-cols-2 rounded-none sm:rounded-2xl md:rounded-[24px] border-x-0 sm:border border-slate-800/80 bg-[#080e20]/95 shadow-2xl shadow-black/40 overflow-hidden md:min-h-[580px] my-auto">
+      <div className="mx-auto w-full max-w-md md:max-w-[1180px] md:grid md:grid-cols-2 rounded-2xl md:rounded-[24px] border border-slate-800/80 bg-[#080e20]/95 shadow-2xl shadow-black/40 overflow-hidden md:min-h-[580px] my-auto">
         
         {/* SIGN-IN FORM: Focused, clean single card on mobile; right column on desktop */}
         <section
           id="auth-form-section"
           className="w-full md:order-2 relative flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-10"
         >
-          <div className="w-full max-w-full sm:max-w-md rounded-xl md:rounded-2xl md:border md:border-indigo-500/40 md:bg-[#0c142a]/95 p-0 sm:p-2 md:p-7 md:shadow-[0_0_35px_rgba(37,99,235,.08)]">
+          <div className="w-full max-w-full sm:max-w-md rounded-xl md:rounded-2xl md:border md:border-indigo-500/40 md:bg-[#0c142a]/95 p-2 sm:p-4 md:p-7 md:shadow-[0_0_35px_rgba(37,99,235,.08)]">
             <div className="text-center">
               <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-slate-100">
                 {isSignUp ? 'Create your account' : 'Welcome back'}
@@ -228,13 +228,13 @@ export const LoginPage: React.FC = () => {
             )}
 
             {/* Quick 1-Click Social Sign In */}
-            <div className="mt-2.5 sm:mt-4 grid grid-cols-2 gap-1.5 sm:gap-2">
+            <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
               <button
                 type="button"
                 id="google-signin-button"
                 onClick={() => handleProviderAuth(new GoogleAuthProvider())}
                 disabled={isSubmitting}
-                className="flex min-h-[40px] sm:min-h-[44px] items-center justify-center gap-1.5 sm:gap-2 rounded-xl border border-slate-700/80 bg-slate-900/80 py-2 px-2 text-xs font-medium text-slate-200 hover:border-slate-500 hover:bg-slate-800/80 transition active:scale-[0.98]"
+                className="flex-1 flex min-h-[40px] sm:min-h-[44px] items-center justify-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/80 py-2 sm:py-2.5 px-3 text-xs font-semibold text-slate-200 hover:border-slate-500 hover:bg-slate-800/80 transition active:scale-[0.98] w-full"
               >
                 <span className="font-bold text-blue-400 text-sm leading-none">G</span>
                 <span>Google</span>
@@ -244,7 +244,7 @@ export const LoginPage: React.FC = () => {
                 id="github-signin-button"
                 onClick={() => handleProviderAuth(new GithubAuthProvider())}
                 disabled={isSubmitting}
-                className="flex min-h-[40px] sm:min-h-[44px] items-center justify-center gap-1.5 sm:gap-2 rounded-xl border border-slate-700/80 bg-slate-900/80 py-2 px-2 text-xs font-medium text-slate-200 hover:border-slate-500 hover:bg-slate-800/80 transition active:scale-[0.98]"
+                className="flex-1 flex min-h-[40px] sm:min-h-[44px] items-center justify-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/80 py-2 sm:py-2.5 px-3 text-xs font-semibold text-slate-200 hover:border-slate-500 hover:bg-slate-800/80 transition active:scale-[0.98] w-full"
               >
                 <Github className="h-3.5 w-3.5 text-slate-300" />
                 <span>GitHub</span>
@@ -371,10 +371,10 @@ export const LoginPage: React.FC = () => {
           </div>
         </section>
 
-        {/* MARKETING CONTENT: Hidden on mobile (<768px) for a focused login experience; displayed on desktop (>=768px) */}
+        {/* MARKETING CONTENT: Displayed on both mobile and desktop with responsive column layouts */}
         <section
           id="marketing-info-section"
-          className="hidden md:flex md:order-1 relative md:flex-col justify-between overflow-hidden px-6 py-6 md:px-8 md:py-8 lg:px-10 lg:py-9 md:border-r border-slate-800/60"
+          className="flex md:order-1 relative flex-col justify-between overflow-hidden p-6 sm:p-8 md:p-8 lg:p-10 border-t md:border-t-0 md:border-r border-slate-800/60"
         >
           <div className="pointer-events-none absolute -bottom-32 -left-10 h-80 w-72 sm:w-96 md:w-[520px] max-w-full rounded-full bg-blue-600/10 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 left-0 h-32 w-full opacity-50 [background-image:linear-gradient(135deg,transparent_45%,rgba(37,99,235,.3)_46%,transparent_47%),linear-gradient(45deg,transparent_45%,rgba(124,58,237,.25)_46%,transparent_47%)] [background-size:38px_38px]" />
@@ -391,20 +391,20 @@ export const LoginPage: React.FC = () => {
           </div>
 
           <div className="relative z-10 mt-1 sm:mt-2 md:mt-6 lg:mt-8 max-w-[470px]">
-            <div className="hidden md:inline-flex items-center gap-2 rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 text-[11px] font-medium text-blue-300">
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 text-[11px] font-medium text-blue-300 mb-2 sm:mb-3">
               <Sparkles className="h-3 w-3" /> Interactive AI Academy
             </div>
-            <h2 className="mt-1 sm:mt-3 md:mt-4 text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold leading-tight tracking-tight text-slate-100">
+            <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold leading-tight tracking-tight text-slate-100 mt-2">
               Master the Architecture of<br />
               <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
                 Large Language Models
               </span>
             </h2>
-            <p className="mt-2 sm:mt-3 max-w-[430px] text-xs sm:text-sm leading-relaxed text-slate-400">
+            <p className="mt-2 text-[11px] sm:text-xs md:text-sm leading-relaxed text-slate-400 max-w-[430px]">
               Join thousands of developers and AI practitioners mastering prompt engineering, system design, and production workflows with real-time sandbox feedback.
             </p>
 
-            <div className="mt-4 sm:mt-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-2.5 sm:gap-3">
+            <div className="mt-4 sm:mt-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-4">
               {[
                 {
                   icon: BookOpen,
@@ -431,13 +431,13 @@ export const LoginPage: React.FC = () => {
                   color: 'text-amber-400 bg-amber-500/10',
                 },
               ].map(({ icon: Icon, title, detail, color }) => (
-                <div key={title} className="flex items-center gap-2.5 sm:gap-3 rounded-xl bg-slate-900/40 p-2 sm:p-2.5 border border-slate-800/50">
+                <div key={title} className="flex items-center gap-2.5 sm:gap-3 rounded-xl bg-slate-900/40 p-2.5 sm:p-3 border border-slate-800/50">
                   <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${color}`}>
-                    <Icon className="h-4 w-4" />
+                     <Icon className="h-4 w-4" />
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-slate-200">{title}</p>
-                    <p className="text-[10px] text-slate-400 line-clamp-1">{detail}</p>
+                    <p className="text-[10px] text-slate-400 leading-normal">{detail}</p>
                   </div>
                 </div>
               ))}

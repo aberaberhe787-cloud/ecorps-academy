@@ -553,7 +553,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
     try {
-      const res = await robustApiFetch('/api/health').catch(() => null);
+      const res = await robustApiFetch('/api/health', { silent: true }).catch(() => null);
       if (res && res.ok) {
         setIsOnline(true);
       }
@@ -1235,9 +1235,7 @@ Provide:
 
   // Check health endpoint for backend / real Gemini API availability
   useEffect(() => {
-    if (!auth.currentUser) return;
-
-    robustApiFetch("/api/health")
+    robustApiFetch("/api/health", { silent: true })
       .then((r) => r.json())
       .then((data) => {
         if (data && data.hasGeminiKey) {
