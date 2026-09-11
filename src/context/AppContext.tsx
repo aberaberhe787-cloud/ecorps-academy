@@ -1235,6 +1235,8 @@ Provide:
 
   // Check health endpoint for backend / real Gemini API availability
   useEffect(() => {
+    if (!auth.currentUser) return;
+
     robustApiFetch("/api/health")
       .then((r) => r.json())
       .then((data) => {
