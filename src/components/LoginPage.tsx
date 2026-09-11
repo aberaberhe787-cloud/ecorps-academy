@@ -177,9 +177,9 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <main className="login-page min-h-[100dvh] bg-[#050a19] px-4 py-6 sm:px-8 sm:py-12 md:px-10 md:py-8 text-slate-100 flex flex-col justify-between w-full max-w-full overflow-x-hidden">
+    <main className="login-page min-h-[100dvh] bg-[#050a19] p-4 sm:p-6 md:p-8 lg:p-10 text-slate-100 flex flex-col justify-center items-center w-full max-w-full overflow-x-hidden">
       {/* Mobile Top Brand Bar - Compact branding on small screens (< 768px) */}
-      <header className="md:hidden flex items-center justify-between mb-4 px-0 w-full max-w-md mx-auto">
+      <header className="md:hidden flex items-center justify-between mb-6 px-0 w-full max-w-md mx-auto">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-400/50 bg-blue-950/80 shadow-sm shadow-blue-950/50">
             <WandSparkles className="h-4 w-4 text-blue-400" />
@@ -196,7 +196,7 @@ export const LoginPage: React.FC = () => {
       </header>
 
       {/* Main Responsive Container: Clean unified card on mobile (<768px), side-by-side 2-column grid on desktop (>=768px) */}
-      <div className="mx-auto w-full max-w-md md:max-w-[1180px] md:grid md:grid-cols-2 rounded-2xl md:rounded-[24px] border border-slate-800/80 bg-[#080e20]/95 shadow-2xl shadow-black/40 overflow-hidden md:min-h-[580px] my-4 md:my-auto">
+      <div className="mx-auto w-full max-w-md md:max-w-[1180px] md:grid md:grid-cols-2 rounded-2xl md:rounded-[24px] border border-slate-800/80 bg-[#080e20]/95 shadow-2xl shadow-black/40 overflow-hidden h-auto md:min-h-[580px] my-2 md:my-auto">
         
         {/* SIGN-IN FORM: Focused, clean single card on mobile; right column on desktop */}
         <section
