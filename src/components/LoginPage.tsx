@@ -374,7 +374,7 @@ export const LoginPage: React.FC = () => {
         {/* MARKETING CONTENT: Hidden on mobile (<768px) for a focused login experience; displayed on desktop (>=768px) */}
         <section
           id="marketing-info-section"
-          className="hidden md:flex md:order-1 relative flex-col justify-between overflow-hidden px-6 py-6 md:px-8 md:py-8 lg:px-10 lg:py-9 md:border-r border-slate-800/60"
+          className="hidden md:flex md:order-1 relative md:flex-col justify-between overflow-hidden px-6 py-6 md:px-8 md:py-8 lg:px-10 lg:py-9 md:border-r border-slate-800/60"
         >
           <div className="pointer-events-none absolute -bottom-32 -left-10 h-80 w-72 sm:w-96 md:w-[520px] max-w-full rounded-full bg-blue-600/10 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 left-0 h-32 w-full opacity-50 [background-image:linear-gradient(135deg,transparent_45%,rgba(37,99,235,.3)_46%,transparent_47%),linear-gradient(45deg,transparent_45%,rgba(124,58,237,.25)_46%,transparent_47%)] [background-size:38px_38px]" />
