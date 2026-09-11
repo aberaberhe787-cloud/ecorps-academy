@@ -186,17 +186,17 @@ export const LoginPage: React.FC = () => {
           </div>
           <div>
             <p className="text-xs font-bold tracking-tight text-slate-100">Ecorp Academy</p>
-            <p className="text-[9px] text-slate-400 leading-none">Prompt Engineering &amp; AI</p>
+            <p className="text-[10px] text-slate-400 leading-none">Prompt Engineering &amp; AI</p>
           </div>
         </div>
-        <div className="inline-flex items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 text-[9px] font-medium text-blue-300">
+        <div className="inline-flex items-center gap-1 rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 text-[10px] font-medium text-blue-300">
           <Sparkles className="h-2.5 w-2.5 text-blue-400" />
           <span>Interactive</span>
         </div>
       </header>
 
       {/* Main Responsive Container: Clean unified card on mobile (<768px), side-by-side 2-column grid on desktop (>=768px) */}
-      <div className="mx-auto w-full max-w-md md:max-w-[1180px] md:grid md:grid-cols-2 rounded-2xl md:rounded-[24px] border border-slate-800/80 bg-[#080e20]/95 shadow-2xl shadow-black/40 overflow-hidden md:min-h-[580px] my-auto">
+      <div className="mx-auto w-full max-w-md md:max-w-[1180px] md:grid md:grid-cols-2 rounded-2xl md:rounded-[24px] border border-slate-800/80 bg-[#080e20]/95 shadow-2xl shadow-black/40 overflow-hidden md:min-h-[580px] my-4 md:my-auto">
         
         {/* SIGN-IN FORM: Focused, clean single card on mobile; right column on desktop */}
         <section
@@ -208,7 +208,7 @@ export const LoginPage: React.FC = () => {
               <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-slate-100">
                 {isSignUp ? 'Create your account' : 'Welcome back'}
               </h1>
-              <p className="mt-0.5 sm:mt-1 text-[11px] sm:text-xs text-slate-400">
+              <p className="mt-1 text-xs text-slate-400">
                 {isSignUp ? 'Start mastering prompt engineering & AI systems' : 'Sign in to continue your AI learning journey'}
               </p>
             </div>
@@ -251,16 +251,16 @@ export const LoginPage: React.FC = () => {
               </button>
             </div>
 
-            <div className="my-2.5 sm:my-3 flex items-center gap-2 text-[9px] sm:text-[10px] uppercase font-mono tracking-wider text-slate-500">
+            <div className="my-2.5 sm:my-3 flex items-center gap-2 text-xs uppercase font-mono tracking-wider text-slate-500">
               <span className="h-px flex-1 bg-slate-800" />
               <span>or with email</span>
               <span className="h-px flex-1 bg-slate-800" />
             </div>
 
-            <form onSubmit={handleEmailAuth} className="space-y-2 sm:space-y-3">
+            <form onSubmit={handleEmailAuth} className="space-y-3 sm:space-y-4">
               {isSignUp && (
                 <label className="block">
-                  <span className="mb-1 block text-[11px] font-medium text-slate-300">Full name</span>
+                  <span className="mb-1 block text-xs sm:text-sm font-medium text-slate-300">Full name</span>
                   <div className="relative">
                     <UserRound className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500 pointer-events-none" />
                     <input
@@ -268,7 +268,7 @@ export const LoginPage: React.FC = () => {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Your name"
-                      className="login-input text-xs sm:text-sm py-2 sm:py-2.5"
+                      className="login-input text-sm py-2 sm:py-2.5"
                       autoComplete="name"
                     />
                   </div>
@@ -276,7 +276,7 @@ export const LoginPage: React.FC = () => {
               )}
 
               <label className="block">
-                <span className="mb-1 block text-[11px] font-medium text-slate-300">Email address</span>
+                <span className="mb-1 block text-xs sm:text-sm font-medium text-slate-300">Email address</span>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500 pointer-events-none" />
                   <input
@@ -284,7 +284,7 @@ export const LoginPage: React.FC = () => {
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                     placeholder="you@example.com"
-                    className="login-input text-xs sm:text-sm py-2 sm:py-2.5"
+                    className="login-input text-sm py-2 sm:py-2.5"
                     autoComplete="email"
                     required
                   />
@@ -292,7 +292,7 @@ export const LoginPage: React.FC = () => {
               </label>
 
               <label className="block">
-                <span className="mb-1 block text-[11px] font-medium text-slate-300">Password</span>
+                <span className="mb-1 block text-xs sm:text-sm font-medium text-slate-300">Password</span>
                 <div className="relative">
                   <LockKeyhole className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500 pointer-events-none" />
                   <input
@@ -300,7 +300,7 @@ export const LoginPage: React.FC = () => {
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     placeholder="••••••••••••"
-                    className="login-input pr-9 sm:pr-10 text-xs sm:text-sm py-2 sm:py-2.5"
+                    className="login-input pr-9 sm:pr-10 text-sm py-2 sm:py-2.5"
                     autoComplete={isSignUp ? 'new-password' : 'current-password'}
                     required
                   />
@@ -316,7 +316,7 @@ export const LoginPage: React.FC = () => {
               </label>
 
               {!isSignUp && (
-                <div className="flex flex-wrap items-center justify-between gap-1 text-[11px]">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
                   <label className="flex items-center gap-1.5 text-slate-400 cursor-pointer select-none">
                     <input
                       type="checkbox"
@@ -337,7 +337,7 @@ export const LoginPage: React.FC = () => {
               )}
 
               {error && (
-                <p role="alert" className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-2 text-xs text-rose-300">
+                <p role="alert" className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-2.5 text-xs text-rose-300">
                   {error}
                 </p>
               )}
@@ -347,7 +347,7 @@ export const LoginPage: React.FC = () => {
                 type="submit"
                 id="primary-auth-submit-btn"
                 disabled={isSubmitting}
-                className="flex w-full min-h-[42px] sm:min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-blue-900/30 transition hover:brightness-110 active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
+                className="flex w-full min-h-[44px] items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-2.5 sm:py-3 text-sm font-bold text-white shadow-lg shadow-blue-900/30 transition hover:brightness-110 active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
               >
                 {isSubmitting ? 'Authenticating...' : isSignUp ? 'Create Account' : 'Sign In'}
                 <ArrowRight className="h-4 w-4" />
@@ -391,7 +391,7 @@ export const LoginPage: React.FC = () => {
           </div>
 
           <div className="relative z-10 mt-1 sm:mt-2 md:mt-6 lg:mt-8 max-w-[470px]">
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 text-[11px] font-medium text-blue-300 mb-2 sm:mb-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-300 mb-2 sm:mb-3">
               <Sparkles className="h-3 w-3" /> Interactive AI Academy
             </div>
             <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold leading-tight tracking-tight text-slate-100 mt-2">
@@ -400,7 +400,7 @@ export const LoginPage: React.FC = () => {
                 Large Language Models
               </span>
             </h2>
-            <p className="mt-2 text-[11px] sm:text-xs md:text-sm leading-relaxed text-slate-400 max-w-[430px]">
+            <p className="mt-2 text-xs sm:text-sm md:text-base leading-relaxed text-slate-400 max-w-[430px]">
               Join thousands of developers and AI practitioners mastering prompt engineering, system design, and production workflows with real-time sandbox feedback.
             </p>
 
@@ -436,8 +436,8 @@ export const LoginPage: React.FC = () => {
                      <Icon className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-slate-200">{title}</p>
-                    <p className="text-[10px] text-slate-400 leading-normal">{detail}</p>
+                    <p className="text-xs sm:text-sm font-semibold text-slate-200">{title}</p>
+                    <p className="text-[11px] sm:text-xs text-slate-400 leading-normal">{detail}</p>
                   </div>
                 </div>
               ))}
@@ -451,22 +451,22 @@ export const LoginPage: React.FC = () => {
       </div>
 
       {/* Footer Features Bar */}
-      <footer className="mx-auto flex w-full max-w-[1180px] flex-wrap items-center justify-center gap-x-3 sm:gap-x-4 gap-y-1.5 py-2 sm:py-3 text-[10px] sm:text-xs text-slate-500 text-center px-4 sm:px-1">
-        <span className="flex items-center gap-1.5">
-          <BookOpen className="h-3.5 w-3.5 text-blue-400" />
-          <strong className="text-blue-300">10+</strong> Interactive Lessons
+      <footer className="mx-auto w-full max-w-[1180px] grid grid-cols-2 md:flex md:flex-row md:flex-wrap md:items-center md:justify-center gap-3 sm:gap-4 py-4 sm:py-6 md:py-3 text-[11px] sm:text-xs text-slate-400 text-center px-4 sm:px-6 md:px-10 mt-4 md:mt-0">
+        <span className="flex items-center gap-2 justify-center bg-slate-950/40 md:bg-transparent p-2.5 md:p-0 rounded-xl border border-slate-800/40 md:border-0 hover:border-slate-700/50 transition">
+          <BookOpen className="h-4 w-4 text-blue-400 shrink-0" />
+          <span><strong className="text-blue-300 font-bold">10+</strong> Interactive Lessons</span>
         </span>
-        <span className="flex items-center gap-1.5">
-          <Code2 className="h-3.5 w-3.5 text-emerald-400" />
-          <strong className="text-emerald-300">6+</strong> Production Patterns
+        <span className="flex items-center gap-2 justify-center bg-slate-950/40 md:bg-transparent p-2.5 md:p-0 rounded-xl border border-slate-800/40 md:border-0 hover:border-slate-700/50 transition">
+          <Code2 className="h-4 w-4 text-emerald-400 shrink-0" />
+          <span><strong className="text-emerald-300 font-bold">6+</strong> Production Patterns</span>
         </span>
-        <span className="flex items-center gap-1.5">
-          <Trophy className="h-3.5 w-3.5 text-amber-400" />
-          <strong className="text-amber-300">5+</strong> Graded Missions
+        <span className="flex items-center gap-2 justify-center bg-slate-950/40 md:bg-transparent p-2.5 md:p-0 rounded-xl border border-slate-800/40 md:border-0 hover:border-slate-700/50 transition">
+          <Trophy className="h-4 w-4 text-amber-400 shrink-0" />
+          <span><strong className="text-amber-300 font-bold">5+</strong> Graded Missions</span>
         </span>
-        <span className="flex items-center gap-1.5">
-          <Check className="h-3.5 w-3.5 text-purple-400" />
-          <strong className="text-purple-300">100%</strong> Hands-On Practice
+        <span className="flex items-center gap-2 justify-center bg-slate-950/40 md:bg-transparent p-2.5 md:p-0 rounded-xl border border-slate-800/40 md:border-0 hover:border-slate-700/50 transition">
+          <Check className="h-4 w-4 text-purple-400 shrink-0" />
+          <span><strong className="text-purple-300 font-bold">100%</strong> Hands-On Practice</span>
         </span>
       </footer>
     </main>
