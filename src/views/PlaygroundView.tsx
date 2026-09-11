@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Play, RotateCcw, Sparkles, Columns2, Sliders, Save, Trash2,
   History, Target, Terminal, Bookmark, Check, ChevronDown, ChevronUp,
   Zap, Code2, ShieldAlert, PanelRightOpen, PanelRightClose, X,
-  Clock, BookmarkCheck
+  Clock, BookmarkCheck, Loader2
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { PromptQualityMeter } from "../components/PromptQualityMeter";
@@ -276,6 +276,34 @@ export const PlaygroundView: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const [presetLoadedName, setPresetLoadedName] = useState<string | null>(null);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+
+  // Auto-save logic
+  useEffect(() => {
+    const savedPrompt = localStorage.getItem("promptlab_playground_prompt_autosave");
+    const savedSys = localStorage.getItem("promptlab_playground_sys_autosave");
+    if (savedPrompt) {
+      setPrompt(savedPrompt);
+    }
+    if (savedSys) {
+      setSystemInstruction(savedSys);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!prompt) return;
+
+    setAutoSaveStatus("saving");
+    const timer = setTimeout(() => {
+      localStorage.setItem("promptlab_playground_prompt_autosave", prompt);
+      localStorage.setItem("promptlab_playground_sys_autosave", systemInstruction);
+      setAutoSaveStatus("saved");
+      const statusTimer = setTimeout(() => setAutoSaveStatus("idle"), 2000);
+      return () => clearTimeout(statusTimer);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [prompt, systemInstruction]);
 
   const handleInsertSnippet = (snippet: string) => setPrompt(prompt + snippet);
 
@@ -303,9 +331,19 @@ export const PlaygroundView: React.FC = () => {
       {/* Header & Sub Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 border-b border-slate-800 pb-3 sm:pb-4 w-full">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Terminal className="h-5 w-5 text-blue-400" />
             <h1 className="text-xl font-bold tracking-tight text-white">{t.playground.title}</h1>
+            {autoSaveStatus === "saving" && (
+              <span className="text-[10px] text-slate-500 flex items-center gap-1 bg-slate-900/50 border border-slate-800/80 px-2 py-0.5 rounded-full select-none">
+                <Loader2 className="h-2.5 w-2.5 animate-spin text-blue-500" /> Saving draft...
+              </span>
+            )}
+            {autoSaveStatus === "saved" && (
+              <span className="text-[10px] text-emerald-500 dark:text-emerald-400 flex items-center gap-1 font-medium bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full select-none animate-in fade-in duration-200">
+                <Check className="h-2.5 w-2.5 text-emerald-500" /> Draft auto-saved
+              </span>
+            )}
           </div>
           <p className="mt-0.5 sm:mt-1 text-xs text-slate-400">{t.playground.subtitle}</p>
         </div>

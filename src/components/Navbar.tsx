@@ -63,12 +63,15 @@ export const Navbar: React.FC = () => {
     selectedResourceFilter,
     setSelectedResourceFilter,
     language,
+    theme,
+    setTheme,
+    resumeCurriculum,
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchCategory, setSearchCategory] = useState<'all' | SearchItemType>('all');
+  const [searchCategory, setSearchCategory] = useState<'all' | SearchItemType | 'command'>('all');
   const [searchResults, setSearchResults] = useState<GlobalSearchItem[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -79,6 +82,141 @@ export const Navbar: React.FC = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const accountMenuRef = useRef<HTMLDivElement>(null);
 
+  // List of interactive system actions and navigation commands
+  const commandItems = React.useMemo(() => [
+    {
+      id: "cmd-nav-home",
+      title: "Go to Home Dashboard",
+      subtitle: "Navigate to your progress home overview",
+      type: "command" as const,
+      tab: "home" as NavTab,
+      category: "Navigation",
+      action: () => { setActiveTab("home"); setSearchOpen(false); }
+    },
+    {
+      id: "cmd-nav-curriculum",
+      title: "Go to Lesson Curriculum",
+      subtitle: "Browse module-by-module learning paths",
+      type: "command" as const,
+      tab: "curriculum" as NavTab,
+      category: "Navigation",
+      action: () => { setActiveTab("curriculum"); setSearchOpen(false); }
+    },
+    {
+      id: "cmd-nav-foundations",
+      title: "Go to Foundations Path",
+      subtitle: "Master the 10 core in-context engineering lessons",
+      type: "command" as const,
+      tab: "foundations" as NavTab,
+      category: "Navigation",
+      action: () => { setActiveTab("foundations"); setSearchOpen(false); }
+    },
+    {
+      id: "cmd-nav-playground",
+      title: "Go to AI Sandbox",
+      subtitle: "Interact and test prompt architectures live",
+      type: "command" as const,
+      tab: "playground" as NavTab,
+      category: "Navigation",
+      action: () => { setActiveTab("playground"); setSearchOpen(false); }
+    },
+    {
+      id: "cmd-nav-patterns",
+      title: "Go to Pattern Library",
+      subtitle: "Browse advanced structural templates and blueprints",
+      type: "command" as const,
+      tab: "patterns" as NavTab,
+      category: "Navigation",
+      action: () => { setActiveTab("patterns"); setSearchOpen(false); }
+    },
+    {
+      id: "cmd-nav-resources",
+      title: "Go to Resources & Glossary",
+      subtitle: "Lookup glossary terms and prompt definitions",
+      type: "command" as const,
+      tab: "resources" as NavTab,
+      category: "Navigation",
+      action: () => { setActiveTab("resources"); setSearchOpen(false); }
+    },
+    {
+      id: "cmd-nav-certification",
+      title: "Go to Assessment & Certification",
+      subtitle: "Take the professional exam to unlock your credential",
+      type: "command" as const,
+      tab: "certification" as NavTab,
+      category: "Navigation",
+      action: () => { setActiveTab("certification"); setSearchOpen(false); }
+    },
+    {
+      id: "cmd-nav-profile",
+      title: "Go to User Profile",
+      subtitle: "View earned badges, streak, certificate & settings",
+      type: "command" as const,
+      tab: "profile" as NavTab,
+      category: "Navigation",
+      action: () => { setActiveTab("profile"); setSearchOpen(false); }
+    },
+    {
+      id: "cmd-theme-dark",
+      title: "Switch Theme: Dark Mode 🌙",
+      subtitle: "Change appearance to calm high-contrast dark palette",
+      type: "command" as const,
+      tab: activeTab,
+      category: "Theme Management",
+      action: () => { setTheme("dark"); setSearchOpen(false); }
+    },
+    {
+      id: "cmd-theme-light",
+      title: "Switch Theme: Light Mode ☀️",
+      subtitle: "Change appearance to bright clean canvas layout",
+      type: "command" as const,
+      tab: activeTab,
+      category: "Theme Management",
+      action: () => { setTheme("light"); setSearchOpen(false); }
+    },
+    {
+      id: "cmd-theme-system",
+      title: "Switch Theme: Use System Preference 🖥️",
+      subtitle: "Adapt app styling to your operating system theme",
+      type: "command" as const,
+      tab: activeTab,
+      category: "Theme Management",
+      action: () => { setTheme("system"); setSearchOpen(false); }
+    },
+    {
+      id: "cmd-action-resume",
+      title: "Action: Resume Current Lesson 🚀",
+      subtitle: "Instantly jump back to your active training curriculum module",
+      type: "command" as const,
+      tab: "curriculum" as NavTab,
+      category: "Learning Action",
+      action: () => { 
+        if (resumeCurriculum) {
+          resumeCurriculum();
+        } else {
+          setActiveTab("curriculum");
+        }
+        setSearchOpen(false);
+      }
+    },
+    {
+      id: "cmd-action-clear-playground",
+      title: "Action: Reset Sandbox Inputs 🧹",
+      subtitle: "Clear the playground textareas and template states",
+      type: "command" as const,
+      tab: "playground" as NavTab,
+      category: "Sandbox Action",
+      action: () => {
+        setPrompt("");
+        setSystemInstruction("");
+        localStorage.removeItem("promptlab_playground_prompt_autosave");
+        localStorage.removeItem("promptlab_playground_sys_autosave");
+        setActiveTab("playground");
+        setSearchOpen(false);
+      }
+    }
+  ], [setActiveTab, setTheme, activeTab, setPrompt, setSystemInstruction, resumeCurriculum]);
+
   // Global search index built across all academy lessons, patterns, resources, missions
   const globalIndex = React.useMemo(() => {
     return buildGlobalSearchIndex(language);
@@ -86,6 +224,21 @@ export const Navbar: React.FC = () => {
 
   // Execute global search whenever query or category changes
   useEffect(() => {
+    if (searchCategory === 'command') {
+      const q = searchQuery.trim().toLowerCase().replace(/^>/, '');
+      const filteredCommands = q
+        ? commandItems.filter(cmd => 
+            cmd.title.toLowerCase().includes(q) || 
+            cmd.subtitle.toLowerCase().includes(q) || 
+            cmd.category.toLowerCase().includes(q)
+          )
+        : commandItems;
+      setSearchResults(filteredCommands as any);
+      setSelectedIndex(0);
+      setIsSearching(false);
+      return;
+    }
+
     if (!searchQuery.trim() || searchQuery.trim().length < 2) {
       setSearchResults([]);
       setSelectedIndex(0);
@@ -94,11 +247,23 @@ export const Navbar: React.FC = () => {
     }
 
     setIsSearching(true);
-    const results = queryGlobalSearch(globalIndex, searchQuery, searchCategory, 12);
-    setSearchResults(results);
+    const results = queryGlobalSearch(globalIndex, searchQuery, searchCategory === 'all' ? 'all' : searchCategory, 12);
+    
+    // Also inject commands if category is 'all' and keywords match
+    if (searchCategory === 'all') {
+      const q = searchQuery.trim().toLowerCase();
+      const matchedCmds = commandItems.filter(cmd =>
+        cmd.title.toLowerCase().includes(q) ||
+        cmd.subtitle.toLowerCase().includes(q) ||
+        cmd.category.toLowerCase().includes(q)
+      );
+      setSearchResults([...(matchedCmds as any), ...results]);
+    } else {
+      setSearchResults(results);
+    }
     setSelectedIndex(0);
     setIsSearching(false);
-  }, [searchQuery, searchCategory, globalIndex]);
+  }, [searchQuery, searchCategory, globalIndex, commandItems]);
 
   // Keyboard shortcut listener (⌘K or Ctrl+K)
   useEffect(() => {
@@ -150,7 +315,13 @@ export const Navbar: React.FC = () => {
     };
   }, []);
 
-  const handleSelectSearchResult = (item: GlobalSearchItem) => {
+  const handleSelectSearchResult = (item: any) => {
+    if (item.type === 'command' && item.action) {
+      item.action();
+      setSearchOpen(false);
+      setSearchQuery("");
+      return;
+    }
     setActiveTab(item.tab);
     if (item.type === 'lesson' && item.lessonId && setActiveLessonId) {
       setActiveLessonId(item.lessonId);
@@ -212,8 +383,10 @@ export const Navbar: React.FC = () => {
     }
   };
 
-  const getItemIcon = (type: SearchItemType) => {
+  const getItemIcon = (type: any) => {
     switch (type) {
+      case 'command':
+        return <Command className="h-3.5 w-3.5 text-blue-400" />;
       case 'lesson':
         return <BookOpen className="h-3.5 w-3.5 text-blue-400" />;
       case 'foundation':
@@ -229,8 +402,10 @@ export const Navbar: React.FC = () => {
     }
   };
 
-  const getItemBadgeClass = (type: SearchItemType) => {
+  const getItemBadgeClass = (type: any) => {
     switch (type) {
+      case 'command':
+        return 'bg-blue-950/70 text-blue-300 border-blue-800/60';
       case 'lesson':
         return 'bg-blue-950/70 text-blue-300 border-blue-800/60';
       case 'foundation':
@@ -246,8 +421,9 @@ export const Navbar: React.FC = () => {
     }
   };
 
-  const SEARCH_CATEGORIES: { id: 'all' | SearchItemType; label: string }[] = [
+  const SEARCH_CATEGORIES: { id: 'all' | SearchItemType | 'command'; label: string }[] = [
     { id: 'all', label: 'All' },
+    { id: 'command', label: 'Commands' },
     { id: 'lesson', label: 'Lessons' },
     { id: 'pattern', label: 'Patterns' },
     { id: 'resource', label: 'Resources' },
@@ -425,25 +601,50 @@ export const Navbar: React.FC = () => {
                     )
                   ) : (
                     /* Suggestions & Quick Links when query is empty */
-                    <div className="p-3">
-                      <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-2.5">
-                        <span>Popular Academy Topics</span>
-                        <span className="text-slate-400">Quick Filter</span>
+                    <div className="p-3 space-y-4">
+                      <div>
+                        <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-2">
+                          <span>Popular Academy Topics</span>
+                          <span className="text-slate-400">Quick Filter</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {POPULAR_QUICK_SEARCHES.map((qs) => (
+                            <button
+                              key={qs.label}
+                              onClick={() => {
+                                setSearchQuery(qs.query);
+                                searchInputRef.current?.focus();
+                              }}
+                              className="text-left px-2.5 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 text-[11px] text-slate-300 hover:text-white transition-all flex items-center gap-1.5 group"
+                            >
+                              <span className="h-1.5 w-1.5 rounded-full bg-blue-400 group-hover:scale-125 transition-transform" />
+                              <span>{qs.label}</span>
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {POPULAR_QUICK_SEARCHES.map((qs) => (
-                          <button
-                            key={qs.label}
-                            onClick={() => {
-                              setSearchQuery(qs.query);
-                              searchInputRef.current?.focus();
-                            }}
-                            className="text-left px-2.5 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 text-[11px] text-slate-300 hover:text-white transition-all flex items-center gap-1.5 group"
-                          >
-                            <span className="h-1.5 w-1.5 rounded-full bg-blue-400 group-hover:scale-125 transition-transform" />
-                            <span>{qs.label}</span>
-                          </button>
-                        ))}
+
+                      <div className="border-t border-slate-800/60 pt-3">
+                        <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-2">
+                          <span>Quick Actions &amp; Navigation Commands</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {commandItems.slice(0, 8).map((cmd) => (
+                            <button
+                              key={cmd.id}
+                              onClick={cmd.action}
+                              className="text-left p-2 rounded-xl bg-slate-900/40 hover:bg-slate-900/90 border border-slate-800/60 text-xs text-slate-300 hover:text-white transition-all flex items-center gap-2 group"
+                            >
+                              <div className="p-1 rounded bg-slate-950 border border-slate-800/80">
+                                <Command className="h-3.5 w-3.5 text-blue-400" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="font-semibold text-slate-200 truncate group-hover:text-blue-300">{cmd.title}</p>
+                                <p className="text-[10px] text-slate-500 truncate">{cmd.subtitle}</p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -520,7 +721,17 @@ export const Navbar: React.FC = () => {
           </nav>
 
           {/* Right Side Controls */}
-          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            {userProgress && (
+              <div 
+                title={`${userProgress.streakDays} Day Activity Streak!`}
+                onClick={() => setActiveTab("profile")}
+                className="flex items-center gap-1.5 bg-orange-500/10 border border-orange-500/25 hover:border-orange-500/40 hover:bg-orange-500/20 rounded-full px-2 py-0.5 sm:px-2.5 sm:py-1 text-xs font-bold text-orange-400 cursor-pointer transition select-none active:scale-[0.95]"
+              >
+                <Flame className="h-3.5 w-3.5 fill-orange-500 text-orange-400 animate-pulse shrink-0" />
+                <span className="font-mono text-[11px] sm:text-xs leading-none">{userProgress.streakDays}</span>
+              </div>
+            )}
             <div className="hidden md:flex items-center gap-1 sm:gap-2">
               <NetworkStatusBadge />
               <ThemeToggle />

@@ -26,6 +26,7 @@ import { NetworkStatusToast } from "./components/NetworkStatusIndicator";
 import { SessionInactivityWarning } from "./components/SessionInactivityWarning";
 import { GlobalShortcutsHandler } from "./components/GlobalShortcutsHandler";
 import { AchievementNotificationToast } from "./components/AchievementNotificationToast";
+import { Breadcrumbs } from "./components/Breadcrumbs";
 
 const MainContent: React.FC = () => {
   const { activeTab } = useApp();
@@ -63,6 +64,7 @@ const AppShell: React.FC = () => {
   return (
     <div className="flex min-h-screen flex-col w-full overflow-x-clip bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-blue-600 selection:text-white font-sans antialiased">
       {!hideGlobalChrome && <Navbar />}
+      {!hideGlobalChrome && <Breadcrumbs />}
       <MainContent />
       {!hideGlobalChrome && <Footer />}
     </div>
