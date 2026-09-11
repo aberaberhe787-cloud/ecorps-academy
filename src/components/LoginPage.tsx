@@ -177,7 +177,7 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <main className="login-page min-h-screen md:min-h-[100dvh] bg-[#050a19] px-4 py-6 sm:px-8 sm:py-12 md:px-10 md:py-8 text-slate-100 flex flex-col justify-between w-full max-w-full overflow-x-hidden">
+    <main className="login-page min-h-[100dvh] bg-[#050a19] px-4 py-6 sm:px-8 sm:py-12 md:px-10 md:py-8 text-slate-100 flex flex-col justify-between w-full max-w-full overflow-x-hidden">
       {/* Mobile Top Brand Bar - Compact branding on small screens (< 768px) */}
       <header className="md:hidden flex items-center justify-between mb-4 px-0 w-full max-w-md mx-auto">
         <div className="flex items-center gap-2">

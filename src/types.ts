@@ -213,6 +213,7 @@ export interface UserProgress {
   lastLessonId?: string;
   lastModuleId?: string;
   curriculumProgressPercent?: number;
+  promptsEngineeredCount?: number;
 }
 
 export interface GlossaryTerm {

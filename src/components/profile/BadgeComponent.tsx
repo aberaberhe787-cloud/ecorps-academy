@@ -22,6 +22,9 @@ const ICON_MAP: Record<string, React.FC<any>> = {
   'level-up': Award,
   'halfway-scholar': Award,
   'prompt-architect': Trophy,
+  'prompts-10': Zap,
+  'prompts-50': Target,
+  'prompts-100': Cpu,
   'ai-master': Cpu,
   'default': Star,
 };

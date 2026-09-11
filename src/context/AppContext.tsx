@@ -165,7 +165,8 @@ const initialProgress: UserProgress = {
   streakDays: 1,
   lastActivityDate: getUtcDateString(),
   loginHistory: [getUtcDateString()],
-  achievements: []
+  achievements: [],
+  promptsEngineeredCount: 0
 };
 
 function getProgressFingerprint(p: UserProgress): string {
@@ -178,6 +179,7 @@ function getProgressFingerprint(p: UserProgress): string {
     prompts: p.savedCustomPrompts.map(x => ({ id: x.id, title: x.title, prompt: x.prompt })),
     bookmarks: [...p.bookmarkedPatterns].sort(),
     achievements: p.achievements.map(x => x.id).sort(),
+    promptsEngineeredCount: p.promptsEngineeredCount || 0,
   });
 }
 
@@ -492,6 +494,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         bookmarkedPatterns: progressToPersist.bookmarkedPatterns,
         savedCustomPrompts: progressToPersist.savedCustomPrompts,
         achievements: progressToPersist.achievements,
+        promptsEngineeredCount: progressToPersist.promptsEngineeredCount || 0,
         // Also save progress object for backward-compatibility with progressUtils
         progress: {
           ...progressToPersist,
@@ -905,6 +908,13 @@ Provide:
 
           const finalStreak = streakResult.streak;
 
+          const promptsEngineeredCount = Math.max(
+            typeof data.promptsEngineeredCount === "number" ? data.promptsEngineeredCount : 0,
+            typeof progressNested?.promptsEngineeredCount === "number" ? progressNested.promptsEngineeredCount : 0,
+            cachedState.promptsEngineeredCount || 0,
+            legacyCached.promptsEngineeredCount || 0
+          );
+
           const rawLoginHistory = Array.isArray(data.loginHistory)
             ? data.loginHistory
             : (Array.isArray(progressNested.loginHistory) ? progressNested.loginHistory : []);
@@ -933,6 +943,7 @@ Provide:
             lastLessonId: data.lastLessonId || progressNested.lastLessonId || cachedState.lastLessonId || undefined,
             lastModuleId: data.lastModuleId || progressNested.lastModuleId || cachedState.lastModuleId || undefined,
             curriculumProgressPercent: Math.min(100, Math.round((mergedLessons.length / 16) * 100)),
+            promptsEngineeredCount,
           };
 
           // Check for any milestones that should be unlocked
@@ -1022,6 +1033,7 @@ Provide:
             bookmarkedPatterns: initialUserProgress.bookmarkedPatterns,
             savedCustomPrompts: initialUserProgress.savedCustomPrompts,
             achievements: initialUserProgress.achievements,
+            promptsEngineeredCount: initialUserProgress.promptsEngineeredCount || 0,
             progress: initialUserProgress,
           };
 
@@ -1349,11 +1361,12 @@ Provide:
         }
       }
 
-      // Award XP only on successful real execution
+      // Award XP and increment promptsEngineeredCount on successful real execution
       if (status === "success" && !isolated) {
-        setUserProgress((prev) => ({
+        setUserProgress((prev) => processUserActivity({
           ...prev,
           xp: prev.xp + 5,
+          promptsEngineeredCount: (prev.promptsEngineeredCount || 0) + 1,
         }));
       }
     }
@@ -1478,6 +1491,13 @@ Provide:
 
     await Promise.all([fetchA(), fetchB()]);
     setIsExecuting(false);
+
+    // Increment promptsEngineeredCount when comparison completes
+    setUserProgress((prev) => processUserActivity({
+      ...prev,
+      xp: prev.xp + 10,
+      promptsEngineeredCount: (prev.promptsEngineeredCount || 0) + 2,
+    }));
   };
 
   const clearOutput = () => {
@@ -1551,14 +1571,21 @@ Provide:
           const completed = isAlreadyCompleted
             ? prev.completedMissions
             : [...prev.completedMissions, missionId];
-          return {
+          return processUserActivity({
             ...prev,
             completedMissions: completed,
             missionScores: { ...prev.missionScores, [missionId]: Math.max(prev.missionScores[missionId] || 0, score) },
             missionEvidence: { ...(prev.missionEvidence || {}), [missionId]: submittedPrompt },
             xp: isAlreadyCompleted ? prev.xp : prev.xp + xpEarned,
-          };
+            promptsEngineeredCount: (prev.promptsEngineeredCount || 0) + 1,
+          });
         });
+      } else {
+        setUserProgress((prev) => processUserActivity({
+          ...prev,
+          xp: prev.xp + xpEarned,
+          promptsEngineeredCount: (prev.promptsEngineeredCount || 0) + 1,
+        }));
       }
 
       setIsEvaluatingMission(false);

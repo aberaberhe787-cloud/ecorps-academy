@@ -282,28 +282,33 @@ export const PlaygroundView: React.FC = () => {
   useEffect(() => {
     const savedPrompt = localStorage.getItem("promptlab_playground_prompt_autosave");
     const savedSys = localStorage.getItem("promptlab_playground_sys_autosave");
+    const savedCompB = localStorage.getItem("promptlab_playground_comp_b_autosave");
     if (savedPrompt) {
       setPrompt(savedPrompt);
     }
     if (savedSys) {
       setSystemInstruction(savedSys);
     }
+    if (savedCompB) {
+      setComparisonPromptB(savedCompB);
+    }
   }, []);
 
   useEffect(() => {
-    if (!prompt) return;
+    if (!prompt && !systemInstruction && !comparisonPromptB) return;
 
     setAutoSaveStatus("saving");
     const timer = setTimeout(() => {
       localStorage.setItem("promptlab_playground_prompt_autosave", prompt);
       localStorage.setItem("promptlab_playground_sys_autosave", systemInstruction);
+      localStorage.setItem("promptlab_playground_comp_b_autosave", comparisonPromptB);
       setAutoSaveStatus("saved");
       const statusTimer = setTimeout(() => setAutoSaveStatus("idle"), 2000);
       return () => clearTimeout(statusTimer);
     }, 1500);
 
     return () => clearTimeout(timer);
-  }, [prompt, systemInstruction]);
+  }, [prompt, systemInstruction, comparisonPromptB]);
 
   const handleInsertSnippet = (snippet: string) => setPrompt(prompt + snippet);
 

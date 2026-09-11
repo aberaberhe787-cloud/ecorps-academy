@@ -12,7 +12,7 @@ export interface MilestoneDefinition {
 export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
   {
     id: "first-lesson",
-    title: "First Lesson Finished",
+    title: "First Lesson Completed",
     description: "Successfully mastered your first Prompt Engineering lesson.",
     icon: "first-prompt",
     category: "curriculum",
@@ -95,6 +95,30 @@ export const MILESTONE_DEFINITIONS: MilestoneDefinition[] = [
     icon: "ai-master",
     category: "mastery",
     check: (p) => (p.completedLessons?.length || 0) >= 16,
+  },
+  {
+    id: "prompts-10",
+    title: "10 Prompts Engineered",
+    description: "Designed and executed 10 prompts across the sandbox and challenges.",
+    icon: "first-prompt",
+    category: "tools",
+    check: (p) => (p.promptsEngineeredCount || 0) >= 10,
+  },
+  {
+    id: "prompts-50",
+    title: "50 Prompts Engineered",
+    description: "Designed and executed 50 prompts across the sandbox and challenges.",
+    icon: "sandbox-2",
+    category: "tools",
+    check: (p) => (p.promptsEngineeredCount || 0) >= 50,
+  },
+  {
+    id: "prompts-100",
+    title: "100 Prompts Engineered",
+    description: "Designed and executed 100 prompts across the sandbox and challenges.",
+    icon: "ai-master",
+    category: "mastery",
+    check: (p) => (p.promptsEngineeredCount || 0) >= 100,
   },
 ];
 
