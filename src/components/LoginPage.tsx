@@ -177,9 +177,9 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <main className="login-page min-h-screen bg-[#050a19] px-2.5 py-2 sm:px-6 sm:py-5 md:py-6 lg:px-10 lg:py-8 text-slate-100 flex flex-col justify-between w-full max-w-full overflow-x-hidden">
+    <main className="login-page min-h-screen bg-[#050a19] px-0 sm:px-6 py-2 sm:py-5 md:py-6 lg:px-10 lg:py-8 text-slate-100 flex flex-col justify-between w-full max-w-full overflow-x-hidden">
       {/* Mobile Top Brand Bar - Compact branding on small screens (< 768px) */}
-      <header className="md:hidden flex items-center justify-between mb-2 px-0.5 w-full max-w-md mx-auto">
+      <header className="md:hidden flex items-center justify-between mb-2 px-4 sm:px-0 w-full max-w-md mx-auto">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-400/50 bg-blue-950/80 shadow-sm shadow-blue-950/50">
             <WandSparkles className="h-4 w-4 text-blue-400" />
@@ -196,14 +196,14 @@ export const LoginPage: React.FC = () => {
       </header>
 
       {/* Main Responsive Container: Clean unified card on mobile (<768px), side-by-side 2-column grid on desktop (>=768px) */}
-      <div className="mx-auto w-full max-w-md md:max-w-[1180px] md:grid md:grid-cols-2 rounded-2xl md:rounded-[24px] border border-slate-800/80 bg-[#080e20]/95 shadow-2xl shadow-black/40 overflow-hidden md:min-h-[580px] my-auto">
+      <div className="mx-auto w-full max-w-md md:max-w-[1180px] md:grid md:grid-cols-2 rounded-none sm:rounded-2xl md:rounded-[24px] border-x-0 sm:border border-slate-800/80 bg-[#080e20]/95 shadow-2xl shadow-black/40 overflow-hidden md:min-h-[580px] my-auto">
         
         {/* SIGN-IN FORM: Focused, clean single card on mobile; right column on desktop */}
         <section
           id="auth-form-section"
-          className="w-full md:order-2 relative flex items-center justify-center p-3 sm:p-6 md:p-8 lg:p-10"
+          className="w-full md:order-2 relative flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-10"
         >
-          <div className="w-full max-w-full sm:max-w-md rounded-xl md:rounded-2xl md:border md:border-indigo-500/40 md:bg-[#0c142a]/95 p-0.5 sm:p-2 md:p-7 md:shadow-[0_0_35px_rgba(37,99,235,.08)]">
+          <div className="w-full max-w-full sm:max-w-md rounded-xl md:rounded-2xl md:border md:border-indigo-500/40 md:bg-[#0c142a]/95 p-0 sm:p-2 md:p-7 md:shadow-[0_0_35px_rgba(37,99,235,.08)]">
             <div className="text-center">
               <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-slate-100">
                 {isSignUp ? 'Create your account' : 'Welcome back'}
@@ -451,7 +451,7 @@ export const LoginPage: React.FC = () => {
       </div>
 
       {/* Footer Features Bar */}
-      <footer className="mx-auto flex w-full max-w-[1180px] flex-wrap items-center justify-center gap-x-3 sm:gap-x-4 gap-y-1.5 py-2 sm:py-3 text-[10px] sm:text-xs text-slate-500 text-center px-1">
+      <footer className="mx-auto flex w-full max-w-[1180px] flex-wrap items-center justify-center gap-x-3 sm:gap-x-4 gap-y-1.5 py-2 sm:py-3 text-[10px] sm:text-xs text-slate-500 text-center px-4 sm:px-1">
         <span className="flex items-center gap-1.5">
           <BookOpen className="h-3.5 w-3.5 text-blue-400" />
           <strong className="text-blue-300">10+</strong> Interactive Lessons

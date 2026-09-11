@@ -14,6 +14,7 @@ import { TokenVisualizer } from "../components/TokenVisualizer";
 import { BatchRunner } from "../components/BatchRunner";
 import { JsonValidator } from "../components/JsonValidator";
 import { CtfSimulator } from "../components/CtfSimulator";
+import { Tooltip } from "../components/Tooltip";
 
 const STARTER_PRESETS = [
   {
@@ -417,8 +418,9 @@ export const PlaygroundView: React.FC = () => {
               {/* Editor Header */}
               <div className="flex items-center justify-between border-b border-slate-800 bg-slate-950/70 px-3 sm:px-4 py-2 sm:py-2.5">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-semibold text-slate-300">
+                  <span className="font-mono text-xs font-semibold text-slate-300 flex items-center gap-1.5">
                     {isComparisonMode ? "Variant A — Engineered" : "User Prompt Input"}
+                    <Tooltip content={isComparisonMode ? "Your optimized, structure-aligned prompt using engineering patterns." : "Input your primary prompt template to execute against the active LLM."} />
                   </span>
                   <span className="text-[11px] text-slate-500 font-mono">{prompt.length} chars</span>
                 </div>
@@ -452,9 +454,12 @@ export const PlaygroundView: React.FC = () => {
               {/* Collapsible System Prompt */}
               {showSystemPrompt && (
                 <div className="border-b border-slate-800 bg-slate-950/90 p-3">
-                  <label className="text-[11px] font-semibold text-slate-400 block mb-1">
-                    System Instruction (Privileged Rules)
-                  </label>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="text-[11px] font-semibold text-slate-400">
+                      System Instruction (Privileged Rules)
+                    </span>
+                    <Tooltip content="Sets foundational guidelines, safety boundaries, or a persona that the model must strictly obey." />
+                  </div>
                   <textarea
                     id="system-prompt-input"
                     rows={2}
@@ -470,8 +475,11 @@ export const PlaygroundView: React.FC = () => {
               {showParameters && (
                 <div className="border-b border-slate-800 bg-slate-950/90 p-3 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div>
-                    <div className="flex justify-between font-mono text-slate-400 mb-1">
-                      <span>Temperature:</span>
+                    <div className="flex justify-between font-mono text-slate-400 mb-1 items-center">
+                      <div className="flex items-center gap-1.5">
+                        <span>Temperature:</span>
+                        <Tooltip content="Controls response randomness. Lower values are precise and deterministic; higher values are creative." position="top" />
+                      </div>
                       <span className="text-blue-400 font-bold">{temperature.toFixed(2)}</span>
                     </div>
                     <input id="temperature-slider" type="range" min="0.0" max="1.0" step="0.05"
@@ -482,8 +490,11 @@ export const PlaygroundView: React.FC = () => {
                     </div>
                   </div>
                   <div>
-                    <div className="flex justify-between font-mono text-slate-400 mb-1">
-                      <span>Top-P:</span>
+                    <div className="flex justify-between font-mono text-slate-400 mb-1 items-center">
+                      <div className="flex items-center gap-1.5">
+                        <span>Top-P:</span>
+                        <Tooltip content="Nucleus sampling. Filters word pool to cumulative probability. 1.0 considers all words; 0.1 only the top 10% most probable." position="top" />
+                      </div>
                       <span className="text-blue-400 font-bold">{topP.toFixed(2)}</span>
                     </div>
                     <input id="top-p-slider" type="range" min="0.1" max="1.0" step="0.05"
@@ -561,7 +572,10 @@ export const PlaygroundView: React.FC = () => {
             {isComparisonMode && (
               <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-4 space-y-2.5 sm:space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                  <span className="font-mono text-xs font-semibold text-rose-400">Variant B — Baseline / Naive</span>
+                  <span className="font-mono text-xs font-semibold text-rose-400 flex items-center gap-1.5">
+                    Variant B — Baseline / Naive
+                    <Tooltip content="The control variant. Input a raw, conversational, or un-engineered prompt here to contrast performance." />
+                  </span>
                   <span className="text-[11px] text-slate-500 font-mono">{comparisonPromptB.length} chars</span>
                 </div>
                 <textarea
