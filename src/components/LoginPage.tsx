@@ -26,12 +26,11 @@ import {
   getRedirectResult,
   setPersistence,
   browserLocalPersistence,
-  browserSessionPersistence,
   sendPasswordResetEmail,
   updateProfile,
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
-import { recordUserActivity, consumeSessionExpiredNotice } from '../lib/sessionManager';
+import { recordUserActivity } from '../lib/sessionManager';
 
 function getAuthErrorMessage(authError: any): string {
   const code = authError?.code;
@@ -71,11 +70,6 @@ export const LoginPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [resetSuccess, setResetSuccess] = useState('');
-  const [sessionNotice, setSessionNotice] = useState('');
-
-  useEffect(() => {
-    // No session expiry notice needed
-  }, []);
 
   useEffect(() => {
     getRedirectResult(auth).then((result) => {
@@ -98,7 +92,6 @@ export const LoginPage: React.FC = () => {
 
     setError('');
     setResetSuccess('');
-    setSessionNotice('');
     setIsSubmitting(true);
     recordUserActivity();
 
@@ -132,7 +125,6 @@ export const LoginPage: React.FC = () => {
   const handleProviderAuth = async (provider: GoogleAuthProvider | GithubAuthProvider) => {
     setError('');
     setResetSuccess('');
-    setSessionNotice('');
     setIsSubmitting(true);
     recordUserActivity();
 
@@ -177,7 +169,7 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <main className="login-page min-h-dvh md:min-h-[100dvh] bg-[#050a19] p-3 sm:p-6 md:p-8 lg:p-10 text-slate-100 flex flex-col justify-start md:justify-center items-center w-full max-w-full overflow-x-hidden">
+    <main className="login-page min-h-dvh bg-[#050a19] p-3 sm:p-6 md:p-8 lg:p-10 text-slate-100 flex flex-col justify-start md:justify-center items-center w-full max-w-full overflow-x-hidden">
       {/* Mobile Top Brand Bar - Compact branding on small screens (< 768px) */}
       <header className="md:hidden flex items-center justify-between mb-6 px-0 w-full max-w-md mx-auto">
         <div className="flex items-center gap-2">
@@ -196,7 +188,7 @@ export const LoginPage: React.FC = () => {
       </header>
 
       {/* Main Responsive Container: Clean unified card on mobile (<768px), side-by-side 2-column grid on desktop (>=768px) */}
-      <div className="mx-auto w-full max-w-md md:max-w-[1180px] flex flex-col md:grid md:grid-cols-2 rounded-2xl md:rounded-[24px] border border-slate-800/80 bg-[#080e20]/95 shadow-2xl shadow-black/40 overflow-hidden h-auto md:min-h-[580px] my-4 md:my-auto">
+      <div className="mx-auto w-full max-w-md md:max-w-[1180px] flex flex-col md:grid md:grid-cols-2 rounded-2xl md:rounded-[24px] border border-slate-800/80 bg-[#080e20]/95 shadow-2xl shadow-black/40 overflow-hidden my-4 md:my-auto">
         
         {/* SIGN-IN FORM: Focused, clean single card on mobile; right column on desktop */}
         <section
@@ -212,13 +204,6 @@ export const LoginPage: React.FC = () => {
                 {isSignUp ? 'Start mastering prompt engineering & AI systems' : 'Sign in to continue your AI learning journey'}
               </p>
             </div>
-
-            {sessionNotice && (
-              <div className="mt-2.5 sm:mt-3 flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-2 text-xs text-amber-300">
-                <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-400" />
-                <span>{sessionNotice}</span>
-              </div>
-            )}
 
             {resetSuccess && (
               <div className="mt-2.5 sm:mt-3 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-2 text-xs text-emerald-300">
@@ -472,4 +457,3 @@ export const LoginPage: React.FC = () => {
     </main>
   );
 };
-
