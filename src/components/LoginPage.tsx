@@ -177,7 +177,7 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <main className="login-page min-h-dvh md:min-h-[100dvh] bg-[#050a19] p-4 sm:p-6 md:p-8 lg:p-10 text-slate-100 flex flex-col justify-start md:justify-center items-center w-full max-w-full overflow-x-hidden">
+    <main className="login-page min-h-dvh md:min-h-[100dvh] bg-[#050a19] p-3 sm:p-6 md:p-8 lg:p-10 text-slate-100 flex flex-col justify-start md:justify-center items-center w-full max-w-full overflow-x-hidden">
       {/* Mobile Top Brand Bar - Compact branding on small screens (< 768px) */}
       <header className="md:hidden flex items-center justify-between mb-6 px-0 w-full max-w-md mx-auto">
         <div className="flex items-center gap-2">
@@ -196,14 +196,14 @@ export const LoginPage: React.FC = () => {
       </header>
 
       {/* Main Responsive Container: Clean unified card on mobile (<768px), side-by-side 2-column grid on desktop (>=768px) */}
-      <div className="mx-auto w-full max-w-md md:max-w-[1180px] md:grid md:grid-cols-2 rounded-2xl md:rounded-[24px] border border-slate-800/80 bg-[#080e20]/95 shadow-2xl shadow-black/40 overflow-hidden h-auto md:min-h-[580px] my-4 md:my-auto">
+      <div className="mx-auto w-full max-w-md md:max-w-[1180px] flex flex-col md:grid md:grid-cols-2 rounded-2xl md:rounded-[24px] border border-slate-800/80 bg-[#080e20]/95 shadow-2xl shadow-black/40 overflow-hidden h-auto md:min-h-[580px] my-4 md:my-auto">
         
         {/* SIGN-IN FORM: Focused, clean single card on mobile; right column on desktop */}
         <section
           id="auth-form-section"
-          className="w-full md:order-2 relative flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-10"
+          className="w-full md:order-2 relative flex items-center justify-center p-3 sm:p-6 md:p-8 lg:p-10"
         >
-          <div className="w-full max-w-full sm:max-w-md rounded-xl md:rounded-2xl md:border md:border-indigo-500/40 md:bg-[#0c142a]/95 p-2 sm:p-4 md:p-7 md:shadow-[0_0_35px_rgba(37,99,235,.08)]">
+          <div className="w-full max-w-full sm:max-w-md rounded-xl md:rounded-2xl md:border md:border-indigo-500/40 md:bg-[#0c142a]/95 p-3 sm:p-4 md:p-7 md:shadow-[0_0_35px_rgba(37,99,235,.08)]">
             <div className="text-center">
               <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-slate-100">
                 {isSignUp ? 'Create your account' : 'Welcome back'}
@@ -374,7 +374,7 @@ export const LoginPage: React.FC = () => {
         {/* MARKETING CONTENT: Displayed on both mobile and desktop with responsive column layouts */}
         <section
           id="marketing-info-section"
-          className="hidden md:flex md:order-1 relative flex-col justify-between overflow-hidden p-6 sm:p-8 md:p-8 lg:p-10 border-t md:border-t-0 md:border-r border-slate-800/60"
+          className="flex md:order-1 relative flex-col justify-between overflow-hidden p-4 sm:p-8 md:p-8 lg:p-10 border-t md:border-t-0 md:border-r border-slate-800/60"
         >
           <div className="pointer-events-none absolute -bottom-32 -left-10 h-80 w-72 sm:w-96 md:w-[520px] max-w-full rounded-full bg-blue-600/10 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 left-0 h-32 w-full opacity-50 [background-image:linear-gradient(135deg,transparent_45%,rgba(37,99,235,.3)_46%,transparent_47%),linear-gradient(45deg,transparent_45%,rgba(124,58,237,.25)_46%,transparent_47%)] [background-size:38px_38px]" />
