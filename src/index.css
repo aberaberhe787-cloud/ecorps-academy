@@ -5,10 +5,29 @@
   :root {
     --bg-primary: #ffffff;
     --text-primary: #0f172a;
+
+    /* Form input focus & feedback CSS variables for mobile keyboards & accessibility */
+    --input-focus-border: #3b82f6;
+    --input-focus-ring: #3b82f6;
+    --input-focus-ring-glow: rgba(59, 130, 246, 0.4);
+    --input-focus-ring-width: 3px;
+    --input-focus-bg: rgba(2, 6, 23, 0.9);
+    --input-error-border: #f43f5e;
+    --input-error-ring-glow: rgba(244, 63, 94, 0.38);
+    --input-success-border: #10b981;
   }
   .dark {
     --bg-primary: #020617;
     --text-primary: #f8fafc;
+
+    --input-focus-border: #60a5fa;
+    --input-focus-ring: #3b82f6;
+    --input-focus-ring-glow: rgba(59, 130, 246, 0.45);
+    --input-focus-ring-width: 3px;
+    --input-focus-bg: rgba(2, 6, 23, 0.92);
+    --input-error-border: #f87171;
+    --input-error-ring-glow: rgba(248, 113, 113, 0.42);
+    --input-success-border: #34d399;
   }
   
   html {
@@ -93,22 +112,224 @@ body {
   max-width: 100%;
   box-sizing: border-box;
   border: 1px solid rgb(51 65 85 / 0.9);
-  border-radius: 0.5rem;
-  background: rgb(2 6 23 / 0.55);
-  padding: 0.65rem 0.65rem 0.65rem 2.25rem;
+  border-radius: 0.625rem;
+  background: rgb(2 6 23 / 0.65);
+  padding: 0.65rem 0.75rem 0.65rem 2.65rem;
   color: #e2e8f0;
-  font-size: 0.75rem;
+  font-size: 1rem; /* 16px on mobile prevents iOS Safari auto-zoom */
   outline: none;
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+@media (min-width: 640px) {
+  .login-input {
+    font-size: 0.875rem; /* 14px on sm */
+  }
+}
+
+/* Dedicated Media Queries for Small (< 768px), Tablet (768px - 1024px), and Large (> 1024px) */
+
+/* Small Screens (< 768px) */
+@media (max-width: 767px) {
+  .login-page {
+    padding-left: clamp(0.75rem, 3vw, 1.25rem) !important;
+    padding-right: clamp(0.75rem, 3vw, 1.25rem) !important;
+  }
+}
+
+/* Dedicated Tablet Media Queries (768px to 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  /* Prevent excessive empty vertical space: group card and footer together in the center */
+  .login-page {
+    justify-content: center !important;
+    gap: clamp(0.75rem, 1.6vw, 1.25rem) !important;
+    padding-top: max(0.75rem, env(safe-area-inset-top)) !important;
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom)) !important;
+  }
+
+  /* --- Tablet Portrait (768px - 1024px portrait, or width < 960px) --- */
+  @media (orientation: portrait), (max-width: 959px) {
+    .tablet-fluid-container {
+      width: min(92vw, 660px) !important;
+      max-width: 660px !important;
+      margin: 0 auto !important;
+    }
+
+    .tablet-main-grid {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 0 !important;
+    }
+
+    #marketing-info-section {
+      order: 1 !important;
+      border-right: none !important;
+      border-bottom: 1px solid rgba(30, 41, 59, 0.6) !important;
+      padding: clamp(1rem, 2.5vw, 1.75rem) !important;
+    }
+
+    #auth-form-section {
+      order: 2 !important;
+      padding: clamp(1rem, 2.5vw, 1.75rem) !important;
+    }
+
+    .tablet-card-grid {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: clamp(0.5rem, 1.2vw, 0.75rem) !important;
+      margin-top: clamp(0.4rem, 1vw, 0.75rem) !important;
+    }
+
+    .tablet-footer-fluid {
+      width: min(92vw, 660px) !important;
+      max-width: 660px !important;
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: clamp(0.4rem, 1vw, 0.65rem) !important;
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+    }
+  }
+
+  /* --- Tablet Landscape (Sufficient width: width >= 960px and landscape) --- */
+  @media (orientation: landscape) and (min-width: 960px) {
+    .tablet-fluid-container {
+      width: clamp(90%, 94vw, 1060px) !important;
+      max-width: 1060px !important;
+      margin: 0 auto !important;
+    }
+
+    .tablet-main-grid {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: clamp(0.5rem, 1.5vw, 1rem) !important;
+      align-items: stretch !important;
+    }
+
+    #marketing-info-section {
+      order: 1 !important;
+      border-right: 1px solid rgba(30, 41, 59, 0.6) !important;
+      border-bottom: none !important;
+    }
+
+    #auth-form-section {
+      order: 2 !important;
+      grid-column-start: 2 !important;
+    }
+
+    .tablet-card-grid {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: clamp(0.4rem, 1vw, 0.65rem) !important;
+    }
+
+    .tablet-footer-fluid {
+      width: clamp(90%, 94vw, 1060px) !important;
+      max-width: 1060px !important;
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: clamp(0.4rem, 1vw, 0.75rem) !important;
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+    }
+  }
+
+  /* Enhanced legibility and touch targets on tablet viewports using fluid sizing */
+  .login-input {
+    font-size: 0.9375rem !important;
+    padding-top: 0.65rem !important;
+    padding-bottom: 0.65rem !important;
+    padding-left: 2.75rem !important;
+    min-height: 44px !important;
+  }
+
+  /* Fluid, compact padding on tablet to remove excessive empty space without fixed sizes */
+  .tablet-viewport-pad {
+    padding: clamp(0.625rem, 1.8vw, 1.25rem) !important;
+  }
+
+  .tablet-fluid-section {
+    padding: clamp(0.625rem, 1.8vw, 1.25rem) !important;
+    margin: 0 !important;
+    gap: clamp(0.5rem, 1.4vw, 0.875rem) !important;
+  }
+
+  /* Fluid card dimensions without fixed height */
+  .tablet-feature-card {
+    padding: clamp(0.5rem, 1vw, 0.75rem) !important;
+    min-height: auto !important;
+    height: auto !important;
+  }
+
+  /* Keep headings proportional without excessive line wraps */
+  .tablet-title {
+    font-size: clamp(1.2rem, 2.2vw, 1.5rem) !important;
+    line-height: 1.25 !important;
+  }
+
+  .tablet-subtitle {
+    font-size: clamp(0.8rem, 1.3vw, 0.9rem) !important;
+    line-height: 1.45 !important;
+  }
+
+  /* Remove excessive section margins on tablet viewports */
+  .tablet-no-excess-margin {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  section.tablet-no-excess-margin {
+    margin: 0 !important;
+  }
+}
+
+/* Large Screens (> 1024px) */
+@media (min-width: 1025px) {
+  .desktop-fluid-container {
+    width: min(92vw, 1200px) !important;
+    max-width: 1200px !important;
+  }
 }
 
 .login-input::placeholder {
   color: #64748b;
 }
 
-.login-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.12);
+/* Clear visual 'is-focused' ring using CSS variables for high visibility on mobile virtual keyboards */
+.login-input:focus,
+.login-input.is-focused {
+  border-color: var(--input-focus-border, #60a5fa) !important;
+  box-shadow: 0 0 0 var(--input-focus-ring-width, 3px) var(--input-focus-ring-glow, rgba(59, 130, 246, 0.45)),
+              0 0 16px rgba(59, 130, 246, 0.25) !important;
+  background-color: var(--input-focus-bg, rgba(2, 6, 23, 0.9)) !important;
+}
+
+/* Real-time error feedback visual states */
+.login-input.has-error {
+  border-color: var(--input-error-border, #f87171) !important;
+  background-color: rgba(244, 63, 94, 0.08) !important;
+}
+
+.login-input.has-error:focus,
+.login-input.has-error.is-focused {
+  border-color: var(--input-error-border, #f87171) !important;
+  box-shadow: 0 0 0 var(--input-focus-ring-width, 3px) var(--input-error-ring-glow, rgba(248, 113, 113, 0.42)),
+              0 0 16px rgba(244, 63, 94, 0.25) !important;
+  background-color: rgba(244, 63, 94, 0.1) !important;
+}
+
+/* Real-time valid feedback visual states */
+.login-input.is-valid {
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.login-input.is-valid:focus,
+.login-input.is-valid.is-focused {
+  border-color: var(--input-success-border, #34d399) !important;
+  box-shadow: 0 0 0 var(--input-focus-ring-width, 3px) rgba(16, 185, 129, 0.35),
+              0 0 14px rgba(16, 185, 129, 0.2) !important;
 }
 
 .skiptranslate > iframe {
@@ -161,5 +382,23 @@ pre:not(:focus) {
 
 textarea:focus {
   touch-action: auto;
+}
+
+/* Rotating Gradient Border Animation for Footer Features */
+@keyframes rotate-border {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-rotate-border {
+  animation: rotate-border 4.5s linear infinite;
+}
+
+.animate-rotate-border-fast {
+  animation: rotate-border 3s linear infinite;
 }
 

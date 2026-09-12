@@ -62,7 +62,7 @@ const AppShell: React.FC = () => {
     isDistractionFreeMode && activeTab === "curriculum" && !!activeLessonId;
 
   return (
-    <div className="flex min-h-screen flex-col w-full overflow-x-clip bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-blue-600 selection:text-white font-sans antialiased">
+    <div className="flex min-h-dvh flex-col w-full overflow-x-clip bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-blue-600 selection:text-white font-sans antialiased">
       {!hideGlobalChrome && <Navbar />}
       {!hideGlobalChrome && <Breadcrumbs />}
       <MainContent />
@@ -87,7 +87,7 @@ const AuthGate: React.FC = () => {
   }, []);
 
   if (isAuthLoading) {
-    return <div className="flex min-h-screen items-center justify-center bg-[#050a19] text-sm text-slate-400">Loading your learning space...</div>;
+    return <div className="flex min-h-dvh items-center justify-center bg-[#050a19] text-sm text-slate-400">Loading your learning space...</div>;
   }
 
   return user ? <AppShell /> : <LoginPage />;

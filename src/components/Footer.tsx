@@ -1,7 +1,38 @@
 import React from "react";
-import { Sparkles, BookOpen, Terminal, Grid3X3, Github, Heart } from "lucide-react";
+import { Sparkles, BookOpen, Terminal, Grid3X3, Trophy, Check, Github, Heart } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { EcorpLogo } from "./EcorpLogo";
+
+const FOOTER_FEATURE_STATISTICS = [
+  {
+    icon: BookOpen,
+    iconColor: "text-blue-400",
+    number: "10+",
+    numberColor: "text-blue-300",
+    text: "Interactive Lessons",
+  },
+  {
+    icon: Terminal,
+    iconColor: "text-emerald-400",
+    number: "6+",
+    numberColor: "text-emerald-300",
+    text: "Production Patterns",
+  },
+  {
+    icon: Trophy,
+    iconColor: "text-amber-400",
+    number: "5+",
+    numberColor: "text-amber-300",
+    text: "Graded Missions",
+  },
+  {
+    icon: Check,
+    iconColor: "text-purple-400",
+    number: "100%",
+    numberColor: "text-purple-300",
+    text: "Hands-On Practice",
+  },
+];
 
 export const Footer: React.FC = () => {
   const { setActiveTab, t } = useApp();
@@ -9,6 +40,27 @@ export const Footer: React.FC = () => {
   return (
     <footer className="border-t border-slate-800/80 bg-slate-950/80 text-slate-400 text-xs py-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Feature Statistics Section: Explicitly stacks on mobile (< 768px) and transitions to spaced-out horizontal layout on desktop */}
+        <div id="footer-feature-statistics-section" className="mb-10 pb-8 border-b border-slate-800/70">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 lg:gap-6">
+            {FOOTER_FEATURE_STATISTICS.map((stat) => {
+              const Icon = stat.icon;
+              return (
+                <div
+                  key={stat.text}
+                  className="w-full md:w-auto flex items-center justify-center md:justify-start gap-2.5 rounded-xl border border-slate-800/80 bg-slate-900/60 px-4 py-2.5 text-xs text-slate-300 shadow-sm shrink-0 whitespace-nowrap"
+                >
+                  <Icon className={`h-4 w-4 ${stat.iconColor} shrink-0`} />
+                  <span className="whitespace-nowrap">
+                    <strong className={`${stat.numberColor} font-bold mr-1.5`}>{stat.number}</strong>
+                    {stat.text}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="space-y-3 md:col-span-1">
