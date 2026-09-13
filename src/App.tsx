@@ -27,6 +27,7 @@ import { SessionInactivityWarning } from "./components/SessionInactivityWarning"
 import { GlobalShortcutsHandler } from "./components/GlobalShortcutsHandler";
 import { AchievementNotificationToast } from "./components/AchievementNotificationToast";
 import { Breadcrumbs } from "./components/Breadcrumbs";
+import { LearnerInactivityReminder } from "./components/LearnerInactivityReminder";
 
 const MainContent: React.FC = () => {
   const { activeTab } = useApp();
@@ -99,6 +100,7 @@ export default function App() {
       <ThemeProvider>
         <AuthGate />
         <GlobalShortcutsHandler />
+        <LearnerInactivityReminder />
         <NetworkStatusToast />
         <AchievementNotificationToast />
         <SessionInactivityWarning />

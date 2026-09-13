@@ -174,6 +174,15 @@ export const Footer: React.FC = () => {
         <div className="mt-8 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center sm:justify-between text-center sm:text-left gap-4 text-xs text-slate-500">
           <p>© 2026 Ecorp Acadamy. {t.footer.copyright}</p>
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent("ecorp:open-shortcuts-modal"))}
+              className="hover:text-blue-400 transition-colors flex items-center gap-1 cursor-pointer"
+              title="View all keyboard shortcuts"
+            >
+              <kbd className="px-1.5 py-0.5 rounded border border-slate-700 bg-slate-900 text-[10px] font-mono text-slate-300">?</kbd>
+              <span>Shortcuts</span>
+            </button>
+            <span>•</span>
             <span>{t.footer.designedFor}</span>
           </div>
         </div>

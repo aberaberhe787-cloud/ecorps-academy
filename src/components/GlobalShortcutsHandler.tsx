@@ -15,6 +15,23 @@ export const GlobalShortcutsHandler: React.FC = () => {
 
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
 
+  // Allow other UI components to request opening the modal via custom event
+  useEffect(() => {
+    const handleOpenModal = () => setIsShortcutsModalOpen(true);
+    const handleCloseModal = () => setIsShortcutsModalOpen(false);
+    const handleToggleModal = () => setIsShortcutsModalOpen((prev) => !prev);
+
+    window.addEventListener("ecorp:open-shortcuts-modal", handleOpenModal);
+    window.addEventListener("ecorp:close-shortcuts-modal", handleCloseModal);
+    window.addEventListener("ecorp:toggle-shortcuts-modal", handleToggleModal);
+
+    return () => {
+      window.removeEventListener("ecorp:open-shortcuts-modal", handleOpenModal);
+      window.removeEventListener("ecorp:close-shortcuts-modal", handleCloseModal);
+      window.removeEventListener("ecorp:toggle-shortcuts-modal", handleToggleModal);
+    };
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const activeElement = document.activeElement;
@@ -36,13 +53,22 @@ export const GlobalShortcutsHandler: React.FC = () => {
         }
       }
 
-      // Help Modal: '?' or 'Ctrl+/'
+      // Help Modal: '?' or 'Ctrl+/' or 'Cmd+/'
       if (
         (e.key === "?" && !isInput) ||
         ((e.metaKey || e.ctrlKey) && e.key === "/")
       ) {
         e.preventDefault();
         setIsShortcutsModalOpen((prev) => !prev);
+        return;
+      }
+
+      // Ctrl+Shift+M: Trigger Inactivity Reminder Notification Test
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === "m") {
+        e.preventDefault();
+        window.dispatchEvent(
+          new CustomEvent("ecorp:trigger-reminder-test", { detail: { days: 1 } })
+        );
         return;
       }
 
@@ -91,11 +117,12 @@ export const GlobalShortcutsHandler: React.FC = () => {
         }
       }
 
-      // Single key Expert Navigation (only when outside inputs)
+      // Single key Expert Navigation (only when outside inputs and no modifiers)
       if (!isInput && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
         const keyMap: Record<string, NavTab> = {
           "g": "home",
           "c": "curriculum",
+          "f": "foundations",
           "p": "playground",
           "l": "patterns",
           "r": "resources",

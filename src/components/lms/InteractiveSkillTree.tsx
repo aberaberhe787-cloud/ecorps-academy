@@ -34,6 +34,7 @@ interface InteractiveSkillTreeProps {
   activeLessonId: string | null;
   onSelectLesson: (lesson: Lesson) => void;
   searchFilter?: string;
+  difficultyFilter?: string;
 }
 
 export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
@@ -42,6 +43,7 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
   activeLessonId,
   onSelectLesson,
   searchFilter = "",
+  difficultyFilter = "All",
 }) => {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
@@ -129,14 +131,18 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
 
   // Filter highlights
   const isHighlighted = (node: SkillNode): boolean => {
-    if (!searchFilter.trim()) return false;
+    const matchesDifficulty = difficultyFilter === "All" || node.lesson.difficulty === difficultyFilter;
+    if (!searchFilter.trim()) {
+      return difficultyFilter !== "All" && matchesDifficulty;
+    }
     const q = searchFilter.toLowerCase();
-    return (
+    const matchesSearch =
       node.lesson.title.toLowerCase().includes(q) ||
       node.lesson.conceptSummary.toLowerCase().includes(q) ||
       node.lesson.difficulty.toLowerCase().includes(q) ||
-      (node.lesson.bloomTaxonomyFocus || "").toLowerCase().includes(q)
-    );
+      (node.lesson.bloomTaxonomyFocus || "").toLowerCase().includes(q);
+
+    return matchesSearch && matchesDifficulty;
   };
 
   const tiers = [
