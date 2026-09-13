@@ -398,9 +398,9 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <main className="login-page min-h-dvh bg-[#050a19] px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-4 lg:py-6 text-slate-100 flex flex-col justify-start md:justify-center items-center gap-3 sm:gap-4 md:gap-3.5 lg:gap-5 w-full max-w-full overflow-y-auto pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))]">
+    <main className="login-page min-h-dvh bg-[#050a19] px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 lg:py-6 text-slate-100 flex flex-col justify-start items-center gap-3 sm:gap-4 lg:gap-5 w-full max-w-full overflow-y-auto overflow-x-hidden pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))]">
       {/* Mobile Top Brand Bar - Compact branding on small phone screens (< 768px) */}
-      <header className="md:hidden flex items-center justify-between mb-1.5 sm:mb-3 px-1 w-full max-w-md mx-auto shrink-0">
+      <header className="min-[768px]:hidden flex items-center justify-between mb-1.5 sm:mb-3 px-1 w-full max-w-md mx-auto shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-blue-400/50 bg-blue-950/80 shadow-sm shadow-blue-950/50">
             <WandSparkles className="h-4.5 w-4.5 text-blue-400" />
@@ -416,24 +416,24 @@ export const LoginPage: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Responsive Container: Fluid sizing across device widths, 1-column stack on tablet portrait, 2-column grid on tablet landscape & desktop */}
+      {/* Main Responsive Container: Fluid sizing across device widths, 1-column stack on tablet portrait (768px-959px), 2-column grid on tablet landscape (960px+) & desktop */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        className="mx-auto w-[94%] sm:w-[92%] md:w-[min(92vw,660px)] min-[960px]:w-[94%] lg:w-[90%] max-w-6xl grid grid-cols-1 min-[960px]:grid-cols-2 lg:grid-cols-2 rounded-2xl lg:rounded-3xl border border-slate-800/80 bg-[#080e20]/95 shadow-2xl shadow-black/40 overflow-hidden my-auto lg:my-auto min-h-0"
+        className="mx-auto w-[94%] sm:w-[90%] min-[768px]:w-[min(90vw,680px)] min-[960px]:w-[94%] lg:w-[90%] max-w-6xl grid grid-cols-1 min-[960px]:grid-cols-2 rounded-2xl lg:rounded-3xl border border-slate-800/80 bg-[#080e20]/95 shadow-2xl shadow-black/40 overflow-hidden my-auto min-h-0"
       >
         
-        {/* SIGN-IN FORM: Prominent, fluid width, stacked below marketing on tablet portrait, side-by-side on landscape/desktop */}
+        {/* SIGN-IN FORM: Prominent, fluid width, stacked below marketing on tablet portrait (768-959px), side-by-side on landscape/desktop (960px+) */}
         <section
           id="auth-form-section"
-          className="w-full min-w-0 max-w-full order-1 min-[768px]:order-2 min-[960px]:col-start-2 relative flex flex-col items-center justify-center p-[clamp(0.75rem,2vw,1.75rem)] overflow-hidden"
+          className="w-full min-w-0 max-w-full order-1 min-[768px]:order-2 min-[960px]:order-2 min-[960px]:col-start-2 relative flex flex-col items-center justify-center p-[clamp(0.75rem,2vw,1.75rem)] overflow-hidden"
         >
           <motion.div
             initial={{ opacity: 0, y: 10, scale: 0.99 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.4, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-            className="w-full min-w-0 max-w-md md:max-w-none lg:max-w-md mx-auto rounded-xl lg:rounded-2xl p-1 sm:p-2.5 lg:p-6 lg:border lg:border-indigo-500/40 lg:bg-[#0c142a]/95 lg:shadow-[0_0_35px_rgba(37,99,235,.08)]"
+            className="w-full min-w-0 max-w-md min-[768px]:max-w-lg min-[960px]:max-w-md lg:max-w-md mx-auto rounded-xl lg:rounded-2xl p-1 sm:p-2.5 lg:p-6 lg:border lg:border-indigo-500/40 lg:bg-[#0c142a]/95 lg:shadow-[0_0_35px_rgba(37,99,235,.08)]"
           >
             <div className="text-center">
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-100">
@@ -872,13 +872,13 @@ export const LoginPage: React.FC = () => {
         {/* MARKETING CONTENT: Displayed with responsive flexbox and CSS grid layouts */}
         <section
           id="marketing-info-section"
-          className="flex order-2 min-[768px]:order-1 min-[960px]:col-start-1 relative flex-col justify-between md:justify-center lg:justify-between overflow-hidden p-[clamp(0.75rem,2vw,2rem)] border-t min-[768px]:border-t-0 min-[768px]:border-b min-[960px]:border-b-0 min-[960px]:border-r border-slate-800/60 min-w-0 max-w-full gap-[clamp(0.5rem,1.5vw,1rem)]"
+          className="flex order-2 min-[768px]:order-1 min-[960px]:order-1 min-[960px]:col-start-1 relative flex-col justify-between min-[960px]:justify-between overflow-hidden p-[clamp(0.75rem,2vw,2rem)] border-t min-[768px]:border-t-0 min-[768px]:border-b min-[960px]:border-b-0 min-[960px]:border-r border-slate-800/60 min-w-0 max-w-full gap-[clamp(0.5rem,1.5vw,1rem)]"
         >
           <div className="pointer-events-none absolute -bottom-32 -left-10 h-[clamp(14rem,28vw,22rem)] w-[clamp(14rem,28vw,22rem)] max-w-full rounded-full bg-blue-600/10 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 left-0 h-32 w-full opacity-50 [background-image:linear-gradient(135deg,transparent_45%,rgba(37,99,235,.3)_46%,transparent_47%),linear-gradient(45deg,transparent_45%,rgba(124,58,237,.25)_46%,transparent_47%)] [background-size:38px_38px]" />
 
           {/* Desktop/Tablet brand banner */}
-          <div className="hidden md:flex relative z-10 items-center gap-[clamp(0.5rem,1vw,0.75rem)]">
+          <div className="hidden min-[768px]:flex relative z-10 items-center gap-[clamp(0.5rem,1vw,0.75rem)]">
             <div className="flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-xl border border-blue-400/50 bg-blue-950/60 shadow-lg shadow-blue-950/50">
               <WandSparkles className="h-5 w-5 text-blue-400" />
             </div>
@@ -903,7 +903,7 @@ export const LoginPage: React.FC = () => {
               Join thousands of developers and AI practitioners mastering prompt engineering, system design, and production workflows with real-time sandbox feedback.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 min-[768px]:grid-cols-2 gap-[clamp(0.35rem,1vw,0.65rem)] w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-[clamp(0.35rem,1vw,0.65rem)] w-full">
               {[
                 {
                   icon: BookOpen,
@@ -943,7 +943,7 @@ export const LoginPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="hidden md:block relative z-10 pt-2 lg:pt-4 border-t border-slate-800/60 text-xs md:text-xs text-slate-500">
+          <div className="hidden min-[768px]:block relative z-10 pt-2 lg:pt-4 border-t border-slate-800/60 text-xs text-slate-500">
             <span>Trusted by builders learning modern AI orchestration</span>
           </div>
         </section>
@@ -952,7 +952,7 @@ export const LoginPage: React.FC = () => {
       {/* Footer Features Bar: Fluid 2x2 grid on tablet (768px-1024px), single stack on mobile, 4-item horizontal on large desktop */}
       <footer
         id="login-footer-feature-statistics"
-        className="mx-auto w-[94%] sm:w-[92%] md:w-[min(92vw,660px)] min-[960px]:w-[94%] lg:w-[90%] max-w-6xl grid grid-cols-1 sm:grid-cols-2 min-[768px]:grid-cols-2 lg:flex lg:flex-row lg:items-center lg:justify-between gap-[clamp(0.4rem,1.2vw,0.75rem)] lg:gap-6 py-2 sm:py-3 lg:py-5 text-xs text-center px-0 shrink-0"
+        className="mx-auto w-[94%] sm:w-[90%] min-[768px]:w-[min(90vw,680px)] min-[960px]:w-[94%] lg:w-[90%] max-w-6xl grid grid-cols-1 sm:grid-cols-2 min-[768px]:grid-cols-2 lg:flex lg:flex-row lg:items-center lg:justify-between gap-[clamp(0.4rem,1.2vw,0.75rem)] lg:gap-6 py-2 sm:py-3 lg:py-5 text-xs text-center px-0 shrink-0"
       >
         {FOOTER_FEATURES.map((feat, index) => {
           const Icon = feat.icon;
