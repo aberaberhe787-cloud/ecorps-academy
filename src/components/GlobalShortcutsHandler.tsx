@@ -90,6 +90,25 @@ export const GlobalShortcutsHandler: React.FC = () => {
           return;
         }
       }
+
+      // Single key Expert Navigation (only when outside inputs)
+      if (!isInput && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        const keyMap: Record<string, NavTab> = {
+          "g": "home",
+          "c": "curriculum",
+          "p": "playground",
+          "l": "patterns",
+          "r": "resources",
+          "a": "certification",
+          "u": "profile",
+        };
+        const targetTab = keyMap[e.key.toLowerCase()];
+        if (targetTab) {
+          e.preventDefault();
+          setActiveTab(targetTab);
+          return;
+        }
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);

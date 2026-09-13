@@ -234,3 +234,43 @@ textarea:focus {
   animation: rotate-border 3s linear infinite;
 }
 
+
+/* Theme Transition */
+body, #root {
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* Print Styles */
+@media print {
+  /* Hide navigation, footer, and interactive UI elements */
+  header, nav, footer, #mobile-menu-toggle-btn, .no-print {
+    display: none !important;
+  }
+  
+  /* Reset background and text color for print readability */
+  body, #root, main, .app-view, section, div {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    border-color: #ddd !important;
+  }
+
+  /* Prevent page breaks inside important components */
+  .concept-card, .lesson-card, .curriculum-module, .assessment-card {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  /* Make text black and clear for readability */
+  h1, h2, h3, h4, h5, p, span, li, .concept-card, .lesson-card, .curriculum-module, .assessment-card {
+    color: #000 !important;
+    font-family: Georgia, Cambria, "Times New Roman", Times, serif !important;
+  }
+  
+  /* Give links a readable format */
+  a {
+    text-decoration: underline !important;
+    color: #000 !important;
+  }
+}

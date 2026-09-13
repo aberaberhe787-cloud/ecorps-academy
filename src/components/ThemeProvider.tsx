@@ -24,6 +24,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const root = document.documentElement;
+    root.classList.add("theme-transition");
 
     if (theme === "light") {
       root.classList.add("light");
@@ -36,6 +37,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       root.classList.toggle("dark", prefersDark);
       root.classList.toggle("light", !prefersDark);
     }
+    
+    const timeout = setTimeout(() => {
+      root.classList.remove("theme-transition");
+    }, 500);
+
+    return () => clearTimeout(timeout);
   }, [theme]);
 
   const setTheme = (newTheme: Theme) => {

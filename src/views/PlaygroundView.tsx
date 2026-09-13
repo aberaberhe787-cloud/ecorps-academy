@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Play, RotateCcw, Sparkles, Columns2, Sliders, Save, Trash2,
   History, Target, Terminal, Bookmark, Check, ChevronDown, ChevronUp,
   Zap, Code2, ShieldAlert, PanelRightOpen, PanelRightClose, X,
-  Clock, BookmarkCheck, Loader2
+  Clock, BookmarkCheck, Loader2, Mic, MicOff
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { PromptQualityMeter } from "../components/PromptQualityMeter";
@@ -277,6 +277,57 @@ export const PlaygroundView: React.FC = () => {
 
   const [presetLoadedName, setPresetLoadedName] = useState<string | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+  const promptRef = useRef(prompt);
+
+  useEffect(() => {
+    promptRef.current = prompt;
+  }, [prompt]);
+
+  const toggleListening = () => {
+    if (isListening) {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      setIsListening(false);
+    } else {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert("Speech recognition is not supported in this browser.");
+        return;
+      }
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      
+      recognition.onresult = (event: any) => {
+        let finalTranscript = "";
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          }
+        }
+        if (finalTranscript) {
+          const prev = promptRef.current;
+          setPrompt(prev + (prev.endsWith(" ") || prev === "" ? "" : " ") + finalTranscript.trim());
+        }
+      };
+
+      recognition.onerror = (e: any) => {
+        console.error("Speech recognition error:", e);
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
+      recognitionRef.current = recognition;
+      setIsListening(true);
+    }
+  };
 
   // Auto-save logic
   useEffect(() => {
@@ -339,16 +390,6 @@ export const PlaygroundView: React.FC = () => {
           <div className="flex items-center gap-2 flex-wrap">
             <Terminal className="h-5 w-5 text-blue-400" />
             <h1 className="text-xl font-bold tracking-tight text-white">{t.playground.title}</h1>
-            {autoSaveStatus === "saving" && (
-              <span className="text-xs sm:text-xs text-slate-500 flex items-center gap-1 bg-slate-900/50 border border-slate-800/80 px-2 py-0.5 rounded-full select-none">
-                <Loader2 className="h-2.5 w-2.5 animate-spin text-blue-500" /> Saving draft...
-              </span>
-            )}
-            {autoSaveStatus === "saved" && (
-              <span className="text-xs sm:text-xs text-emerald-500 dark:text-emerald-400 flex items-center gap-1 font-medium bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full select-none animate-in fade-in duration-200">
-                <Check className="h-2.5 w-2.5 text-emerald-500" /> Draft auto-saved
-              </span>
-            )}
           </div>
           <p className="mt-0.5 sm:mt-1 text-xs text-slate-400">{t.playground.subtitle}</p>
         </div>
@@ -466,8 +507,32 @@ export const PlaygroundView: React.FC = () => {
                     <Tooltip content={isComparisonMode ? "Your optimized, structure-aligned prompt using engineering patterns." : "Input your primary prompt template to execute against the active LLM."} />
                   </span>
                   <span className="text-xs text-slate-500 font-mono">{prompt.length} chars</span>
+                  
+                  {/* Status Indicator */}
+                  {autoSaveStatus === "saving" && (
+                    <span className="text-xs text-blue-400 font-mono flex items-center gap-1 ml-2">
+                      <Loader2 className="h-3 w-3 animate-spin" /> Saving...
+                    </span>
+                  )}
+                  {autoSaveStatus === "saved" && (
+                    <span className="text-xs text-emerald-500 font-mono flex items-center gap-1 ml-2 animate-in fade-in duration-300">
+                      <Check className="h-3 w-3" /> Saved
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-1.5 sm:gap-2">
+                  <button
+                    onClick={toggleListening}
+                    className={`flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors ${
+                      isListening
+                        ? "bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"
+                        : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                    }`}
+                    title={isListening ? "Stop Dictation" : "Start Voice Dictation"}
+                  >
+                    {isListening ? <MicOff className="h-3 w-3" /> : <Mic className="h-3 w-3" />}
+                    <span>{isListening ? "Listening..." : "Dictate"}</span>
+                  </button>
                   <button
                     id="toggle-system-prompt-btn"
                     onClick={() => setShowSystemPrompt(!showSystemPrompt)}
