@@ -105,12 +105,12 @@ export const LessonScratchpad: React.FC<LessonScratchpadProps> = ({ lessonId, le
               <h3 className="text-xs font-bold text-white uppercase tracking-wider">
                 Lesson Study Scratchpad
               </h3>
-              <span className="flex items-center gap-1 rounded bg-slate-800 px-1.5 py-0.5 text-[10px] font-mono text-emerald-400 border border-slate-700">
+              <span className="flex items-center gap-1 rounded bg-slate-800 px-1.5 py-0.5 text-xs sm:text-xs font-mono text-emerald-400 border border-slate-700">
                 <HardDrive className="h-2.5 w-2.5" />
                 IndexedDB Local
               </span>
             </div>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-xs text-slate-400">
               Private notes stored offline in your browser's IndexedDB engine.
             </p>
           </div>
@@ -118,12 +118,12 @@ export const LessonScratchpad: React.FC<LessonScratchpadProps> = ({ lessonId, le
 
         <div className="flex items-center gap-2">
           {saveStatus === "saving" && (
-            <span className="text-[10px] text-amber-400 font-mono animate-pulse">
+            <span className="text-xs sm:text-xs text-amber-400 font-mono animate-pulse">
               Saving to IndexedDB...
             </span>
           )}
           {saveStatus === "saved" && (
-            <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
+            <span className="text-xs sm:text-xs text-emerald-400 font-mono flex items-center gap-1">
               <Check className="h-3 w-3" />
               Saved locally {lastSavedTime ? `at ${lastSavedTime}` : ""}
             </span>
@@ -150,7 +150,7 @@ export const LessonScratchpad: React.FC<LessonScratchpadProps> = ({ lessonId, le
             className="w-full rounded-xl border border-slate-800 bg-slate-950 p-3 text-xs text-slate-100 placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none font-mono leading-relaxed resize-y transition-all"
           />
 
-          <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-400">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
             <div className="flex items-center gap-3 font-mono">
               <span>{wordCount} words</span>
               <span>•</span>
@@ -160,7 +160,7 @@ export const LessonScratchpad: React.FC<LessonScratchpadProps> = ({ lessonId, le
             <div className="flex items-center gap-2">
               <button
                 onClick={handleManualSave}
-                className="flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-slate-200 hover:text-white hover:bg-slate-700 transition-colors"
+                className="flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-200 hover:text-white hover:bg-slate-700 transition-colors"
                 title="Save immediately to IndexedDB"
               >
                 <Save className="h-3 w-3" />
@@ -170,7 +170,7 @@ export const LessonScratchpad: React.FC<LessonScratchpadProps> = ({ lessonId, le
               <button
                 onClick={handleDownloadNote}
                 disabled={!noteText.trim()}
-                className="flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1 text-[11px] font-semibold text-slate-200 hover:text-white hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-200 hover:text-white hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 title="Download note as text file"
               >
                 <Download className="h-3 w-3" />
@@ -180,7 +180,7 @@ export const LessonScratchpad: React.FC<LessonScratchpadProps> = ({ lessonId, le
               <button
                 onClick={handleClearNote}
                 disabled={!noteText.trim()}
-                className="flex items-center gap-1 rounded-lg border border-rose-900/40 bg-rose-950/30 px-2 py-1 text-[11px] font-semibold text-rose-400 hover:bg-rose-900/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-1 rounded-lg border border-rose-900/40 bg-rose-950/30 px-2 py-1 text-xs font-semibold text-rose-400 hover:bg-rose-900/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 title="Delete note for this lesson from IndexedDB"
               >
                 <Trash2 className="h-3 w-3" />

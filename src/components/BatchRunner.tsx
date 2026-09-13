@@ -75,7 +75,7 @@ export const BatchRunner: React.FC<BatchRunnerProps> = ({ promptTemplate, system
           <span className="font-mono text-xs font-semibold text-slate-300">Dynamic Batch Runner</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded font-mono">
+          <span className="text-xs sm:text-xs text-slate-400 bg-slate-800 px-2 py-0.5 rounded font-mono">
             {variables.length} variables detected
           </span>
         </div>

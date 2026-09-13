@@ -92,7 +92,7 @@ export const CtfSimulator: React.FC = () => {
               <Cpu className="h-3 w-3" /> Target System Output
             </span>
             {success !== null && (
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${success ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400'}`}>
+              <span className={`text-xs sm:text-xs font-bold px-2 py-0.5 rounded ${success ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400'}`}>
                 {success ? "COMPROMISED" : "SECURE"}
               </span>
             )}

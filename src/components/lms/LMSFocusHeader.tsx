@@ -55,7 +55,7 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
 
           <div className="min-w-0 truncate">
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="font-mono text-[10px] font-bold text-blue-400 bg-blue-950 px-1.5 py-0.5 rounded border border-blue-800/60 shrink-0">
+              <span className="font-mono text-xs sm:text-xs font-bold text-blue-400 bg-blue-950 px-1.5 py-0.5 rounded border border-blue-800/60 shrink-0">
                 {currentModule?.code || "MODULE"}
               </span>
               <span className="text-xs font-bold text-white truncate max-w-[120px] sm:max-w-[240px]">
@@ -67,7 +67,7 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
 
         {/* Center: Interactive Lesson Progress Bar (on medium+ screens) */}
         <div className="hidden md:flex flex-col items-center justify-center w-64">
-          <div className="flex justify-between w-full text-[10px] font-mono text-slate-400 mb-1">
+          <div className="flex justify-between w-full text-xs sm:text-xs font-mono text-slate-400 mb-1">
             <span>Lesson Mastery:</span>
             <span className="text-blue-400 font-bold">{Math.round(progressPercent)}%</span>
           </div>
@@ -82,13 +82,13 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
         {/* Right: Streak, XP, and Distraction-free toggle */}
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {/* Streak */}
-          <div className="flex items-center gap-1 rounded-lg bg-orange-500/10 border border-orange-500/30 px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-semibold text-orange-300">
+          <div className="flex items-center gap-1 rounded-lg bg-orange-500/10 border border-orange-500/30 px-2 sm:px-2.5 py-1 text-xs sm:text-xs font-semibold text-orange-300">
             <Flame className="h-3.5 w-3.5 text-orange-400 fill-orange-400/20" />
             <span>{streakDays}d</span>
           </div>
 
           {/* XP */}
-          <div className="flex items-center gap-1 rounded-lg bg-amber-500/10 border border-amber-500/30 px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-semibold text-amber-300 font-mono">
+          <div className="flex items-center gap-1 rounded-lg bg-amber-500/10 border border-amber-500/30 px-2 sm:px-2.5 py-1 text-xs sm:text-xs font-semibold text-amber-300 font-mono">
             <Sparkles className="h-3.5 w-3.5 text-amber-400" />
             <span>{totalXp} XP</span>
           </div>
@@ -107,12 +107,12 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
             {isDistractionFree ? (
               <>
                 <Minimize2 className="h-3.5 w-3.5" />
-                <span className="text-[11px]">Compact</span>
+                <span className="text-xs">Compact</span>
               </>
             ) : (
               <>
                 <Maximize2 className="h-3.5 w-3.5" />
-                <span className="text-[11px]">Focus Mode</span>
+                <span className="text-xs">Focus Mode</span>
               </>
             )}
           </button>

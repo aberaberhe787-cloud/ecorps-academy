@@ -242,7 +242,7 @@ export const LessonAudioPlayer: React.FC<LessonAudioPlayerProps> = ({ lesson }) 
         {/* Speed button */}
         <button
           onClick={cycleSpeed}
-          className="rounded-lg border border-slate-800 bg-slate-950 px-2 py-1.5 text-[11px] font-mono font-bold text-slate-300 hover:text-blue-400 hover:border-slate-700 transition-all"
+          className="rounded-lg border border-slate-800 bg-slate-950 px-2 py-1.5 text-xs font-mono font-bold text-slate-300 hover:text-blue-400 hover:border-slate-700 transition-all"
           title="Change playback speed"
         >
           {rate}x
@@ -260,16 +260,16 @@ export const LessonAudioPlayer: React.FC<LessonAudioPlayerProps> = ({ lesson }) 
               <span className="w-1 bg-cyan-400 rounded-full animate-pulse h-2.5 delay-150" />
               <span className="w-1 bg-blue-500 rounded-full animate-pulse h-1.5 delay-100" />
             </div>
-            <span className="font-mono text-[11px] text-blue-300 font-medium">
+            <span className="font-mono text-xs text-blue-300 font-medium">
               Narrating: <strong className="text-white">{currentSectionTitle}</strong>
             </span>
           </div>
         ) : isPaused ? (
-          <span className="font-mono text-[11px] text-amber-300">
+          <span className="font-mono text-xs text-amber-300">
             Narration paused at: {currentSectionTitle}
           </span>
         ) : (
-          <span className="text-[11px] text-slate-400 flex items-center gap-1">
+          <span className="text-xs text-slate-400 flex items-center gap-1">
             <Sparkles className="h-3 w-3 text-blue-400" />
             Web Speech Audio Narration available
           </span>

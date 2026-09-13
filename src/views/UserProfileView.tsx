@@ -182,7 +182,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
   };
 
   return (
-    <div className="app-view w-full max-w-5xl mx-auto space-y-3.5 sm:space-y-8 px-2.5 sm:px-6 py-2.5 sm:py-6 animate-in fade-in duration-200 pb-20 sm:pb-6 overflow-x-hidden">
+    <div className="app-view w-full max-w-5xl mx-auto space-y-3.5 sm:space-y-8 px-2.5 sm:px-6 py-2.5 sm:py-6 animate-in fade-in duration-200 pb-20 sm:pb-6 ">
       {/* Learner Profile Header */}
       <div className="flex flex-col items-center gap-4 sm:gap-6 rounded-2xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-6 md:flex-row shadow-xl">
         <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-4xl text-white font-bold shadow-lg shadow-blue-900/30">
@@ -260,18 +260,18 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
               >
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="space-y-1">
-                    <span className="text-[10px] font-mono uppercase tracking-widest font-bold text-blue-400">
+                    <span className="text-xs sm:text-xs font-mono uppercase tracking-widest font-bold text-blue-400">
                       Track {track.id === 'prompt-engineering-foundations' ? '01' : '02'}
                     </span>
                     <h3 className="text-base font-bold text-white">{track.title}</h3>
                     <p className="text-xs text-slate-400">{track.description}</p>
                   </div>
                   {isTrackCompleted ? (
-                    <span className="shrink-0 flex items-center gap-1 rounded-full bg-emerald-950 border border-emerald-700/80 px-2.5 py-1 text-[11px] font-bold text-emerald-300">
+                    <span className="shrink-0 flex items-center gap-1 rounded-full bg-emerald-950 border border-emerald-700/80 px-2.5 py-1 text-xs font-bold text-emerald-300">
                       <Award className="h-3.5 w-3.5" /> Certified
                     </span>
                   ) : (
-                    <span className="shrink-0 rounded-full bg-slate-800 border border-slate-700 px-2.5 py-1 text-[11px] font-medium text-slate-300">
+                    <span className="shrink-0 rounded-full bg-slate-800 border border-slate-700 px-2.5 py-1 text-xs font-medium text-slate-300">
                       {compLessons}/{track.lessons.length} Done
                     </span>
                   )}
@@ -328,7 +328,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
               className="flex items-center justify-between gap-3 rounded-xl border border-slate-800/80 bg-slate-950/50 px-4 py-3 text-xs"
             >
               <div className="flex items-center gap-3">
-                <span className="font-mono text-slate-500 text-[11px]">
+                <span className="font-mono text-slate-500 text-xs">
                   {String(idx + 1).padStart(2, '0')}
                 </span>
                 {lesson.completed ? (
@@ -340,7 +340,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
                   {lesson.title}
                 </span>
               </div>
-              <span className={`text-[11px] font-mono px-2 py-0.5 rounded ${
+              <span className={`text-xs font-mono px-2 py-0.5 rounded ${
                 lesson.completed 
                   ? 'text-emerald-400 bg-emerald-950/60 border border-emerald-800/60' 
                   : 'text-slate-500 bg-slate-900 border border-slate-800'
@@ -438,10 +438,10 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
                 <ShieldCheck className={`h-4 w-4 ${foundationsComplete ? 'text-emerald-400' : 'text-slate-500'}`} />
                 <div>
                   <div className="font-bold text-white">Foundations of Prompt Engineering</div>
-                  <div className="text-[11px] text-slate-400">5 Foundational Modules</div>
+                  <div className="text-xs text-slate-400">5 Foundational Modules</div>
                 </div>
               </div>
-              <span className={`font-mono text-[11px] font-bold px-2 py-0.5 rounded ${
+              <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${
                 foundationsComplete 
                   ? 'text-emerald-300 bg-emerald-950 border border-emerald-800' 
                   : 'text-slate-400 bg-slate-800'
@@ -455,10 +455,10 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
                 <ShieldCheck className={`h-4 w-4 ${curriculumComplete ? 'text-emerald-400' : 'text-slate-500'}`} />
                 <div>
                   <div className="font-bold text-white">Advanced AI Systems & Prompting</div>
-                  <div className="text-[11px] text-slate-400">10 Comprehensive Modules</div>
+                  <div className="text-xs text-slate-400">10 Comprehensive Modules</div>
                 </div>
               </div>
-              <span className={`font-mono text-[11px] font-bold px-2 py-0.5 rounded ${
+              <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${
                 curriculumComplete 
                   ? 'text-emerald-300 bg-emerald-950 border border-emerald-800' 
                   : 'text-slate-400 bg-slate-800'

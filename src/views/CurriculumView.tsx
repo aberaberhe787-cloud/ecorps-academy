@@ -282,7 +282,7 @@ export const CurriculumView: React.FC = () => {
         />
       )}
 
-      <div className="w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 space-y-3 sm:space-y-6 overflow-x-hidden">
+      <div className="w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 space-y-3 sm:space-y-6 ">
         {/* ========================================================================= */}
         {/* GLOBAL CURRICULUM CONTROLS: PROGRESS TRACKER, SYNC STATUS & VIEW SELECTOR  */}
         {/* ========================================================================= */}
@@ -297,7 +297,7 @@ export const CurriculumView: React.FC = () => {
                 </span>
 
                 {/* Real-time Firestore Sync Badge */}
-                <div className="flex items-center gap-1.5 rounded-md bg-slate-950/80 border border-slate-800 px-2.5 py-1 text-[11px] font-mono">
+                <div className="flex items-center gap-1.5 rounded-md bg-slate-950/80 border border-slate-800 px-2.5 py-1 text-xs font-mono">
                   {persistenceStatus === "saving" ? (
                     <>
                       <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
@@ -496,7 +496,7 @@ export const CurriculumView: React.FC = () => {
                         <span className="font-mono text-xs font-bold uppercase tracking-widest text-blue-400">
                           {t.nav.brandName} Acadamy
                         </span>
-                        <span className="rounded bg-blue-950 px-2 py-0.5 text-[10px] font-mono font-semibold text-blue-300 border border-blue-800">
+                        <span className="rounded bg-blue-950 px-2 py-0.5 text-xs sm:text-xs font-mono font-semibold text-blue-300 border border-blue-800">
                           {t.curriculum.lmsVersion}
                         </span>
                       </div>
@@ -510,7 +510,7 @@ export const CurriculumView: React.FC = () => {
                     <div className="flex items-center gap-2 rounded-xl bg-slate-900 border border-slate-800 px-3.5 py-2">
                       <Flame className="h-4 w-4 text-orange-400 fill-orange-400/30" />
                       <div className="text-left">
-                        <div className="text-[10px] text-slate-400 font-mono">{t.curriculum.currentStreak}</div>
+                        <div className="text-xs sm:text-xs text-slate-400 font-mono">{t.curriculum.currentStreak}</div>
                         <div className="text-xs font-bold text-white">{userProgress.streakDays} {t.curriculum.daysActive}</div>
                       </div>
                     </div>
@@ -518,7 +518,7 @@ export const CurriculumView: React.FC = () => {
                     <div className="flex items-center gap-2 rounded-xl bg-slate-900 border border-slate-800 px-3.5 py-2">
                       <Sparkles className="h-4 w-4 text-amber-400" />
                       <div className="text-left">
-                        <div className="text-[10px] text-slate-400 font-mono">{t.curriculum.academicXp}</div>
+                        <div className="text-xs sm:text-xs text-slate-400 font-mono">{t.curriculum.academicXp}</div>
                         <div className="text-xs font-bold text-amber-300 font-mono">{userProgress.xp} XP</div>
                       </div>
                     </div>
@@ -533,40 +533,40 @@ export const CurriculumView: React.FC = () => {
                 <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar pb-2 sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3">
                   <button type="button" onClick={() => handlePillarClick("lesson-concepts-section")} className="shrink-0 w-[82vw] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-blue-500/60 hover:bg-blue-950/30">
                     <div className="text-xs font-bold text-blue-300 flex items-center gap-1.5">
-                      <span className="flex h-5 w-5 items-center justify-center rounded bg-blue-950 text-[11px] font-mono text-blue-400 font-bold">1</span>
+                      <span className="flex h-5 w-5 items-center justify-center rounded bg-blue-950 text-xs font-mono text-blue-400 font-bold">1</span>
                       {t.curriculum.pillarMicroTitle}
                     </div>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                    <p className="text-xs text-slate-400 leading-relaxed">
                       {t.curriculum.pillarMicroDesc}
                     </p>
                   </button>
 
                   <button type="button" onClick={() => handlePillarClick("lesson-quizzes-section")} className="shrink-0 w-[82vw] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-emerald-500/60 hover:bg-emerald-950/30">
                     <div className="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
-                      <span className="flex h-5 w-5 items-center justify-center rounded bg-emerald-950 text-[11px] font-mono text-emerald-400 font-bold">2</span>
+                      <span className="flex h-5 w-5 items-center justify-center rounded bg-emerald-950 text-xs font-mono text-emerald-400 font-bold">2</span>
                       {t.curriculum.pillarRecallTitle}
                     </div>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                    <p className="text-xs text-slate-400 leading-relaxed">
                       {t.curriculum.pillarRecallDesc}
                     </p>
                   </button>
 
                   <button type="button" onClick={() => handlePillarClick("lesson-case-study-section")} className="shrink-0 w-[82vw] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-amber-500/60 hover:bg-amber-950/30">
                     <div className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
-                      <span className="flex h-5 w-5 items-center justify-center rounded bg-amber-950 text-[11px] font-mono text-amber-400 font-bold">3</span>
+                      <span className="flex h-5 w-5 items-center justify-center rounded bg-amber-950 text-xs font-mono text-amber-400 font-bold">3</span>
                       {t.curriculum.pillarBloomTitle}
                     </div>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                    <p className="text-xs text-slate-400 leading-relaxed">
                       {t.curriculum.pillarBloomDesc}
                     </p>
                   </button>
 
                   <button type="button" onClick={() => handlePillarClick("lesson-sandbox-section")} className="shrink-0 w-[82vw] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-purple-500/60 hover:bg-purple-950/30">
                     <div className="text-xs font-bold text-purple-300 flex items-center gap-1.5">
-                      <span className="flex h-5 w-5 items-center justify-center rounded bg-purple-950 text-[11px] font-mono text-purple-400 font-bold">4</span>
+                      <span className="flex h-5 w-5 items-center justify-center rounded bg-purple-950 text-xs font-mono text-purple-400 font-bold">4</span>
                       {t.curriculum.pillarSandboxTitle}
                     </div>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                    <p className="text-xs text-slate-400 leading-relaxed">
                       {t.curriculum.pillarSandboxDesc}
                     </p>
                   </button>
@@ -706,7 +706,7 @@ export const CurriculumView: React.FC = () => {
                         </span>
                       </button>
                       {!allMilestonesReached && (
-                        <span className="text-[10px] font-mono text-amber-300/90 bg-amber-950/40 border border-amber-900/50 px-2 py-0.5 rounded">
+                        <span className="text-xs sm:text-xs font-mono text-amber-300/90 bg-amber-950/40 border border-amber-900/50 px-2 py-0.5 rounded">
                           Pending: {[
                             (totalConcepts - readConceptIds.length) > 0 ? `${totalConcepts - readConceptIds.length} Concept${(totalConcepts - readConceptIds.length) > 1 ? 's' : ''}` : '',
                             (totalCheckpoints - passedCheckpointIds.length) > 0 ? `${totalCheckpoints - passedCheckpointIds.length} Quiz${(totalCheckpoints - passedCheckpointIds.length) > 1 ? 'zes' : ''}` : ''
@@ -880,13 +880,13 @@ export const CurriculumView: React.FC = () => {
                       ❌ {t.curriculum.naiveInput}
                     </div>
                     <div>
-                      <span className="text-[11px] font-semibold text-slate-400 block mb-1 font-mono">{t.curriculum.promptLabel}:</span>
+                      <span className="text-xs font-semibold text-slate-400 block mb-1 font-mono">{t.curriculum.promptLabel}:</span>
                       <pre className="rounded-lg bg-slate-950 p-3 font-mono text-xs text-rose-200/90 whitespace-pre-wrap border border-rose-950 max-h-40 overflow-y-auto">
                         {currentLesson.badPrompt.prompt}
                       </pre>
                     </div>
                     <div>
-                      <span className="text-[11px] font-semibold text-slate-400 block mb-1 font-mono">{t.curriculum.modelOutputLabel}:</span>
+                      <span className="text-xs font-semibold text-slate-400 block mb-1 font-mono">{t.curriculum.modelOutputLabel}:</span>
                       <div className="rounded-lg bg-slate-950 p-3 text-xs text-slate-300 border border-slate-800 leading-relaxed max-h-40 overflow-y-auto">
                         {currentLesson.badPrompt.sampleOutput}
                       </div>
@@ -902,13 +902,13 @@ export const CurriculumView: React.FC = () => {
                       ✅ {t.curriculum.engineeredPrompt}
                     </div>
                     <div>
-                      <span className="text-[11px] font-semibold text-slate-400 block mb-1 font-mono">{t.curriculum.promptLabel}:</span>
+                      <span className="text-xs font-semibold text-slate-400 block mb-1 font-mono">{t.curriculum.promptLabel}:</span>
                       <pre className="rounded-lg bg-slate-950 p-3 font-mono text-xs text-emerald-200/90 whitespace-pre-wrap border border-emerald-950 max-h-40 overflow-y-auto">
                         {currentLesson.goodPrompt.prompt}
                       </pre>
                     </div>
                     <div>
-                      <span className="text-[11px] font-semibold text-slate-400 block mb-1 font-mono">{t.curriculum.modelOutputLabel}:</span>
+                      <span className="text-xs font-semibold text-slate-400 block mb-1 font-mono">{t.curriculum.modelOutputLabel}:</span>
                       <div className="rounded-lg bg-slate-950 p-3 text-xs text-slate-200 border border-slate-800 leading-relaxed max-h-40 overflow-y-auto">
                         {currentLesson.goodPrompt.sampleOutput}
                       </div>

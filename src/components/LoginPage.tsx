@@ -398,7 +398,7 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <main className="login-page min-h-dvh bg-[#050a19] px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-4 lg:py-6 text-slate-100 flex flex-col justify-start md:justify-center items-center gap-3 sm:gap-4 md:gap-3.5 lg:gap-5 w-full max-w-full overflow-x-hidden overflow-y-auto pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))]">
+    <main className="login-page min-h-dvh bg-[#050a19] px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-4 lg:py-6 text-slate-100 flex flex-col justify-start md:justify-center items-center gap-3 sm:gap-4 md:gap-3.5 lg:gap-5 w-full max-w-full overflow-y-auto pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))]">
       {/* Mobile Top Brand Bar - Compact branding on small phone screens (< 768px) */}
       <header className="md:hidden flex items-center justify-between mb-1.5 sm:mb-3 px-1 w-full max-w-md mx-auto shrink-0">
         <div className="flex items-center gap-2.5">
@@ -407,10 +407,10 @@ export const LoginPage: React.FC = () => {
           </div>
           <div>
             <p className="text-sm font-bold tracking-tight text-slate-100 leading-tight">Ecorp Academy</p>
-            <p className="text-[10px] text-slate-400 leading-none">Prompt Engineering &amp; AI</p>
+            <p className="text-xs sm:text-xs text-slate-400 leading-none">Prompt Engineering &amp; AI</p>
           </div>
         </div>
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 text-[10px] font-medium text-blue-300">
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-1 text-xs sm:text-xs font-medium text-blue-300">
           <Sparkles className="h-3 w-3 text-blue-400 shrink-0" />
           <span>Interactive</span>
         </div>
@@ -421,19 +421,19 @@ export const LoginPage: React.FC = () => {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        className="mx-auto w-[94%] sm:w-[92%] md:w-[min(92vw,660px)] min-[960px]:w-[94%] lg:w-[90%] max-w-6xl grid grid-cols-1 min-[960px]:grid-cols-2 lg:grid-cols-2 rounded-2xl lg:rounded-3xl border border-slate-800/80 bg-[#080e20]/95 shadow-2xl shadow-black/40 overflow-hidden my-auto lg:my-auto tablet-fluid-container tablet-main-grid tablet-no-excess-margin min-h-0"
+        className="mx-auto w-[94%] sm:w-[92%] md:w-[min(92vw,660px)] min-[960px]:w-[94%] lg:w-[90%] max-w-6xl grid grid-cols-1 min-[960px]:grid-cols-2 lg:grid-cols-2 rounded-2xl lg:rounded-3xl border border-slate-800/80 bg-[#080e20]/95 shadow-2xl shadow-black/40 overflow-hidden my-auto lg:my-auto min-h-0"
       >
         
         {/* SIGN-IN FORM: Prominent, fluid width, stacked below marketing on tablet portrait, side-by-side on landscape/desktop */}
         <section
           id="auth-form-section"
-          className="w-full min-w-0 max-w-full order-1 min-[768px]:order-2 min-[960px]:col-start-2 relative flex flex-col items-center justify-center p-[clamp(0.75rem,2vw,1.75rem)] tablet-viewport-pad tablet-fluid-section tablet-no-excess-margin overflow-hidden"
+          className="w-full min-w-0 max-w-full order-1 min-[768px]:order-2 min-[960px]:col-start-2 relative flex flex-col items-center justify-center p-[clamp(0.75rem,2vw,1.75rem)] overflow-hidden"
         >
           <motion.div
             initial={{ opacity: 0, y: 10, scale: 0.99 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.4, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-            className="w-full min-w-0 max-w-md md:max-w-none lg:max-w-md mx-auto rounded-xl lg:rounded-2xl p-1 sm:p-2.5 lg:p-6 lg:border lg:border-indigo-500/40 lg:bg-[#0c142a]/95 lg:shadow-[0_0_35px_rgba(37,99,235,.08)] tablet-viewport-pad tablet-no-excess-margin"
+            className="w-full min-w-0 max-w-md md:max-w-none lg:max-w-md mx-auto rounded-xl lg:rounded-2xl p-1 sm:p-2.5 lg:p-6 lg:border lg:border-indigo-500/40 lg:bg-[#0c142a]/95 lg:shadow-[0_0_35px_rgba(37,99,235,.08)]"
           >
             <div className="text-center">
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-100">
@@ -872,7 +872,7 @@ export const LoginPage: React.FC = () => {
         {/* MARKETING CONTENT: Displayed with responsive flexbox and CSS grid layouts */}
         <section
           id="marketing-info-section"
-          className="flex order-2 min-[768px]:order-1 min-[960px]:col-start-1 relative flex-col justify-between md:justify-center lg:justify-between overflow-hidden p-[clamp(0.75rem,2vw,2rem)] tablet-viewport-pad tablet-fluid-section tablet-no-excess-margin border-t min-[768px]:border-t-0 min-[768px]:border-b min-[960px]:border-b-0 min-[960px]:border-r border-slate-800/60 min-w-0 max-w-full gap-[clamp(0.5rem,1.5vw,1rem)]"
+          className="flex order-2 min-[768px]:order-1 min-[960px]:col-start-1 relative flex-col justify-between md:justify-center lg:justify-between overflow-hidden p-[clamp(0.75rem,2vw,2rem)] border-t min-[768px]:border-t-0 min-[768px]:border-b min-[960px]:border-b-0 min-[960px]:border-r border-slate-800/60 min-w-0 max-w-full gap-[clamp(0.5rem,1.5vw,1rem)]"
         >
           <div className="pointer-events-none absolute -bottom-32 -left-10 h-[clamp(14rem,28vw,22rem)] w-[clamp(14rem,28vw,22rem)] max-w-full rounded-full bg-blue-600/10 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 left-0 h-32 w-full opacity-50 [background-image:linear-gradient(135deg,transparent_45%,rgba(37,99,235,.3)_46%,transparent_47%),linear-gradient(45deg,transparent_45%,rgba(124,58,237,.25)_46%,transparent_47%)] [background-size:38px_38px]" />
@@ -884,26 +884,26 @@ export const LoginPage: React.FC = () => {
             </div>
             <div>
               <p className="font-semibold tracking-tight text-slate-100 text-sm md:text-base">Ecorp Academy</p>
-              <p className="text-[10px] md:text-xs text-slate-400">Prompt Engineering &amp; AI Systems</p>
+              <p className="text-xs sm:text-xs md:text-xs text-slate-400">Prompt Engineering &amp; AI Systems</p>
             </div>
           </div>
 
           <div className="relative z-10 w-full min-w-0 max-w-full flex flex-col gap-[clamp(0.25rem,0.8vw,0.625rem)]">
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/40 bg-blue-500/10 px-2.5 py-1 text-[11px] sm:text-xs md:text-xs font-medium text-blue-300 w-fit">
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/40 bg-blue-500/10 px-2.5 py-1 text-xs sm:text-xs md:text-xs font-medium text-blue-300 w-fit">
               <Sparkles className="h-3 w-3 shrink-0" />
               <span>Interactive AI Academy</span>
             </div>
-            <h2 className="text-base sm:text-xl md:text-[clamp(1.15rem,2vw,1.4rem)] lg:text-3xl font-bold leading-snug tracking-tight text-slate-100 tablet-title">
+            <h2 className="text-base sm:text-xl md:text-[clamp(1.15rem,2vw,1.4rem)] lg:text-3xl font-bold leading-snug tracking-tight text-slate-100">
               Master the Architecture of<br className="hidden sm:inline" />{' '}
               <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
                 Large Language Models
               </span>
             </h2>
-            <p className="text-xs sm:text-sm md:text-[clamp(0.75rem,1.2vw,0.875rem)] lg:text-sm leading-relaxed text-slate-400 w-full tablet-subtitle">
+            <p className="text-xs sm:text-sm md:text-[clamp(0.75rem,1.2vw,0.875rem)] lg:text-sm leading-relaxed text-slate-400 w-full">
               Join thousands of developers and AI practitioners mastering prompt engineering, system design, and production workflows with real-time sandbox feedback.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 min-[768px]:grid-cols-2 tablet-card-grid gap-[clamp(0.35rem,1vw,0.65rem)] w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 min-[768px]:grid-cols-2 gap-[clamp(0.35rem,1vw,0.65rem)] w-full">
               {[
                 {
                   icon: BookOpen,
@@ -936,14 +936,14 @@ export const LoginPage: React.FC = () => {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs sm:text-sm md:text-sm font-semibold text-slate-200 truncate">{title}</p>
-                    <p className="text-[11px] md:text-xs text-slate-400 leading-tight line-clamp-2">{detail}</p>
+                    <p className="text-xs md:text-xs text-slate-400 leading-tight line-clamp-2">{detail}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="hidden md:block relative z-10 pt-2 lg:pt-4 border-t border-slate-800/60 text-[11px] md:text-xs text-slate-500">
+          <div className="hidden md:block relative z-10 pt-2 lg:pt-4 border-t border-slate-800/60 text-xs md:text-xs text-slate-500">
             <span>Trusted by builders learning modern AI orchestration</span>
           </div>
         </section>
@@ -952,7 +952,7 @@ export const LoginPage: React.FC = () => {
       {/* Footer Features Bar: Fluid 2x2 grid on tablet (768px-1024px), single stack on mobile, 4-item horizontal on large desktop */}
       <footer
         id="login-footer-feature-statistics"
-        className="mx-auto w-[94%] sm:w-[92%] md:w-[min(92vw,660px)] min-[960px]:w-[94%] lg:w-[90%] max-w-6xl grid grid-cols-1 sm:grid-cols-2 min-[768px]:grid-cols-2 lg:flex lg:flex-row lg:items-center lg:justify-between gap-[clamp(0.4rem,1.2vw,0.75rem)] lg:gap-6 py-2 sm:py-3 lg:py-5 text-xs text-center px-0 tablet-no-excess-margin tablet-footer-fluid shrink-0"
+        className="mx-auto w-[94%] sm:w-[92%] md:w-[min(92vw,660px)] min-[960px]:w-[94%] lg:w-[90%] max-w-6xl grid grid-cols-1 sm:grid-cols-2 min-[768px]:grid-cols-2 lg:flex lg:flex-row lg:items-center lg:justify-between gap-[clamp(0.4rem,1.2vw,0.75rem)] lg:gap-6 py-2 sm:py-3 lg:py-5 text-xs text-center px-0 shrink-0"
       >
         {FOOTER_FEATURES.map((feat, index) => {
           const Icon = feat.icon;
@@ -1153,7 +1153,7 @@ export const LoginPage: React.FC = () => {
                     We sent a password reset link to{' '}
                     <strong className="text-blue-300 font-semibold">{forgotEmail}</strong>. Follow the instructions in the email to set a new password.
                   </p>
-                  <p className="text-[11px] text-slate-500 mb-5">
+                  <p className="text-xs text-slate-500 mb-5">
                     Didn't receive the email? Check your spam folder or wait a moment to try again.
                   </p>
                   <button

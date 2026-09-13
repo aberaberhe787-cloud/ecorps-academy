@@ -123,13 +123,13 @@ export const PromptPlayground: React.FC<{ initialPrompt?: string }> = ({ initial
                 {panel.label}
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400">
+                <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400">
                   Rubric: {panel.analysis.score}/100
                 </span>
                 <button
                   type="button"
                   onClick={() => handleExportToSandbox(panel.value, panel.id)}
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-400 hover:text-blue-300 transition-colors"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
                   title="Export this prompt to Sandbox"
                 >
                   {exported === panel.id ? <Check className="h-3 w-3 text-emerald-400" /> : <ArrowUpRight className="h-3 w-3" />}

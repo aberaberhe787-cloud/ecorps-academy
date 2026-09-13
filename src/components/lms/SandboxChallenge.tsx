@@ -187,7 +187,7 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
               <span className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-400">
                 Sandbox Engineering Lab
               </span>
-              <span className="rounded bg-indigo-950/90 border border-indigo-800/60 px-2 py-0.5 text-[10px] font-mono text-indigo-300 font-semibold">
+              <span className="rounded bg-indigo-950/90 border border-indigo-800/60 px-2 py-0.5 text-xs sm:text-xs font-mono text-indigo-300 font-semibold">
                 Bloom Level: Applying
               </span>
             </div>
@@ -222,7 +222,7 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
                 : "bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
             }`}
           >
-            <span className="h-4 w-4 rounded-full bg-slate-950 text-[10px] flex items-center justify-center font-bold">1</span>
+            <span className="h-4 w-4 rounded-full bg-slate-950 text-xs sm:text-xs flex items-center justify-center font-bold">1</span>
             <span>Brief</span>
           </button>
 
@@ -236,7 +236,7 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
                 : "bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
             }`}
           >
-            <span className="h-4 w-4 rounded-full bg-slate-950 text-[10px] flex items-center justify-center font-bold">2</span>
+            <span className="h-4 w-4 rounded-full bg-slate-950 text-xs sm:text-xs flex items-center justify-center font-bold">2</span>
             <span>Refactor</span>
           </button>
 
@@ -250,7 +250,7 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
                 : "bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
             }`}
           >
-            <span className="h-4 w-4 rounded-full bg-slate-950 text-[10px] flex items-center justify-center font-bold">3</span>
+            <span className="h-4 w-4 rounded-full bg-slate-950 text-xs sm:text-xs flex items-center justify-center font-bold">3</span>
             <span>Live Test</span>
           </button>
 
@@ -264,7 +264,7 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
                 : "bg-slate-900 border border-slate-800 text-slate-400"
             }`}
           >
-            <span className="h-4 w-4 rounded-full bg-slate-950 text-[10px] flex items-center justify-center font-bold">4</span>
+            <span className="h-4 w-4 rounded-full bg-slate-950 text-xs sm:text-xs flex items-center justify-center font-bold">4</span>
             <span>Verify</span>
           </button>
         </div>
@@ -272,7 +272,7 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowHint(!showHint)}
-            className="text-[11px] font-mono text-amber-400 hover:text-amber-300 flex items-center gap-1 border border-amber-900/50 bg-amber-950/30 px-2 py-0.5 rounded-md"
+            className="text-xs font-mono text-amber-400 hover:text-amber-300 flex items-center gap-1 border border-amber-900/50 bg-amber-950/30 px-2 py-0.5 rounded-md"
           >
             <HelpCircle className="h-3 w-3" />
             {showHint ? "Hide Hint" : "Need Hint?"}
@@ -305,7 +305,7 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
               <span className="font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <ShieldAlert className="h-3.5 w-3.5 text-blue-400" /> Automated Validation Criteria
               </span>
-              <span className="text-[11px] font-mono text-slate-400">
+              <span className="text-xs font-mono text-slate-400">
                 {allCriteriaMet ? (
                   <span className="text-emerald-400 font-bold flex items-center gap-1">
                     <Check className="h-3.5 w-3.5" /> All Criteria Met
@@ -415,7 +415,7 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
               {challenge.brokenPrompt && (
                 <button
                   onClick={() => setShowDiff(!showDiff)}
-                  className="text-[11px] text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
+                  className="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
                 >
                   <Eye className="h-3 w-3" />
                   {showDiff ? "Hide Broken Prompt" : "Compare with Broken Prompt"}
@@ -423,7 +423,7 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
               )}
               <button
                 onClick={handleReset}
-                className="text-[11px] text-slate-400 hover:text-white transition-colors"
+                className="text-xs text-slate-400 hover:text-white transition-colors"
               >
                 Reset
               </button>
@@ -432,7 +432,7 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
 
           {showDiff && challenge.brokenPrompt && (
             <div className="rounded-xl border border-rose-900/50 bg-rose-950/20 p-3 space-y-1 text-xs">
-              <div className="text-[11px] font-mono text-rose-300 font-bold uppercase">
+              <div className="text-xs font-mono text-rose-300 font-bold uppercase">
                 Original Flawed / Broken Prompt:
               </div>
               <pre className="font-mono text-rose-200/90 whitespace-pre-wrap">
@@ -458,7 +458,7 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
 
         {/* Action Controls */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-          <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono">
+          <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
             <Cpu className="h-3.5 w-3.5 text-blue-400 shrink-0" />
             <span>AI Execution Engine:</span>
             <span className="rounded bg-blue-950 border border-blue-800 px-1.5 py-0.5 text-blue-300 font-bold">
@@ -500,7 +500,7 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
                 <li key={i} className="text-rose-200/90">{err}</li>
               ))}
             </ul>
-            <p className="pt-1 text-[11px] text-slate-400 italic">
+            <p className="pt-1 text-xs text-slate-400 italic">
               Hint: {challenge.feedback.failure}
             </p>
           </div>
@@ -514,7 +514,7 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
               <span>Engineering Validation Passed! (+{challenge.xpReward || 40} XP)</span>
             </div>
             <p className="text-slate-200 leading-relaxed">{challenge.feedback.success}</p>
-            <div className="text-[11px] text-slate-400 border-t border-slate-800/80 pt-2 font-mono">
+            <div className="text-xs text-slate-400 border-t border-slate-800/80 pt-2 font-mono">
               <span className="text-emerald-400 font-semibold">Theoretical Rationale:</span> {challenge.feedback.theoreticalRationale}
             </div>
           </div>

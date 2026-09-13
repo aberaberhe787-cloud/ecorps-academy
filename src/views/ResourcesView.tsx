@@ -57,7 +57,7 @@ export const ResourcesView: React.FC = () => {
   };
 
   return (
-    <div className="app-view w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 space-y-3.5 sm:space-y-8 pb-20 sm:pb-6 overflow-x-hidden">
+    <div className="app-view w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 space-y-3.5 sm:space-y-8 pb-20 sm:pb-6 ">
       {/* Header */}
       <div className="border-b border-slate-800 pb-3 sm:pb-5">
         <div className="flex items-center gap-2">
@@ -136,7 +136,7 @@ export const ResourcesView: React.FC = () => {
             </div>
 
             {searchTerm && (
-              <span className="text-[11px] font-mono text-blue-400">
+              <span className="text-xs font-mono text-blue-400">
                 Found {filteredGuides.length} guides &bull; {filteredGlossary.length} glossary terms
               </span>
             )}
@@ -194,14 +194,14 @@ export const ResourcesView: React.FC = () => {
 
               <div className="mt-4 flex flex-wrap gap-1.5">
                 {todayPrompt.tags.map((t, i) => (
-                  <span key={i} className="rounded bg-slate-900 border border-slate-800 px-2 py-0.5 text-[10px] text-slate-400">
+                  <span key={i} className="rounded bg-slate-900 border border-slate-800 px-2 py-0.5 text-xs sm:text-xs text-slate-400">
                     #{t}
                   </span>
                 ))}
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-500">
+            <div className="mt-4 pt-3 border-t border-slate-800 text-xs text-slate-500">
               New daily pattern curated each week from state-of-the-art research papers.
             </div>
           </div>
@@ -221,7 +221,7 @@ export const ResourcesView: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-bold text-white truncate">{saved.title}</span>
-                    <span className="text-[10px] text-slate-500 font-mono">
+                    <span className="text-xs sm:text-xs text-slate-500 font-mono">
                       {new Date(saved.createdAt).toLocaleDateString()}
                     </span>
                   </div>
@@ -285,7 +285,7 @@ export const ResourcesView: React.FC = () => {
                 <button
                   key={c}
                   onClick={() => setSelectedGlossaryCategory(c)}
-                  className={`rounded px-2.5 py-1 text-[11px] font-semibold transition-all ${
+                  className={`rounded px-2.5 py-1 text-xs font-semibold transition-all ${
                     selectedGlossaryCategory === c
                       ? "bg-blue-600 text-white"
                       : "text-slate-400 hover:text-slate-200"
@@ -304,21 +304,21 @@ export const ResourcesView: React.FC = () => {
             <div key={idx} className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 space-y-2">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-white">{item.term}</h3>
-                <span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-mono text-blue-300">
+                <span className="rounded bg-slate-800 px-2 py-0.5 text-xs sm:text-xs font-mono text-blue-300">
                   {item.category}
                 </span>
               </div>
               <p className="text-xs text-slate-300 leading-relaxed">{item.definition}</p>
 
               {item.example && (
-                <div className="rounded-lg bg-slate-950 p-2.5 font-mono text-[11px] text-slate-400 whitespace-pre-wrap border border-slate-800">
+                <div className="rounded-lg bg-slate-950 p-2.5 font-mono text-xs text-slate-400 whitespace-pre-wrap border border-slate-800">
                   <span className="text-slate-500 block mb-0.5">Example:</span>
                   {item.example}
                 </div>
               )}
 
               {item.proTip && (
-                <div className="text-[11px] text-emerald-300/90 bg-emerald-950/30 border border-emerald-900/40 p-2 rounded-lg flex items-start gap-1.5">
+                <div className="text-xs text-emerald-300/90 bg-emerald-950/30 border border-emerald-900/40 p-2 rounded-lg flex items-start gap-1.5">
                   <span className="font-bold text-emerald-400">Pro-Tip:</span>
                   <span>{item.proTip}</span>
                 </div>
@@ -346,15 +346,15 @@ export const ResourcesView: React.FC = () => {
               className="group rounded-xl border border-slate-800 bg-slate-900/70 p-4 transition-all hover:border-blue-500/60 hover:bg-slate-900 flex flex-col justify-between"
             >
               <div>
-                <span className="text-[10px] font-mono text-blue-400 font-semibold uppercase">{res.type}</span>
+                <span className="text-xs sm:text-xs font-mono text-blue-400 font-semibold uppercase">{res.type}</span>
                 <h3 className="mt-1 text-xs font-bold text-white group-hover:text-blue-300 transition-colors">
                   {res.title}
                 </h3>
-                <p className="mt-1 text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                <p className="mt-1 text-xs text-slate-400 line-clamp-2 leading-relaxed">
                   {res.description}
                 </p>
               </div>
-              <div className="mt-3 flex items-center gap-1 text-[11px] font-semibold text-blue-400 group-hover:underline">
+              <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-blue-400 group-hover:underline">
                 <span>Visit Guide</span>
                 <ExternalLink className="h-3 w-3" />
               </div>

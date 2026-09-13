@@ -31,7 +31,7 @@ export const EcorpLogo: React.FC<EcorpLogoProps> = ({
           <span className="font-mono text-base font-extrabold tracking-wider text-white">
             ECORP <span className="text-blue-400 font-bold">ACADAMY</span>
           </span>
-          <span className="text-[10px] text-slate-400 tracking-wide font-sans">
+          <span className="text-xs sm:text-xs text-slate-400 tracking-wide font-sans">
             Prompt Engineering & AI Systems
           </span>
         </div>

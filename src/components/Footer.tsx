@@ -70,17 +70,17 @@ export const Footer: React.FC = () => {
                 {t.nav.brandName} <span className="text-blue-400">Acadamy</span>
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 leading-relaxed">
+            <p className="text-xs text-slate-400 leading-relaxed">
               {t.footer.brandDesc}
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-semibold text-slate-200 uppercase tracking-wider text-[11px] mb-3">
+            <h4 className="font-semibold text-slate-200 uppercase tracking-wider text-xs mb-3">
               {t.footer.tracksHeader}
             </h4>
-            <ul className="space-y-2 text-[11px]">
+            <ul className="space-y-2 text-xs">
               <li>
                 <button
                   onClick={() => setActiveTab("curriculum")}
@@ -118,10 +118,10 @@ export const Footer: React.FC = () => {
 
           {/* Interactive Tools */}
           <div>
-            <h4 className="font-semibold text-slate-200 uppercase tracking-wider text-[11px] mb-3">
+            <h4 className="font-semibold text-slate-200 uppercase tracking-wider text-xs mb-3">
               {t.footer.toolsHeader}
             </h4>
-            <ul className="space-y-2 text-[11px]">
+            <ul className="space-y-2 text-xs">
               <li>
                 <button
                   onClick={() => setActiveTab("playground")}
@@ -159,19 +159,19 @@ export const Footer: React.FC = () => {
 
           {/* Principles */}
           <div>
-            <h4 className="font-semibold text-slate-200 uppercase tracking-wider text-[11px] mb-3">
+            <h4 className="font-semibold text-slate-200 uppercase tracking-wider text-xs mb-3">
               Engineering Core
             </h4>
-            <p className="text-[11px] text-slate-400 leading-relaxed">
+            <p className="text-xs text-slate-400 leading-relaxed">
               Designed with enterprise best practices: structured XML tags, typed JSON schema validation, zero hallucination guardrails, and deterministic temperature controls.
             </p>
-            <div className="mt-3 flex items-center gap-2 text-[10px] text-slate-500 font-mono">
+            <div className="mt-3 flex items-center gap-2 text-xs sm:text-xs text-slate-500 font-mono">
               <span>Status: All Heuristic Analyzers Operational</span>
             </div>
           </div>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center sm:justify-between text-center sm:text-left gap-4 text-[11px] text-slate-500">
+        <div className="mt-8 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center sm:justify-between text-center sm:text-left gap-4 text-xs text-slate-500">
           <p>© 2026 Ecorp Acadamy. {t.footer.copyright}</p>
           <div className="flex items-center gap-4">
             <span>{t.footer.designedFor}</span>

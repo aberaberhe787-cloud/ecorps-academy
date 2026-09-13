@@ -42,8 +42,8 @@ export const BadgeComponent: React.FC<BadgeComponentProps> = ({ achievement, isL
           </div>
         </div>
         <div>
-          <h4 className="text-[11px] font-bold text-slate-300">{achievement.title}</h4>
-          <p className="mt-1 text-[9px] text-slate-500 leading-tight">{achievement.description}</p>
+          <h4 className="text-xs font-bold text-slate-300">{achievement.title}</h4>
+          <p className="mt-1 text-xs text-slate-500 leading-tight">{achievement.description}</p>
         </div>
       </div>
     );
@@ -58,10 +58,10 @@ export const BadgeComponent: React.FC<BadgeComponentProps> = ({ achievement, isL
         </div>
       </div>
       <div>
-        <h4 className="text-[11px] font-bold text-white group-hover:text-amber-300 transition-colors">
+        <h4 className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">
           {achievement.title}
         </h4>
-        <p className="mt-1 text-[9px] text-slate-300 leading-tight">{achievement.description}</p>
+        <p className="mt-1 text-xs text-slate-300 leading-tight">{achievement.description}</p>
         {achievement.earnedAt && (
           <span className="mt-1.5 block text-[8px] font-mono text-amber-400/80">
             Unlocked {new Date(achievement.earnedAt).toLocaleDateString([], { month: "short", day: "numeric" })}

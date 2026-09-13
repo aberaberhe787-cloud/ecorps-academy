@@ -186,7 +186,7 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
             <h2 className="text-base font-bold text-white">
               Curriculum Interactive Skill Tree
             </h2>
-            <span className="rounded bg-blue-950 px-2 py-0.5 text-[10px] font-mono font-semibold text-blue-300 border border-blue-800/80">
+            <span className="rounded bg-blue-950 px-2 py-0.5 text-xs sm:text-xs font-mono font-semibold text-blue-300 border border-blue-800/80">
               Prerequisite Graph
             </span>
           </div>
@@ -198,7 +198,7 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
         {/* Tree Mastery Metric */}
         <div className="flex items-center gap-4 shrink-0">
           <div className="flex flex-col text-right">
-            <div className="text-[11px] font-mono text-slate-400">
+            <div className="text-xs font-mono text-slate-400">
               Tree Mastery: <span className="font-bold text-white">{completionPercent}%</span>
             </div>
             <div className="text-xs font-semibold text-emerald-400">
@@ -225,7 +225,7 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
               />
             </svg>
-            <span className="absolute text-[10px] font-bold font-mono text-white">
+            <span className="absolute text-xs sm:text-xs font-bold font-mono text-white">
               {completionPercent}%
             </span>
           </div>
@@ -255,13 +255,13 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
                   <span className="text-slate-600">&bull;</span>
                   <h3 className="text-sm font-bold text-white">{t.name}</h3>
                   {tierCompleted && (
-                    <span className="flex items-center gap-1 rounded bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
+                    <span className="flex items-center gap-1 rounded bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 text-xs sm:text-xs font-bold text-emerald-300">
                       <CheckCircle2 className="h-3 w-3" /> Tier Mastered
                     </span>
                   )}
                 </div>
 
-                <div className="text-[11px] text-slate-400 font-mono">
+                <div className="text-xs text-slate-400 font-mono">
                   {tierUnlockedCount}/{tierNodes.length} Unlocked &bull; {t.description}
                 </div>
               </div>
@@ -303,20 +303,20 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
                         <div>
                           {/* Card Top Meta */}
                           <div className="flex items-center justify-between gap-1 mb-2">
-                            <span className="font-mono text-[10px] text-slate-400 font-semibold">
+                            <span className="font-mono text-xs sm:text-xs text-slate-400 font-semibold">
                               STEP {node.tier}.{node.indexInTier + 1}
                             </span>
 
                             {isCompleted ? (
-                              <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/50 px-1.5 py-0.5 rounded">
+                              <span className="flex items-center gap-1 text-xs sm:text-xs font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/50 px-1.5 py-0.5 rounded">
                                 <CheckCircle2 className="h-3 w-3" /> Mastered
                               </span>
                             ) : isUnlocked ? (
-                              <span className="flex items-center gap-1 text-[10px] font-bold text-blue-400 bg-blue-950/60 border border-blue-800/50 px-1.5 py-0.5 rounded">
+                              <span className="flex items-center gap-1 text-xs sm:text-xs font-bold text-blue-400 bg-blue-950/60 border border-blue-800/50 px-1.5 py-0.5 rounded">
                                 <Play className="h-2.5 w-2.5 fill-blue-400" /> Available
                               </span>
                             ) : (
-                              <span className="flex items-center gap-1 text-[10px] font-semibold text-slate-400 bg-slate-800/70 border border-slate-700/60 px-1.5 py-0.5 rounded">
+                              <span className="flex items-center gap-1 text-xs sm:text-xs font-semibold text-slate-400 bg-slate-800/70 border border-slate-700/60 px-1.5 py-0.5 rounded">
                                 <Lock className="h-2.5 w-2.5" /> Locked
                               </span>
                             )}
@@ -335,13 +335,13 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
                             {node.lesson.title}
                           </h4>
 
-                          <p className="mt-1 text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                          <p className="mt-1 text-xs text-slate-400 line-clamp-2 leading-relaxed">
                             {node.lesson.subtitle}
                           </p>
                         </div>
 
                         {/* Card Bottom Meta */}
-                        <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[10px]">
+                        <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-xs sm:text-xs">
                           <div className="flex items-center gap-1.5 text-slate-400 font-mono">
                             <Clock className="h-3 w-3 text-slate-400" />
                             <span>{node.lesson.estimatedMinutes}m</span>
@@ -354,7 +354,7 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
 
                         {/* If locked, explicit unlock prompt */}
                         {!isUnlocked && prereqNodes.length > 0 && (
-                          <div className="mt-2 text-[10px] text-amber-400/90 bg-amber-950/30 border border-amber-900/40 p-1.5 rounded flex items-start gap-1">
+                          <div className="mt-2 text-xs sm:text-xs text-amber-400/90 bg-amber-950/30 border border-amber-900/40 p-1.5 rounded flex items-start gap-1">
                             <Info className="h-3 w-3 shrink-0 mt-0.5 text-amber-400" />
                             <span>
                               Requires:{" "}
@@ -383,11 +383,11 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
                 <span className="font-mono text-xs font-bold text-blue-400 uppercase">
                   {activeDetailNode.moduleCode} &bull; Skill Focus
                 </span>
-                <span className="rounded bg-slate-800 px-2 py-0.5 text-[10px] font-mono text-slate-300">
+                <span className="rounded bg-slate-800 px-2 py-0.5 text-xs sm:text-xs font-mono text-slate-300">
                   {activeDetailNode.lesson.difficulty}
                 </span>
                 {activeDetailNode.lesson.bloomTaxonomyFocus && (
-                  <span className="rounded bg-indigo-950 border border-indigo-800/80 px-2 py-0.5 text-[10px] font-mono text-indigo-300">
+                  <span className="rounded bg-indigo-950 border border-indigo-800/80 px-2 py-0.5 text-xs sm:text-xs font-mono text-indigo-300">
                     Bloom: {activeDetailNode.lesson.bloomTaxonomyFocus}
                   </span>
                 )}

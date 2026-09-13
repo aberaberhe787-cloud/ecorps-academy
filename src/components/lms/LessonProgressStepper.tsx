@@ -121,7 +121,7 @@ export const LessonProgressStepper: React.FC<LessonProgressStepperProps> = ({
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-2">
               <span>{t.curriculum.stepperHeader || "Lesson Learning Progression Stepper"}</span>
-              <span className="rounded bg-blue-950/80 border border-blue-700/60 px-2 py-0.5 text-[10px] font-mono text-blue-300 font-bold">
+              <span className="rounded bg-blue-950/80 border border-blue-700/60 px-2 py-0.5 text-xs sm:text-xs font-mono text-blue-300 font-bold">
                 {progressPercent}% {t.curriculum.completed || "Completed"}
               </span>
             </h4>
@@ -178,7 +178,7 @@ export const LessonProgressStepper: React.FC<LessonProgressStepperProps> = ({
 
                 {step.countBadge && (
                   <span
-                    className={`font-mono text-[10px] font-semibold px-1.5 py-0.5 rounded border ${
+                    className={`font-mono text-xs sm:text-xs font-semibold px-1.5 py-0.5 rounded border ${
                       step.isCompleted
                         ? "bg-emerald-950 border-emerald-800/60 text-emerald-400"
                         : step.isActive
@@ -204,7 +204,7 @@ export const LessonProgressStepper: React.FC<LessonProgressStepperProps> = ({
                 >
                   {step.title}
                 </div>
-                <div className={`text-[10px] truncate font-mono mt-0.5 ${step.isActive ? "text-blue-200" : "text-slate-500"}`}>
+                <div className={`text-xs sm:text-xs truncate font-mono mt-0.5 ${step.isActive ? "text-blue-200" : "text-slate-500"}`}>
                   {step.subtitle}
                 </div>
               </div>

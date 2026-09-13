@@ -498,7 +498,7 @@ export const Navbar: React.FC = () => {
                   </button>
                 )}
                 {!searchQuery && (
-                  <kbd className="hidden md:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-slate-800/90 border border-slate-700/80 rounded select-none shadow-xs">
+                  <kbd className="hidden md:inline-flex items-center px-1.5 py-0.5 text-xs sm:text-xs font-mono text-slate-400 bg-slate-800/90 border border-slate-700/80 rounded select-none shadow-xs">
                     ⌘K
                   </kbd>
                 )}
@@ -516,7 +516,7 @@ export const Navbar: React.FC = () => {
                       <button
                         key={cat.id}
                         onClick={() => setSearchCategory(cat.id)}
-                        className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
+                        className={`shrink-0 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
                           isSelected
                             ? "bg-blue-600 text-white shadow-xs"
                             : "bg-slate-900/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800/80"
@@ -527,7 +527,7 @@ export const Navbar: React.FC = () => {
                     );
                   })}
                   {searchResults.length > 0 && (
-                    <span className="ml-auto text-[10px] font-mono text-slate-400 shrink-0 pr-1">
+                    <span className="ml-auto text-xs sm:text-xs font-mono text-slate-400 shrink-0 pr-1">
                       {searchResults.length} match{searchResults.length === 1 ? '' : 'es'}
                     </span>
                   )}
@@ -562,11 +562,11 @@ export const Navbar: React.FC = () => {
                                 </p>
                               </div>
                               {item.subtitle && (
-                                <p className="text-[11px] text-slate-400 line-clamp-1">
+                                <p className="text-xs text-slate-400 line-clamp-1">
                                   {item.subtitle}
                                 </p>
                               )}
-                              <div className="mt-1 flex items-center gap-2 text-[10px] font-mono text-slate-400">
+                              <div className="mt-1 flex items-center gap-2 text-xs sm:text-xs font-mono text-slate-400">
                                 <span>{item.category}</span>
                                 {item.tags && item.tags.length > 0 && (
                                   <>
@@ -579,7 +579,7 @@ export const Navbar: React.FC = () => {
                               </div>
                             </div>
                             <div className="shrink-0 flex flex-col items-end gap-1.5 mt-0.5">
-                              <span className={`text-[10px] font-mono px-2 py-0.5 rounded border capitalize ${getItemBadgeClass(item.type)}`}>
+                              <span className={`text-xs sm:text-xs font-mono px-2 py-0.5 rounded border capitalize ${getItemBadgeClass(item.type)}`}>
                                 {item.type}
                               </span>
                               {isHighlighted && (
@@ -594,7 +594,7 @@ export const Navbar: React.FC = () => {
                         <p className="text-xs font-medium text-slate-300">
                           No matches found for &ldquo;{searchQuery}&rdquo;
                         </p>
-                        <p className="mt-1 text-[11px] text-slate-400">
+                        <p className="mt-1 text-xs text-slate-400">
                           Try searching for prompt concepts like &ldquo;Chain-of-Thought&rdquo;, &ldquo;Zero-Shot&rdquo;, or &ldquo;XML Delimiters&rdquo;.
                         </p>
                       </div>
@@ -603,7 +603,7 @@ export const Navbar: React.FC = () => {
                     /* Suggestions & Quick Links when query is empty */
                     <div className="p-3 space-y-4">
                       <div>
-                        <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-2">
+                        <div className="flex items-center justify-between text-xs sm:text-xs font-mono uppercase tracking-wider text-slate-400 mb-2">
                           <span>Popular Academy Topics</span>
                           <span className="text-slate-400">Quick Filter</span>
                         </div>
@@ -615,7 +615,7 @@ export const Navbar: React.FC = () => {
                                 setSearchQuery(qs.query);
                                 searchInputRef.current?.focus();
                               }}
-                              className="text-left px-2.5 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 text-[11px] text-slate-300 hover:text-white transition-all flex items-center gap-1.5 group"
+                              className="text-left px-2.5 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 text-xs text-slate-300 hover:text-white transition-all flex items-center gap-1.5 group"
                             >
                               <span className="h-1.5 w-1.5 rounded-full bg-blue-400 group-hover:scale-125 transition-transform" />
                               <span>{qs.label}</span>
@@ -625,7 +625,7 @@ export const Navbar: React.FC = () => {
                       </div>
 
                       <div className="border-t border-slate-800/60 pt-3">
-                        <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400 mb-2">
+                        <div className="text-xs sm:text-xs font-mono uppercase tracking-wider text-slate-400 mb-2">
                           <span>Quick Actions &amp; Navigation Commands</span>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -640,7 +640,7 @@ export const Navbar: React.FC = () => {
                               </div>
                               <div className="min-w-0 flex-1">
                                 <p className="font-semibold text-slate-200 truncate group-hover:text-blue-300">{cmd.title}</p>
-                                <p className="text-[10px] text-slate-500 truncate">{cmd.subtitle}</p>
+                                <p className="text-xs sm:text-xs text-slate-500 truncate">{cmd.subtitle}</p>
                               </div>
                             </button>
                           ))}
@@ -651,7 +651,7 @@ export const Navbar: React.FC = () => {
                 </div>
 
                 {/* Keyboard Shortcut Footer */}
-                <div className="px-3 py-2 border-t border-slate-800/80 bg-slate-900/60 flex items-center justify-between text-[10px] font-mono text-slate-400">
+                <div className="px-3 py-2 border-t border-slate-800/80 bg-slate-900/60 flex items-center justify-between text-xs sm:text-xs font-mono text-slate-400">
                   <div className="flex items-center gap-3">
                     <span><kbd className="px-1 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-300">↑↓</kbd> navigate</span>
                     <span><kbd className="px-1 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-300">↵</kbd> select</span>
@@ -729,7 +729,7 @@ export const Navbar: React.FC = () => {
                 className="flex items-center gap-1.5 bg-orange-500/10 border border-orange-500/25 hover:border-orange-500/40 hover:bg-orange-500/20 rounded-full px-2 py-0.5 sm:px-2.5 sm:py-1 text-xs font-bold text-orange-400 cursor-pointer transition select-none active:scale-[0.95]"
               >
                 <Flame className="h-3.5 w-3.5 fill-orange-500 text-orange-400 animate-pulse shrink-0" />
-                <span className="font-mono text-[11px] sm:text-xs leading-none">{userProgress.streakDays}</span>
+                <span className="font-mono text-xs sm:text-xs leading-none">{userProgress.streakDays}</span>
               </div>
             )}
             <div className="hidden md:flex items-center gap-1 sm:gap-2">
@@ -756,17 +756,17 @@ export const Navbar: React.FC = () => {
                       <p className="font-semibold text-white truncate">
                         {auth.currentUser?.displayName || auth.currentUser?.email?.split('@')[0] || "Scholar"}
                       </p>
-                      <p className="text-[11px] text-slate-400 truncate">
+                      <p className="text-xs text-slate-400 truncate">
                         {auth.currentUser?.email || "Authenticated User"}
                       </p>
-                      <div className="mt-1.5 flex items-center justify-between text-[11px] font-mono text-blue-400">
+                      <div className="mt-1.5 flex items-center justify-between text-xs font-mono text-blue-400">
                         <span>Level {level}</span>
                         <span>{userProgress.xp} XP</span>
                       </div>
                     </div>
 
                     {resetStatus && (
-                      <div className="mb-2 p-2 rounded-lg bg-blue-950/60 border border-blue-800/80 text-[11px] text-blue-300">
+                      <div className="mb-2 p-2 rounded-lg bg-blue-950/60 border border-blue-800/80 text-xs text-blue-300">
                         {resetStatus}
                       </div>
                     )}

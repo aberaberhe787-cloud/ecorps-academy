@@ -201,7 +201,7 @@ export const CertificateGenerator: React.FC<CertificateGeneratorProps> = ({
             <div className="flex items-center gap-2 rounded-xl bg-slate-800/80 border border-slate-700 px-4 py-2">
               <Trophy className="h-4 w-4 text-amber-400" />
               <div>
-                <div className="text-[10px] text-slate-400 font-mono">Progress</div>
+                <div className="text-xs sm:text-xs text-slate-400 font-mono">Progress</div>
                 <div className="text-sm font-bold text-white">{completedLessons}/{totalLessons} Lessons</div>
               </div>
             </div>
@@ -236,11 +236,11 @@ export const CertificateGenerator: React.FC<CertificateGeneratorProps> = ({
               </div>
 
               {/* Ecorp label */}
-              <p className="text-[10px] font-mono tracking-[6px] text-slate-500 uppercase mb-1">Ecorp Academy</p>
+              <p className="text-xs sm:text-xs font-mono tracking-[6px] text-slate-500 uppercase mb-1">Ecorp Academy</p>
 
               {/* Title */}
               <h3 className="text-xl sm:text-3xl font-black tracking-wide text-white mb-0.5">CERTIFICATE</h3>
-              <p className="text-[10px] sm:text-xs tracking-[5px] text-slate-400 uppercase mb-4">of Completion</p>
+              <p className="text-xs sm:text-xs sm:text-xs tracking-[5px] text-slate-400 uppercase mb-4">of Completion</p>
 
               <div className="w-32 h-px bg-gradient-to-r from-transparent via-amber-500/60 to-transparent mx-auto mb-4" />
 
@@ -271,7 +271,7 @@ export const CertificateGenerator: React.FC<CertificateGeneratorProps> = ({
                   { label: 'CTF Lab', color: 'text-purple-400 border-purple-500/30 bg-purple-500/10' },
                   { label: 'Certified', color: 'text-amber-400 border-amber-500/30 bg-amber-500/10' },
                 ].map((b) => (
-                  <span key={b.label} className={`rounded-full border px-3 py-0.5 text-[10px] font-bold ${b.color} ${isSample ? 'opacity-50' : ''}`}>
+                  <span key={b.label} className={`rounded-full border px-3 py-0.5 text-xs sm:text-xs font-bold ${b.color} ${isSample ? 'opacity-50' : ''}`}>
                     ✓ {b.label}
                   </span>
                 ))}
@@ -283,7 +283,7 @@ export const CertificateGenerator: React.FC<CertificateGeneratorProps> = ({
                   <p className={`text-xs font-bold text-white ${isSample ? 'opacity-40' : ''}`}>
                     {isSample ? 'MM / DD / YYYY' : completionDate}
                   </p>
-                  <p className="text-[9px] text-slate-600 uppercase tracking-widest mt-0.5">Date Issued</p>
+                  <p className="text-xs text-slate-600 uppercase tracking-widest mt-0.5">Date Issued</p>
                 </div>
 
                 <div className="h-10 w-10 rounded-full border-2 border-amber-500/50 flex items-center justify-center bg-slate-950">
@@ -292,7 +292,7 @@ export const CertificateGenerator: React.FC<CertificateGeneratorProps> = ({
 
                 <div className="text-right">
                   <p className="text-xs font-bold text-white font-serif italic">Ecorp Academy</p>
-                  <p className="text-[9px] text-slate-600 uppercase tracking-widest mt-0.5">Authorized Issuer</p>
+                  <p className="text-xs text-slate-600 uppercase tracking-widest mt-0.5">Authorized Issuer</p>
                 </div>
               </div>
             </div>
@@ -318,7 +318,7 @@ export const CertificateGenerator: React.FC<CertificateGeneratorProps> = ({
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <div className="flex items-center justify-between text-[11px] text-slate-500">
+            <div className="flex items-center justify-between text-xs text-slate-500">
               <span>{completedLessons} of {totalLessons} lessons completed</span>
               <span>{totalLessons - completedLessons} lessons remaining</span>
             </div>
@@ -333,8 +333,8 @@ export const CertificateGenerator: React.FC<CertificateGeneratorProps> = ({
                 <div key={item.label} className="rounded-xl border border-slate-800 bg-slate-950 px-3 py-2.5 flex items-center gap-2">
                   {item.icon}
                   <div>
-                    <p className="text-[11px] font-bold text-white">{item.label}</p>
-                    <p className="text-[10px] text-slate-500">{item.desc}</p>
+                    <p className="text-xs font-bold text-white">{item.label}</p>
+                    <p className="text-xs sm:text-xs text-slate-500">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -366,7 +366,7 @@ export const CertificateGenerator: React.FC<CertificateGeneratorProps> = ({
         </div>
 
         {isSample && (
-          <p className="text-center text-[11px] text-slate-600">
+          <p className="text-center text-xs text-slate-600">
             Download a sample preview now — your personalized certificate will be unlocked when you complete all lessons.
           </p>
         )}

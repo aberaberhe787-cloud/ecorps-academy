@@ -40,7 +40,7 @@ export const TokenVisualizer: React.FC<TokenVisualizerProps> = ({ text }) => {
           <Layers className="h-4 w-4 text-purple-400" />
           <span className="font-mono text-xs font-semibold text-slate-300">Live Tokenization Visualizer</span>
         </div>
-        <div className="flex items-center gap-4 text-[11px] font-mono text-slate-400">
+        <div className="flex items-center gap-4 text-xs font-mono text-slate-400">
           <div className="flex items-center gap-1">
             <Activity className="h-3 w-3 text-blue-400" />
             <span>~{tokenCount} Tokens</span>
@@ -71,7 +71,7 @@ export const TokenVisualizer: React.FC<TokenVisualizerProps> = ({ text }) => {
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-2.5 flex items-center justify-between">
             <div>
-              <div className="text-[10px] text-slate-500 font-mono">Gemini 1.5 Pro (Input)</div>
+              <div className="text-xs sm:text-xs text-slate-500 font-mono">Gemini 1.5 Pro (Input)</div>
               <div className="text-xs font-bold text-slate-300 flex items-center gap-1 mt-0.5">
                 <DollarSign className="h-3 w-3 text-emerald-400" /> {estimatedCostGemini1_5}
               </div>
@@ -79,7 +79,7 @@ export const TokenVisualizer: React.FC<TokenVisualizerProps> = ({ text }) => {
           </div>
           <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-2.5 flex items-center justify-between">
             <div>
-              <div className="text-[10px] text-slate-500 font-mono">Gemini 1.5 Flash (Input)</div>
+              <div className="text-xs sm:text-xs text-slate-500 font-mono">Gemini 1.5 Flash (Input)</div>
               <div className="text-xs font-bold text-slate-300 flex items-center gap-1 mt-0.5">
                 <DollarSign className="h-3 w-3 text-emerald-400" /> {estimatedCostFlash}
               </div>

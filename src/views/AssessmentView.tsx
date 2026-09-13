@@ -63,7 +63,7 @@ export const AssessmentView: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-8 space-y-3.5 sm:space-y-6 animate-in fade-in duration-200 pb-20 sm:pb-8 overflow-x-hidden">
+    <div className="w-full max-w-4xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-8 space-y-3.5 sm:space-y-6 animate-in fade-in duration-200 pb-20 sm:pb-8 ">
       {/* Breadcrumb Navigation */}
       <div className="flex items-center justify-between gap-4">
         <button
@@ -73,7 +73,7 @@ export const AssessmentView: React.FC = () => {
           <ArrowLeft className="h-3.5 w-3.5" />
           <span>Back to Foundations Path</span>
         </button>
-        <span className="text-[11px] font-mono text-blue-400 bg-blue-950/60 border border-blue-800/80 px-2.5 py-0.5 rounded-full">
+        <span className="text-xs font-mono text-blue-400 bg-blue-950/60 border border-blue-800/80 px-2.5 py-0.5 rounded-full">
           Capstone Final Evaluation
         </span>
       </div>
@@ -89,10 +89,10 @@ export const AssessmentView: React.FC = () => {
       </div>
 
       <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 space-y-2 text-xs text-slate-300">
-        <h2 className="font-bold text-white uppercase tracking-wider text-[11px] text-blue-300 flex items-center gap-1.5">
+        <h2 className="font-bold text-white uppercase tracking-wider text-xs text-blue-300 flex items-center gap-1.5">
           <Award className="h-3.5 w-3.5 text-blue-400" /> Capstone Rubric & Passing Criteria (Min Score: 70/100)
         </h2>
-        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono mt-2">
+        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono mt-2">
           <li className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-blue-400 shrink-0" /> Explicit Persona ("Act as a Senior...")</li>
           <li className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-blue-400 shrink-0" /> Delimiters (e.g. &lt;context&gt; or ```)</li>
           <li className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-blue-400 shrink-0" /> Strict Output Format (JSON / Table / Schema)</li>

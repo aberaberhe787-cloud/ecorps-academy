@@ -45,7 +45,7 @@ export const PromptEngineeringPath: React.FC = () => {
   };
 
   return (
-    <div className="app-view foundation-page w-full max-w-7xl mx-auto space-y-3 sm:space-y-6 px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 pb-20 sm:pb-6 overflow-x-hidden">
+    <div className="app-view foundation-page w-full max-w-7xl mx-auto space-y-3 sm:space-y-6 px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 pb-20 sm:pb-6 ">
       <header className="rounded-2xl border border-blue-900/60 bg-gradient-to-br from-blue-950/80 to-slate-950 p-3.5 sm:p-6">
         <div className="flex items-center gap-2 text-blue-300"><Sparkles className="h-5 w-5" /><span className="text-xs font-bold uppercase tracking-widest">Learning Path</span></div>
         <h1 className="mt-3 text-2xl sm:text-3xl font-black text-white">Prompt Engineering Foundations</h1>
@@ -152,7 +152,7 @@ export const PromptEngineeringPath: React.FC = () => {
 
               {practiceOutput && (
                 <div className="mt-3 rounded-xl border border-slate-800 bg-slate-900/70 p-3.5 space-y-1">
-                  <p className="text-[11px] font-bold text-slate-400 font-mono uppercase">Model Execution Output</p>
+                  <p className="text-xs font-bold text-slate-400 font-mono uppercase">Model Execution Output</p>
                   <p className="whitespace-pre-wrap text-xs leading-relaxed text-slate-300">{practiceOutput}</p>
                 </div>
               )}

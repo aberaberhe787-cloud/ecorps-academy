@@ -52,7 +52,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.12 }}
-            className={`absolute z-50 w-48 p-2 text-[10px] font-medium leading-relaxed rounded-lg border shadow-xl pointer-events-none bg-slate-900 border-slate-800 text-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-100 ${positionClasses[position]} ${className}`}
+            className={`absolute z-50 w-48 p-2 text-xs sm:text-xs font-medium leading-relaxed rounded-lg border shadow-xl pointer-events-none bg-slate-900 border-slate-800 text-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-100 ${positionClasses[position]} ${className}`}
             role="tooltip"
           >
             {content}

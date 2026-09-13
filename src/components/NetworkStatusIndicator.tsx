@@ -48,10 +48,10 @@ export const NetworkStatusBadge: React.FC<{ onOpenDetails?: () => void }> = ({ o
           <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
         </span>
         <WifiOff className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-        <span className="hidden sm:inline font-mono text-[11px] font-semibold tracking-tight">
+        <span className="hidden sm:inline font-mono text-xs font-semibold tracking-tight">
           Offline • Saved Locally
         </span>
-        <span className="sm:hidden font-mono text-[11px]">Offline</span>
+        <span className="sm:hidden font-mono text-xs">Offline</span>
       </button>
     );
   }
@@ -64,7 +64,7 @@ export const NetworkStatusBadge: React.FC<{ onOpenDetails?: () => void }> = ({ o
         title="Syncing progress to cloud..."
       >
         <Loader2 className="h-3 w-3 animate-spin text-blue-400 shrink-0" />
-        <span className="hidden md:inline font-mono text-[11px]">Syncing...</span>
+        <span className="hidden md:inline font-mono text-xs">Syncing...</span>
       </div>
     );
   }
@@ -73,11 +73,11 @@ export const NetworkStatusBadge: React.FC<{ onOpenDetails?: () => void }> = ({ o
   return (
     <div
       id="network-status-synced-badge"
-      className="hidden lg:flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-mono text-slate-400 hover:text-emerald-400 transition-colors"
+      className="hidden lg:flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-mono text-slate-400 hover:text-emerald-400 transition-colors"
       title="All progress synced with cloud"
     >
       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-      <span className="text-[10px] tracking-tight">Cloud Synced</span>
+      <span className="text-xs sm:text-xs tracking-tight">Cloud Synced</span>
     </div>
   );
 };
@@ -190,7 +190,7 @@ export const NetworkStatusToast: React.FC = () => {
                       }`}>
                         {activeApiError.title}
                       </h4>
-                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium ${
+                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs sm:text-xs font-mono font-medium ${
                         activeApiError.status === 405
                           ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
                           : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
@@ -213,7 +213,7 @@ export const NetworkStatusToast: React.FC = () => {
                   </p>
 
                   <div className="mt-3 flex items-center justify-between gap-2 pt-2 border-t border-slate-800">
-                    <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-400 font-mono">
                       <ShieldCheck className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
                       <span>Data & progress safe</span>
                     </div>
@@ -272,7 +272,7 @@ export const NetworkStatusToast: React.FC = () => {
                   <p className="mt-1 text-xs text-slate-300 leading-relaxed">
                     You are back online. All offline progress, completed lessons, and earned XP have been securely synchronized to the cloud.
                   </p>
-                  <div className="mt-2.5 flex items-center gap-1.5 text-[11px] font-mono text-emerald-400">
+                  <div className="mt-2.5 flex items-center gap-1.5 text-xs font-mono text-emerald-400">
                     <ShieldCheck className="h-3.5 w-3.5" />
                     <span>All changes safely synced</span>
                   </div>
@@ -292,7 +292,7 @@ export const NetworkStatusToast: React.FC = () => {
                       <h4 className="text-sm font-semibold text-amber-300">
                         Internet Connection Lost
                       </h4>
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs sm:text-xs font-mono font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
                         <HardDrive className="h-2.5 w-2.5" /> Local Save Active
                       </span>
                     </div>
@@ -311,7 +311,7 @@ export const NetworkStatusToast: React.FC = () => {
                   </p>
 
                   <div className="mt-3 flex items-center justify-between gap-2 pt-2 border-t border-slate-800">
-                    <div className="flex items-center gap-1.5 text-[11px] text-amber-400/90 font-medium">
+                    <div className="flex items-center gap-1.5 text-xs text-amber-400/90 font-medium">
                       <ShieldCheck className="h-3.5 w-3.5 text-amber-400 shrink-0" />
                       <span>Auto-sync when back online</span>
                     </div>

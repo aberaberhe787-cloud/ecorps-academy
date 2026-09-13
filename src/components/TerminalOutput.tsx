@@ -50,7 +50,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
           </div>
           <span className="font-mono text-xs font-semibold text-slate-300">{title}</span>
           {badge && (
-            <span className="rounded bg-blue-900/60 px-2 py-0.5 font-mono text-[10px] text-blue-300 border border-blue-700/50">
+            <span className="rounded bg-blue-900/60 px-2 py-0.5 font-mono text-xs sm:text-xs text-blue-300 border border-blue-700/50">
               {badge}
             </span>
           )}
@@ -63,14 +63,14 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
               <button
                 id="toggle-raw-btn"
                 onClick={() => setViewRaw(!viewRaw)}
-                className="rounded px-2 py-1 text-[11px] font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                className="rounded px-2 py-1 text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200"
               >
                 {viewRaw ? "Formatted" : "Raw Text"}
               </button>
               <button
                 id="copy-output-btn"
                 onClick={handleCopy}
-                className="flex items-center gap-1 rounded bg-slate-800 px-2.5 py-1 text-[11px] font-medium text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
+                className="flex items-center gap-1 rounded bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
               >
                 {copied ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
                 <span>{copied ? "Copied!" : "Copy"}</span>
@@ -82,15 +82,15 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
 
       {/* Execution Status / Metrics Bar (Only shown when not executing and result exists) */}
       {!isExecuting && result && (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-800/80 bg-slate-950/40 px-4 py-2 text-[11px] text-slate-400 font-mono gap-y-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-800/80 bg-slate-950/40 px-4 py-2 text-xs text-slate-400 font-mono gap-y-2">
           <div className="flex flex-wrap items-center gap-3">
             {result.status === "error" ? (
-              <span className="rounded bg-rose-950/80 px-2 py-0.5 font-mono text-[10px] text-rose-300 border border-rose-700/50 font-semibold flex items-center gap-1">
+              <span className="rounded bg-rose-950/80 px-2 py-0.5 font-mono text-xs sm:text-xs text-rose-300 border border-rose-700/50 font-semibold flex items-center gap-1">
                 <AlertTriangle className="h-3 w-3 text-rose-400" />
                 EXECUTION FAILED
               </span>
             ) : (
-              <span className="rounded bg-emerald-950/80 px-2 py-0.5 font-mono text-[10px] text-emerald-300 border border-emerald-700/50 font-semibold flex items-center gap-1.5">
+              <span className="rounded bg-emerald-950/80 px-2 py-0.5 font-mono text-xs sm:text-xs text-emerald-300 border border-emerald-700/50 font-semibold flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 GOOGLE GEMINI
               </span>

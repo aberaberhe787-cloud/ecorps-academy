@@ -57,7 +57,7 @@ export const AchievementNotificationToast: React.FC = () => {
           </div>
 
           <div className="flex-1 min-w-0 pr-1">
-            <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400">
+            <div className="flex items-center gap-1.5 text-xs sm:text-xs font-mono font-bold uppercase tracking-wider text-amber-400">
               <Sparkles className="h-3 w-3 animate-pulse" />
               <span>Achievement Unlocked!</span>
             </div>
@@ -68,10 +68,10 @@ export const AchievementNotificationToast: React.FC = () => {
               {current.description || "You reached a new milestone in your curriculum journey!"}
             </p>
             <div className="mt-2 flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-950/80 border border-amber-700/50 px-2 py-0.5 text-[10px] font-mono font-semibold text-amber-300">
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-950/80 border border-amber-700/50 px-2 py-0.5 text-xs sm:text-xs font-mono font-semibold text-amber-300">
                 +100 XP Bonus
               </span>
-              <span className="text-[10px] text-slate-400 font-mono">
+              <span className="text-xs sm:text-xs text-slate-400 font-mono">
                 View in Profile
               </span>
             </div>

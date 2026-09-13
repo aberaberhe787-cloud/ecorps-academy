@@ -120,7 +120,7 @@ export const MissionsPanel: React.FC = () => {
                   : "bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-slate-200"
               }`}
             >
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-950/60 text-[10px] font-bold">
+              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-950/60 text-xs sm:text-xs font-bold">
                 {idx + 1}
               </div>
               <span>{m.title.split(":")[1] || m.title}</span>
@@ -196,10 +196,10 @@ export const MissionsPanel: React.FC = () => {
             <p className="mt-1 text-xs text-slate-400 leading-relaxed">{selectedMission.objective}</p>
 
             <div className="mt-3 space-y-2">
-              <h4 className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Grading Rubric Criteria:</h4>
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Grading Rubric Criteria:</h4>
               {selectedMission.targetCriteria.map((crit, idx) => (
                 <div key={idx} className="flex items-start gap-2 text-xs text-slate-300">
-                  <div className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-slate-800 text-[10px] text-blue-400 font-mono">
+                  <div className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs sm:text-xs text-blue-400 font-mono">
                     {idx + 1}
                   </div>
                   <span>{crit}</span>
@@ -218,7 +218,7 @@ export const MissionsPanel: React.FC = () => {
                 {currentHintIndex < selectedMission.hints.length && (
                   <button
                     onClick={handleRevealNextHint}
-                    className="text-[11px] font-medium text-amber-300 underline hover:text-amber-200"
+                    className="text-xs font-medium text-amber-300 underline hover:text-amber-200"
                   >
                     Reveal Hint +1
                   </button>
@@ -243,7 +243,7 @@ export const MissionsPanel: React.FC = () => {
 
             {/* Submit & Grade Button */}
             <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between">
-              <span className="text-[11px] text-slate-400 font-mono">
+              <span className="text-xs text-slate-400 font-mono">
                 Evaluates prompt against rubric
               </span>
               <button
@@ -318,7 +318,7 @@ export const MissionsPanel: React.FC = () => {
                   )}
                   <div>
                     <span className="font-semibold">{check.criteria}</span>
-                    <p className="mt-0.5 text-[11px] text-slate-300">{check.feedback}</p>
+                    <p className="mt-0.5 text-xs text-slate-300">{check.feedback}</p>
                   </div>
                 </div>
               ))}

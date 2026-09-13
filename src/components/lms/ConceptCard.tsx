@@ -67,12 +67,12 @@ export const ConceptCard: React.FC<ConceptCardProps> = ({
             <div className="flex items-center gap-2">
               <h3 className="text-base font-bold text-white tracking-tight">{concept.title}</h3>
               <span
-                className={`rounded px-1.5 py-0.5 text-[9px] font-mono font-semibold border ${bloomStyle.bg} ${bloomStyle.text} ${bloomStyle.border}`}
+                className={`rounded px-1.5 py-0.5 text-xs font-mono font-semibold border ${bloomStyle.bg} ${bloomStyle.text} ${bloomStyle.border}`}
               >
                 {bloom}
               </span>
             </div>
-            <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-400">
+            <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-400">
               <span>Micro-Concept {index + 1} of {totalConcepts}</span>
               <span>•</span>
               <span className="font-mono">{concept.readMinutes || 5} min read</span>
@@ -82,7 +82,7 @@ export const ConceptCard: React.FC<ConceptCardProps> = ({
 
         {/* Academic citation if present */}
         {concept.academicCitation && (
-          <div className="rounded-md bg-slate-950 px-2.5 py-1 border border-slate-800 text-[10px] font-mono text-slate-400 flex items-center gap-1.5">
+          <div className="rounded-md bg-slate-950 px-2.5 py-1 border border-slate-800 text-xs sm:text-xs font-mono text-slate-400 flex items-center gap-1.5">
             <GraduationCap className="h-3 w-3 text-blue-400" />
             <span>Ref: {concept.academicCitation}</span>
           </div>
@@ -108,7 +108,7 @@ export const ConceptCard: React.FC<ConceptCardProps> = ({
               <button
                 id={`copy-snippet-${concept.id}`}
                 onClick={() => handleCopyCode(concept.codeSnippet!.code)}
-                className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-white transition-colors"
+                className="flex items-center gap-1 text-xs text-slate-400 hover:text-white transition-colors"
               >
                 {copiedCode ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
                 <span>{copiedCode ? "Copied" : "Copy"}</span>
@@ -139,7 +139,7 @@ export const ConceptCard: React.FC<ConceptCardProps> = ({
 
         {/* Footer: Read Verification Interaction */}
         <div className="pt-2 flex items-center justify-between border-t border-slate-800/80">
-          <span className="text-[11px] text-slate-400">
+          <span className="text-xs text-slate-400">
             {isRead ? "Concept verified & active recall unlocked." : "Review the concept theory carefully before proceeding."}
           </span>
           <button

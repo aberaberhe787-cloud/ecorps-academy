@@ -146,14 +146,14 @@ const SideDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
               ) : (
                 executionHistory.map((item) => (
                   <div key={item.id} className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-2">
-                    <div className="flex items-center justify-between text-[10px] font-mono text-slate-500">
+                    <div className="flex items-center justify-between text-xs sm:text-xs font-mono text-slate-500">
                       <span className="flex items-center gap-1 text-blue-400">
                         <Clock className="h-3 w-3" />
                         {new Date(item.timestamp).toLocaleTimeString()}
                       </span>
                       <span>{item.durationMs}ms · ~{item.tokenCount} tokens</span>
                     </div>
-                    <pre className="rounded-lg bg-slate-950 p-2 font-mono text-[10px] text-slate-300 whitespace-pre-wrap max-h-24 overflow-y-auto border border-slate-800 leading-relaxed">
+                    <pre className="rounded-lg bg-slate-950 p-2 font-mono text-xs sm:text-xs text-slate-300 whitespace-pre-wrap max-h-24 overflow-y-auto border border-slate-800 leading-relaxed">
                       {item.prompt.slice(0, 200)}{item.prompt.length > 200 ? "…" : ""}
                     </pre>
                     <button
@@ -187,15 +187,15 @@ const SideDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
                   <div key={p.id} className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-white truncate max-w-[180px]">{p.title}</span>
-                      <span className="text-[10px] text-slate-500 font-mono shrink-0">{new Date(p.createdAt).toLocaleDateString()}</span>
+                      <span className="text-xs sm:text-xs text-slate-500 font-mono shrink-0">{new Date(p.createdAt).toLocaleDateString()}</span>
                     </div>
-                    <pre className="rounded-lg bg-slate-950 p-2 font-mono text-[10px] text-slate-300 whitespace-pre-wrap max-h-24 overflow-y-auto border border-slate-800 leading-relaxed">
+                    <pre className="rounded-lg bg-slate-950 p-2 font-mono text-xs sm:text-xs text-slate-300 whitespace-pre-wrap max-h-24 overflow-y-auto border border-slate-800 leading-relaxed">
                       {p.prompt.slice(0, 200)}{p.prompt.length > 200 ? "…" : ""}
                     </pre>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => deleteCustomPrompt(p.id)}
-                        className="flex items-center gap-1 rounded-lg border border-rose-900/50 px-2 py-1 text-[10px] text-rose-400 hover:bg-rose-950/40 transition-colors"
+                        className="flex items-center gap-1 rounded-lg border border-rose-900/50 px-2 py-1 text-xs sm:text-xs text-rose-400 hover:bg-rose-950/40 transition-colors"
                       >
                         <Trash2 className="h-3 w-3" /> Delete
                       </button>
@@ -208,7 +208,7 @@ const SideDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
                           a.download = `${p.title.replace(/\s+/g, '_')}.json`;
                           a.click();
                         }}
-                        className="flex items-center gap-1 rounded-lg border border-slate-700 px-2 py-1 text-[10px] text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                        className="flex items-center gap-1 rounded-lg border border-slate-700 px-2 py-1 text-xs sm:text-xs text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
                       >
                         JSON
                       </button>
@@ -222,7 +222,7 @@ const SideDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
                           a.download = `${p.title.replace(/\s+/g, '_')}.md`;
                           a.click();
                         }}
-                        className="flex items-center gap-1 rounded-lg border border-slate-700 px-2 py-1 text-[10px] text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                        className="flex items-center gap-1 rounded-lg border border-slate-700 px-2 py-1 text-xs sm:text-xs text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
                       >
                         MD
                       </button>
@@ -331,7 +331,7 @@ export const PlaygroundView: React.FC = () => {
   const totalDrawerItems = executionHistory.length + userProgress.savedCustomPrompts.length;
 
   return (
-    <div className="app-view w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 space-y-3 sm:space-y-6 pb-20 md:pb-6 overflow-x-hidden">
+    <div className="app-view w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 space-y-3 sm:space-y-6 pb-20 md:pb-6 ">
 
       {/* Header & Sub Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 border-b border-slate-800 pb-3 sm:pb-4 w-full">
@@ -340,12 +340,12 @@ export const PlaygroundView: React.FC = () => {
             <Terminal className="h-5 w-5 text-blue-400" />
             <h1 className="text-xl font-bold tracking-tight text-white">{t.playground.title}</h1>
             {autoSaveStatus === "saving" && (
-              <span className="text-[10px] text-slate-500 flex items-center gap-1 bg-slate-900/50 border border-slate-800/80 px-2 py-0.5 rounded-full select-none">
+              <span className="text-xs sm:text-xs text-slate-500 flex items-center gap-1 bg-slate-900/50 border border-slate-800/80 px-2 py-0.5 rounded-full select-none">
                 <Loader2 className="h-2.5 w-2.5 animate-spin text-blue-500" /> Saving draft...
               </span>
             )}
             {autoSaveStatus === "saved" && (
-              <span className="text-[10px] text-emerald-500 dark:text-emerald-400 flex items-center gap-1 font-medium bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full select-none animate-in fade-in duration-200">
+              <span className="text-xs sm:text-xs text-emerald-500 dark:text-emerald-400 flex items-center gap-1 font-medium bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full select-none animate-in fade-in duration-200">
                 <Check className="h-2.5 w-2.5 text-emerald-500" /> Draft auto-saved
               </span>
             )}
@@ -401,7 +401,7 @@ export const PlaygroundView: React.FC = () => {
             <PanelRightOpen className="h-4 w-4 text-blue-400" />
             <span className="hidden sm:inline">Library</span>
             {totalDrawerItems > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-blue-600 text-[9px] font-black text-white flex items-center justify-center">
+              <span className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-blue-600 text-xs font-black text-white flex items-center justify-center">
                 {Math.min(totalDrawerItems, 99)}
               </span>
             )}
@@ -425,7 +425,7 @@ export const PlaygroundView: React.FC = () => {
             {/* Starter Presets Bar */}
             {playgroundSubTab === "sandbox" && !isComparisonMode && (
               <div className="rounded-xl border border-slate-800/80 bg-slate-900/60 p-2 sm:p-2.5 flex flex-col sm:flex-row items-start sm:items-center gap-1.5 sm:gap-2 w-full max-w-full overflow-hidden">
-                <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1.5 whitespace-nowrap pl-1 shrink-0">
+                <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5 whitespace-nowrap pl-1 shrink-0">
                   <Zap className="h-3.5 w-3.5 text-amber-400" /> Presets:
                 </span>
                 <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar sm:flex-wrap items-center gap-1.5 sm:gap-2 w-full max-w-full pb-1 touch-pan-x">
@@ -436,7 +436,7 @@ export const PlaygroundView: React.FC = () => {
                         key={idx}
                         id={`preset-btn-${idx + 1}`}
                         onClick={() => handleLoadPreset(preset)}
-                        className="shrink-0 snap-start flex items-center gap-1.5 rounded-lg border border-slate-800 bg-slate-950 px-2.5 py-1 text-[11px] font-medium text-slate-300 hover:border-blue-500 hover:text-blue-300 whitespace-nowrap transition-all"
+                        className="shrink-0 snap-start flex items-center gap-1.5 rounded-lg border border-slate-800 bg-slate-950 px-2.5 py-1 text-xs font-medium text-slate-300 hover:border-blue-500 hover:text-blue-300 whitespace-nowrap transition-all"
                       >
                         <Icon className="h-3 w-3 text-blue-400" />
                         <span>{preset.name}</span>
@@ -445,7 +445,7 @@ export const PlaygroundView: React.FC = () => {
                   })}
                 </div>
                 {presetLoadedName && (
-                  <span className="animate-in fade-in text-[11px] font-bold text-emerald-300 bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded flex items-center gap-1">
+                  <span className="animate-in fade-in text-xs font-bold text-emerald-300 bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded flex items-center gap-1">
                     <Check className="h-3 w-3 text-emerald-400" /> Loaded "{presetLoadedName}"
                   </span>
                 )}
@@ -465,13 +465,13 @@ export const PlaygroundView: React.FC = () => {
                     {isComparisonMode ? "Variant A — Engineered" : "User Prompt Input"}
                     <Tooltip content={isComparisonMode ? "Your optimized, structure-aligned prompt using engineering patterns." : "Input your primary prompt template to execute against the active LLM."} />
                   </span>
-                  <span className="text-[11px] text-slate-500 font-mono">{prompt.length} chars</span>
+                  <span className="text-xs text-slate-500 font-mono">{prompt.length} chars</span>
                 </div>
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   <button
                     id="toggle-system-prompt-btn"
                     onClick={() => setShowSystemPrompt(!showSystemPrompt)}
-                    className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                    className="flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200"
                   >
                     <span>System</span>
                     {showSystemPrompt ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
@@ -479,14 +479,14 @@ export const PlaygroundView: React.FC = () => {
                   <button
                     id="toggle-params-btn"
                     onClick={() => setShowParameters(!showParameters)}
-                    className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                    className="flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200"
                   >
                     <Sliders className="h-3 w-3" />
                     <span className="hidden sm:inline">Params</span>
                   </button>
                   <button
                     onClick={() => setIsSaving(true)}
-                    className="flex items-center gap-1 rounded bg-slate-800 px-2 py-1 text-[11px] font-medium text-slate-300 hover:bg-slate-700 hover:text-white"
+                    className="flex items-center gap-1 rounded bg-slate-800 px-2 py-1 text-xs font-medium text-slate-300 hover:bg-slate-700 hover:text-white"
                   >
                     <Bookmark className="h-3 w-3" />
                     <span className="hidden sm:inline">Save</span>
@@ -498,7 +498,7 @@ export const PlaygroundView: React.FC = () => {
               {showSystemPrompt && (
                 <div className="border-b border-slate-800 bg-slate-950/90 p-3">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <span className="text-[11px] font-semibold text-slate-400">
+                    <span className="text-xs font-semibold text-slate-400">
                       System Instruction (Privileged Rules)
                     </span>
                     <Tooltip content="Sets foundational guidelines, safety boundaries, or a persona that the model must strictly obey." />
@@ -528,7 +528,7 @@ export const PlaygroundView: React.FC = () => {
                     <input id="temperature-slider" type="range" min="0.0" max="1.0" step="0.05"
                       value={temperature} onChange={(e) => setTemperature(parseFloat(e.target.value))}
                       className="w-full accent-blue-500 cursor-pointer" />
-                    <div className="flex justify-between text-[10px] text-slate-500 mt-0.5 font-mono">
+                    <div className="flex justify-between text-xs sm:text-xs text-slate-500 mt-0.5 font-mono">
                       <span>Deterministic</span><span>Creative</span>
                     </div>
                   </div>
@@ -619,7 +619,7 @@ export const PlaygroundView: React.FC = () => {
                     Variant B — Baseline / Naive
                     <Tooltip content="The control variant. Input a raw, conversational, or un-engineered prompt here to contrast performance." />
                   </span>
-                  <span className="text-[11px] text-slate-500 font-mono">{comparisonPromptB.length} chars</span>
+                  <span className="text-xs text-slate-500 font-mono">{comparisonPromptB.length} chars</span>
                 </div>
                 <textarea
                   id="comparison-prompt-b-editor"

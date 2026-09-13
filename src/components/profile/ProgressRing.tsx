@@ -40,7 +40,7 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({ progress, label }) =
           {Math.round(progress)}%
         </div>
       </div>
-      <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">
+      <span className="text-xs sm:text-xs font-medium text-slate-400 uppercase tracking-wider">
         {label}
       </span>
     </div>

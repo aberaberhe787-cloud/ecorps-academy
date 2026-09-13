@@ -56,7 +56,7 @@ export const GoogleTranslate: React.FC = () => {
         <Languages className={`h-3.5 w-3.5 shrink-0 ${isAmharic ? "text-emerald-400" : "text-blue-400"}`} />
         <span className="hidden sm:inline">{current.flag}</span>
         <span className="hidden sm:inline">{current.nativeName}</span>
-        <span className="sm:hidden font-mono text-[10px] uppercase">{current.code}</span>
+        <span className="sm:hidden font-mono text-xs sm:text-xs uppercase">{current.code}</span>
         <ChevronDown className={`h-3 w-3 shrink-0 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
@@ -69,7 +69,7 @@ export const GoogleTranslate: React.FC = () => {
           {/* Header */}
           <div className="flex items-center gap-1.5 border-b border-slate-800 px-2.5 pb-2 mb-1.5">
             <Globe className="h-3.5 w-3.5 text-blue-400" />
-            <span className="text-[11px] font-semibold text-slate-400">
+            <span className="text-xs font-semibold text-slate-400">
               Select Language / ቋንቋ ምረጥ
             </span>
           </div>
@@ -94,7 +94,7 @@ export const GoogleTranslate: React.FC = () => {
                   <span className="text-base">{lang.flag}</span>
                   <div className="text-left">
                     <div className="font-semibold text-sm leading-tight">{lang.nativeName}</div>
-                    <div className="text-[10px] opacity-60">{lang.label}</div>
+                    <div className="text-xs sm:text-xs opacity-60">{lang.label}</div>
                   </div>
                 </div>
                 {isActive && <Check className="h-4 w-4 shrink-0" />}
@@ -104,7 +104,7 @@ export const GoogleTranslate: React.FC = () => {
 
           {/* Footer */}
           <div className="border-t border-slate-800 mt-1.5 pt-1.5 px-2.5 pb-0.5">
-            <p className="text-[10px] text-slate-600 text-center">
+            <p className="text-xs sm:text-xs text-slate-600 text-center">
               Native i18n engine · No tracking
             </p>
           </div>

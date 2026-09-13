@@ -55,7 +55,7 @@ export const PromptHelperBar: React.FC<PromptHelperBarProps> = ({ onInsertText }
 
   return (
     <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar snap-x">
-      <span className="text-slate-400 font-medium text-[11px] whitespace-nowrap mr-1 flex items-center gap-1 shrink-0">
+      <span className="text-slate-400 font-medium text-xs whitespace-nowrap mr-1 flex items-center gap-1 shrink-0">
         <Plus className="h-3 w-3 text-blue-400" /> Quick Inject:
       </span>
       {[...snippets, ...patternSnippets].map((snip, idx) => {

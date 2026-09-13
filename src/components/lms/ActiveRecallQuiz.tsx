@@ -84,7 +84,7 @@ export const ActiveRecallQuiz: React.FC<ActiveRecallQuizProps> = ({
               <span className="text-xs font-mono font-bold uppercase tracking-wider text-blue-400">
                 Active Recall Checkpoint
               </span>
-              <span className="rounded bg-slate-800 px-1.5 py-0.2 text-[9px] font-mono text-slate-300">
+              <span className="rounded bg-slate-800 px-1.5 py-0.2 text-xs font-mono text-slate-300">
                 Gatekeeper
               </span>
             </div>
@@ -118,7 +118,7 @@ export const ActiveRecallQuiz: React.FC<ActiveRecallQuizProps> = ({
         {/* Broken Prompt Display if Spot the Error type */}
         {challenge.brokenPrompt && (
           <div className="rounded-xl border border-rose-900/50 bg-slate-950 p-4 space-y-2">
-            <div className="flex items-center justify-between text-[11px] font-mono text-rose-300 font-semibold">
+            <div className="flex items-center justify-between text-xs font-mono text-rose-300 font-semibold">
               <span className="flex items-center gap-1.5">
                 <Code2 className="h-3.5 w-3.5 text-rose-400" /> Inspect This Defective Prompt:
               </span>
@@ -162,7 +162,7 @@ export const ActiveRecallQuiz: React.FC<ActiveRecallQuizProps> = ({
                   <div className="space-y-1 flex-1">
                     <div className="font-medium text-slate-200 leading-relaxed">{option.text}</div>
                     {option.code && (
-                      <pre className="mt-1 rounded-lg bg-slate-900/90 p-2 font-mono text-[11px] text-blue-200 overflow-x-auto whitespace-pre-wrap">
+                      <pre className="mt-1 rounded-lg bg-slate-900/90 p-2 font-mono text-xs text-blue-200 overflow-x-auto whitespace-pre-wrap">
                         {option.code}
                       </pre>
                     )}

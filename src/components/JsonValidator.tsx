@@ -58,7 +58,7 @@ export const JsonValidator: React.FC<JsonValidatorProps> = ({ outputString }) =>
           <span className="font-mono text-xs font-semibold text-slate-300">Strict Output Validator</span>
         </div>
         {validationResult && (
-          <div className="flex items-center gap-1.5 text-[11px] font-bold">
+          <div className="flex items-center gap-1.5 text-xs font-bold">
             {validationResult.valid ? (
               <span className="text-emerald-400 flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" /> Valid JSON</span>
             ) : (
@@ -77,12 +77,12 @@ export const JsonValidator: React.FC<JsonValidatorProps> = ({ outputString }) =>
             rows={8}
             value={schemaStr}
             onChange={(e) => setSchemaStr(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-800 rounded p-2.5 font-mono text-[11px] text-slate-300 focus:border-amber-500 focus:outline-none resize-y"
+            className="w-full bg-slate-950 border border-slate-800 rounded p-2.5 font-mono text-xs text-slate-300 focus:border-amber-500 focus:outline-none resize-y"
           />
         </div>
         <div>
           <label className="text-xs font-semibold text-slate-400 mb-1 block">Validation Log</label>
-          <div className="h-full min-h-[150px] bg-slate-950 border border-slate-800 rounded p-2.5 font-mono text-[11px] overflow-y-auto">
+          <div className="h-full min-h-[150px] bg-slate-950 border border-slate-800 rounded p-2.5 font-mono text-xs overflow-y-auto">
             {!outputString ? (
               <span className="text-slate-600 italic">Waiting for AI output...</span>
             ) : validationResult?.valid ? (

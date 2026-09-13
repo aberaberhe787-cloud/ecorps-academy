@@ -183,7 +183,7 @@ export const GlobalShortcutsModal: React.FC<GlobalShortcutsModalProps> = ({
                   <span className="text-xs font-medium text-slate-200">
                     {item.description}
                   </span>
-                  <span className="text-[10px] text-slate-500 font-mono">
+                  <span className="text-xs sm:text-xs text-slate-500 font-mono">
                     {item.category}
                   </span>
                 </div>
@@ -191,9 +191,9 @@ export const GlobalShortcutsModal: React.FC<GlobalShortcutsModalProps> = ({
                 <div className="flex items-center gap-1.5 shrink-0">
                   {item.keys.map((k, kidx) => (
                     <React.Fragment key={kidx}>
-                      <kbd className="inline-flex min-w-[24px] items-center justify-center rounded border border-slate-700 bg-slate-800/90 px-2 py-1 font-mono text-[11px] font-semibold text-slate-300 shadow-sm">
+                      <kbd className="inline-flex min-w-[24px] items-center justify-center rounded border border-slate-700 bg-slate-800/90 px-2 py-1 font-mono text-xs font-semibold text-slate-300 shadow-sm">
                         {k === "Ctrl" ? (
-                          <span className="text-[10px]">Ctrl / ⌘</span>
+                          <span className="text-xs sm:text-xs">Ctrl / ⌘</span>
                         ) : (
                           k
                         )}
@@ -211,7 +211,7 @@ export const GlobalShortcutsModal: React.FC<GlobalShortcutsModalProps> = ({
           {/* Footer note */}
           <div className="flex items-center justify-between px-6 py-3 border-t border-slate-800 bg-slate-950/70 text-xs text-slate-400 font-mono">
             <span>Tip: Press <kbd className="text-slate-300 font-bold">Esc</kbd> anytime to dismiss overlays</span>
-            <span className="text-[11px] text-blue-400">Ctrl+K for Universal Search</span>
+            <span className="text-xs text-blue-400">Ctrl+K for Universal Search</span>
           </div>
         </motion.div>
       </div>

@@ -36,12 +36,12 @@ export const PromptQualityMeter: React.FC<PromptQualityMeterProps> = ({
           <h3 className="text-xs sm:text-sm font-semibold text-slate-200">Real-Time Prompt Quality Score</h3>
         </div>
         <div className="flex items-center justify-between sm:justify-end gap-2">
-          <span className="text-[11px] sm:text-xs text-slate-400 font-mono">
+          <span className="text-xs sm:text-xs text-slate-400 font-mono">
             {analysis.wordCount} words • ~{analysis.tokenEstimate} tok
           </span>
           <div
             id="prompt-grade-badge"
-            className={`flex items-center justify-center rounded-lg border px-2 py-0.5 font-mono text-[11px] sm:text-xs font-bold ${getScoreColor(
+            className={`flex items-center justify-center rounded-lg border px-2 py-0.5 font-mono text-xs sm:text-xs font-bold ${getScoreColor(
               analysis.score
             )}`}
           >
@@ -67,14 +67,14 @@ export const PromptQualityMeter: React.FC<PromptQualityMeterProps> = ({
           analysis.techniqueBadges.map((badge, idx) => (
             <span
               key={idx}
-              className="inline-flex items-center gap-1 rounded-md bg-blue-950/70 border border-blue-800/60 px-2 py-0.5 text-[11px] font-medium text-blue-300"
+              className="inline-flex items-center gap-1 rounded-md bg-blue-950/70 border border-blue-800/60 px-2 py-0.5 text-xs font-medium text-blue-300"
             >
               <CheckCircle2 className="h-3 w-3 text-blue-400" />
               {badge}
             </span>
           ))
         ) : (
-          <span className="text-[11px] text-slate-500 italic">No advanced prompting techniques detected yet.</span>
+          <span className="text-xs text-slate-500 italic">No advanced prompting techniques detected yet.</span>
         )}
       </div>
 
@@ -85,7 +85,7 @@ export const PromptQualityMeter: React.FC<PromptQualityMeterProps> = ({
             <span className="font-semibold text-emerald-400 flex items-center gap-1 mb-1">
               <ShieldCheck className="h-3.5 w-3.5" /> Prompt Strengths
             </span>
-            <ul className="space-y-1 text-slate-300 text-[11px]">
+            <ul className="space-y-1 text-slate-300 text-xs">
               {analysis.strengths.map((str, i) => (
                 <li key={i} className="flex items-start gap-1.5">
                   <span className="text-emerald-400 font-bold">•</span>
@@ -101,7 +101,7 @@ export const PromptQualityMeter: React.FC<PromptQualityMeterProps> = ({
             <span className="font-semibold text-amber-400 flex items-center gap-1 mb-1">
               <AlertCircle className="h-3.5 w-3.5" /> Recommended Upgrades
             </span>
-            <ul className="space-y-1 text-slate-300 text-[11px]">
+            <ul className="space-y-1 text-slate-300 text-xs">
               {analysis.suggestions.map((sug, i) => (
                 <li key={i} className="flex items-start gap-1.5">
                   <span className="text-amber-400 font-bold">•</span>

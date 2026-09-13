@@ -189,7 +189,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                   <span className="font-mono font-bold text-white text-sm tracking-tight block">
                     {t.nav.brandName}
                   </span>
-                  <span className="text-[10px] font-mono text-slate-400">
+                  <span className="text-xs sm:text-xs font-mono text-slate-400">
                     Prompt Engineering Academy
                   </span>
                 </div>
@@ -222,7 +222,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                     <Search className="h-4 w-4 text-blue-400 group-hover:scale-110 transition-transform" />
                     <span className="text-xs font-medium">Search curriculum, patterns & topics...</span>
                   </div>
-                  <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-400">
+                  <kbd className="text-xs sm:text-xs font-mono px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-400">
                     ⌘K
                   </kbd>
                 </button>
@@ -231,10 +231,10 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
               {/* Navigation Items List */}
               <div className="pt-4 space-y-1">
                 <div className="px-1 mb-2 flex items-center justify-between">
-                  <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400">
+                  <span className="text-xs font-mono uppercase tracking-wider text-slate-400">
                     Navigation Menu
                   </span>
-                  <span className="text-[10px] font-mono text-blue-400">
+                  <span className="text-xs sm:text-xs font-mono text-blue-400">
                     {navSections.length} Sections
                   </span>
                 </div>
@@ -270,7 +270,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                             </span>
                             {item.badge && (
                               <span
-                                className={`text-[10px] font-mono px-1.5 py-0.2 rounded border ${
+                                className={`text-xs sm:text-xs font-mono px-1.5 py-0.2 rounded border ${
                                   isActive
                                     ? "bg-blue-500/20 text-blue-300 border-blue-400/30"
                                     : "bg-slate-800 text-slate-400 border-slate-700/60"
@@ -280,7 +280,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                               </span>
                             )}
                           </div>
-                          <p className="text-[11px] text-slate-400 truncate">
+                          <p className="text-xs text-slate-400 truncate">
                             {item.description}
                           </p>
                         </div>
@@ -299,7 +299,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
               {/* User Preferences & Toggles Section */}
               <div className="pt-4 space-y-3">
                 <div className="px-1">
-                  <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400">
+                  <span className="text-xs font-mono uppercase tracking-wider text-slate-400">
                     Account & System
                   </span>
                 </div>
@@ -333,7 +333,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                 </div>
 
                 <div className="px-1">
-                  <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400">
+                  <span className="text-xs font-mono uppercase tracking-wider text-slate-400">
                     Preferences & Controls
                   </span>
                 </div>
@@ -345,7 +345,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                       <Sun className="h-3.5 w-3.5 text-amber-400" />
                       Interface Theme
                     </span>
-                    <span className="font-mono text-[11px] text-slate-400 capitalize">
+                    <span className="font-mono text-xs text-slate-400 capitalize">
                       {theme}
                     </span>
                   </div>
@@ -393,7 +393,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                         <span className="text-xs font-semibold text-slate-200">
                           Distraction-Free Mode
                         </span>
-                        <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded border ${
+                        <span className={`text-xs sm:text-xs font-mono px-1.5 py-0.2 rounded border ${
                           isDistractionFreeMode
                             ? "bg-purple-500/20 text-purple-300 border-purple-400/30"
                             : "bg-slate-800 text-slate-400 border-slate-700/60"
@@ -401,7 +401,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                           {isDistractionFreeMode ? "ON" : "OFF"}
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-400 mt-0.5">
+                      <p className="text-xs text-slate-400 mt-0.5">
                         Hides global chrome during active curriculum lessons
                       </p>
                     </div>
@@ -430,7 +430,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                 <div className="grid grid-cols-2 gap-2">
                   {/* Language switcher */}
                   <div className="p-2.5 rounded-xl bg-slate-900/70 border border-slate-800/80">
-                    <span className="text-[10px] font-mono text-slate-400 block mb-1.5 flex items-center gap-1">
+                    <span className="text-xs sm:text-xs font-mono text-slate-400 block mb-1.5 flex items-center gap-1">
                       <Languages className="h-3 w-3 text-blue-400" />
                       Language
                     </span>
@@ -460,7 +460,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
 
                   {/* AI Engine switcher */}
                   <div className="p-2.5 rounded-xl bg-slate-900/70 border border-slate-800/80">
-                    <span className="text-[10px] font-mono text-slate-400 block mb-1.5 flex items-center gap-1">
+                    <span className="text-xs sm:text-xs font-mono text-slate-400 block mb-1.5 flex items-center gap-1">
                       <Zap className="h-3 w-3 text-amber-400" />
                       AI Engine
                     </span>
@@ -493,7 +493,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
               {/* Scholar Profile & Progress Card */}
               <div className="pt-4 space-y-3">
                 <div className="px-1">
-                  <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400">
+                  <span className="text-xs font-mono uppercase tracking-wider text-slate-400">
                     Scholar Progress
                   </span>
                 </div>
@@ -506,7 +506,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                           auth.currentUser?.email?.split("@")[0] ||
                           "Prompt Scholar"}
                       </p>
-                      <p className="text-[10px] text-slate-400 truncate max-w-[180px]">
+                      <p className="text-xs sm:text-xs text-slate-400 truncate max-w-[180px]">
                         {auth.currentUser?.email || "Academic Learner"}
                       </p>
                     </div>
@@ -519,7 +519,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
 
                   {/* Level & XP Progress bar */}
                   <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-[11px] font-mono">
+                    <div className="flex items-center justify-between text-xs font-mono">
                       <span className="text-blue-400 font-semibold">
                         Level {level}
                       </span>

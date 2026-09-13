@@ -73,7 +73,7 @@ export const DailyStreakCounter: React.FC<DailyStreakCounterProps> = ({
             <span className="font-mono text-xs font-bold uppercase tracking-widest text-orange-400">
               Academy Attendance Record
             </span>
-            <span className="flex items-center gap-1 rounded bg-orange-950/80 border border-orange-800/60 px-2 py-0.5 text-[10px] font-mono text-orange-300">
+            <span className="flex items-center gap-1 rounded bg-orange-950/80 border border-orange-800/60 px-2 py-0.5 text-xs sm:text-xs font-mono text-orange-300">
               <ShieldCheck className="h-3 w-3 text-orange-400" />
               Firestore Synced
             </span>
@@ -96,7 +96,7 @@ export const DailyStreakCounter: React.FC<DailyStreakCounterProps> = ({
               <div className="text-2xl sm:text-3xl font-black text-white font-mono leading-none">
                 {streakDays} <span className="text-xs font-normal text-orange-300 uppercase">Days</span>
               </div>
-              <div className="text-[10px] font-mono text-slate-400 mt-1">
+              <div className="text-xs sm:text-xs font-mono text-slate-400 mt-1">
                 Current Active Streak
               </div>
             </div>
@@ -111,7 +111,7 @@ export const DailyStreakCounter: React.FC<DailyStreakCounterProps> = ({
             <Calendar className="h-3.5 w-3.5 text-blue-400" />
             Past 14 Days Attendance
           </span>
-          <span className="text-[11px] font-mono text-slate-400">
+          <span className="text-xs font-mono text-slate-400">
             {totalDaysVisited} total active {totalDaysVisited === 1 ? "day" : "days"} logged
           </span>
         </div>
@@ -127,7 +127,7 @@ export const DailyStreakCounter: React.FC<DailyStreakCounterProps> = ({
                   : "border-slate-800/80 bg-slate-950/60 text-slate-500"
               } ${day.isToday ? "ring-1 ring-blue-400" : ""}`}
             >
-              <span className="text-[9px] font-mono font-bold uppercase">{day.dayName}</span>
+              <span className="text-xs font-mono font-bold uppercase">{day.dayName}</span>
               <span className="text-xs font-bold font-mono my-0.5">{day.dayNum}</span>
               <div className="h-3.5 w-3.5 flex items-center justify-center mt-0.5">
                 {day.isActive ? (
@@ -144,17 +144,17 @@ export const DailyStreakCounter: React.FC<DailyStreakCounterProps> = ({
       {/* Streak Metrics & Milestones */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 space-y-1">
-          <div className="text-[10px] font-mono text-slate-400 uppercase">Longest Streak</div>
+          <div className="text-xs sm:text-xs font-mono text-slate-400 uppercase">Longest Streak</div>
           <div className="text-lg font-black text-white font-mono">{bestStreak} Consecutive Days</div>
-          <p className="text-[10px] text-slate-400">Personal all-time record</p>
+          <p className="text-xs sm:text-xs text-slate-400">Personal all-time record</p>
         </div>
 
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 space-y-1">
-          <div className="text-[10px] font-mono text-slate-400 uppercase">Next Milestone</div>
+          <div className="text-xs sm:text-xs font-mono text-slate-400 uppercase">Next Milestone</div>
           <div className="text-lg font-black text-amber-300 font-mono">
             {streakDays < 3 ? "3 Days (Spark)" : streakDays < 7 ? "7 Days (Habit)" : streakDays < 10 ? "10 Days (Trophy)" : "14 Days (Legend)"}
           </div>
-          <p className="text-[10px] text-slate-400">
+          <p className="text-xs sm:text-xs text-slate-400">
             {streakDays < 3
               ? `${3 - streakDays} days remaining`
               : streakDays < 7
@@ -166,12 +166,12 @@ export const DailyStreakCounter: React.FC<DailyStreakCounterProps> = ({
         </div>
 
         <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3.5 space-y-1">
-          <div className="text-[10px] font-mono text-slate-400 uppercase">Firestore Record</div>
+          <div className="text-xs sm:text-xs font-mono text-slate-400 uppercase">Firestore Record</div>
           <div className="text-lg font-black text-emerald-400 font-mono flex items-center gap-1.5">
             <CheckCircle className="h-4 w-4" />
             <span>Persisted</span>
           </div>
-          <p className="text-[10px] text-slate-400">
+          <p className="text-xs sm:text-xs text-slate-400">
             Last active: {lastActivityDate ? lastActivityDate.slice(0, 10) : todayStr}
           </p>
         </div>
