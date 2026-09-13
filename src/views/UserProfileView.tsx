@@ -18,6 +18,7 @@ import { useApp } from '../context/AppContext';
 import { auth } from '../lib/firebase';
 import { BadgeComponent } from '../components/profile/BadgeComponent';
 import { DailyStreakCounter } from '../components/profile/DailyStreakCounter';
+import { ActivityAnalytics } from '../components/profile/ActivityAnalytics';
 import { MILESTONE_DEFINITIONS } from '../lib/achievementEngine';
 import { ProgressRing } from '../components/profile/ProgressRing';
 import { FOUNDATION_LESSONS } from './PromptEngineeringPath';
@@ -222,6 +223,9 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
         lastActivityDate={userProgress.lastActivityDate}
         isOnline={isOnline}
       />
+
+      {/* Activity Analytics Engine (Recharts Heatmap & Completion Trends) */}
+      <ActivityAnalytics userProgress={userProgress} />
 
       {/* Multi-Track Overview Cards */}
       <section className="space-y-4">
