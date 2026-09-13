@@ -28,8 +28,6 @@ import {
   RotateCcw,
   Compass,
   Download,
-  Route,
-  Map,
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { curriculumModules } from "../data/lessonsData";
@@ -38,7 +36,6 @@ import { exportLessonToPdf } from "../lib/lessonPdfExporter";
 import { LessonAudioPlayer } from "../components/lms/LessonAudioPlayer";
 import { LessonScratchpad } from "../components/lms/LessonScratchpad";
 import { LearningPathway } from "../components/lms/LearningPathway";
-import { LearningMap } from "../components/lms/LearningMap";
 import { ConceptCard } from "../components/lms/ConceptCard";
 import { ActiveRecallQuiz } from "../components/lms/ActiveRecallQuiz";
 import { SandboxChallenge } from "../components/lms/SandboxChallenge";
@@ -94,8 +91,8 @@ export const CurriculumView: React.FC = () => {
   const [readConceptIds, setReadConceptIds] = useState<string[]>([]);
   const [passedCheckpointIds, setPassedCheckpointIds] = useState<string[]>([]);
   const [selectedBloomFilter, setSelectedBloomFilter] = useState<BloomsTaxonomyLevel | "All">("All");
-  const [viewMode, setViewMode] = useState<"learningmap" | "syllabus" | "skilltree" | "lesson">(
-    activeLessonId ? "lesson" : "learningmap"
+  const [viewMode, setViewMode] = useState<"syllabus" | "skilltree" | "lesson">(
+    activeLessonId ? "lesson" : "syllabus"
   );
   const [showCaseStudy, setShowCaseStudy] = useState<boolean>(true);
 
@@ -359,16 +356,16 @@ export const CurriculumView: React.FC = () => {
             {/* View Mode Buttons */}
             <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-950 p-1 shrink-0">
               <button
-                id="view-learningmap-tab"
-                onClick={() => setViewMode("learningmap")}
+                id="view-skilltree-tab"
+                onClick={() => setViewMode("skilltree")}
                 className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
-                  viewMode === "learningmap"
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-900/30"
+                  viewMode === "skilltree"
+                    ? "bg-blue-600 text-white shadow-md"
                     : "text-slate-400 hover:text-white hover:bg-slate-800/60"
                 }`}
               >
-                <Route className="h-3.5 w-3.5" />
-                <span>Learning Map</span>
+                <GitBranch className="h-3.5 w-3.5" />
+                <span>Interactive Skill Tree</span>
               </button>
 
               <button
@@ -376,25 +373,12 @@ export const CurriculumView: React.FC = () => {
                 onClick={() => setViewMode("syllabus")}
                 className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
                   viewMode === "syllabus"
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-900/30"
+                    ? "bg-blue-600 text-white shadow-md"
                     : "text-slate-400 hover:text-white hover:bg-slate-800/60"
                 }`}
               >
                 <BookOpen className="h-3.5 w-3.5" />
                 <span>Syllabus Pathway</span>
-              </button>
-
-              <button
-                id="view-skilltree-tab"
-                onClick={() => setViewMode("skilltree")}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
-                  viewMode === "skilltree"
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-900/30"
-                    : "text-slate-400 hover:text-white hover:bg-slate-800/60"
-                }`}
-              >
-                <GitBranch className="h-3.5 w-3.5" />
-                <span>Skill Tree</span>
               </button>
 
               {activeLessonId && (
@@ -479,23 +463,7 @@ export const CurriculumView: React.FC = () => {
         </div>
 
         {/* ========================================================================= */}
-        {/* VIEW MODE 1: VISUAL SVG LEARNING MAP                                      */}
-        {/* ========================================================================= */}
-        {viewMode === "learningmap" && (
-          <div className="animate-in fade-in duration-300" id="lms-learning-map-view">
-            <LearningMap
-              modules={filteredModules}
-              completedLessonIds={userProgress.completedLessons}
-              activeLessonId={activeLessonId}
-              onSelectLesson={handleSelectLesson}
-              searchFilter={searchQuery}
-              difficultyFilter={difficultyFilter}
-            />
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* VIEW MODE 2: VISUAL INTERACTIVE SKILL TREE                                */}
+        {/* VIEW MODE 1: VISUAL INTERACTIVE SKILL TREE                                */}
         {/* ========================================================================= */}
         {viewMode === "skilltree" && (
           <div className="animate-in fade-in duration-300" id="lms-skill-tree-view">
