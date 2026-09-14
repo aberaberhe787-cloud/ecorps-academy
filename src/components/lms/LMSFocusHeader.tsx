@@ -7,7 +7,8 @@ import {
   Minimize2,
   CheckCircle2,
   GraduationCap,
-  Award
+  Award,
+  Bookmark
 } from "lucide-react";
 import { Lesson, CurriculumModule } from "../../types";
 import { EcorpLogo } from "../EcorpLogo";
@@ -22,6 +23,8 @@ interface LMSFocusHeaderProps {
   isDistractionFree: boolean;
   onToggleDistractionFree: () => void;
   onExitLesson: () => void;
+  isBookmarked?: boolean;
+  onToggleBookmark?: () => void;
 }
 
 export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
@@ -34,6 +37,8 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
   isDistractionFree,
   onToggleDistractionFree,
   onExitLesson,
+  isBookmarked,
+  onToggleBookmark,
 }) => {
   return (
     <div
@@ -116,6 +121,23 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
               </>
             )}
           </button>
+
+          {/* Bookmark Button */}
+          {onToggleBookmark && (
+            <button
+              id="lms-focus-bookmark-btn"
+              onClick={onToggleBookmark}
+              title={isBookmarked ? "Remove from bookmarked topics" : "Bookmark this topic for later review"}
+              className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold transition-all ${
+                isBookmarked
+                  ? "border-amber-500/60 bg-amber-950/80 text-amber-300 shadow-sm shadow-amber-950/50"
+                  : "border-slate-800 bg-slate-900 text-slate-400 hover:text-white hover:border-slate-700"
+              }`}
+            >
+              <Bookmark className={`h-3.5 w-3.5 ${isBookmarked ? "fill-amber-400 text-amber-400" : ""}`} />
+              <span className="hidden sm:inline">{isBookmarked ? "Saved" : "Save"}</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

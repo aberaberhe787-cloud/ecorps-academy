@@ -35,6 +35,10 @@ import {
   Target,
   TrendingUp,
   Zap,
+  Bookmark,
+  X,
+  MessageSquare,
+  Star,
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { curriculumModules } from "../data/lessonsData";
@@ -53,6 +57,7 @@ import { LessonProgressStepper } from "../components/lms/LessonProgressStepper";
 import { EcorpLogo } from "../components/EcorpLogo";
 import { CertificateGenerator } from "../components/CertificateGenerator";
 import { InteractiveSkillTree } from "../components/lms/InteractiveSkillTree";
+import { LessonFeedbackModal } from "../components/lms/LessonFeedbackModal";
 
 const BLOOM_COLORS: Record<BloomsTaxonomyLevel, { bg: string; text: string; border: string }> = {
   Remembering: { bg: "bg-slate-800", text: "text-slate-300", border: "border-slate-700" },
@@ -79,6 +84,7 @@ export const CurriculumView: React.FC = () => {
     setIsDistractionFreeMode,
     currentCurriculum,
     setActiveTab,
+    toggleBookmarkLesson,
     t,
   } = useApp();
 
@@ -106,9 +112,15 @@ export const CurriculumView: React.FC = () => {
   const [showCaseStudy, setShowCaseStudy] = useState<boolean>(true);
 
   // Curriculum Search and Filtering states
-  const [searchQuery, setSearchQuery] = useState<string>("All" === "All" ? "" : "");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [difficultyFilter, setDifficultyFilter] = useState<string>("All");
-  const [statusFilter, setStatusFilter] = useState<"All" | "completed" | "uncompleted">("All");
+  const [statusFilter, setStatusFilter] = useState<"All" | "completed" | "uncompleted" | "bookmarked">("All");
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState<boolean>(false);
+
+  const bookmarkedLessons = useMemo(() => userProgress.bookmarkedLessons || [], [userProgress.bookmarkedLessons]);
+  const bookmarkedCount = bookmarkedLessons.length;
+  const completedCount = userProgress.completedLessons.length;
+  const inProgressCount = Math.max(0, allLessons.length - completedCount);
 
   // Pathway Track Profiles & Metadata
   const PATHWAY_TIERS = useMemo(() => [
@@ -251,13 +263,23 @@ export const CurriculumView: React.FC = () => {
         if (!isModuleInDifficulty) return null;
 
         const matchingLessons = m.lessons.filter((l) => {
+          const q = searchQuery.trim().toLowerCase();
           const matchesSearch =
-            !searchQuery.trim() ||
-            l.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            l.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            l.conceptSummary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (l.objective || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (l.bloomTaxonomyFocus || "").toLowerCase().includes(searchQuery.toLowerCase());
+            !q ||
+            l.title.toLowerCase().includes(q) ||
+            l.subtitle.toLowerCase().includes(q) ||
+            l.conceptSummary.toLowerCase().includes(q) ||
+            (l.objective || "").toLowerCase().includes(q) ||
+            (l.bloomTaxonomyFocus || "").toLowerCase().includes(q) ||
+            (l.difficulty || "").toLowerCase().includes(q) ||
+            (l.keyRules || []).some((r) => r.toLowerCase().includes(q)) ||
+            (l.deepDive || []).some((d) => d.toLowerCase().includes(q)) ||
+            (l.concepts || []).some(
+              (c) =>
+                c.title.toLowerCase().includes(q) ||
+                c.content.toLowerCase().includes(q) ||
+                (c.keyTakeaway || "").toLowerCase().includes(q)
+            );
 
           const matchesDifficulty =
             difficultyFilter === "All" ||
@@ -267,10 +289,12 @@ export const CurriculumView: React.FC = () => {
             (difficultyFilter === "Advanced" && (l.difficulty === "Advanced" || l.difficulty === "Expert" || m.id === "module-3"));
 
           const isLessonDone = userProgress.completedLessons.includes(l.id);
+          const isBookmarked = (userProgress.bookmarkedLessons || []).includes(l.id);
           const matchesStatus =
             statusFilter === "All" ||
             (statusFilter === "completed" && isLessonDone) ||
-            (statusFilter === "uncompleted" && !isLessonDone);
+            (statusFilter === "uncompleted" && !isLessonDone) ||
+            (statusFilter === "bookmarked" && isBookmarked);
 
           return matchesSearch && matchesDifficulty && matchesStatus;
         });
@@ -283,12 +307,16 @@ export const CurriculumView: React.FC = () => {
         };
       })
       .filter((m): m is CurriculumModule => m !== null);
-  }, [currentCurriculum, searchQuery, difficultyFilter, statusFilter, userProgress.completedLessons]);
+  }, [currentCurriculum, searchQuery, difficultyFilter, statusFilter, userProgress.completedLessons, userProgress.bookmarkedLessons]);
 
   const totalMatchingLessons = filteredModules.reduce(
     (acc, m) => acc + m.lessons.length,
     0
   );
+
+  const flatMatchingLessons = useMemo(() => {
+    return filteredModules.flatMap((m) => m.lessons);
+  }, [filteredModules]);
 
   // Sync viewMode if activeLessonId changes
   useEffect(() => {
@@ -356,6 +384,10 @@ export const CurriculumView: React.FC = () => {
       spread: 70,
       origin: { y: 0.6 }
     });
+    // Trigger Send Feedback modal after celebrating lesson completion
+    setTimeout(() => {
+      setIsFeedbackModalOpen(true);
+    }, 600);
   };
 
   const handleExitLesson = () => {
@@ -421,10 +453,234 @@ export const CurriculumView: React.FC = () => {
           isDistractionFree={isDistractionFreeMode}
           onToggleDistractionFree={() => setIsDistractionFreeMode(!isDistractionFreeMode)}
           onExitLesson={handleExitLesson}
+          isBookmarked={bookmarkedLessons.includes(currentLesson.id)}
+          onToggleBookmark={() => toggleBookmarkLesson(currentLesson.id)}
         />
       )}
 
       <div className="w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 space-y-3 sm:space-y-6 ">
+        {/* ========================================================================= */}
+        {/* TOP CURRICULUM SEARCH & FILTER BAR                                        */}
+        {/* ========================================================================= */}
+        {viewMode !== "lesson" && (
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 sm:p-5 shadow-xl backdrop-blur-md space-y-3.5" id="curriculum-top-search-panel">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+              {/* Main Search Input */}
+              <div className="relative flex-1">
+                <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
+                <input
+                  id="curriculum-top-search-input"
+                  type="text"
+                  placeholder="Search curriculum by title or keyword (e.g. delimiters, few-shot, CoT, schemas, system prompt)..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950 pl-10 pr-10 py-2.5 text-xs sm:text-sm text-white placeholder-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all shadow-inner"
+                />
+                {searchQuery ? (
+                  <button
+                    type="button"
+                    id="curriculum-top-search-clear"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-2 p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                    title="Clear search query"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                ) : (
+                  <span className="hidden sm:inline-flex items-center absolute right-3.5 top-2.5 text-[11px] font-mono text-slate-400 border border-slate-700/60 rounded px-1.5 py-0.5">
+                    Filter
+                  </span>
+                )}
+              </div>
+
+              {/* Status & Bookmark Quick Filters */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                {/* All Lessons Filter */}
+                <button
+                  type="button"
+                  id="top-filter-status-all"
+                  onClick={() => setStatusFilter("All")}
+                  className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold border transition-all ${
+                    statusFilter === "All"
+                      ? "bg-blue-600 border-blue-500 text-white shadow-md shadow-blue-900/40"
+                      : "bg-slate-950 border-slate-800 text-slate-300 hover:text-white hover:border-slate-700"
+                  }`}
+                >
+                  <span>All Lessons</span>
+                  <span className="rounded-full bg-slate-800/80 px-1.5 py-0.5 text-[10px] font-mono">
+                    {allLessons.length}
+                  </span>
+                </button>
+
+                {/* Bookmarked / Saved Topics Filter */}
+                <button
+                  type="button"
+                  id="top-filter-status-bookmarked"
+                  onClick={() => setStatusFilter(statusFilter === "bookmarked" ? "All" : "bookmarked")}
+                  className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold border transition-all ${
+                    statusFilter === "bookmarked"
+                      ? "bg-amber-500/20 border-amber-500/60 text-amber-300 shadow-md shadow-amber-950/40"
+                      : "bg-slate-950 border-slate-800 text-slate-300 hover:text-amber-300 hover:border-amber-500/40"
+                  }`}
+                  title="Filter by your bookmarked topics"
+                >
+                  <Bookmark className={`h-3.5 w-3.5 ${statusFilter === "bookmarked" || bookmarkedCount > 0 ? "fill-amber-400 text-amber-400" : ""}`} />
+                  <span>Saved Topics</span>
+                  <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-mono ${
+                    statusFilter === "bookmarked" ? "bg-amber-500/30 text-amber-200" : "bg-slate-800/80 text-slate-300"
+                  }`}>
+                    {bookmarkedCount}
+                  </span>
+                </button>
+
+                {/* In Progress Filter */}
+                <button
+                  type="button"
+                  id="top-filter-status-uncompleted"
+                  onClick={() => setStatusFilter(statusFilter === "uncompleted" ? "All" : "uncompleted")}
+                  className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold border transition-all ${
+                    statusFilter === "uncompleted"
+                      ? "bg-indigo-600 border-indigo-500 text-white shadow-md shadow-indigo-900/40"
+                      : "bg-slate-950 border-slate-800 text-slate-300 hover:text-white hover:border-slate-700"
+                  }`}
+                >
+                  <span>In Progress</span>
+                  <span className="rounded-full bg-slate-800/80 px-1.5 py-0.5 text-[10px] font-mono">
+                    {inProgressCount}
+                  </span>
+                </button>
+
+                {/* Mastered Filter */}
+                <button
+                  type="button"
+                  id="top-filter-status-completed"
+                  onClick={() => setStatusFilter(statusFilter === "completed" ? "All" : "completed")}
+                  className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold border transition-all ${
+                    statusFilter === "completed"
+                      ? "bg-emerald-600 border-emerald-500 text-white shadow-md shadow-emerald-950/40"
+                      : "bg-slate-950 border-slate-800 text-slate-300 hover:text-white hover:border-slate-700"
+                  }`}
+                >
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                  <span>Mastered</span>
+                  <span className="rounded-full bg-slate-800/80 px-1.5 py-0.5 text-[10px] font-mono">
+                    {completedCount}
+                  </span>
+                </button>
+
+                {/* Track Selector Dropdown */}
+                <select
+                  id="top-filter-difficulty-select"
+                  value={difficultyFilter}
+                  onChange={(e) => setDifficultyFilter(e.target.value)}
+                  className="rounded-xl border border-slate-700 bg-slate-950 px-2.5 py-2 text-xs font-semibold text-slate-300 focus:border-blue-500 focus:outline-none transition-colors"
+                >
+                  <option value="All">All Tracks</option>
+                  <option value="Beginner">Beginner Track</option>
+                  <option value="Intermediate">Intermediate Track</option>
+                  <option value="Advanced">Advanced Track</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Live Search & Filter Feedback Strip */}
+            {(searchQuery || statusFilter !== "All" || difficultyFilter !== "All") && (
+              <div className="pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-slate-400">
+                    Showing <strong className="text-white font-mono">{totalMatchingLessons}</strong> of {allLessons.length} lessons
+                  </span>
+                  {searchQuery && (
+                    <span className="rounded-md bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 text-blue-300">
+                      Keyword: "{searchQuery}"
+                    </span>
+                  )}
+                  {statusFilter === "bookmarked" && (
+                    <span className="rounded-md bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-amber-300 flex items-center gap-1 font-semibold">
+                      <Bookmark className="h-3 w-3 fill-amber-400 text-amber-400" />
+                      Bookmarked Topics
+                    </span>
+                  )}
+                  {difficultyFilter !== "All" && (
+                    <span className="rounded-md bg-slate-800 px-2 py-0.5 text-slate-300">
+                      Track: {difficultyFilter}
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  id="curriculum-reset-all-filters-btn"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setStatusFilter("All");
+                    setDifficultyFilter("All");
+                  }}
+                  className="text-xs text-blue-400 hover:text-blue-300 underline underline-offset-2 flex items-center gap-1"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                  Reset all filters
+                </button>
+              </div>
+            )}
+
+            {/* Quick Result Jump Chips (when searching or bookmarked) */}
+            {(searchQuery.trim() || statusFilter === "bookmarked") && flatMatchingLessons.length > 0 && (
+              <div className="pt-1 flex items-center gap-2 overflow-x-auto no-scrollbar">
+                <span className="text-[11px] font-mono text-slate-400 shrink-0">Quick jump:</span>
+                <div className="flex items-center gap-1.5 flex-nowrap">
+                  {flatMatchingLessons.slice(0, 6).map((l) => (
+                    <button
+                      key={l.id}
+                      type="button"
+                      onClick={() => handleSelectLesson(l)}
+                      className="rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 hover:border-blue-500/50 px-2.5 py-1 text-xs text-slate-300 hover:text-white whitespace-nowrap transition-all flex items-center gap-1.5"
+                    >
+                      <span className="truncate max-w-[150px]">{l.title}</span>
+                      <ChevronRight className="h-3 w-3 text-slate-400 shrink-0" />
+                    </button>
+                  ))}
+                  {flatMatchingLessons.length > 6 && (
+                    <span className="text-[11px] text-slate-400 font-mono shrink-0">
+                      +{flatMatchingLessons.length - 6} more below
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Empty State for Bookmarked Filter */}
+            {statusFilter === "bookmarked" && bookmarkedCount === 0 && (
+              <div className="p-3.5 rounded-xl bg-amber-500/5 border border-amber-500/20 text-xs text-amber-300 flex items-center gap-2.5">
+                <Bookmark className="h-4 w-4 text-amber-400 shrink-0" />
+                <div>
+                  <strong className="text-amber-200">No saved topics yet.</strong> Click the bookmark icon on any lesson card in the syllabus or during study to save favorite or unfinished topics here for quick access.
+                </div>
+              </div>
+            )}
+
+            {/* Empty State for Search */}
+            {totalMatchingLessons === 0 && (
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-center space-y-2">
+                <p className="text-xs text-slate-400">
+                  No lessons found matching <strong className="text-slate-200">"{searchQuery}"</strong> with selected filters.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setStatusFilter("All");
+                    setDifficultyFilter("All");
+                  }}
+                  className="rounded-lg bg-blue-600 hover:bg-blue-500 px-3 py-1 text-xs font-semibold text-white transition-colors"
+                >
+                  Clear search and show all lessons
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ========================================================================= */}
         {/* GLOBAL CURRICULUM CONTROLS: PROGRESS TRACKER, SYNC STATUS & VIEW SELECTOR  */}
         {/* ========================================================================= */}
@@ -775,8 +1031,9 @@ export const CurriculumView: React.FC = () => {
                 className="rounded-xl border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-xs text-slate-300 focus:border-blue-500 focus:outline-none"
               >
                 <option value="All">All Status</option>
-                <option value="completed">Completed</option>
-                <option value="uncompleted">In Progress</option>
+                <option value="bookmarked">⭐ Saved ({bookmarkedCount})</option>
+                <option value="uncompleted">In Progress ({inProgressCount})</option>
+                <option value="completed">Mastered ({completedCount})</option>
               </select>
             </div>
           </div>
@@ -1039,6 +1296,20 @@ export const CurriculumView: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-2.5">
+                  <button
+                    id="lesson-bookmark-top-btn"
+                    onClick={() => toggleBookmarkLesson(currentLesson.id)}
+                    className={`flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-semibold transition-all ${
+                      bookmarkedLessons.includes(currentLesson.id)
+                        ? "border-amber-500/60 bg-amber-950/80 text-amber-300 shadow-sm shadow-amber-950/40"
+                        : "border-slate-700 bg-slate-800/90 text-slate-200 hover:text-white hover:border-slate-600"
+                    }`}
+                    title={bookmarkedLessons.includes(currentLesson.id) ? "Remove from bookmarked topics" : "Bookmark this topic for later review"}
+                  >
+                    <Bookmark className={`h-3.5 w-3.5 ${bookmarkedLessons.includes(currentLesson.id) ? "fill-amber-400 text-amber-400" : ""}`} />
+                    <span>{bookmarkedLessons.includes(currentLesson.id) ? "Saved" : "Save Topic"}</span>
+                  </button>
+
                   <button
                     id="lesson-export-pdf-top-btn"
                     onClick={() => exportLessonToPdf(currentLesson)}
@@ -1323,6 +1594,18 @@ export const CurriculumView: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-3">
+                {isCompleted && (
+                  <button
+                    id="lesson-feedback-trigger-btn"
+                    onClick={() => setIsFeedbackModalOpen(true)}
+                    className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/90 hover:bg-slate-700 px-3.5 py-2 text-xs font-semibold text-amber-300 hover:text-amber-200 transition-colors shadow-sm"
+                    title="Rate this lesson and send qualitative feedback"
+                  >
+                    <MessageSquare className="h-3.5 w-3.5 text-amber-400" />
+                    <span>{userProgress.lessonFeedbacks?.[currentLesson.id] ? "Update Feedback" : "Send Feedback"}</span>
+                  </button>
+                )}
+
                 {!isCompleted && (
                   <button
                     id="bottom-complete-lesson-btn"
@@ -1365,6 +1648,13 @@ export const CurriculumView: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Lesson Feedback & Rating Modal */}
+      <LessonFeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={() => setIsFeedbackModalOpen(false)}
+        lesson={currentLesson}
+      />
     </div>
   );
 };

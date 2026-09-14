@@ -21,7 +21,8 @@ import {
   RotateCcw,
   Milestone,
   Route,
-  GraduationCap
+  GraduationCap,
+  Bookmark
 } from "lucide-react";
 import { CurriculumModule, Lesson, BloomsTaxonomyLevel } from "../../types";
 import { useApp } from "../../context/AppContext";
@@ -63,7 +64,8 @@ export const LearningMap: React.FC<LearningMapProps> = ({
   searchFilter = "",
   difficultyFilter = "All",
 }) => {
-  const { t, userProgress } = useApp();
+  const { t, userProgress, toggleBookmarkLesson } = useApp();
+  const bookmarkedLessons = userProgress.bookmarkedLessons || [];
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
@@ -556,20 +558,34 @@ export const LearningMap: React.FC<LearningMapProps> = ({
                     </p>
 
                     {/* Progress & Lesson Count */}
-                    <div className="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
-                      <div className="font-mono text-slate-400">
-                        {modNode.completedLessonsCount}/{modNode.totalLessonsCount} Lessons ({modNode.completionPercent}%)
+                    <div className="mt-3 pt-2.5 border-t border-slate-800/80 space-y-1.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-mono text-xs text-slate-400 font-medium">Lesson Progress</span>
+                        <span className="font-mono text-xs font-bold text-slate-200">
+                          {modNode.completionPercent}% ({modNode.completedLessonsCount}/{modNode.totalLessonsCount})
+                        </span>
                       </div>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleModuleExpand(modNode.module.id);
-                        }}
-                        className="flex items-center gap-1 font-mono text-xs text-blue-400 hover:text-blue-300 bg-blue-950/60 px-2 py-0.5 rounded border border-blue-900/60"
-                      >
-                        <span>{isExpanded ? "Hide Lessons" : "View Lessons"}</span>
-                      </button>
+                      <div className="h-1.5 w-full rounded-full bg-slate-800 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-300 ${
+                            modNode.status === "completed"
+                              ? "bg-emerald-400"
+                              : "bg-gradient-to-r from-blue-500 to-indigo-400"
+                          }`}
+                          style={{ width: `${modNode.completionPercent}%` }}
+                        />
+                      </div>
+                      <div className="pt-1 flex items-center justify-end">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleModuleExpand(modNode.module.id);
+                          }}
+                          className="flex items-center gap-1 font-mono text-xs text-blue-400 hover:text-blue-300 bg-blue-950/60 px-2 py-0.5 rounded border border-blue-900/60"
+                        >
+                          <span>{isExpanded ? "Hide Lessons" : "View Lessons"}</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -693,6 +709,34 @@ export const LearningMap: React.FC<LearningMapProps> = ({
             </div>
           </div>
 
+          {/* Module Lesson Progress Bar */}
+          <div className="py-3 px-4 rounded-xl bg-slate-950/70 border border-slate-800/80 my-3">
+            <div className="flex items-center justify-between text-xs font-mono mb-1.5">
+              <span className="text-slate-300 font-semibold flex items-center gap-1.5">
+                <CheckCircle2 className={`h-3.5 w-3.5 ${activeModuleNode.status === "completed" ? "text-emerald-400" : "text-blue-400"}`} />
+                Lesson Progress
+              </span>
+              <span className="font-bold text-slate-200">
+                <span className={activeModuleNode.status === "completed" ? "text-emerald-400 font-bold" : "text-blue-400 font-bold"}>
+                  {activeModuleNode.completionPercent}%
+                </span>
+                <span className="text-slate-400 ml-1.5 font-normal">
+                  ({activeModuleNode.completedLessonsCount} of {activeModuleNode.totalLessonsCount} completed)
+                </span>
+              </span>
+            </div>
+            <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  activeModuleNode.status === "completed"
+                    ? "bg-gradient-to-r from-emerald-500 to-teal-400"
+                    : "bg-gradient-to-r from-blue-600 via-indigo-500 to-cyan-400"
+                }`}
+                style={{ width: `${activeModuleNode.completionPercent}%` }}
+              />
+            </div>
+          </div>
+
           {/* Module Lessons Grid within Detail */}
           <div className="pt-4">
             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
@@ -702,11 +746,12 @@ export const LearningMap: React.FC<LearningMapProps> = ({
               {activeModuleNode.module.lessons.map((lesson, idx) => {
                 const isDone = completedLessonIds.includes(lesson.id);
                 const isCurrent = activeLessonId === lesson.id;
+                const isBookmarked = bookmarkedLessons.includes(lesson.id);
                 return (
-                  <button
+                  <div
                     key={lesson.id}
                     onClick={() => onSelectLesson(lesson)}
-                    className={`rounded-xl p-3 text-left border transition ${
+                    className={`rounded-xl p-3 text-left border transition cursor-pointer group ${
                       isDone
                         ? "bg-slate-950/80 border-emerald-600/50 hover:border-emerald-400"
                         : isCurrent
@@ -715,16 +760,40 @@ export const LearningMap: React.FC<LearningMapProps> = ({
                     }`}
                   >
                     <div className="flex items-center justify-between text-xs text-slate-400 mb-1 font-mono">
-                      <span>Step {idx + 1}</span>
-                      {isDone ? (
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-                      ) : (
-                        <span>+{lesson.xpReward || 50} XP</span>
-                      )}
+                      <div className="flex items-center gap-1.5">
+                        <span>Step {idx + 1}</span>
+                        {isBookmarked && (
+                          <span className="text-amber-400 text-xs flex items-center gap-0.5" title="Saved to bookmarks">
+                            <Bookmark className="h-3 w-3 fill-amber-400" />
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleBookmarkLesson(lesson.id);
+                          }}
+                          className={`h-6 w-6 rounded flex items-center justify-center transition-all ${
+                            isBookmarked
+                              ? "text-amber-400 bg-amber-500/20 hover:bg-amber-500/30"
+                              : "text-slate-500 hover:text-white hover:bg-slate-800"
+                          }`}
+                          title={isBookmarked ? "Remove bookmark" : "Bookmark lesson"}
+                        >
+                          <Bookmark className={`h-3.5 w-3.5 ${isBookmarked ? "fill-amber-400 text-amber-400" : ""}`} />
+                        </button>
+                        {isDone ? (
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                        ) : (
+                          <span>+{lesson.xpReward || 50} XP</span>
+                        )}
+                      </div>
                     </div>
                     <div className="text-xs font-bold text-white line-clamp-1">{lesson.title}</div>
                     <div className="text-xs text-slate-400 mt-1 line-clamp-2">{lesson.subtitle}</div>
-                  </button>
+                  </div>
                 );
               })}
             </div>

@@ -6,7 +6,8 @@ import {
   UserProgress,
   MissionEvaluationResult,
   Mission,
-  CurriculumModule
+  CurriculumModule,
+  LessonFeedback
 } from "../types";
 import { missions } from "../data/missionsData";
 import { analyzePrompt } from "../lib/promptAnalyzer";
@@ -120,6 +121,8 @@ interface AppContextType {
   saveCustomPrompt: (title: string, promptText: string) => void;
   deleteCustomPrompt: (id: string) => void;
   toggleBookmarkPattern: (patternId: string) => void;
+  toggleBookmarkLesson: (lessonId: string) => void;
+  submitLessonFeedback: (feedback: LessonFeedback) => void;
   syncProgressToDb: (email?: string) => Promise<void>;
   logout: () => Promise<void>;
   
@@ -160,6 +163,7 @@ const initialProgress: UserProgress = {
   missionEvidence: {},
   missionScores: {},
   bookmarkedPatterns: [],
+  bookmarkedLessons: [],
   savedCustomPrompts: [],
   xp: 120, // Initial welcome XP
   streakDays: 1,
@@ -178,6 +182,7 @@ function getProgressFingerprint(p: UserProgress): string {
     scores: p.missionScores,
     prompts: p.savedCustomPrompts.map(x => ({ id: x.id, title: x.title, prompt: x.prompt })),
     bookmarks: [...p.bookmarkedPatterns].sort(),
+    bookmarkedLessons: [...(p.bookmarkedLessons || [])].sort(),
     achievements: p.achievements.map(x => x.id).sort(),
     promptsEngineeredCount: p.promptsEngineeredCount || 0,
   });
@@ -291,7 +296,10 @@ function loadCachedProgress(uid?: string | null): UserProgress {
     }
 
     if (hasLoaded) {
-      return result;
+      return {
+        ...result,
+        bookmarkedLessons: Array.isArray(result.bookmarkedLessons) ? result.bookmarkedLessons : []
+      };
     }
   } catch (e) {
     console.warn("Could not load cached progress from localStorage", e);
@@ -1724,6 +1732,35 @@ Provide:
     });
   };
 
+  const toggleBookmarkLesson = (lessonId: string) => {
+    setUserProgress((prev) => {
+      const current = prev.bookmarkedLessons || [];
+      const isBookmarked = current.includes(lessonId);
+      return {
+        ...prev,
+        bookmarkedLessons: isBookmarked
+          ? current.filter((id) => id !== lessonId)
+          : [...current, lessonId]
+      };
+    });
+  };
+
+  const submitLessonFeedback = (feedback: LessonFeedback) => {
+    setUserProgress((prev) => {
+      const currentFeedbacks = prev.lessonFeedbacks || {};
+      const isFirstTime = !currentFeedbacks[feedback.lessonId];
+      const updatedFeedbacks = {
+        ...currentFeedbacks,
+        [feedback.lessonId]: feedback,
+      };
+      return processUserActivity({
+        ...prev,
+        lessonFeedbacks: updatedFeedbacks,
+        xp: isFirstTime ? prev.xp + 20 : prev.xp,
+      });
+    });
+  };
+
   const loadIntoPlayground = (options: {
     prompt: string;
     systemInstruction?: string;
@@ -1797,6 +1834,8 @@ Provide:
         saveCustomPrompt,
         deleteCustomPrompt,
         toggleBookmarkPattern,
+        toggleBookmarkLesson,
+        submitLessonFeedback,
         syncProgressToDb,
         logout,
         selectedPatternId,

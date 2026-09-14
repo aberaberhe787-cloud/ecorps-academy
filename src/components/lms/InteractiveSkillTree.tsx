@@ -14,8 +14,10 @@ import {
   Zap,
   Info,
   ExternalLink,
+  Bookmark,
 } from "lucide-react";
 import { Lesson, CurriculumModule, BloomsTaxonomyLevel } from "../../types";
+import { useApp } from "../../context/AppContext";
 
 interface SkillNode {
   lesson: Lesson;
@@ -45,6 +47,8 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
   searchFilter = "",
   difficultyFilter = "All",
 }) => {
+  const { userProgress, toggleBookmarkLesson } = useApp();
+  const bookmarkedLessons = userProgress.bookmarkedLessons || [];
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
   // Build the ordered skill nodes with explicit unlock dependencies
@@ -272,6 +276,38 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
                 </div>
               </div>
 
+              {/* Tier Lesson Progress Bar */}
+              {(() => {
+                const tierDoneCount = tierNodes.filter((n) => completedLessonIds.includes(n.lesson.id)).length;
+                const tierPercent = Math.round((tierDoneCount / (tierNodes.length || 1)) * 100);
+                return (
+                  <div className="px-3 py-2 rounded-xl bg-slate-950/60 border border-slate-800/60 space-y-1.5">
+                    <div className="flex items-center justify-between text-xs font-mono">
+                      <span className="text-slate-300 font-semibold flex items-center gap-1.5">
+                        <CheckCircle2 className={`h-3 w-3 ${tierCompleted ? "text-emerald-400" : "text-blue-400"}`} />
+                        Lesson Progress
+                      </span>
+                      <span className="text-slate-300">
+                        <span className={tierCompleted ? "text-emerald-400 font-bold" : "text-blue-400 font-bold"}>
+                          {tierPercent}%
+                        </span>
+                        <span className="text-slate-400 font-normal ml-1">
+                          ({tierDoneCount}/{tierNodes.length} completed)
+                        </span>
+                      </span>
+                    </div>
+                    <div className="h-1.5 w-full rounded-full bg-slate-800 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          tierCompleted ? "bg-emerald-400" : "bg-gradient-to-r from-blue-500 to-cyan-400"
+                        }`}
+                        style={{ width: `${tierPercent}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Tier Skill Nodes Grid with Connection Connectors */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 relative">
                 {tierNodes.map((node, nodeIdx) => {
@@ -279,6 +315,7 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
                   const isUnlocked = isNodeUnlocked(node);
                   const isCurrentActive = activeLessonId === node.lesson.id;
                   const highlighted = isHighlighted(node);
+                  const isBookmarked = bookmarkedLessons.includes(node.lesson.id);
 
                   // Find prerequisite lesson names for tooltip/lock explanation
                   const prereqNodes = node.prerequisites
@@ -309,9 +346,16 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
                         <div>
                           {/* Card Top Meta */}
                           <div className="flex items-center justify-between gap-1 mb-2">
-                            <span className="font-mono text-xs sm:text-xs text-slate-400 font-semibold">
-                              STEP {node.tier}.{node.indexInTier + 1}
-                            </span>
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-mono text-xs sm:text-xs text-slate-400 font-semibold">
+                                STEP {node.tier}.{node.indexInTier + 1}
+                              </span>
+                              {isBookmarked && (
+                                <span className="flex items-center text-amber-400" title="Saved to bookmarks">
+                                  <Bookmark className="h-3 w-3 fill-amber-400" />
+                                </span>
+                              )}
+                            </div>
 
                             {isCompleted ? (
                               <span className="flex items-center gap-1 text-xs sm:text-xs font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/50 px-1.5 py-0.5 rounded">
@@ -348,9 +392,26 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
 
                         {/* Card Bottom Meta */}
                         <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-xs sm:text-xs">
-                          <div className="flex items-center gap-1.5 text-slate-400 font-mono">
-                            <Clock className="h-3 w-3 text-slate-400" />
-                            <span>{node.lesson.estimatedMinutes}m</span>
+                          <div className="flex items-center gap-2 text-slate-400 font-mono">
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-3 w-3 text-slate-400" />
+                              <span>{node.lesson.estimatedMinutes}m</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleBookmarkLesson(node.lesson.id);
+                              }}
+                              className={`h-5 w-5 rounded flex items-center justify-center transition-all ${
+                                isBookmarked
+                                  ? "text-amber-400 bg-amber-500/20 hover:bg-amber-500/30"
+                                  : "text-slate-500 hover:text-white hover:bg-slate-800"
+                              }`}
+                              title={isBookmarked ? "Remove bookmark" : "Bookmark this topic"}
+                            >
+                              <Bookmark className={`h-3 w-3 ${isBookmarked ? "fill-amber-400 text-amber-400" : ""}`} />
+                            </button>
                           </div>
 
                           <span className="font-mono font-bold text-amber-300">
@@ -407,6 +468,20 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => toggleBookmarkLesson(activeDetailNode.lesson.id)}
+                className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${
+                  bookmarkedLessons.includes(activeDetailNode.lesson.id)
+                    ? "border-amber-500/60 bg-amber-950/70 text-amber-300 hover:bg-amber-900/50"
+                    : "border-slate-700 bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700"
+                }`}
+                title={bookmarkedLessons.includes(activeDetailNode.lesson.id) ? "Remove bookmark" : "Bookmark this topic"}
+              >
+                <Bookmark className={`h-3.5 w-3.5 ${bookmarkedLessons.includes(activeDetailNode.lesson.id) ? "fill-amber-400 text-amber-400" : ""}`} />
+                <span>{bookmarkedLessons.includes(activeDetailNode.lesson.id) ? "Saved" : "Save"}</span>
+              </button>
+
               <button
                 onClick={() => setSelectedNodeId(null)}
                 className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-700"

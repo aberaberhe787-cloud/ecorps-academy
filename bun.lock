@@ -23,6 +23,7 @@
         "motion": "^12.23.24",
         "pdfkit": "^0.20.1",
         "pg": "^8.23.0",
+        "prismjs": "^1.30.0",
         "react": "^19.0.1",
         "react-dom": "^19.0.1",
         "react-markdown": "^10.1.0",
@@ -40,6 +41,7 @@
         "@types/mocha": "^10.0.10",
         "@types/node": "^26.2.0",
         "@types/pdfkit": "^0.17.6",
+        "@types/prismjs": "^1.26.6",
         "autoprefixer": "^10.4.21",
         "chai": "^6.2.2",
         "drizzle-kit": "^0.31.10",
@@ -626,6 +628,8 @@
     "@types/pako": ["@types/pako@2.0.4", "", {}, ""],
 
     "@types/pdfkit": ["@types/pdfkit@0.17.6", "", { "dependencies": { "@types/node": "*" } }, ""],
+
+    "@types/prismjs": ["@types/prismjs@1.26.6", "", {}, "sha512-vqlvI7qlMvcCBbVe0AKAb4f97//Hy0EBTaiW8AalRnG/xAN5zOiWWyrNqNXeq8+KAuvRewjCVY1+IPxk4RdNYw=="],
 
     "@types/qs": ["@types/qs@6.15.1", "", {}, ""],
 
@@ -1898,6 +1902,8 @@
     "pretty-format": ["pretty-format@30.5.1", "", { "dependencies": { "@jest/react-is-18": "npm:react-is@^18.3.1", "@jest/react-is-19": "npm:react-is@^19.2.5", "@jest/schemas": "30.5.0", "ansi-styles": "^5.2.0" } }, "sha512-byhRAPguVKMQIj4kjJwJ5lAskVhfuiSdiYl/aLTWpgkGEmic2jYhJh1yE9ih8Ox44Xg9ccCT11/S6QrzSJuNrg=="],
 
     "prisma": ["prisma@7.10.0", "", { "dependencies": { "@prisma/config": "7.10.0", "@prisma/dev": "0.24.17", "@prisma/engines": "7.10.0", "@prisma/studio-core": "0.33.0", "mysql2": "3.15.3", "postgres": "3.4.7" }, "peerDependencies": { "better-sqlite3": ">=9.0.0", "typescript": ">=5.4.0" }, "optionalPeers": ["better-sqlite3", "typescript"], "bin": "build/index.js" }, ""],
+
+    "prismjs": ["prismjs@1.30.0", "", {}, "sha512-DEvV2ZF2r2/63V+tK8hQvrR2ZGn10srHbXviTlcv7Kpzw8jWiNTqbVgjO3IY8RxrrOUF8VPMQQFysYYYv0YZxw=="],
 
     "process": ["process@0.11.10", "", {}, ""],
 

@@ -189,6 +189,19 @@ export interface MissionEvaluationResult {
   xpEarned: number;
 }
 
+export interface LessonFeedback {
+  id: string;
+  lessonId: string;
+  lessonTitle: string;
+  rating: number; // 1 to 5
+  clarityRating?: number; // 1 to 5
+  practicalityRating?: number; // 1 to 5
+  pacing?: "too-slow" | "just-right" | "too-fast";
+  comment: string;
+  tags?: string[];
+  submittedAt: number;
+}
+
 export interface Achievement {
   id: string;
   title: string;
@@ -204,6 +217,8 @@ export interface UserProgress {
   missionEvidence?: Record<string, string>;
   missionScores: Record<string, number>;
   bookmarkedPatterns: string[];
+  bookmarkedLessons?: string[];
+  lessonFeedbacks?: Record<string, LessonFeedback>;
   savedCustomPrompts: { id: string; title: string; prompt: string; createdAt: number }[];
   xp: number;
   streakDays: number;

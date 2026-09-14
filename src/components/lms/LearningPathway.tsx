@@ -8,7 +8,8 @@ import {
   ChevronRight,
   BookOpen,
   GraduationCap,
-  Play
+  Play,
+  Bookmark
 } from "lucide-react";
 import { CurriculumModule, Lesson, BloomsTaxonomyLevel } from "../../types";
 import { useApp } from "../../context/AppContext";
@@ -40,7 +41,8 @@ export const LearningPathway: React.FC<LearningPathwayProps> = ({
   selectedBloomFilter = "All",
   onSelectBloomFilter,
 }) => {
-  const { t } = useApp();
+  const { t, userProgress, toggleBookmarkLesson } = useApp();
+  const bookmarkedLessonIds = userProgress.bookmarkedLessons || [];
 
   const bloomLevels: (BloomsTaxonomyLevel | "All")[] = [
     "All",
@@ -144,6 +146,34 @@ export const LearningPathway: React.FC<LearningPathwayProps> = ({
                 </div>
               </div>
 
+              {/* Lesson Progress Percentage Bar */}
+              <div className="px-4 sm:px-5 py-3 bg-slate-950/60 border-b border-slate-800/80">
+                <div className="flex items-center justify-between text-xs font-mono mb-2">
+                  <span className="flex items-center gap-1.5 text-slate-300 font-semibold">
+                    <CheckCircle2 className={`h-3.5 w-3.5 ${isModuleComplete ? "text-emerald-400" : "text-blue-400"}`} />
+                    <span>Lesson Progress</span>
+                  </span>
+                  <span className="font-bold flex items-center gap-2">
+                    <span className={isModuleComplete ? "text-emerald-400 font-bold" : "text-blue-400 font-bold"}>
+                      {Math.round((completedCount / (module.lessons.length || 1)) * 100)}%
+                    </span>
+                    <span className="text-slate-400 font-normal">
+                      ({completedCount} of {module.lessons.length} {t.curriculum.completed || "completed"})
+                    </span>
+                  </span>
+                </div>
+                <div className="relative h-2.5 w-full rounded-full bg-slate-800/80 overflow-hidden shadow-inner p-[1px]">
+                  <div
+                    className={`h-full transition-all duration-500 rounded-full ${
+                      isModuleComplete
+                        ? "bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-300 shadow-sm shadow-emerald-500/50"
+                        : "bg-gradient-to-r from-blue-600 via-indigo-500 to-cyan-400 shadow-sm shadow-blue-500/50"
+                    }`}
+                    style={{ width: `${Math.round((completedCount / (module.lessons.length || 1)) * 100)}%` }}
+                  />
+                </div>
+              </div>
+
               {/* Lesson Stepper Nodes */}
               <div className="p-3 sm:p-4 space-y-2.5">
                 {filteredLessons.map((lesson, lIdx) => {
@@ -157,6 +187,7 @@ export const LearningPathway: React.FC<LearningPathwayProps> = ({
                   const bloomStyle = BLOOM_COLORS[bloom] || BLOOM_COLORS.Understanding;
                   const readingStats = calculateLessonReadingStats(lesson);
                   const diffConfig = getDifficultyBadgeConfig(lesson.difficulty);
+                  const isBookmarked = bookmarkedLessonIds.includes(lesson.id);
 
                   return (
                     <div
@@ -212,6 +243,16 @@ export const LearningPathway: React.FC<LearningPathwayProps> = ({
                             >
                               {bloom}
                             </span>
+                            {/* Bookmarked Badge */}
+                            {isBookmarked && (
+                              <span
+                                className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/40 shadow-sm"
+                                title="Topic saved to your bookmarks"
+                              >
+                                <Bookmark className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
+                                <span>Saved</span>
+                              </span>
+                            )}
                             {/* Mobile read time badge */}
                             <span className="sm:hidden flex items-center gap-1 text-xs font-mono text-slate-400">
                               <Clock className="h-3 w-3 text-blue-400" />
@@ -240,7 +281,25 @@ export const LearningPathway: React.FC<LearningPathwayProps> = ({
                           </span>
                         </div>
 
-                        <div className="flex items-center">
+                        <div className="flex items-center gap-2">
+                          {/* Bookmark Toggle Button */}
+                          <button
+                            type="button"
+                            id={`pathway-bookmark-btn-${lesson.id}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleBookmarkLesson(lesson.id);
+                            }}
+                            className={`flex items-center justify-center h-8 w-8 rounded-lg border transition-all ${
+                              isBookmarked
+                                ? "bg-amber-500/20 border-amber-500/60 text-amber-400 hover:bg-amber-500/30"
+                                : "bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 hover:bg-slate-800"
+                            }`}
+                            title={isBookmarked ? "Remove from bookmarked topics" : "Bookmark this topic for quick review later"}
+                          >
+                            <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-amber-400 text-amber-400" : ""}`} />
+                          </button>
+
                           {isCurrent ? (
                             <span className="rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-1.5 text-sm font-bold text-white shadow-lg flex items-center gap-1.5 transition-colors">
                               {t.curriculum.current} <ChevronRight className="h-4 w-4" />
