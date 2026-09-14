@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { CurriculumModule, Lesson, BloomsTaxonomyLevel } from "../../types";
 import { useApp } from "../../context/AppContext";
+import { calculateLessonReadingStats, getDifficultyBadgeConfig } from "../../lib/lessonCalculations";
 
 interface LearningPathwayProps {
   modules: CurriculumModule[];
@@ -154,6 +155,8 @@ export const LearningPathway: React.FC<LearningPathwayProps> = ({
                   
                   const bloom = lesson.bloomTaxonomyFocus || "Understanding";
                   const bloomStyle = BLOOM_COLORS[bloom] || BLOOM_COLORS.Understanding;
+                  const readingStats = calculateLessonReadingStats(lesson);
+                  const diffConfig = getDifficultyBadgeConfig(lesson.difficulty);
 
                   return (
                     <div
@@ -191,14 +194,28 @@ export const LearningPathway: React.FC<LearningPathwayProps> = ({
 
                         {/* Text details */}
                         <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
                             <span className={`font-semibold text-sm truncate ${isCurrent ? "text-white text-base" : "text-slate-200 group-hover:text-white"}`}>
                               {lesson.title}
                             </span>
+                            {/* Difficulty Level Badge */}
+                            <span
+                              className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-mono font-bold border ${diffConfig.bg} ${diffConfig.text} ${diffConfig.border} shadow-sm`}
+                              title={`Difficulty Level: ${diffConfig.label}`}
+                            >
+                              <span className={`h-1.5 w-1.5 rounded-full ${diffConfig.dotBg}`} />
+                              <span>{diffConfig.label}</span>
+                            </span>
+                            {/* Bloom's Taxonomy Badge */}
                             <span
                               className={`rounded px-1.5 py-0.5 text-xs font-mono font-semibold border ${bloomStyle.bg} ${bloomStyle.text} ${bloomStyle.border}`}
                             >
                               {bloom}
+                            </span>
+                            {/* Mobile read time badge */}
+                            <span className="sm:hidden flex items-center gap-1 text-xs font-mono text-slate-400">
+                              <Clock className="h-3 w-3 text-blue-400" />
+                              <span>{readingStats.display}</span>
                             </span>
                           </div>
                           <p className={`text-xs line-clamp-1 ${isCurrent ? "text-blue-200" : "text-slate-400"}`}>
@@ -210,9 +227,12 @@ export const LearningPathway: React.FC<LearningPathwayProps> = ({
                       {/* Right: Meta stats & action button */}
                       <div className="flex items-center gap-4 shrink-0">
                         <div className={`hidden sm:flex items-center gap-3 text-xs font-mono ${isCurrent ? "text-blue-300" : "text-slate-400"}`}>
-                          <span className="flex items-center gap-1.5">
-                            <Clock className="h-3.5 w-3.5 opacity-70" />
-                            {lesson.estimatedMinutes}{t.curriculum.mins}
+                          <span
+                            className="flex items-center gap-1.5"
+                            title={`Calculated reading time based on content length (~${readingStats.wordCount} words): ${readingStats.display}`}
+                          >
+                            <Clock className="h-3.5 w-3.5 opacity-90 text-blue-400" />
+                            <span className="font-semibold text-slate-200">{readingStats.display}</span>
                           </span>
                           <span className="flex items-center gap-1.5 text-amber-400 font-semibold">
                             <Sparkles className="h-3.5 w-3.5" />

@@ -3,7 +3,7 @@ import {
   Play, RotateCcw, Sparkles, Columns2, Sliders, Save, Trash2,
   History, Target, Terminal, Bookmark, Check, ChevronDown, ChevronUp,
   Zap, Code2, ShieldAlert, PanelRightOpen, PanelRightClose, X,
-  Clock, BookmarkCheck, Loader2, Mic, MicOff
+  Clock, BookmarkCheck, Loader2, Mic, MicOff, Copy
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { PromptQualityMeter } from "../components/PromptQualityMeter";
@@ -156,17 +156,29 @@ const SideDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
                     <pre className="rounded-lg bg-slate-950 p-2 font-mono text-xs sm:text-xs text-slate-300 whitespace-pre-wrap max-h-24 overflow-y-auto border border-slate-800 leading-relaxed">
                       {item.prompt.slice(0, 200)}{item.prompt.length > 200 ? "…" : ""}
                     </pre>
-                    <button
-                      onClick={() => {
-                        setPrompt(item.prompt);
-                        if (item.systemInstruction) setSystemInstruction(item.systemInstruction);
-                        setPlaygroundSubTab("sandbox");
-                        onClose();
-                      }}
-                      className="w-full rounded-lg bg-slate-800 py-1.5 text-xs font-semibold text-slate-300 hover:bg-blue-600 hover:text-white transition-colors"
-                    >
-                      Reload in Editor
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(item.prompt);
+                        }}
+                        className="flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800/80 px-2 py-1.5 text-xs text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
+                        title="Copy prompt to clipboard"
+                      >
+                        <Copy className="h-3 w-3" />
+                        <span>Copy</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setPrompt(item.prompt);
+                          if (item.systemInstruction) setSystemInstruction(item.systemInstruction);
+                          setPlaygroundSubTab("sandbox");
+                          onClose();
+                        }}
+                        className="flex-1 rounded-lg bg-slate-800 py-1.5 text-xs font-semibold text-slate-300 hover:bg-blue-600 hover:text-white transition-colors text-center"
+                      >
+                        Reload in Editor
+                      </button>
+                    </div>
                   </div>
                 ))
               )}
@@ -192,12 +204,22 @@ const SideDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
                     <pre className="rounded-lg bg-slate-950 p-2 font-mono text-xs sm:text-xs text-slate-300 whitespace-pre-wrap max-h-24 overflow-y-auto border border-slate-800 leading-relaxed">
                       {p.prompt.slice(0, 200)}{p.prompt.length > 200 ? "…" : ""}
                     </pre>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(p.prompt);
+                        }}
+                        className="flex items-center gap-1 rounded-lg border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                        title="Copy to clipboard"
+                      >
+                        <Copy className="h-3 w-3" />
+                        <span>Copy</span>
+                      </button>
                       <button
                         onClick={() => deleteCustomPrompt(p.id)}
-                        className="flex items-center gap-1 rounded-lg border border-rose-900/50 px-2 py-1 text-xs sm:text-xs text-rose-400 hover:bg-rose-950/40 transition-colors"
+                        className="flex items-center gap-1 rounded-lg border border-rose-900/50 px-2 py-1 text-xs text-rose-400 hover:bg-rose-950/40 transition-colors"
                       >
-                        <Trash2 className="h-3 w-3" /> Delete
+                        <Trash2 className="h-3 w-3" />
                       </button>
                       <button
                         onClick={() => {
@@ -208,7 +230,7 @@ const SideDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
                           a.download = `${p.title.replace(/\s+/g, '_')}.json`;
                           a.click();
                         }}
-                        className="flex items-center gap-1 rounded-lg border border-slate-700 px-2 py-1 text-xs sm:text-xs text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                        className="flex items-center gap-1 rounded-lg border border-slate-700 px-2 py-1 text-xs text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
                       >
                         JSON
                       </button>
@@ -222,7 +244,7 @@ const SideDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
                           a.download = `${p.title.replace(/\s+/g, '_')}.md`;
                           a.click();
                         }}
-                        className="flex items-center gap-1 rounded-lg border border-slate-700 px-2 py-1 text-xs sm:text-xs text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                        className="flex items-center gap-1 rounded-lg border border-slate-700 px-2 py-1 text-xs text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
                       >
                         MD
                       </button>
@@ -232,7 +254,7 @@ const SideDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
                           setPlaygroundSubTab("sandbox");
                           onClose();
                         }}
-                        className="flex-1 rounded-lg bg-blue-600 py-1.5 text-xs font-semibold text-white hover:bg-blue-500 transition-colors"
+                        className="flex-1 rounded-lg bg-blue-600 py-1 text-xs font-semibold text-white hover:bg-blue-500 transition-colors text-center"
                       >
                         Load
                       </button>
@@ -274,6 +296,15 @@ export const PlaygroundView: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [promptCopied, setPromptCopied] = useState(false);
+  const [compBCopied, setCompBCopied] = useState(false);
+
+  const handleCopyPrompt = () => {
+    if (!prompt.trim()) return;
+    navigator.clipboard.writeText(prompt);
+    setPromptCopied(true);
+    setTimeout(() => setPromptCopied(false), 2000);
+  };
 
   const [presetLoadedName, setPresetLoadedName] = useState<string | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
@@ -647,14 +678,36 @@ export const PlaygroundView: React.FC = () => {
 
               {/* Execution Bar */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 border-t border-slate-800 bg-slate-950/70 px-3 sm:px-4 py-2.5 sm:py-3">
-                <button
-                  id="clear-prompt-btn"
-                  onClick={() => setPrompt("")}
-                  className="flex items-center justify-center gap-1 text-xs text-slate-400 hover:text-slate-200 py-1.5 sm:py-0"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  <span>Reset</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    id="clear-prompt-btn"
+                    onClick={() => setPrompt("")}
+                    className="flex items-center justify-center gap-1 text-xs text-slate-400 hover:text-slate-200 py-1.5 sm:py-1 px-2.5 rounded-lg hover:bg-slate-900 transition-colors"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    <span>Reset</span>
+                  </button>
+                  <button
+                    id="copy-prompt-btn"
+                    type="button"
+                    onClick={handleCopyPrompt}
+                    disabled={!prompt.trim()}
+                    className="flex items-center justify-center gap-1.5 text-xs text-slate-400 hover:text-white py-1.5 sm:py-1 px-2.5 rounded-lg hover:bg-slate-800/80 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                    title="Copy prompt text to clipboard"
+                  >
+                    {promptCopied ? (
+                      <>
+                        <Check className="h-3.5 w-3.5 text-emerald-400" />
+                        <span className="text-emerald-400 font-semibold">Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-3.5 w-3.5 text-slate-400" />
+                        <span>Copy to Clipboard</span>
+                      </>
+                    )}
+                  </button>
+                </div>
                 <button
                   id="run-prompt-btn"
                   onClick={() => isComparisonMode ? executeComparison() : executeCurrentPrompt()}
@@ -684,7 +737,33 @@ export const PlaygroundView: React.FC = () => {
                     Variant B — Baseline / Naive
                     <Tooltip content="The control variant. Input a raw, conversational, or un-engineered prompt here to contrast performance." />
                   </span>
-                  <span className="text-xs text-slate-500 font-mono">{comparisonPromptB.length} chars</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!comparisonPromptB) return;
+                        navigator.clipboard.writeText(comparisonPromptB);
+                        setCompBCopied(true);
+                        setTimeout(() => setCompBCopied(false), 2000);
+                      }}
+                      disabled={!comparisonPromptB.trim()}
+                      className="flex items-center gap-1 text-xs text-slate-400 hover:text-white px-2 py-1 rounded bg-slate-800/60 hover:bg-slate-800 transition-colors disabled:opacity-40"
+                      title="Copy Variant B to clipboard"
+                    >
+                      {compBCopied ? (
+                        <>
+                          <Check className="h-3 w-3 text-emerald-400" />
+                          <span className="text-emerald-400">Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-3 w-3" />
+                          <span>Copy to Clipboard</span>
+                        </>
+                      )}
+                    </button>
+                    <span className="text-xs text-slate-500 font-mono">{comparisonPromptB.length} chars</span>
+                  </div>
                 </div>
                 <textarea
                   id="comparison-prompt-b-editor"

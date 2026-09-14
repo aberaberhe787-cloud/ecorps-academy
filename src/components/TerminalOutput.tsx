@@ -8,7 +8,8 @@ import {
   Layers,
   Sparkles,
   AlertTriangle,
-  RotateCcw
+  RotateCcw,
+  Code2,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { ExecutionResult } from "../types";
@@ -20,6 +21,53 @@ interface TerminalOutputProps {
   badge?: string;
   onRetry?: () => void;
 }
+
+const CodeBlockWithCopy: React.FC<{ language?: string; codeString: string; children: React.ReactNode }> = ({
+  language,
+  codeString,
+  children,
+}) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyCode = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(codeString);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="relative my-3 rounded-xl border border-slate-800 bg-slate-950 overflow-hidden group shadow-md">
+      <div className="flex items-center justify-between px-3.5 py-1.5 bg-slate-900/90 border-b border-slate-800 text-xs font-mono text-slate-400">
+        <span className="flex items-center gap-1.5 font-semibold text-slate-300 uppercase tracking-wider">
+          <Code2 className="h-3.5 w-3.5 text-blue-400" />
+          <span>{language || "code"}</span>
+        </span>
+        <button
+          type="button"
+          onClick={handleCopyCode}
+          className="flex items-center gap-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 px-2.5 py-1 text-xs font-medium text-slate-200 hover:text-white transition-all border border-slate-700/80 shadow-sm"
+          title="Copy code block to clipboard"
+        >
+          {copied ? (
+            <>
+              <Check className="h-3.5 w-3.5 text-emerald-400" />
+              <span className="text-emerald-400 font-semibold">Copied!</span>
+            </>
+          ) : (
+            <>
+              <Copy className="h-3.5 w-3.5 text-slate-400" />
+              <span>Copy to Clipboard</span>
+            </>
+          )}
+        </button>
+      </div>
+      <pre className="p-3.5 overflow-x-auto text-xs font-mono text-slate-200 leading-relaxed bg-slate-950">
+        {children}
+      </pre>
+    </div>
+  );
+};
 
 export const TerminalOutput: React.FC<TerminalOutputProps> = ({
   result,
@@ -63,17 +111,27 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
               <button
                 id="toggle-raw-btn"
                 onClick={() => setViewRaw(!viewRaw)}
-                className="rounded px-2 py-1 text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                className="rounded px-2.5 py-1 text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors"
               >
-                {viewRaw ? "Formatted" : "Raw Text"}
+                {viewRaw ? "Formatted View" : "Raw Text"}
               </button>
               <button
                 id="copy-output-btn"
                 onClick={handleCopy}
-                className="flex items-center gap-1 rounded bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
+                className="flex items-center gap-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:text-white border border-slate-700 transition-all shadow-sm active:scale-95"
+                title="Copy entire output to clipboard"
               >
-                {copied ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
-                <span>{copied ? "Copied!" : "Copy"}</span>
+                {copied ? (
+                  <>
+                    <Check className="h-3.5 w-3.5 text-emerald-400" />
+                    <span className="text-emerald-400">Copied to Clipboard!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3.5 w-3.5 text-slate-400" />
+                    <span>Copy to Clipboard</span>
+                  </>
+                )}
               </button>
             </>
           )}
@@ -173,13 +231,57 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
           </div>
         ) : result?.status === "success" ? (
           viewRaw ? (
-            <pre className="font-mono text-xs text-slate-300 whitespace-pre overflow-x-auto select-text leading-relaxed">
-              {result.output}
-            </pre>
+            <div className="relative rounded-xl border border-slate-800 bg-slate-950 p-4">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+                <span className="text-xs font-mono text-slate-400">Raw Terminal Stream</span>
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="flex items-center gap-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-300 hover:text-white border border-slate-700 transition-colors"
+                  title="Copy raw text to clipboard"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="h-3 w-3 text-emerald-400" />
+                      <span className="text-emerald-400">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3 w-3 text-slate-400" />
+                      <span>Copy to Clipboard</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              <pre className="font-mono text-xs text-slate-300 whitespace-pre overflow-x-auto select-text leading-relaxed">
+                {result.output}
+              </pre>
+            </div>
           ) : (
             <div className="prose prose-invert prose-sm max-w-none text-slate-200 leading-relaxed">
               <div className="markdown-body">
-                <ReactMarkdown>{result.output}</ReactMarkdown>
+                <ReactMarkdown
+                  components={{
+                    code({ inline, className, children, ...props }: any) {
+                      const match = /language-(\w+)/.exec(className || "");
+                      const codeString = String(children).replace(/\n$/, "");
+                      if (!inline) {
+                        return (
+                          <CodeBlockWithCopy language={match ? match[1] : undefined} codeString={codeString}>
+                            {children}
+                          </CodeBlockWithCopy>
+                        );
+                      }
+                      return (
+                        <code className="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-xs text-blue-300 border border-slate-700/60" {...props}>
+                          {children}
+                        </code>
+                      );
+                    },
+                  }}
+                >
+                  {result.output}
+                </ReactMarkdown>
               </div>
             </div>
           )

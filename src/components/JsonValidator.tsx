@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Braces, CheckCircle2, XCircle, Code2 } from 'lucide-react';
+import { Braces, CheckCircle2, XCircle, Code2, Copy, Check } from 'lucide-react';
 
 interface JsonValidatorProps {
   outputString: string;
@@ -8,6 +8,14 @@ interface JsonValidatorProps {
 export const JsonValidator: React.FC<JsonValidatorProps> = ({ outputString }) => {
   const [schemaStr, setSchemaStr] = useState("{\n  \"type\": \"object\",\n  \"properties\": {\n    \"name\": {\"type\": \"string\"}\n  },\n  \"required\": [\"name\"]\n}");
   const [validationResult, setValidationResult] = useState<{valid: boolean; error?: string; parsedData?: any} | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyJson = () => {
+    if (!validationResult?.parsedData) return;
+    navigator.clipboard.writeText(JSON.stringify(validationResult.parsedData, null, 2));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   useEffect(() => {
     if (!outputString) {
@@ -89,8 +97,19 @@ export const JsonValidator: React.FC<JsonValidatorProps> = ({ outputString }) =>
               <div className="text-emerald-400">
                 <p>✓ Successfully parsed raw JSON.</p>
                 <p>✓ Schema structure verified.</p>
-                <p className="mt-2 text-slate-500">Parsed Data:</p>
-                <pre className="text-slate-300 mt-1">{JSON.stringify(validationResult.parsedData, null, 2)}</pre>
+                <div className="flex items-center justify-between mt-2 mb-1">
+                  <p className="text-slate-500">Parsed Data:</p>
+                  <button
+                    type="button"
+                    onClick={handleCopyJson}
+                    className="flex items-center gap-1 rounded bg-slate-900 hover:bg-slate-800 px-2 py-0.5 text-xs text-slate-300 hover:text-white border border-slate-700 transition-colors"
+                    title="Copy parsed JSON to clipboard"
+                  >
+                    {copied ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                    <span>{copied ? "Copied!" : "Copy JSON"}</span>
+                  </button>
+                </div>
+                <pre className="text-slate-300 mt-1 bg-slate-900/60 p-2 rounded border border-slate-800/80 overflow-x-auto">{JSON.stringify(validationResult.parsedData, null, 2)}</pre>
               </div>
             ) : (
               <div className="text-rose-400 whitespace-pre-wrap">
@@ -98,8 +117,19 @@ export const JsonValidator: React.FC<JsonValidatorProps> = ({ outputString }) =>
                 <p className="mt-1">{validationResult?.error}</p>
                 {validationResult?.parsedData && (
                   <>
-                    <p className="mt-2 text-slate-500">Partial/Invalid Data:</p>
-                    <pre className="text-slate-300 mt-1">{JSON.stringify(validationResult.parsedData, null, 2)}</pre>
+                    <div className="flex items-center justify-between mt-2 mb-1">
+                      <p className="text-slate-500">Partial/Invalid Data:</p>
+                      <button
+                        type="button"
+                        onClick={handleCopyJson}
+                        className="flex items-center gap-1 rounded bg-slate-900 hover:bg-slate-800 px-2 py-0.5 text-xs text-slate-300 hover:text-white border border-slate-700 transition-colors"
+                        title="Copy parsed JSON to clipboard"
+                      >
+                        {copied ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                        <span>{copied ? "Copied!" : "Copy JSON"}</span>
+                      </button>
+                    </div>
+                    <pre className="text-slate-300 mt-1 bg-slate-900/60 p-2 rounded border border-slate-800/80 overflow-x-auto">{JSON.stringify(validationResult.parsedData, null, 2)}</pre>
                   </>
                 )}
               </div>

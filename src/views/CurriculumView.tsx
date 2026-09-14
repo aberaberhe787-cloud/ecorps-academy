@@ -40,6 +40,7 @@ import { useApp } from "../context/AppContext";
 import { curriculumModules } from "../data/lessonsData";
 import { Lesson, CurriculumModule, BloomsTaxonomyLevel } from "../types";
 import { exportLessonToPdf } from "../lib/lessonPdfExporter";
+import { calculateLessonReadingStats, getDifficultyBadgeConfig } from "../lib/lessonCalculations";
 import { LessonAudioPlayer } from "../components/lms/LessonAudioPlayer";
 import { LessonScratchpad } from "../components/lms/LessonScratchpad";
 import { LearningPathway } from "../components/lms/LearningPathway";
@@ -999,14 +1000,35 @@ export const CurriculumView: React.FC = () => {
                     <span className="rounded-md bg-blue-950 border border-blue-800 px-2 py-0.5 font-mono text-xs font-semibold text-blue-300">
                       {currentModule?.code || "MODULE"} • {currentModule?.title}
                     </span>
+                    {(() => {
+                      const diffConfig = getDifficultyBadgeConfig(currentLesson.difficulty);
+                      return (
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-mono font-bold border ${diffConfig.bg} ${diffConfig.text} ${diffConfig.border}`}
+                          title={`Difficulty Level: ${diffConfig.label}`}
+                        >
+                          <span className={`h-1.5 w-1.5 rounded-full ${diffConfig.dotBg}`} />
+                          <span>{diffConfig.label}</span>
+                        </span>
+                      );
+                    })()}
                     <span
                       className={`rounded-md border px-2 py-0.5 text-xs font-semibold ${bloomStyle.bg} ${bloomStyle.text} ${bloomStyle.border}`}
                     >
                       {t.curriculum.bloomLevel}: {bloomFocus}
                     </span>
-                    <span className="flex items-center gap-1 text-xs text-slate-400 font-mono">
-                      <Clock className="h-3.5 w-3.5 text-slate-500" /> {currentLesson.estimatedMinutes} {t.curriculum.mins}
-                    </span>
+                    {(() => {
+                      const readingStats = calculateLessonReadingStats(currentLesson);
+                      return (
+                        <span
+                          className="flex items-center gap-1 text-xs text-slate-300 font-mono"
+                          title={`Estimated read time based on ~${readingStats.wordCount} words`}
+                        >
+                          <Clock className="h-3.5 w-3.5 text-blue-400" />
+                          <span className="font-semibold">{readingStats.display}</span>
+                        </span>
+                      );
+                    })()}
                   </div>
                   <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white mt-1">
                     {currentLesson.title}
