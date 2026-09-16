@@ -1353,11 +1353,11 @@ export const CurriculumView: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2.5">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
                   <button
                     id="lesson-bookmark-top-btn"
                     onClick={() => toggleBookmarkLesson(currentLesson.id)}
-                    className={`flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-semibold transition-all ${
+                    className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold min-h-[40px] transition-all ${
                       bookmarkedLessons.includes(currentLesson.id)
                         ? "border-amber-500/60 bg-amber-950/80 text-amber-300 shadow-sm shadow-amber-950/40"
                         : "border-slate-700 bg-slate-800/90 text-slate-200 hover:text-white hover:border-slate-600"
@@ -1365,41 +1365,41 @@ export const CurriculumView: React.FC = () => {
                     title={bookmarkedLessons.includes(currentLesson.id) ? "Remove from bookmarked topics" : "Bookmark this topic for later review"}
                   >
                     <Bookmark className={`h-3.5 w-3.5 ${bookmarkedLessons.includes(currentLesson.id) ? "fill-amber-400 text-amber-400" : ""}`} />
-                    <span>{bookmarkedLessons.includes(currentLesson.id) ? "Saved" : "Save Topic"}</span>
+                    <span>{bookmarkedLessons.includes(currentLesson.id) ? "Saved" : "Save"}</span>
                   </button>
 
                   <button
                     id="lesson-export-pdf-top-btn"
                     onClick={() => exportLessonToPdf(currentLesson)}
-                    className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/90 px-3.5 py-2 text-xs font-semibold text-slate-200 hover:text-white hover:border-slate-600 transition-all"
+                    className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/90 px-3 py-2 text-xs font-semibold text-slate-200 hover:text-white hover:border-slate-600 min-h-[40px] transition-all"
                     title="Export clean, print-friendly study guide PDF"
                   >
                     <Download className="h-3.5 w-3.5 text-emerald-400" />
-                    <span>Export PDF</span>
+                    <span>PDF</span>
                   </button>
 
                   <button
                     id="lesson-try-sandbox-top-btn"
                     onClick={handleTryInPlayground}
-                    className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/90 px-3.5 py-2 text-xs font-semibold text-slate-200 hover:text-white hover:border-slate-600 transition-all"
+                    className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/90 px-3 py-2 text-xs font-semibold text-slate-200 hover:text-white hover:border-slate-600 min-h-[40px] transition-all"
                   >
                     <Play className="h-3.5 w-3.5 text-blue-400 fill-blue-400/20" />
-                    <span>{t.curriculum.openInSandbox}</span>
+                    <span>Sandbox</span>
                   </button>
 
                   {isCompleted ? (
-                    <span className="flex items-center gap-1.5 rounded-lg bg-emerald-950/90 border border-emerald-700 px-3.5 py-2 text-xs font-bold text-emerald-300">
+                    <span className="w-full sm:w-auto flex items-center justify-center gap-1.5 rounded-lg bg-emerald-950/90 border border-emerald-700 px-3.5 py-2 text-xs font-bold text-emerald-300 min-h-[40px]">
                       <CheckCircle2 className="h-4 w-4 text-emerald-400" /> {t.curriculum.mastered} (+{currentLesson.xpReward || 50} XP)
                     </span>
                   ) : (
-                    <div className="flex flex-col items-end gap-1">
+                    <div className="w-full sm:w-auto flex flex-col items-stretch sm:items-end gap-1">
                       <button
                         id="lesson-mark-mastered-btn"
                         onClick={handleCompleteFullLesson}
                         disabled={!allMilestonesReached}
-                        className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold transition-all ${
+                        className={`flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold min-h-[40px] transition-all ${
                           allMilestonesReached
-                            ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-950/60 hover:brightness-110 active:scale-95"
+                            ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-950/60 hover:brightness-110 active:scale-95 cursor-pointer"
                             : "bg-slate-900 text-slate-400 border border-slate-800 cursor-not-allowed"
                         }`}
                       >
@@ -1411,7 +1411,7 @@ export const CurriculumView: React.FC = () => {
                         </span>
                       </button>
                       {!allMilestonesReached && (
-                        <span className="text-xs sm:text-xs font-mono text-amber-300/90 bg-amber-950/40 border border-amber-900/50 px-2 py-0.5 rounded">
+                        <span className="text-[11px] sm:text-xs font-mono text-amber-300/90 bg-amber-950/40 border border-amber-900/50 px-2 py-0.5 rounded text-center sm:text-right">
                           Pending: {[
                             (totalConcepts - readConceptIds.length) > 0 ? `${totalConcepts - readConceptIds.length} Concept${(totalConcepts - readConceptIds.length) > 1 ? 's' : ''}` : '',
                             (totalCheckpoints - passedCheckpointIds.length) > 0 ? `${totalCheckpoints - passedCheckpointIds.length} Quiz${(totalCheckpoints - passedCheckpointIds.length) > 1 ? 'zes' : ''}` : ''

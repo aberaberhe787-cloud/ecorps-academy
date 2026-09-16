@@ -360,6 +360,14 @@ export const LearningMap: React.FC<LearningMapProps> = ({
       </div>
 
       {/* 3. Main SVG Visual Learning Map Canvas */}
+      <div className="sm:hidden flex items-center justify-between text-[11px] font-mono text-blue-300 bg-blue-950/40 border border-blue-900/50 px-3 py-1.5 rounded-xl">
+        <span className="flex items-center gap-1.5">
+          <Compass className="h-3.5 w-3.5 text-blue-400" />
+          Swipe horizontally to explore node graph
+        </span>
+        <span className="text-slate-400">↔ Pan</span>
+      </div>
+
       <div className="relative rounded-3xl border border-slate-800/90 bg-slate-950/90 shadow-2xl overflow-x-auto overflow-y-hidden p-4 sm:p-8 backdrop-blur-xl">
         {/* Subtle grid backdrop */}
         <div

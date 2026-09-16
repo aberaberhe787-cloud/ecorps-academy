@@ -3,7 +3,7 @@ import {
   Play, RotateCcw, Sparkles, Columns2, Sliders, Save, Trash2,
   History, Target, Terminal, Bookmark, Check, ChevronDown, ChevronUp,
   Zap, Code2, ShieldAlert, PanelRightOpen, PanelRightClose, X,
-  Clock, BookmarkCheck, Loader2, Mic, MicOff, Copy
+  Clock, BookmarkCheck, Loader2, Mic, MicOff, Copy, Cpu
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { PromptQualityMeter } from "../components/PromptQualityMeter";
@@ -380,6 +380,7 @@ export const PlaygroundView: React.FC = () => {
 
   const [showParameters, setShowParameters] = useState(false);
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
+  const [mobileViewMode, setMobileViewMode] = useState<"editor" | "output" | "tools">("editor");
   const [saveTitle, setSaveTitle] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isSaveSnippetModalOpen, setIsSaveSnippetModalOpen] = useState(false);
@@ -578,10 +579,58 @@ export const PlaygroundView: React.FC = () => {
 
       {/* Main Dual Pane (Sandbox + Comparison) */}
       {(playgroundSubTab === "sandbox" || playgroundSubTab === "comparison") && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 w-full max-w-full">
+        <>
+          {/* Mobile Responsive Workspace Switcher (< lg) */}
+          <div className="lg:hidden flex items-center p-1 bg-slate-950/90 border border-slate-800 rounded-xl mb-3 shadow-sm">
+            <button
+              type="button"
+              id="mobile-tab-editor-btn"
+              onClick={() => setMobileViewMode("editor")}
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all min-h-[40px] ${
+                mobileViewMode === "editor"
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <Code2 className="h-3.5 w-3.5" />
+              <span>Editor</span>
+            </button>
+            <button
+              type="button"
+              id="mobile-tab-output-btn"
+              onClick={() => setMobileViewMode("output")}
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all min-h-[40px] relative ${
+                mobileViewMode === "output"
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <Terminal className="h-3.5 w-3.5" />
+              <span>Output</span>
+              {lastResult && (
+                <span className="h-2 w-2 rounded-full bg-emerald-400"></span>
+              )}
+            </button>
+            {!isComparisonMode && (
+              <button
+                type="button"
+                id="mobile-tab-tools-btn"
+                onClick={() => setMobileViewMode("tools")}
+                className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all min-h-[40px] ${
+                  mobileViewMode === "tools"
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                <Cpu className="h-3.5 w-3.5" />
+                <span>Tools & Labs</span>
+              </button>
+            )}
+          </div>
 
-          {/* Left Column: Prompt Editor */}
-          <div className={`${isComparisonMode ? "lg:col-span-6" : "lg:col-span-7"} space-y-3 sm:space-y-4 w-full max-w-full`}>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 w-full max-w-full">
+            {/* Left Column: Prompt Editor */}
+            <div className={`${isComparisonMode ? "lg:col-span-6" : "lg:col-span-7"} space-y-3 sm:space-y-4 w-full max-w-full ${mobileViewMode !== "editor" && mobileViewMode !== "tools" ? "hidden lg:block" : mobileViewMode === "tools" ? "hidden lg:block" : "block"}`}>
 
             {/* Starter Presets Bar */}
             {playgroundSubTab === "sandbox" && !isComparisonMode && (
@@ -817,9 +866,18 @@ export const PlaygroundView: React.FC = () => {
                 </div>
                 <button
                   id="run-prompt-btn"
-                  onClick={() => isComparisonMode ? executeComparison() : executeCurrentPrompt()}
+                  onClick={() => {
+                    if (isComparisonMode) {
+                      executeComparison();
+                    } else {
+                      executeCurrentPrompt();
+                    }
+                    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+                      setMobileViewMode("output");
+                    }
+                  }}
                   disabled={isExecuting || !prompt.trim()}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   <Play className="h-4 w-4 fill-white" />
                   <span>{isExecuting ? "Generating..." : isComparisonMode ? "Run A/B Benchmark" : "Execute Prompt"}</span>
@@ -827,13 +885,13 @@ export const PlaygroundView: React.FC = () => {
               </div>
             </div>
 
-            {/* Token Visualizer, Batch Runner, JSON Validator */}
+            {/* Token Visualizer, Batch Runner, JSON Validator (Desktop or Mobile Tools Tab) */}
             {playgroundSubTab === "sandbox" && !isComparisonMode && (
-              <>
+              <div className={mobileViewMode === "tools" ? "block lg:block space-y-3" : "hidden lg:block space-y-3"}>
                 <TokenVisualizer text={prompt} />
                 <BatchRunner promptTemplate={prompt} systemInstruction={systemInstruction} />
                 <JsonValidator outputString={lastResult?.output || ""} />
-              </>
+              </div>
             )}
 
             {/* Comparison Variant B Editor */}
@@ -885,7 +943,7 @@ export const PlaygroundView: React.FC = () => {
           </div>
 
           {/* Right Column: Output */}
-          <div className={`${isComparisonMode ? "lg:col-span-6" : "lg:col-span-5"} space-y-3 sm:space-y-4 w-full max-w-full`}>
+          <div className={`${isComparisonMode ? "lg:col-span-6" : "lg:col-span-5"} space-y-3 sm:space-y-4 w-full max-w-full ${mobileViewMode !== "output" ? "hidden lg:block" : "block"}`}>
             {isComparisonMode ? (
               <div className="space-y-4">
                 <div className="min-h-[280px]">
@@ -918,6 +976,7 @@ export const PlaygroundView: React.FC = () => {
             )}
           </div>
         </div>
+      </>
       )}
 
       {/* Slide-out Drawer */}

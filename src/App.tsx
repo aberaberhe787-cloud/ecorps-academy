@@ -28,6 +28,7 @@ import { GlobalShortcutsHandler } from "./components/GlobalShortcutsHandler";
 import { AchievementNotificationToast } from "./components/AchievementNotificationToast";
 import { Breadcrumbs } from "./components/Breadcrumbs";
 import { LearnerInactivityReminder } from "./components/LearnerInactivityReminder";
+import { MobileBottomNav } from "./components/MobileBottomNav";
 
 const MainContent: React.FC = () => {
   const { activeTab } = useApp();
@@ -67,6 +68,7 @@ const AppShell: React.FC = () => {
       {!hideGlobalChrome && <Navbar />}
       {!hideGlobalChrome && <Breadcrumbs />}
       <MainContent />
+      {!hideGlobalChrome && <MobileBottomNav />}
       {!hideGlobalChrome && <Footer />}
     </div>
   );
