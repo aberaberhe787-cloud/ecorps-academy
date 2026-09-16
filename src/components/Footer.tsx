@@ -39,7 +39,7 @@ export const Footer: React.FC = () => {
 
   return (
     <footer className="border-t border-slate-800/80 bg-slate-950/80 text-slate-400 text-xs py-10">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl 2xl:max-w-[1536px] px-4 sm:px-6 lg:px-8">
         {/* Feature Statistics Section: Explicitly stacks on mobile (< 768px) and transitions to spaced-out horizontal layout on desktop */}
         <div id="footer-feature-statistics-section" className="mb-10 pb-8 border-b border-slate-800/70">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 lg:gap-6">

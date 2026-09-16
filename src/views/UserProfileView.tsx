@@ -202,7 +202,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
   };
 
   return (
-    <div className="app-view w-full max-w-5xl mx-auto space-y-3.5 sm:space-y-8 px-2.5 sm:px-6 py-2.5 sm:py-6 animate-in fade-in duration-200 pb-20 sm:pb-6 ">
+    <div className="app-view w-full max-w-6xl 2xl:max-w-[1536px] mx-auto space-y-3.5 sm:space-y-8 px-2.5 sm:px-6 py-2.5 sm:py-6 animate-in fade-in duration-200 pb-20 sm:pb-6 ">
       {/* Learner Profile Header */}
       <div className="flex flex-col items-center gap-4 sm:gap-6 rounded-2xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-6 md:flex-row shadow-xl">
         <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-4xl text-white font-bold shadow-lg shadow-blue-900/30">

@@ -503,7 +503,7 @@ export const PlaygroundView: React.FC = () => {
   const totalDrawerItems = executionHistory.length + userProgress.savedCustomPrompts.length;
 
   return (
-    <div className="app-view w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 space-y-3 sm:space-y-6 pb-20 md:pb-6 ">
+    <div className="app-view w-full max-w-7xl 2xl:max-w-[1536px] mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 space-y-3 sm:space-y-6 pb-20 md:pb-6 ">
 
       {/* Header & Sub Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 border-b border-slate-800 pb-3 sm:pb-4 w-full">
