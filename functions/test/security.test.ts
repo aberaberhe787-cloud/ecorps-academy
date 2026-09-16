@@ -1,9 +1,67 @@
 import * as admin from 'firebase-admin';
-import * as test from 'firebase-functions-test';
+import firebaseFunctionsTest from 'firebase-functions-test';
 import { expect } from 'chai';
 import * as index from '../src/index';
 
-const testEnv = test();
+const testEnv = firebaseFunctionsTest();
+
+const inMemoryStore = new Map<string, any>();
+
+const mockFirestore: any = {
+  collection: (collectionName: string) => ({
+    doc: (docId: string) => ({
+      path: `${collectionName}/${docId}`,
+    }),
+    where: () => ({
+      where: () => ({
+        orderBy: () => ({
+          limit: () => ({
+            _isQuery: true,
+          }),
+        }),
+      }),
+    }),
+  }),
+  runTransaction: async (cb: (transaction: any) => Promise<any>) => {
+    const transaction = {
+      get: async (ref: any) => {
+        if (ref._isQuery) {
+          return {
+            size: 0,
+            docs: [],
+          };
+        }
+        const data = inMemoryStore.get(ref.path);
+        return {
+          exists: data !== undefined,
+          data: () => data,
+        };
+      },
+      set: (ref: any, data: any) => {
+        inMemoryStore.set(ref.path, data);
+      },
+    };
+    return await cb(transaction);
+  },
+};
+
+const mockTimestamp = {
+  now: () => ({
+    toMillis: () => Date.now(),
+  }),
+  fromMillis: (ms: number) => ({
+    toMillis: () => ms,
+  }),
+};
+
+const firestoreFn: any = () => mockFirestore;
+firestoreFn.Timestamp = mockTimestamp;
+
+Object.defineProperty(admin, 'firestore', {
+  value: firestoreFn,
+  configurable: true,
+  writable: true,
+});
 
 describe('Security Tests', () => {
   after(() => {
@@ -26,7 +84,7 @@ describe('Security Tests', () => {
     const authB = { uid: 'userB' };
 
     // User A submits
-    await wrapped({ assessmentId: 'mission-1', submissionId: 'sharedId', payload: 'act as a helper...' } as any, { auth: authA } as any);
+    await wrapped({ assessmentId: 'mission-1', submissionId: 'sharedId', payload: 'act as a helper with bullet points and hook structure words' } as any, { auth: authA } as any);
 
     // User B submits with same ID
     try {

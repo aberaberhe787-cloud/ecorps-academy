@@ -1,0 +1,211 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.submitAssessment = void 0;
+const https_1 = require("firebase-functions/v2/https");
+const admin = __importStar(require("firebase-admin"));
+admin.initializeApp();
+// Authoritative Assessment Definition Map
+const ASSESSMENT_CONFIG = {
+    'mission-1': {
+        requiredKeywords: ["act as", "bullet", "words", "structure", "hook"],
+        forbiddenKeywords: [],
+        requiresRole: true,
+        requiresDelimiters: false,
+        requiresOutputFormat: true,
+        minCharLength: 120
+    },
+    'mission-2': {
+        requiredKeywords: ["json", "schema", "null", "sentiment", "raw"],
+        forbiddenKeywords: [],
+        requiresRole: true,
+        requiresDelimiters: true,
+        requiresOutputFormat: true,
+        minCharLength: 150
+    },
+    'mission-3': {
+        requiredKeywords: ["step", "equation", "verif", "variable", "reasoning"],
+        requiresRole: false,
+        requiresDelimiters: false,
+        requiresCoT: true,
+        requiresOutputFormat: true,
+        minCharLength: 140
+    },
+    'mission-4': {
+        requiredKeywords: ["act as", "analogy", "forbidden", "tone", "paragraph"],
+        requiresRole: true,
+        requiresDelimiters: false,
+        requiresOutputFormat: true,
+        minCharLength: 130
+    },
+    'mission-5': {
+        requiredKeywords: ["example", "input:", "output:", "category", "primary"],
+        requiresRole: false,
+        requiresDelimiters: true,
+        requiresFewShot: true,
+        requiresOutputFormat: true,
+        minCharLength: 200
+    },
+    'prompt-foundations-final': {
+        requiredKeywords: ["step", "reasoning"],
+        forbiddenKeywords: ["forbiddenPattern"],
+        requiresRole: false,
+        requiresDelimiters: true,
+        requiresOutputFormat: true,
+        minCharLength: 50
+    }
+};
+exports.submitAssessment = (0, https_1.onCall)(async (request, context) => {
+    const auth = request?.auth || context?.auth;
+    if (!auth)
+        throw new https_1.HttpsError('unauthenticated', 'Unauthorized');
+    const uid = auth.uid;
+    const data = request?.data ?? request ?? {};
+    const { assessmentId, submissionId, payload } = data;
+    if (!assessmentId || !submissionId || !payload || typeof payload !== 'string' || payload.length > 5000) {
+        throw new https_1.HttpsError('invalid-argument', 'Invalid input');
+    }
+    const config = ASSESSMENT_CONFIG[assessmentId];
+    if (!config)
+        throw new https_1.HttpsError('invalid-argument', 'Unsupported assessment');
+    const db = admin.firestore();
+    // Deterministic Validator
+    const score = validatePayload(payload, config);
+    const status = score >= 80 ? 'PASS' : 'FAIL';
+    // Atomic Transaction
+    return await db.runTransaction(async (transaction) => {
+        // Unique Idempotency Key: submissionId belongs to learnerId
+        const attemptRef = db.collection('assessmentAttempts').doc(submissionId);
+        const attemptDoc = await transaction.get(attemptRef);
+        if (attemptDoc.exists) {
+            const existingAttempt = attemptDoc.data();
+            if (existingAttempt?.learnerId !== uid) {
+                throw new https_1.HttpsError('permission-denied', 'Forbidden');
+            }
+            return existingAttempt;
+        }
+        const now = admin.firestore.Timestamp.now();
+        const userAttemptsQuery = db.collection('assessmentAttempts')
+            .where('learnerId', '==', uid)
+            .where('assessmentId', '==', assessmentId)
+            .orderBy('submittedAt', 'desc')
+            .limit(3);
+        const userAttempts = await transaction.get(userAttemptsQuery);
+        const oneDayAgo = admin.firestore.Timestamp.fromMillis(now.toMillis() - 24 * 60 * 60 * 1000);
+        if (userAttempts.size >= 3) {
+            const latestAttempt = userAttempts.docs[0].data();
+            if (latestAttempt.submittedAt.toMillis() > oneDayAgo.toMillis()) {
+                throw new https_1.HttpsError('resource-exhausted', 'Maximum attempts reached.');
+            }
+        }
+        if (userAttempts.size > 0) {
+            const latestAttempt = userAttempts.docs[0].data();
+            if (now.toMillis() - latestAttempt.submittedAt.toMillis() < 5 * 60 * 1000) {
+                throw new https_1.HttpsError('resource-exhausted', 'Wait 5 minutes between attempts.');
+            }
+        }
+        const credId = `${uid}_${assessmentId}`;
+        const credRef = db.collection('credentials').doc(credId);
+        let credDocExists = false;
+        if (status === 'PASS') {
+            const credDoc = await transaction.get(credRef);
+            credDocExists = credDoc.exists;
+        }
+        const attempt = {
+            attemptId: submissionId,
+            learnerId: uid,
+            assessmentId,
+            submittedAt: now,
+            score,
+            status,
+            validatorVersion: '1.0.0',
+        };
+        transaction.set(attemptRef, attempt);
+        if (status === 'PASS') {
+            // Deterministic evidence ID: learnerId + assessmentId
+            const evidenceId = `${uid}_${assessmentId}`;
+            const evidenceRef = db.collection('evidence').doc(evidenceId);
+            transaction.set(evidenceRef, {
+                evidenceId,
+                assessmentAttemptId: submissionId,
+                learnerId: uid,
+                assessmentId,
+                score,
+                status: 'PASS',
+                createdAt: now,
+            });
+            if (!credDocExists) {
+                transaction.set(credRef, {
+                    credentialId: credId,
+                    credentialName: 'Certified',
+                    pathName: assessmentId,
+                    learnerName: auth.token?.name || 'Learner',
+                    issueDate: now,
+                    verificationStatus: 'VALID',
+                    assessmentId
+                });
+            }
+        }
+        return attempt;
+    });
+});
+function validatePayload(payload, config) {
+    if (payload.length < config.minCharLength)
+        return 0;
+    if (config.requiredKeywords) {
+        for (const keyword of config.requiredKeywords) {
+            if (!payload.toLowerCase().includes(keyword.toLowerCase()))
+                return 0;
+        }
+    }
+    if (config.forbiddenKeywords) {
+        for (const keyword of config.forbiddenKeywords) {
+            if (payload.toLowerCase().includes(keyword.toLowerCase()))
+                return 0;
+        }
+    }
+    if (config.requiresRole && !payload.toLowerCase().includes("act as"))
+        return 0;
+    if (config.requiresDelimiters && !payload.includes("---") && !payload.includes("===") && !payload.includes("```"))
+        return 0;
+    if (config.requiresOutputFormat && !payload.toLowerCase().includes("json") && !payload.toLowerCase().includes("schema"))
+        return 0;
+    if (config.requiresCoT && !payload.toLowerCase().includes("step") && !payload.toLowerCase().includes("reasoning"))
+        return 0;
+    if (config.requiresFewShot && !payload.toLowerCase().includes("example") && !payload.toLowerCase().includes("input:"))
+        return 0;
+    return 100;
+}
+//# sourceMappingURL=index.js.map
