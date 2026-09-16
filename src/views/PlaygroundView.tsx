@@ -15,6 +15,8 @@ import { BatchRunner } from "../components/BatchRunner";
 import { JsonValidator } from "../components/JsonValidator";
 import { CtfSimulator } from "../components/CtfSimulator";
 import { Tooltip } from "../components/Tooltip";
+import { SaveCodeSnippetModal } from "../components/playground/SaveCodeSnippetModal";
+import { SavedCodeSnippet } from "../types";
 
 const STARTER_PRESETS = [
   {
@@ -77,10 +79,12 @@ Step-by-step instructions:
 // ─── Slide-out Drawer ────────────────────────────────────────────────────────
 const SideDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   const {
-    executionHistory, setPrompt, setSystemInstruction, setPlaygroundSubTab,
-    userProgress, deleteCustomPrompt, t
+    executionHistory, setPrompt, setSystemInstruction, setTemperature, setTopP, setPlaygroundSubTab,
+    userProgress, deleteCustomPrompt, deleteCodeSnippet, t
   } = useApp();
-  const [activeDrawerTab, setActiveDrawerTab] = useState<"history" | "saved">("history");
+  const [activeDrawerTab, setActiveDrawerTab] = useState<"history" | "saved" | "snippets">("history");
+
+  const savedSnippetsCount = userProgress.savedCodeSnippets?.length || 0;
 
   return (
     <>
@@ -94,46 +98,57 @@ const SideDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
 
       {/* Drawer Panel */}
       <div
-        className={`fixed top-0 right-0 z-40 h-full w-full max-w-[320px] sm:max-w-sm bg-slate-950 border-l border-slate-800 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out overscroll-contain ${
+        className={`fixed top-0 right-0 z-40 h-full w-full max-w-[340px] sm:max-w-md bg-slate-950 border-l border-slate-800 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out overscroll-contain ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Drawer Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3 shrink-0">
-          <div className="flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-900/80 p-1">
+        <div className="flex items-center justify-between border-b border-slate-800 px-3 py-2.5 shrink-0">
+          <div className="flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-900/80 p-0.5 overflow-x-auto">
             <button
               onClick={() => setActiveDrawerTab("history")}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-semibold transition-all shrink-0 ${
                 activeDrawerTab === "history"
                   ? "bg-blue-600 text-white"
                   : "text-slate-400 hover:text-slate-200"
               }`}
             >
-              <History className="h-3.5 w-3.5" />
+              <History className="h-3 w-3" />
               History ({executionHistory.length})
             </button>
             <button
               onClick={() => setActiveDrawerTab("saved")}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-semibold transition-all shrink-0 ${
                 activeDrawerTab === "saved"
                   ? "bg-blue-600 text-white"
                   : "text-slate-400 hover:text-slate-200"
               }`}
             >
-              <Bookmark className="h-3.5 w-3.5" />
-              Saved ({userProgress.savedCustomPrompts.length})
+              <Bookmark className="h-3 w-3" />
+              Prompts ({userProgress.savedCustomPrompts.length})
+            </button>
+            <button
+              onClick={() => setActiveDrawerTab("snippets")}
+              className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-semibold transition-all shrink-0 ${
+                activeDrawerTab === "snippets"
+                  ? "bg-blue-600 text-white"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <Code2 className="h-3 w-3 text-blue-400" />
+              Snippets ({savedSnippetsCount})
             </button>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors ml-1 shrink-0"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Drawer Content */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <div className="flex-1 overflow-y-auto p-3.5 space-y-3">
           {/* History Tab */}
           {activeDrawerTab === "history" && (
             <>
@@ -153,7 +168,7 @@ const SideDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
                       </span>
                       <span>{item.durationMs}ms · ~{item.tokenCount} tokens</span>
                     </div>
-                    <pre className="rounded-lg bg-slate-950 p-2 font-mono text-xs sm:text-xs text-slate-300 whitespace-pre-wrap max-h-24 overflow-y-auto border border-slate-800 leading-relaxed">
+                    <pre className="rounded-lg bg-slate-950 p-2 font-mono text-xs text-slate-300 whitespace-pre-wrap max-h-24 overflow-y-auto border border-slate-800 leading-relaxed">
                       {item.prompt.slice(0, 200)}{item.prompt.length > 200 ? "…" : ""}
                     </pre>
                     <div className="flex items-center gap-2">
@@ -199,9 +214,9 @@ const SideDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
                   <div key={p.id} className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-white truncate max-w-[180px]">{p.title}</span>
-                      <span className="text-xs sm:text-xs text-slate-500 font-mono shrink-0">{new Date(p.createdAt).toLocaleDateString()}</span>
+                      <span className="text-xs text-slate-500 font-mono shrink-0">{new Date(p.createdAt).toLocaleDateString()}</span>
                     </div>
-                    <pre className="rounded-lg bg-slate-950 p-2 font-mono text-xs sm:text-xs text-slate-300 whitespace-pre-wrap max-h-24 overflow-y-auto border border-slate-800 leading-relaxed">
+                    <pre className="rounded-lg bg-slate-950 p-2 font-mono text-xs text-slate-300 whitespace-pre-wrap max-h-24 overflow-y-auto border border-slate-800 leading-relaxed">
                       {p.prompt.slice(0, 200)}{p.prompt.length > 200 ? "…" : ""}
                     </pre>
                     <div className="flex items-center gap-1.5 flex-wrap">
@@ -264,6 +279,79 @@ const SideDrawer: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen
               )}
             </>
           )}
+
+          {/* Snippets Tab */}
+          {activeDrawerTab === "snippets" && (
+            <>
+              {(!userProgress.savedCodeSnippets || userProgress.savedCodeSnippets.length === 0) ? (
+                <div className="flex flex-col items-center justify-center h-48 text-center text-slate-500 space-y-2">
+                  <Code2 className="h-10 w-10 text-slate-700" />
+                  <p className="text-sm font-medium">No saved code snippets</p>
+                  <p className="text-xs">Use the "Save Snippet" button in the editor to save Python, TypeScript, or REST code.</p>
+                </div>
+              ) : (
+                userProgress.savedCodeSnippets.map((s) => (
+                  <div key={s.id} className="rounded-xl border border-slate-800 bg-slate-900/80 p-3 space-y-2">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-xs font-bold text-white truncate max-w-[160px]">{s.title}</span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-950/80 border border-blue-800 text-blue-300 shrink-0 uppercase">
+                        {s.language}
+                      </span>
+                    </div>
+                    <pre className="rounded-lg bg-slate-950 p-2 font-mono text-xs text-slate-300 whitespace-pre-wrap max-h-24 overflow-y-auto border border-slate-800 leading-relaxed">
+                      {s.code.slice(0, 200)}{s.code.length > 200 ? "…" : ""}
+                    </pre>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(s.code);
+                        }}
+                        className="flex items-center gap-1 rounded-lg border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                        title="Copy code"
+                      >
+                        <Copy className="h-3 w-3" />
+                        <span>Copy</span>
+                      </button>
+                      <button
+                        onClick={() => deleteCodeSnippet(s.id)}
+                        className="flex items-center gap-1 rounded-lg border border-rose-900/50 px-2 py-1 text-xs text-rose-400 hover:bg-rose-950/40 transition-colors"
+                        title="Delete snippet"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          const ext = s.language === "python" ? "py" : s.language === "typescript" ? "ts" : s.language === "json" ? "json" : s.language === "curl" ? "sh" : "txt";
+                          const blob = new Blob([s.code], { type: 'text/plain' });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = `${s.title.replace(/\s+/g, '_')}.${ext}`;
+                          a.click();
+                        }}
+                        className="flex items-center gap-1 rounded-lg border border-slate-700 px-2 py-1 text-xs text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                      >
+                        Export
+                      </button>
+                      <button
+                        onClick={() => {
+                          setPrompt(s.code);
+                          if (s.systemInstruction) setSystemInstruction(s.systemInstruction);
+                          if (typeof s.temperature === "number") setTemperature(s.temperature);
+                          if (typeof s.topP === "number") setTopP(s.topP);
+                          setPlaygroundSubTab("sandbox");
+                          onClose();
+                        }}
+                        className="flex-1 rounded-lg bg-blue-600 py-1 text-xs font-semibold text-white hover:bg-blue-500 transition-colors text-center"
+                      >
+                        Load
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </>
+          )}
         </div>
       </div>
     </>
@@ -294,6 +382,7 @@ export const PlaygroundView: React.FC = () => {
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
   const [saveTitle, setSaveTitle] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isSaveSnippetModalOpen, setIsSaveSnippetModalOpen] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [promptCopied, setPromptCopied] = useState(false);
@@ -585,7 +674,15 @@ export const PlaygroundView: React.FC = () => {
                     className="flex items-center gap-1 rounded bg-slate-800 px-2 py-1 text-xs font-medium text-slate-300 hover:bg-slate-700 hover:text-white"
                   >
                     <Bookmark className="h-3 w-3" />
-                    <span className="hidden sm:inline">Save</span>
+                    <span className="hidden sm:inline">Save Prompt</span>
+                  </button>
+                  <button
+                    onClick={() => setIsSaveSnippetModalOpen(true)}
+                    className="flex items-center gap-1 rounded bg-blue-600/20 border border-blue-500/40 px-2 py-1 text-xs font-medium text-blue-300 hover:bg-blue-600 hover:text-white transition-colors"
+                    title="Save as Python, TypeScript, cURL, or JSON SDK Snippet"
+                  >
+                    <Code2 className="h-3 w-3" />
+                    <span className="hidden sm:inline">Save Snippet</span>
                   </button>
                 </div>
               </div>
@@ -703,9 +800,19 @@ export const PlaygroundView: React.FC = () => {
                     ) : (
                       <>
                         <Copy className="h-3.5 w-3.5 text-slate-400" />
-                        <span>Copy to Clipboard</span>
+                        <span>Copy</span>
                       </>
                     )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsSaveSnippetModalOpen(true)}
+                    disabled={!prompt.trim()}
+                    className="flex items-center justify-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 py-1.5 sm:py-1 px-2.5 rounded-lg hover:bg-blue-950/50 border border-blue-900/60 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+                    title="Save as SDK Code Snippet"
+                  >
+                    <Code2 className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Save Snippet</span>
                   </button>
                 </div>
                 <button
@@ -815,6 +922,16 @@ export const PlaygroundView: React.FC = () => {
 
       {/* Slide-out Drawer */}
       <SideDrawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} />
+
+      {/* Save Code Snippet Modal */}
+      <SaveCodeSnippetModal
+        isOpen={isSaveSnippetModalOpen}
+        onClose={() => setIsSaveSnippetModalOpen(false)}
+        prompt={prompt}
+        systemInstruction={systemInstruction}
+        temperature={temperature}
+        topP={topP}
+      />
 
       {/* Sticky Bottom Action Bar for Mobile (< 768px) */}
       {(playgroundSubTab === "sandbox" || playgroundSubTab === "comparison") && (

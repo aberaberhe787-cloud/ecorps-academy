@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Keyboard } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { GlobalShortcutsModal } from "./GlobalShortcutsModal";
 import { NavTab } from "../types";
@@ -151,9 +152,27 @@ export const GlobalShortcutsHandler: React.FC = () => {
   ]);
 
   return (
-    <GlobalShortcutsModal
-      isOpen={isShortcutsModalOpen}
-      onClose={() => setIsShortcutsModalOpen(false)}
-    />
+    <>
+      {/* Floating Keyboard Shortcuts Helper Button */}
+      {!isDistractionFreeMode && (
+        <button
+          id="floating-shortcuts-helper-btn"
+          onClick={() => setIsShortcutsModalOpen(true)}
+          className="fixed bottom-4 right-4 z-40 hidden sm:flex items-center gap-1.5 rounded-full border border-slate-700/80 bg-slate-900/90 hover:bg-slate-800/95 text-slate-300 hover:text-white px-3 py-1.5 text-xs font-semibold shadow-xl backdrop-blur-md transition-all hover:scale-105 active:scale-95 group cursor-pointer"
+          title="Global Keyboard Shortcuts (Press '?' or 'Ctrl+/')"
+        >
+          <Keyboard className="h-3.5 w-3.5 text-blue-400 group-hover:text-blue-300 transition-colors" />
+          <span className="hidden md:inline text-[11px] text-slate-300 group-hover:text-white">Shortcuts</span>
+          <kbd className="inline-flex items-center justify-center rounded bg-slate-800 border border-slate-700 px-1.5 py-0.5 font-mono text-[10px] text-slate-300 shadow-inner">
+            ?
+          </kbd>
+        </button>
+      )}
+
+      <GlobalShortcutsModal
+        isOpen={isShortcutsModalOpen}
+        onClose={() => setIsShortcutsModalOpen(false)}
+      />
+    </>
   );
 };

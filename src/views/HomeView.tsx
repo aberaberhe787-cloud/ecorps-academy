@@ -19,6 +19,7 @@ import { useApp } from "../context/AppContext";
 import { analyzePrompt } from "../lib/promptAnalyzer";
 import { FOUNDATION_LESSONS } from "./PromptEngineeringPath";
 import { promptPatterns } from "../data/patternsData";
+import { NextStepRecommendationEngine } from "../components/home/NextStepRecommendationEngine";
 
 export const HomeView: React.FC = () => {
   const { setActiveTab, openSandbox, loadIntoPlayground, userProgress, currentCurriculum, t } = useApp();
@@ -86,6 +87,9 @@ export const HomeView: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Personalized Next Step Recommendation Engine */}
+      <NextStepRecommendationEngine />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import confetti from 'canvas-confetti';
 import { Award, ArrowRight, CheckCircle2, ChevronDown, Circle, Lightbulb, Sparkles } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { PromptPlayground } from '../components/PromptPlayground';
@@ -42,6 +43,42 @@ export const PromptEngineeringPath: React.FC = () => {
     setPracticeOutput(result.output);
     setPracticeScore(analyzePrompt(practicePrompt).score);
     setIsPracticing(false);
+  };
+
+  const handleCompleteFoundationLesson = () => {
+    markLessonComplete(activeLesson.id);
+    const willFinishAllFoundations = FOUNDATION_LESSONS.every(
+      (l) => l.id === activeLesson.id || userProgress.completedLessons.includes(l.id)
+    );
+
+    if (willFinishAllFoundations) {
+      confetti({
+        particleCount: 140,
+        spread: 90,
+        origin: { y: 0.5 },
+        colors: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ffffff']
+      });
+      setTimeout(() => {
+        confetti({
+          particleCount: 80,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0.05, y: 0.65 }
+        });
+        confetti({
+          particleCount: 80,
+          angle: 120,
+          spread: 55,
+          origin: { x: 0.95, y: 0.65 }
+        });
+      }, 300);
+    } else {
+      confetti({
+        particleCount: 80,
+        spread: 60,
+        origin: { y: 0.6 }
+      });
+    }
   };
 
   return (
@@ -190,7 +227,7 @@ export const PromptEngineeringPath: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-slate-800 pt-5">
               <button
                 type="button"
-                onClick={() => markLessonComplete(activeLesson.id)}
+                onClick={handleCompleteFoundationLesson}
                 disabled={userProgress.completedLessons.includes(activeLesson.id) || !canComplete}
                 className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-xs sm:text-sm font-bold shadow-lg transition-all active:scale-95 ${
                   userProgress.completedLessons.includes(activeLesson.id)

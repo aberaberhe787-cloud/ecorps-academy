@@ -39,6 +39,7 @@ import {
   X,
   MessageSquare,
   Star,
+  Trophy,
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { curriculumModules } from "../data/lessonsData";
@@ -116,6 +117,7 @@ export const CurriculumView: React.FC = () => {
   const [difficultyFilter, setDifficultyFilter] = useState<string>("All");
   const [statusFilter, setStatusFilter] = useState<"All" | "completed" | "uncompleted" | "bookmarked">("All");
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState<boolean>(false);
+  const [completedModuleCelebration, setCompletedModuleCelebration] = useState<CurriculumModule | null>(null);
 
   const bookmarkedLessons = useMemo(() => userProgress.bookmarkedLessons || [], [userProgress.bookmarkedLessons]);
   const bookmarkedCount = bookmarkedLessons.length;
@@ -377,17 +379,73 @@ export const CurriculumView: React.FC = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const triggerModuleCelebrationAnimation = (moduleName: string) => {
+    // Stage 1: Big Center Cannon Blast
+    confetti({
+      particleCount: 150,
+      spread: 90,
+      origin: { y: 0.5 },
+      colors: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#ffffff']
+    });
+
+    // Stage 2: Left Side Cannon
+    setTimeout(() => {
+      confetti({
+        particleCount: 90,
+        angle: 60,
+        spread: 60,
+        origin: { x: 0.05, y: 0.65 },
+        colors: ['#3b82f6', '#60a5fa', '#93c5fd', '#38bdf8']
+      });
+    }, 250);
+
+    // Stage 3: Right Side Cannon
+    setTimeout(() => {
+      confetti({
+        particleCount: 90,
+        angle: 120,
+        spread: 60,
+        origin: { x: 0.95, y: 0.65 },
+        colors: ['#10b981', '#34d399', '#6ee7b7', '#f59e0b']
+      });
+    }, 500);
+
+    // Stage 4: Starburst Finale
+    setTimeout(() => {
+      confetti({
+        particleCount: 80,
+        spread: 120,
+        origin: { y: 0.35 },
+        shapes: ['star', 'circle'],
+        colors: ['#fbbf24', '#f59e0b', '#fde68a', '#ffffff']
+      });
+    }, 800);
+  };
+
   const handleCompleteFullLesson = () => {
     markLessonComplete(currentLesson.id);
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 }
-    });
-    // Trigger Send Feedback modal after celebrating lesson completion
-    setTimeout(() => {
-      setIsFeedbackModalOpen(true);
-    }, 600);
+
+    // Check if completing this lesson completes all lessons in the course module
+    const isModuleNowComplete = currentModule && currentModule.lessons.every(
+      (l) => l.id === currentLesson.id || userProgress.completedLessons.includes(l.id)
+    );
+
+    if (isModuleNowComplete && currentModule) {
+      // Trigger full module completion celebration sequence!
+      triggerModuleCelebrationAnimation(currentModule.title);
+      setCompletedModuleCelebration(currentModule);
+    } else {
+      // Standard single lesson completion confetti
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+      // Trigger Send Feedback modal after celebrating lesson completion
+      setTimeout(() => {
+        setIsFeedbackModalOpen(true);
+      }, 600);
+    }
   };
 
   const handleExitLesson = () => {
@@ -1655,6 +1713,79 @@ export const CurriculumView: React.FC = () => {
         onClose={() => setIsFeedbackModalOpen(false)}
         lesson={currentLesson}
       />
+
+      {/* Course Module Mastered Celebratory Modal */}
+      {completedModuleCelebration && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="relative w-full max-w-lg rounded-3xl border-2 border-emerald-500/60 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 p-6 sm:p-8 shadow-2xl text-center space-y-6">
+            <button
+              onClick={() => {
+                setCompletedModuleCelebration(null);
+                setTimeout(() => setIsFeedbackModalOpen(true), 300);
+              }}
+              className="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 shadow-xl shadow-emerald-950/60 ring-4 ring-emerald-500/20 animate-bounce">
+              <Trophy className="h-10 w-10 text-slate-950" />
+            </div>
+
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-950/80 px-3 py-1 text-xs font-mono font-bold text-emerald-300">
+                <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+                <span>MODULE MILESTONE ACHIEVED</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                Module Completed!
+              </h2>
+              <p className="text-sm font-semibold text-emerald-400">
+                {completedModuleCelebration.code} • {completedModuleCelebration.title}
+              </p>
+              <p className="text-xs text-slate-300 max-w-md mx-auto leading-relaxed pt-1">
+                Outstanding progress! You have mastered all {completedModuleCelebration.lessons.length} curriculum lessons in this module. Your knowledge structure and mastery metrics have been updated.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+              <button
+                onClick={() => {
+                  setCompletedModuleCelebration(null);
+                  setTimeout(() => setIsFeedbackModalOpen(true), 300);
+                }}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition-all"
+              >
+                Send Lesson Feedback
+              </button>
+
+              {nextLesson ? (
+                <button
+                  onClick={() => {
+                    setCompletedModuleCelebration(null);
+                    handleSelectLesson(nextLesson);
+                  }}
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-blue-950/50 transition-all flex items-center justify-center gap-2"
+                >
+                  <span>Continue to Next Module</span>
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setCompletedModuleCelebration(null);
+                    setActiveTab("certification");
+                  }}
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-950/50 transition-all flex items-center justify-center gap-2"
+                >
+                  <Award className="h-4 w-4" />
+                  <span>Take Capstone Exam</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

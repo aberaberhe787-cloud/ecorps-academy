@@ -12,7 +12,13 @@ import {
   ArrowRight, 
   ShieldCheck, 
   Download,
-  GraduationCap
+  GraduationCap,
+  Code2,
+  Bookmark,
+  Copy,
+  Trash2,
+  ExternalLink,
+  Check
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { auth } from '../lib/firebase';
@@ -38,7 +44,20 @@ interface UserProfileViewProps {
 }
 
 export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPath }) => {
-  const { userProgress, setActiveTab, isOnline } = useApp();
+  const { 
+    userProgress, 
+    setActiveTab, 
+    setPlaygroundSubTab, 
+    setPrompt, 
+    setSystemInstruction, 
+    setTemperature, 
+    setTopP, 
+    deleteCodeSnippet, 
+    deleteCustomPrompt, 
+    isOnline 
+  } = useApp();
+  const [copiedSnippetId, setCopiedSnippetId] = useState<string | null>(null);
+  const [activeSavedTab, setActiveSavedTab] = useState<'snippets' | 'prompts'>('snippets');
   
   // Build both tracks from system source data
   const foundationsTrack: LearningPath = {
@@ -471,6 +490,232 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
               </span>
             </div>
           </div>
+        </section>
+
+        {/* Saved Code Snippets & Custom Prompts Library */}
+        <section className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 space-y-4 shadow-xl">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <h2 className="flex items-center gap-2 text-base font-bold text-white">
+              <Code2 className="text-blue-400 h-5 w-5" />
+              <span>Saved Code Snippets & Library</span>
+            </h2>
+            <div className="flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-950 p-1 text-xs">
+              <button
+                onClick={() => setActiveSavedTab('snippets')}
+                className={`px-3 py-1 rounded-md font-semibold transition-all ${
+                  activeSavedTab === 'snippets'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                SDK Snippets ({userProgress.savedCodeSnippets?.length || 0})
+              </button>
+              <button
+                onClick={() => setActiveSavedTab('prompts')}
+                className={`px-3 py-1 rounded-md font-semibold transition-all ${
+                  activeSavedTab === 'prompts'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                Prompts ({userProgress.savedCustomPrompts?.length || 0})
+              </button>
+            </div>
+          </div>
+
+          {activeSavedTab === 'snippets' && (
+            <div className="space-y-3">
+              {(!userProgress.savedCodeSnippets || userProgress.savedCodeSnippets.length === 0) ? (
+                <div className="flex flex-col items-center justify-center p-8 text-center rounded-xl border border-dashed border-slate-800 bg-slate-950/40">
+                  <Code2 className="h-8 w-8 text-slate-600 mb-2" />
+                  <p className="text-sm font-medium text-slate-400">No saved SDK code snippets yet</p>
+                  <p className="text-xs text-slate-500 mt-1 max-w-sm">
+                    Open the Playground and click <span className="text-blue-400 font-semibold">"Save Snippet"</span> to save Python, TypeScript, cURL, or JSON code directly to your account.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setActiveTab('playground');
+                      setPlaygroundSubTab('sandbox');
+                    }}
+                    className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-colors"
+                  >
+                    Go to Playground <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {userProgress.savedCodeSnippets.map((snippet) => (
+                    <div
+                      key={snippet.id}
+                      className="flex flex-col justify-between rounded-xl border border-slate-800 bg-slate-950/70 p-3.5 hover:border-slate-700 transition-all group"
+                    >
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-bold text-white text-xs truncate max-w-[200px]">
+                            {snippet.title}
+                          </span>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-950/80 border border-blue-800 text-blue-300 uppercase font-semibold">
+                            {snippet.language}
+                          </span>
+                        </div>
+                        {snippet.systemInstruction && (
+                          <div className="text-[11px] text-slate-400 line-clamp-1 italic bg-slate-900/80 px-2 py-1 rounded border border-slate-800/80">
+                            Sys: {snippet.systemInstruction}
+                          </div>
+                        )}
+                        <pre className="rounded-lg bg-slate-900/90 p-2.5 font-mono text-[11px] text-slate-300 overflow-x-auto max-h-28 border border-slate-800 leading-relaxed">
+                          {snippet.code}
+                        </pre>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-1.5 pt-3 mt-2 border-t border-slate-850">
+                        <span className="text-[10px] text-slate-500 font-mono">
+                          {new Date(snippet.createdAt).toLocaleDateString()}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(snippet.code);
+                              setCopiedSnippetId(snippet.id);
+                              setTimeout(() => setCopiedSnippetId(null), 2000);
+                            }}
+                            className="flex items-center gap-1 px-2 py-1 rounded border border-slate-700 text-[11px] text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                            title="Copy code to clipboard"
+                          >
+                            {copiedSnippetId === snippet.id ? (
+                              <>
+                                <Check className="h-3 w-3 text-emerald-400" />
+                                <span className="text-emerald-400">Copied</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="h-3 w-3" />
+                                <span>Copy</span>
+                              </>
+                            )}
+                          </button>
+                          <button
+                            onClick={() => {
+                              const ext = snippet.language === "python" ? "py" : snippet.language === "typescript" ? "ts" : snippet.language === "json" ? "json" : snippet.language === "curl" ? "sh" : "txt";
+                              const blob = new Blob([snippet.code], { type: 'text/plain' });
+                              const url = URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = url;
+                              a.download = `${snippet.title.replace(/\s+/g, '_')}.${ext}`;
+                              a.click();
+                            }}
+                            className="p-1 rounded border border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                            title="Export file"
+                          >
+                            <Download className="h-3 w-3" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setPrompt(snippet.code);
+                              if (snippet.systemInstruction) setSystemInstruction(snippet.systemInstruction);
+                              if (typeof snippet.temperature === "number") setTemperature(snippet.temperature);
+                              if (typeof snippet.topP === "number") setTopP(snippet.topP);
+                              setActiveTab('playground');
+                              setPlaygroundSubTab('sandbox');
+                            }}
+                            className="flex items-center gap-1 px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-semibold transition-colors"
+                            title="Open in Playground Sandbox"
+                          >
+                            <span>Open</span>
+                            <ExternalLink className="h-3 w-3" />
+                          </button>
+                          <button
+                            onClick={() => deleteCodeSnippet(snippet.id)}
+                            className="p-1 rounded border border-rose-900/50 text-rose-400 hover:bg-rose-950/40 transition-colors"
+                            title="Delete snippet"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeSavedTab === 'prompts' && (
+            <div className="space-y-3">
+              {(!userProgress.savedCustomPrompts || userProgress.savedCustomPrompts.length === 0) ? (
+                <div className="flex flex-col items-center justify-center p-8 text-center rounded-xl border border-dashed border-slate-800 bg-slate-950/40">
+                  <Bookmark className="h-8 w-8 text-slate-600 mb-2" />
+                  <p className="text-sm font-medium text-slate-400">No saved prompts yet</p>
+                  <p className="text-xs text-slate-500 mt-1 max-w-sm">
+                    Save prompts in the Playground to organize and reload your crafted prompts anytime.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {userProgress.savedCustomPrompts.map((p) => (
+                    <div
+                      key={p.id}
+                      className="flex flex-col justify-between rounded-xl border border-slate-800 bg-slate-950/70 p-3.5 hover:border-slate-700 transition-all"
+                    >
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-white text-xs truncate max-w-[200px]">
+                            {p.title}
+                          </span>
+                          <span className="text-[10px] text-slate-500 font-mono">
+                            {new Date(p.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <pre className="rounded-lg bg-slate-900/90 p-2.5 font-mono text-[11px] text-slate-300 overflow-x-auto max-h-28 border border-slate-800 leading-relaxed">
+                          {p.prompt}
+                        </pre>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-1.5 pt-3 mt-2 border-t border-slate-850">
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(p.prompt);
+                            setCopiedSnippetId(p.id);
+                            setTimeout(() => setCopiedSnippetId(null), 2000);
+                          }}
+                          className="flex items-center gap-1 px-2 py-1 rounded border border-slate-700 text-[11px] text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                        >
+                          {copiedSnippetId === p.id ? (
+                            <>
+                              <Check className="h-3 w-3 text-emerald-400" />
+                              <span className="text-emerald-400">Copied</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="h-3 w-3" />
+                              <span>Copy</span>
+                            </>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setPrompt(p.prompt);
+                            setActiveTab('playground');
+                            setPlaygroundSubTab('sandbox');
+                          }}
+                          className="flex items-center gap-1 px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-semibold transition-colors"
+                        >
+                          <span>Open</span>
+                          <ExternalLink className="h-3 w-3" />
+                        </button>
+                        <button
+                          onClick={() => deleteCustomPrompt(p.id)}
+                          className="p-1 rounded border border-rose-900/50 text-rose-400 hover:bg-rose-950/40 transition-colors"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </section>
       </div>
     </div>

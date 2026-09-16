@@ -210,6 +210,20 @@ export interface Achievement {
   earnedAt: number;
 }
 
+export interface SavedCodeSnippet {
+  id: string;
+  title: string;
+  language: "python" | "typescript" | "javascript" | "json" | "curl" | "prompt" | string;
+  code: string;
+  systemInstruction?: string;
+  temperature?: number;
+  topP?: number;
+  notes?: string;
+  tags?: string[];
+  createdAt: number;
+  updatedAt?: number;
+}
+
 export interface UserProgress {
   completedLessons: string[];
   completedMissions: string[];
@@ -220,6 +234,7 @@ export interface UserProgress {
   bookmarkedLessons?: string[];
   lessonFeedbacks?: Record<string, LessonFeedback>;
   savedCustomPrompts: { id: string; title: string; prompt: string; createdAt: number }[];
+  savedCodeSnippets?: SavedCodeSnippet[];
   xp: number;
   streakDays: number;
   lastActivityDate: string;

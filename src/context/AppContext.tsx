@@ -7,7 +7,8 @@ import {
   MissionEvaluationResult,
   Mission,
   CurriculumModule,
-  LessonFeedback
+  LessonFeedback,
+  SavedCodeSnippet
 } from "../types";
 import { missions } from "../data/missionsData";
 import { analyzePrompt } from "../lib/promptAnalyzer";
@@ -120,6 +121,8 @@ interface AppContextType {
   completeAssessment: (assessmentId: string, submission: string) => void;
   saveCustomPrompt: (title: string, promptText: string) => void;
   deleteCustomPrompt: (id: string) => void;
+  saveCodeSnippet: (snippet: Omit<SavedCodeSnippet, "id" | "createdAt">) => void;
+  deleteCodeSnippet: (id: string) => void;
   toggleBookmarkPattern: (patternId: string) => void;
   toggleBookmarkLesson: (lessonId: string) => void;
   submitLessonFeedback: (feedback: LessonFeedback) => void;
@@ -165,6 +168,7 @@ const initialProgress: UserProgress = {
   bookmarkedPatterns: [],
   bookmarkedLessons: [],
   savedCustomPrompts: [],
+  savedCodeSnippets: [],
   xp: 120, // Initial welcome XP
   streakDays: 1,
   lastActivityDate: getUtcDateString(),
@@ -1720,6 +1724,29 @@ Provide:
     }));
   };
 
+  const saveCodeSnippet = (snippet: Omit<SavedCodeSnippet, "id" | "createdAt">) => {
+    const newSnippet: SavedCodeSnippet = {
+      ...snippet,
+      id: "snip-" + Date.now() + "-" + Math.random().toString(36).substring(2, 7),
+      createdAt: Date.now()
+    };
+    setUserProgress((prev) => processUserActivity({
+      ...prev,
+      savedCodeSnippets: [
+        newSnippet,
+        ...(prev.savedCodeSnippets || [])
+      ],
+      xp: prev.xp + 20
+    }));
+  };
+
+  const deleteCodeSnippet = (id: string) => {
+    setUserProgress((prev) => ({
+      ...prev,
+      savedCodeSnippets: (prev.savedCodeSnippets || []).filter((s) => s.id !== id)
+    }));
+  };
+
   const toggleBookmarkPattern = (patternId: string) => {
     setUserProgress((prev) => {
       const isBookmarked = prev.bookmarkedPatterns.includes(patternId);
@@ -1833,6 +1860,8 @@ Provide:
         completeAssessment,
         saveCustomPrompt,
         deleteCustomPrompt,
+        saveCodeSnippet,
+        deleteCodeSnippet,
         toggleBookmarkPattern,
         toggleBookmarkLesson,
         submitLessonFeedback,
