@@ -54,10 +54,13 @@ const ASSESSMENT_CONFIG: Record<string, any> = {
   }
 };
 
-export const submitAssessment = onCall(async (request) => {
-  if (!request.auth) throw new HttpsError('unauthenticated', 'Unauthorized');
+export const submitAssessment = onCall(async (request: any, context?: any) => {
+  const auth = request?.auth || context?.auth;
+  if (!auth) throw new HttpsError('unauthenticated', 'Unauthorized');
+  const uid = auth.uid;
 
-  const { assessmentId, submissionId, payload } = request.data;
+  const data = request?.data ?? request ?? {};
+  const { assessmentId, submissionId, payload } = data;
   
   if (!assessmentId || !submissionId || !payload || typeof payload !== 'string' || payload.length > 5000) {
     throw new HttpsError('invalid-argument', 'Invalid input');
@@ -81,7 +84,7 @@ export const submitAssessment = onCall(async (request) => {
     if (attemptDoc.exists) {
         const existingAttempt = attemptDoc.data();
 
-        if (existingAttempt?.learnerId !== request.auth!.uid) {
+        if (existingAttempt?.learnerId !== uid) {
             throw new HttpsError('permission-denied', 'Forbidden');
         }
 
@@ -90,7 +93,7 @@ export const submitAssessment = onCall(async (request) => {
 
     const now = admin.firestore.Timestamp.now();
     const userAttemptsQuery = db.collection('assessmentAttempts')
-      .where('learnerId', '==', request.auth.uid)
+      .where('learnerId', '==', uid)
       .where('assessmentId', '==', assessmentId)
       .orderBy('submittedAt', 'desc')
       .limit(3);
@@ -113,9 +116,17 @@ export const submitAssessment = onCall(async (request) => {
       }
     }
 
+    const credId = `${uid}_${assessmentId}`;
+    const credRef = db.collection('credentials').doc(credId);
+    let credDocExists = false;
+    if (status === 'PASS') {
+      const credDoc = await transaction.get(credRef);
+      credDocExists = credDoc.exists;
+    }
+
     const attempt = {
       attemptId: submissionId,
-      learnerId: request.auth.uid,
+      learnerId: uid,
       assessmentId,
       submittedAt: now,
       score,
@@ -127,29 +138,24 @@ export const submitAssessment = onCall(async (request) => {
 
     if (status === 'PASS') {
       // Deterministic evidence ID: learnerId + assessmentId
-      const evidenceId = `${request.auth.uid}_${assessmentId}`;
+      const evidenceId = `${uid}_${assessmentId}`;
       const evidenceRef = db.collection('evidence').doc(evidenceId);
       transaction.set(evidenceRef, {
         evidenceId,
         assessmentAttemptId: submissionId,
-        learnerId: request.auth.uid,
+        learnerId: uid,
         assessmentId,
         score,
         status: 'PASS',
         createdAt: now,
       });
 
-      // Deterministic credential ID
-      const credId = `${request.auth.uid}_${assessmentId}`;
-      const credRef = db.collection('credentials').doc(credId);
-      
-      const credDoc = await transaction.get(credRef);
-      if (!credDoc.exists) {
+      if (!credDocExists) {
         transaction.set(credRef, {
           credentialId: credId,
           credentialName: 'Certified',
           pathName: assessmentId,
-          learnerName: request.auth.token.name || 'Learner',
+          learnerName: auth.token?.name || 'Learner',
           issueDate: now,
           verificationStatus: 'VALID',
           assessmentId
