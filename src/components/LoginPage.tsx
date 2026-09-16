@@ -399,7 +399,7 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <main className="login-page min-h-dvh bg-[#030712] text-slate-100 flex flex-col justify-between items-center w-full px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-8 lg:py-10 relative overflow-x-hidden">
+    <main className="login-page min-h-dvh bg-[#030712] text-slate-100 flex flex-col justify-between items-center w-full px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-8 lg:py-10 relative">
       {/* Background Ambient Glows & Cyber Gradients */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden z-0" aria-hidden="true">
         <div className="absolute top-[-10%] left-[10%] w-[300px] sm:w-[500px] lg:w-[700px] h-[300px] sm:h-[500px] lg:h-[700px] rounded-full bg-blue-600/10 blur-[100px] lg:blur-[140px]" />

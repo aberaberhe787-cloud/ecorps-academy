@@ -41,9 +41,15 @@ if (typeof window !== 'undefined' && (window as any).__E2E_MOCK_AUTH) {
 
 export const auth = _auth as any;
 
-// Canonical Firestore database instance
+// Canonical Firestore database instance.
+// Guard: never pass "(default)" as an explicit named database ID — that targets a phantom
+// named database instead of the actual default Firestore database. Only a genuine
+// non-default named database ID (e.g. "my-secondary-db") should use the two-arg form.
 const databaseId = (firebaseConfig as any).firestoreDatabaseId;
-export const db = databaseId ? getFirestore(app, databaseId) : getFirestore(app);
+export const db =
+  databaseId && databaseId !== '(default)'
+    ? getFirestore(app, databaseId)
+    : getFirestore(app);
 
 // Safe emulator hook: ONLY connect when VITE_USE_FIREBASE_EMULATORS === 'true'
 let emulatorsConnected = false;

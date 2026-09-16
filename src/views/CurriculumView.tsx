@@ -498,7 +498,7 @@ export const CurriculumView: React.FC = () => {
   const bloomStyle = BLOOM_COLORS[bloomFocus] || BLOOM_COLORS.Understanding;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-blue-600 selection:text-white">
+    <div className="min-h-dvh bg-slate-950 text-slate-100 selection:bg-blue-600 selection:text-white">
       {/* If in active lesson mode, show LMS Focus Header */}
       {viewMode === "lesson" && (
         <LMSFocusHeader
