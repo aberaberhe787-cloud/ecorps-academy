@@ -462,7 +462,7 @@ export const Navbar: React.FC = () => {
           </button>
 
           {/* Global Search Bar with Autocomplete Modal / Dropdown */}
-          <div ref={searchContainerRef} className="relative flex-1 min-w-0 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-1 sm:mx-3" role="search">
+          <div ref={searchContainerRef} className="relative flex-1 min-w-0 max-w-xs sm:max-w-xs md:max-w-[180px] lg:max-w-md mx-1 sm:mx-2" role="search">
             <div className="relative w-full">
               <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-500 pointer-events-none" />
               <input
@@ -732,7 +732,7 @@ export const Navbar: React.FC = () => {
                 <span className="font-mono text-xs sm:text-xs leading-none">{userProgress.streakDays}</span>
               </div>
             )}
-            <div className="hidden md:flex items-center gap-1 sm:gap-2">
+            <div className="hidden lg:flex items-center gap-1 sm:gap-2">
               <NetworkStatusBadge />
               <ThemeToggle />
               

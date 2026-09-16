@@ -56,7 +56,7 @@ export const HomeView: React.FC = () => {
             <Play className="h-4 w-4" /> PRACTICE TODAY
           </button>
 
-          <div className="mt-3.5 sm:mt-5 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 text-left">
+          <div className="mt-3.5 sm:mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 text-left">
             {/* Column 1 (Active Module) */}
             <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3.5 sm:p-4">
               <p className="text-xs text-slate-400">Active Module</p>
@@ -220,7 +220,7 @@ export const HomeView: React.FC = () => {
         </div>
 
         {/* Multi-column grid on desktop/tablet, single-column on mobile */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 w-full">
           <div className="w-full max-w-full rounded-2xl border border-slate-800 bg-slate-900/70 p-3.5 sm:p-5 cursor-pointer hover:bg-slate-800 transition-colors" onClick={() => setActiveTab("curriculum")}>
             <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 mb-2.5 sm:mb-3">
               <Layers className="h-4 w-4" />
@@ -281,7 +281,7 @@ export const HomeView: React.FC = () => {
         </div>
 
         {/* Multi-column grid on desktop/tablet, single-column on mobile */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 w-full">
           {currentCurriculum.slice(0, 4).map((mod) => {
             const completedInMod = mod.lessons.filter((l) =>
               userProgress.completedLessons.includes(l.id)
@@ -360,7 +360,7 @@ export const HomeView: React.FC = () => {
         </div>
 
         {/* Multi-column grid on desktop/tablet (grid-cols-2/3), single-column on mobile */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 w-full">
           {promptPatterns.slice(0, 3).map((pat) => (
             <div
               key={pat.id}
