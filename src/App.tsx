@@ -34,7 +34,7 @@ const MainContent: React.FC = () => {
   const { activeTab } = useApp();
 
   return (
-    <main className="w-full relative flex-1 flex flex-col">
+    <main className="w-full relative flex-1 flex flex-col pb-16 md:pb-0">
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
