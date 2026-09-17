@@ -728,7 +728,7 @@ export const Navbar: React.FC = () => {
                 onClick={() => setActiveTab("profile")}
                 className="flex items-center gap-1.5 bg-orange-500/10 border border-orange-500/25 hover:border-orange-500/40 hover:bg-orange-500/20 rounded-full px-2 py-0.5 sm:px-2.5 sm:py-1 text-xs font-bold text-orange-400 cursor-pointer transition select-none active:scale-[0.95]"
               >
-                <Flame className="h-3.5 w-3.5 fill-orange-500 text-orange-400 animate-pulse shrink-0" />
+                <Flame className="h-3.5 w-3.5 fill-orange-500 text-orange-400 shrink-0" />
                 <span className="font-mono text-xs sm:text-xs leading-none">{userProgress.streakDays}</span>
               </div>
             )}

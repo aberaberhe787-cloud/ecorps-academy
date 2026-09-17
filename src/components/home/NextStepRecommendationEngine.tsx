@@ -209,10 +209,10 @@ export const NextStepRecommendationEngine: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">
-                  Personalized Next Step Engine
+                  Continue Learning
                 </h2>
-                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-950 border border-blue-800 text-[10px] font-mono font-bold text-blue-300">
-                  <Sparkles className="h-3 w-3" /> AI Tailored
+                <span className="hidden sm:inline-flex items-center gap-1 text-xs font-mono text-slate-400">
+                  <Sparkles className="h-3 w-3 text-blue-400" /> Recommended Pathway
                 </span>
               </div>
               <p className="text-xs text-slate-400">

@@ -85,7 +85,7 @@ export const ActiveRecallQuiz: React.FC<ActiveRecallQuizProps> = ({
                 Active Recall Checkpoint
               </span>
               <span className="rounded bg-slate-800 px-1.5 py-0.2 text-xs font-mono text-slate-300">
-                Gatekeeper
+                Checkpoint
               </span>
             </div>
             <h4 className="text-sm font-bold text-white">{challenge.title}</h4>

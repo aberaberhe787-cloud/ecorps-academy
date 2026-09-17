@@ -152,7 +152,7 @@ export const ConceptCard: React.FC<ConceptCardProps> = ({
             }`}
           >
             <CheckCircle2 className={`h-4 w-4 ${isRead ? "text-emerald-400" : "text-white"}`} />
-            <span>{isRead ? "Understood ✓" : "Mark as Understood"}</span>
+            <span>{isRead ? "Reviewed ✓" : "Mark as Reviewed"}</span>
           </button>
         </div>
       </div>
