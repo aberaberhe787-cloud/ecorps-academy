@@ -5,37 +5,27 @@ import {
   Terminal,
   Grid3X3,
   Compass,
-  Trophy,
-  Zap,
   Menu,
   X,
   User,
   Award,
   Flame,
-  Star,
-  ChevronRight,
   Search,
   Target,
   ArrowRight,
-  Check,
-  AlertCircle,
   Loader2,
-  ExternalLink,
   CornerDownLeft,
   Command,
-  Layers,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { NetworkStatusBadge } from "./NetworkStatusIndicator";
 import { useApp } from "../context/AppContext";
 import { NavTab } from "../types";
-import { GoogleTranslate } from "./GoogleTranslate";
 import { EcorpLogo } from "./EcorpLogo";
-import { CertificateGenerator } from "./CertificateGenerator";
 import { MobileMenuOverlay } from "./MobileMenuOverlay";
 import { auth } from "../lib/firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import {
   buildGlobalSearchIndex,
   queryGlobalSearch,
@@ -445,7 +435,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/95 backdrop-blur-md" role="banner">
+      <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/95 backdrop-blur-md" role="banner">
         <nav className="mx-auto flex h-14 sm:h-16 max-w-7xl 2xl:max-w-[1536px] items-center justify-between gap-1.5 sm:gap-2 px-2.5 sm:px-6 lg:px-8" aria-label="Main navigation">
           
           {/* Brand Logo */}
@@ -462,7 +452,7 @@ export const Navbar: React.FC = () => {
           </button>
 
           {/* Global Search Bar with Autocomplete Modal / Dropdown */}
-          <div ref={searchContainerRef} className="relative flex-1 min-w-0 max-w-xs sm:max-w-xs md:max-w-[180px] lg:max-w-md mx-1 sm:mx-2" role="search">
+          <div ref={searchContainerRef} className="relative flex-1 min-w-0 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-1 sm:mx-3" role="search">
             <div className="relative w-full">
               <Search className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-500 pointer-events-none" />
               <input
@@ -664,7 +654,7 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Desktop Nav Links */}
-          <nav className="hidden xl:flex items-center gap-1 rounded-xl border border-slate-800 bg-slate-900/60 p-1 shadow-inner">
+          <nav className="hidden xl:flex items-center gap-1 rounded-xl border border-slate-800 bg-slate-900/60 p-1 shadow-inner relative">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -678,12 +668,23 @@ export const Navbar: React.FC = () => {
                     }
                     setActiveTab(item.id);
                   }}
-                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-all duration-150 ${
+                  className={`relative flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors duration-200 z-10 ${
                     isActive
-                      ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25"
-                      : "text-slate-300 hover:bg-slate-800/80 hover:text-white"
+                      ? "text-white"
+                      : "text-slate-300 hover:text-white"
                   }`}
                 >
+                  {isActive && (
+                    <motion.div
+                      layoutId="desktopActiveTabIndicator"
+                      className="absolute inset-0 bg-blue-600 rounded-lg shadow-sm shadow-blue-500/30 -z-10"
+                      transition={{
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 32,
+                      }}
+                    />
+                  )}
                   <Icon className={`h-3.5 w-3.5 ${isActive ? "text-white" : "text-slate-400"}`} />
                   <span>{item.label}</span>
                 </button>
@@ -692,7 +693,7 @@ export const Navbar: React.FC = () => {
           </nav>
 
           {/* Compact Nav for Intermediate Desktop (md-lg) */}
-          <nav className="hidden md:flex xl:hidden items-center gap-0.5 rounded-xl border border-slate-800 bg-slate-900/60 p-1 shadow-inner">
+          <nav className="hidden md:flex xl:hidden items-center gap-0.5 rounded-xl border border-slate-800 bg-slate-900/60 p-1 shadow-inner relative">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -707,12 +708,23 @@ export const Navbar: React.FC = () => {
                     setActiveTab(item.id);
                   }}
                   title={item.label}
-                  className={`flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-all duration-150 ${
+                  className={`relative flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors duration-200 z-10 ${
                     isActive
-                      ? "bg-blue-600 text-white shadow-sm shadow-blue-500/25"
-                      : "text-slate-300 hover:bg-slate-800/80 hover:text-white"
+                      ? "text-white"
+                      : "text-slate-300 hover:text-white"
                   }`}
                 >
+                  {isActive && (
+                    <motion.div
+                      layoutId="compactActiveTabIndicator"
+                      className="absolute inset-0 bg-blue-600 rounded-lg shadow-sm shadow-blue-500/30 -z-10"
+                      transition={{
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 32,
+                      }}
+                    />
+                  )}
                   <Icon className={`h-3.5 w-3.5 ${isActive ? "text-white" : "text-slate-400"}`} />
                   <span className="hidden lg:inline">{item.label}</span>
                 </button>
@@ -728,11 +740,11 @@ export const Navbar: React.FC = () => {
                 onClick={() => setActiveTab("profile")}
                 className="flex items-center gap-1.5 bg-orange-500/10 border border-orange-500/25 hover:border-orange-500/40 hover:bg-orange-500/20 rounded-full px-2 py-0.5 sm:px-2.5 sm:py-1 text-xs font-bold text-orange-400 cursor-pointer transition select-none active:scale-[0.95]"
               >
-                <Flame className="h-3.5 w-3.5 fill-orange-500 text-orange-400 shrink-0" />
+                <Flame className="h-3.5 w-3.5 fill-orange-500 text-orange-400 animate-pulse shrink-0" />
                 <span className="font-mono text-xs sm:text-xs leading-none">{userProgress.streakDays}</span>
               </div>
             )}
-            <div className="hidden lg:flex items-center gap-1 sm:gap-2">
+            <div className="hidden md:flex items-center gap-1 sm:gap-2">
               <NetworkStatusBadge />
               <ThemeToggle />
               

@@ -1,5 +1,5 @@
 import React from "react";
-import { Flame, Calendar, Award, CheckCircle, Clock, CloudCheck, ShieldCheck } from "lucide-react";
+import { Flame, Calendar, CheckCircle, ShieldCheck } from "lucide-react";
 
 interface DailyStreakCounterProps {
   streakDays: number;

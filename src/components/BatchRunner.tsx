@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Copy, ListTree, RefreshCcw, FastForward } from 'lucide-react';
-import { useApp } from '../context/AppContext';
+import { ListTree, RefreshCcw, FastForward } from 'lucide-react';
 import { callGeminiGenerate } from '../lib/geminiApi';
 
 interface BatchRunnerProps {

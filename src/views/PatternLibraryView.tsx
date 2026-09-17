@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion } from "motion/react";
 import {
   Grid3X3,
   Search,
@@ -122,20 +123,34 @@ export const PatternLibraryView: React.FC = () => {
           </div>
 
           {/* Category Tabs */}
-          <div className="flex items-center gap-1 overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/70 p-1 no-scrollbar max-w-full">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all ${
-                  selectedCategory === cat
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          <div className="flex items-center gap-1 overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/70 p-1 no-scrollbar max-w-full relative">
+            {categories.map((cat) => {
+              const isActive = selectedCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`relative rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors duration-200 z-10 ${
+                    isActive
+                      ? "text-white"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="patternCategoryIndicator"
+                      className="absolute inset-0 bg-blue-600 rounded-lg shadow-sm shadow-blue-500/25 -z-10"
+                      transition={{
+                        type: "spring",
+                        stiffness: 450,
+                        damping: 34,
+                      }}
+                    />
+                  )}
+                  <span>{cat}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>

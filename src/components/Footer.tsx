@@ -40,16 +40,19 @@ export const Footer: React.FC = () => {
   return (
     <footer className="border-t border-slate-800/80 bg-slate-950/80 text-slate-400 text-xs py-10">
       <div className="mx-auto max-w-7xl 2xl:max-w-[1536px] px-4 sm:px-6 lg:px-8">
-        {/* Feature Statistics Section: Secondary inline metadata tags */}
-        <div id="footer-feature-statistics-section" className="mb-8 pb-6 border-b border-slate-800/70">
-          <div className="flex flex-wrap items-center justify-center md:justify-between gap-3 text-xs text-slate-400 font-mono">
+        {/* Feature Statistics Section: Explicitly stacks on mobile (< 768px) and transitions to spaced-out horizontal layout on desktop */}
+        <div id="footer-feature-statistics-section" className="mb-10 pb-8 border-b border-slate-800/70">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 lg:gap-6">
             {FOOTER_FEATURE_STATISTICS.map((stat) => {
               const Icon = stat.icon;
               return (
-                <div key={stat.text} className="flex items-center gap-2 shrink-0">
-                  <Icon className={`h-3.5 w-3.5 ${stat.iconColor} shrink-0`} />
-                  <span>
-                    <strong className={`${stat.numberColor} font-bold mr-1`}>{stat.number}</strong>
+                <div
+                  key={stat.text}
+                  className="w-full md:w-auto flex items-center justify-center md:justify-start gap-2.5 rounded-xl border border-slate-800/80 bg-slate-900/60 px-4 py-2.5 text-xs text-slate-300 shadow-sm shrink-0 whitespace-nowrap"
+                >
+                  <Icon className={`h-4 w-4 ${stat.iconColor} shrink-0`} />
+                  <span className="whitespace-nowrap">
+                    <strong className={`${stat.numberColor} font-bold mr-1.5`}>{stat.number}</strong>
                     {stat.text}
                   </span>
                 </div>

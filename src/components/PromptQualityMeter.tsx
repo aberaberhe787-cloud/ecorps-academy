@@ -1,5 +1,5 @@
 import React from "react";
-import { CheckCircle2, AlertCircle, Sparkles, Tag, ShieldCheck, HelpCircle } from "lucide-react";
+import { CheckCircle2, AlertCircle, Sparkles, Tag, ShieldCheck } from "lucide-react";
 import { analyzePrompt } from "../lib/promptAnalyzer";
 
 interface PromptQualityMeterProps {

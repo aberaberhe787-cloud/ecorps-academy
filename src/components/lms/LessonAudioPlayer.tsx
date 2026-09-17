@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Volume2, VolumeX, Play, Pause, Square, FastForward, RotateCcw, Sparkles } from "lucide-react";
+import { Volume2, Play, Pause, Square, Sparkles } from "lucide-react";
 import { Lesson } from "../../types";
 
 interface LessonAudioPlayerProps {

@@ -1,3 +1,31 @@
+export interface ProgressModel {
+  completed: number;
+  total: number;
+  percentage: number;
+  current: number;
+  remaining: number;
+  weeklyCompleted: number;
+  weeklyGoal: number;
+  foundations: {
+    completed: number;
+    total: number;
+    percentage: number;
+  };
+  curriculum: {
+    completed: number;
+    total: number;
+    percentage: number;
+  };
+  missions: {
+    completed: number;
+    total: number;
+    percentage: number;
+  };
+}
+
+export type CheckpointStatus = "locked" | "available" | "passed";
+export type QuizInteractionState = "idle" | "selected" | "submitted" | "retrying";
+
 export type NavTab = "home" | "curriculum" | "foundations" | "playground" | "patterns" | "resources" | "ctf" | "certification" | "profile";
 
 export type BloomsTaxonomyLevel =

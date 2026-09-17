@@ -6,8 +6,6 @@ import {
   Terminal,
   Layers,
   Award,
-  ChevronRight,
-  Sparkles,
   Zap
 } from "lucide-react";
 import { useApp } from "../../context/AppContext";

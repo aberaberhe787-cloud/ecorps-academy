@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Columns2, LoaderCircle, Play, RotateCcw, ArrowUpRight, Sparkles, SlidersHorizontal, Check } from 'lucide-react';
+import { Columns2, LoaderCircle, Play, RotateCcw, ArrowUpRight, Check } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { analyzePrompt } from '../lib/promptAnalyzer';
 

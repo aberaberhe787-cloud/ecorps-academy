@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Play, RotateCcw, Sparkles, Columns2, Sliders, Save, Trash2,
   History, Target, Terminal, Bookmark, Check, ChevronDown, ChevronUp,
@@ -517,7 +518,7 @@ export const PlaygroundView: React.FC = () => {
 
         <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
           {/* Sub-Nav Pills */}
-          <div className="flex items-center gap-1 rounded-xl border border-slate-800 bg-slate-900/80 p-1 overflow-x-auto no-scrollbar max-w-full touch-pan-x">
+          <div className="flex items-center gap-1 rounded-xl border border-slate-800 bg-slate-900/80 p-1 overflow-x-auto no-scrollbar max-w-full touch-pan-x relative">
             {[
               { id: "sandbox", label: t.playground.tabSandbox, icon: Terminal, onClick: () => { 
                 if (playgroundSubTab === "missions") {
@@ -539,12 +540,25 @@ export const PlaygroundView: React.FC = () => {
                   key={tab.id}
                   id={`tab-${tab.id}`}
                   onClick={tab.onClick}
-                  className={`flex items-center gap-1.5 rounded-lg px-2.5 sm:px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap ${
+                  className={`relative flex items-center gap-1.5 rounded-lg px-2.5 sm:px-3 py-1.5 text-xs font-semibold transition-colors duration-200 whitespace-nowrap z-10 ${
                     isActive
-                      ? isCtf ? "bg-rose-600 text-white shadow-sm" : "bg-blue-600 text-white shadow-sm"
+                      ? "text-white"
                       : "text-slate-400 hover:text-slate-200"
                   }`}
                 >
+                  {isActive && (
+                    <motion.div
+                      layoutId="playgroundSubTabIndicator"
+                      className={`absolute inset-0 rounded-lg shadow-sm -z-10 ${
+                        isCtf ? "bg-rose-600 shadow-rose-900/40" : "bg-blue-600 shadow-blue-900/40"
+                      }`}
+                      transition={{
+                        type: "spring",
+                        stiffness: 450,
+                        damping: 34,
+                      }}
+                    />
+                  )}
                   <Icon className="h-3.5 w-3.5 shrink-0" />
                   <span className="hidden sm:inline">{tab.label}</span>
                   <span className="sm:hidden">{tab.id === "comparison" ? "A/B" : tab.label.split(" ")[0]}</span>
@@ -571,14 +585,24 @@ export const PlaygroundView: React.FC = () => {
         </div>
       </div>
 
-      {/* Missions Tab */}
-      {playgroundSubTab === "missions" && <MissionsPanel />}
+      {/* Main Subtab Views with Smooth Transition */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={playgroundSubTab}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className="w-full space-y-4"
+        >
+          {/* Missions Tab */}
+          {playgroundSubTab === "missions" && <MissionsPanel />}
 
-      {/* CTF Tab */}
-      {playgroundSubTab === "ctf" && <CtfSimulator />}
+          {/* CTF Tab */}
+          {playgroundSubTab === "ctf" && <CtfSimulator />}
 
-      {/* Main Dual Pane (Sandbox + Comparison) */}
-      {(playgroundSubTab === "sandbox" || playgroundSubTab === "comparison") && (
+          {/* Main Dual Pane (Sandbox + Comparison) */}
+          {(playgroundSubTab === "sandbox" || playgroundSubTab === "comparison") && (
         <>
           {/* Mobile Responsive Workspace Switcher (< lg) */}
           <div className="lg:hidden flex items-center p-1 bg-slate-950/90 border border-slate-800 rounded-xl mb-3 shadow-sm">
@@ -978,6 +1002,8 @@ export const PlaygroundView: React.FC = () => {
         </div>
       </>
       )}
+        </motion.div>
+      </AnimatePresence>
 
       {/* Slide-out Drawer */}
       <SideDrawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} />

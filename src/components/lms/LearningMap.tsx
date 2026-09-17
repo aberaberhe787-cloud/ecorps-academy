@@ -1,30 +1,15 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Compass,
   CheckCircle2,
   Lock,
   Play,
   Sparkles,
-  Award,
-  ChevronRight,
-  BookOpen,
-  ArrowRight,
-  Shield,
-  Layers,
-  Zap,
-  Info,
-  ExternalLink,
-  Target,
-  Clock,
-  Flame,
   Check,
-  RotateCcw,
-  Milestone,
   Route,
-  GraduationCap,
-  Bookmark
+  Bookmark,
 } from "lucide-react";
-import { CurriculumModule, Lesson, BloomsTaxonomyLevel } from "../../types";
+import { CurriculumModule, Lesson } from "../../types";
 import { useApp } from "../../context/AppContext";
 
 interface LearningMapProps {

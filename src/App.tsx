@@ -33,15 +33,27 @@ import { MobileBottomNav } from "./components/MobileBottomNav";
 const MainContent: React.FC = () => {
   const { activeTab } = useApp();
 
+  // Smooth scroll to top whenever the tab selection changes
+  React.useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth",
+    });
+  }, [activeTab]);
+
   return (
     <main className="w-full relative flex-1 flex flex-col pb-16 md:pb-0">
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.2 }}
+          initial={{ opacity: 0, y: 14, filter: "blur(4px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          exit={{ opacity: 0, y: -10, filter: "blur(2px)" }}
+          transition={{
+            duration: 0.28,
+            ease: [0.22, 1, 0.36, 1], // Custom cubic bezier for smooth, snappy deceleration
+          }}
           className="w-full flex-1 flex flex-col"
         >
           {activeTab === "home" && <HomeView />}

@@ -7,9 +7,6 @@ import {
   Eye,
   RotateCcw,
   Sparkles,
-  ArrowRight,
-  ChevronRight,
-  Zap,
   Target,
   Award,
   AlertCircle

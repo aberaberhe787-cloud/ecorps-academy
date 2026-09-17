@@ -1,12 +1,10 @@
 import React from "react";
 import {
   CheckCircle2,
-  Lock,
   Clock,
   Award,
   Sparkles,
   ChevronRight,
-  BookOpen,
   GraduationCap,
   Play,
   Bookmark

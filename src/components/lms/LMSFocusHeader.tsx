@@ -1,7 +1,6 @@
 import React from "react";
 import {
   ArrowLeft,
-  Sparkles,
   Flame,
   Maximize2,
   Minimize2,
@@ -27,9 +26,7 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
   currentLesson,
   currentModule,
   progressPercent,
-  isCompleted,
   streakDays,
-  totalXp,
   isDistractionFree,
   onToggleDistractionFree,
   onExitLesson,
@@ -39,67 +36,77 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
   return (
     <div
       id="lms-focus-header"
-      className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/95 backdrop-blur-xl px-3 sm:px-4 py-2 sm:py-3 shadow-md"
+      className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/95 backdrop-blur-md px-3 sm:px-4 py-2 sm:py-2.5 shadow-sm"
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 sm:gap-4">
-        {/* Left: Exit button & Title */}
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
+        {/* Left: Back & Title */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             id="exit-lesson-btn"
             onClick={onExitLesson}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-300 hover:border-blue-500 hover:bg-slate-800 hover:text-white transition-all shrink-0 min-h-[36px]"
+            className="flex items-center gap-1.5 rounded-lg border border-slate-800 bg-slate-900 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:border-slate-700 hover:text-white transition-all shrink-0 min-h-[36px] cursor-pointer"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Back</span>
-            <span className="sm:hidden">Exit</span>
+            <span>Back</span>
           </button>
 
           <div className="min-w-0 truncate">
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="font-mono text-xs sm:text-xs font-bold text-blue-400 bg-blue-950 px-1.5 py-0.5 rounded border border-blue-800/60 shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-xs font-bold text-blue-400 bg-blue-950 px-1.5 py-0.5 rounded border border-blue-900 shrink-0">
                 {currentModule?.code || "MODULE"}
               </span>
-              <span className="text-xs font-bold text-white truncate max-w-[120px] sm:max-w-[240px]">
+              <span className="text-xs sm:text-sm font-bold text-white truncate">
                 {currentLesson.title}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Center: Interactive Lesson Progress Bar (on medium+ screens) */}
-        <div className="hidden md:flex flex-col items-center justify-center w-64">
-          <div className="flex justify-between w-full text-xs sm:text-xs font-mono text-slate-400 mb-1">
-            <span>Lesson Progress:</span>
+        {/* Center: Clean Progress */}
+        <div className="hidden md:flex flex-col items-center justify-center w-48">
+          <div className="flex justify-between w-full text-xs font-mono text-slate-400 mb-1">
+            <span>Progress</span>
             <span className="text-blue-400 font-bold">{Math.round(progressPercent)}%</span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
             <div
-              className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 transition-all duration-300"
+              className="h-full bg-blue-500 transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
         </div>
 
-        {/* Right: Streak, XP, and Focus Mode toggle */}
-        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-          {/* Streak */}
-          <div className="flex items-center gap-1 rounded-lg bg-orange-500/10 border border-orange-500/30 px-2 sm:px-2.5 py-1 text-xs sm:text-xs font-semibold text-orange-300">
+        {/* Right: Streak, Bookmark, Focus Mode */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Streak Indicator (Calm, no ping) */}
+          <div className="flex items-center gap-1 rounded-lg bg-orange-500/10 border border-orange-500/20 px-2 py-1 text-xs font-semibold text-orange-400">
             <Flame className="h-3.5 w-3.5 text-orange-400 fill-orange-400/20" />
-            <span>{streakDays}d</span>
+            <span className="font-mono">{streakDays}d</span>
           </div>
 
-          {/* XP */}
-          <div className="flex items-center gap-1 rounded-lg bg-amber-500/10 border border-amber-500/30 px-2 sm:px-2.5 py-1 text-xs sm:text-xs font-semibold text-amber-300 font-mono">
-            <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-            <span>{totalXp} XP</span>
-          </div>
+          {/* Bookmark Button */}
+          {onToggleBookmark && (
+            <button
+              id="lms-focus-bookmark-btn"
+              onClick={onToggleBookmark}
+              title={isBookmarked ? "Remove bookmark" : "Bookmark lesson"}
+              className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-all cursor-pointer ${
+                isBookmarked
+                  ? "border-amber-500/60 bg-amber-950/60 text-amber-300"
+                  : "border-slate-800 bg-slate-900 text-slate-400 hover:text-white"
+              }`}
+            >
+              <Bookmark className={`h-3.5 w-3.5 ${isBookmarked ? "fill-amber-400 text-amber-400" : ""}`} />
+              <span className="hidden sm:inline">{isBookmarked ? "Saved" : "Save"}</span>
+            </button>
+          )}
 
           {/* Focus Mode Toggle */}
           <button
             id="toggle-distraction-free-btn"
             onClick={onToggleDistractionFree}
-            title={isDistractionFree ? "Exit Focus Mode" : "Enter Focus Mode"}
-            className={`hidden sm:flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-all ${
+            title={isDistractionFree ? "Exit Focus" : "Enter Focus"}
+            className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-all cursor-pointer ${
               isDistractionFree
                 ? "border-blue-500 bg-blue-950 text-blue-300"
                 : "border-slate-800 bg-slate-900 text-slate-400 hover:text-white"
@@ -113,27 +120,10 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
             ) : (
               <>
                 <Maximize2 className="h-3.5 w-3.5" />
-                <span className="text-xs">Focus mode</span>
+                <span className="text-xs">Enter Focus</span>
               </>
             )}
           </button>
-
-          {/* Bookmark Button */}
-          {onToggleBookmark && (
-            <button
-              id="lms-focus-bookmark-btn"
-              onClick={onToggleBookmark}
-              title={isBookmarked ? "Remove from bookmarked topics" : "Bookmark this topic for later review"}
-              className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold transition-all ${
-                isBookmarked
-                  ? "border-amber-500/60 bg-amber-950/80 text-amber-300 shadow-sm shadow-amber-950/50"
-                  : "border-slate-800 bg-slate-900 text-slate-400 hover:text-white hover:border-slate-700"
-              }`}
-            >
-              <Bookmark className={`h-3.5 w-3.5 ${isBookmarked ? "fill-amber-400 text-amber-400" : ""}`} />
-              <span className="hidden sm:inline">{isBookmarked ? "Saved" : "Save"}</span>
-            </button>
-          )}
         </div>
       </div>
     </div>

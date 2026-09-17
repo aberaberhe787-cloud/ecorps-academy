@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from "react";
 import confetti from "canvas-confetti";
 import {
   NavTab,
@@ -8,9 +8,11 @@ import {
   Mission,
   CurriculumModule,
   LessonFeedback,
-  SavedCodeSnippet
+  SavedCodeSnippet,
+  ProgressModel
 } from "../types";
 import { missions } from "../data/missionsData";
+import { FOUNDATION_LESSONS } from "../views/PromptEngineeringPath";
 import { analyzePrompt } from "../lib/promptAnalyzer";
 import { translations, Language, I18nTranslations } from "../i18n/translations";
 import { amharicCurriculumModules } from "../i18n/amharicLessons";
@@ -111,6 +113,7 @@ interface AppContextType {
 
   // User Progress
   userProgress: UserProgress;
+  progressModel: ProgressModel;
   curriculumProgressPercent: number;
   resumeCurriculum: () => string | null;
   persistenceStatus: 'synced' | 'saving' | 'offline' | 'error';
@@ -954,7 +957,7 @@ Provide:
               : (Array.isArray(progressNested.achievements) ? progressNested.achievements : (cachedState.achievements || [])),
             lastLessonId: data.lastLessonId || progressNested.lastLessonId || cachedState.lastLessonId || undefined,
             lastModuleId: data.lastModuleId || progressNested.lastModuleId || cachedState.lastModuleId || undefined,
-            curriculumProgressPercent: Math.min(100, Math.round((mergedLessons.length / (curriculumModules.flatMap(m => m.lessons).length || 1)) * 100)),
+            curriculumProgressPercent: Math.min(100, Math.round((mergedLessons.length / 16) * 100)),
             promptsEngineeredCount,
           };
 
@@ -1637,11 +1640,72 @@ Provide:
     };
   };
 
-  const totalCurriculumLessons = 16;
-  const curriculumProgressPercent = Math.min(
-    100,
-    Math.round((userProgress.completedLessons.length / totalCurriculumLessons) * 100)
-  );
+  const progressModel: ProgressModel = useMemo(() => {
+    const allCurriculumLessons = currentCurriculum.flatMap((m) => m.lessons);
+    const completedIds = userProgress.completedLessons || [];
+
+    const foundationsTotal = FOUNDATION_LESSONS.length;
+    const foundationsCompleted = FOUNDATION_LESSONS.filter((l) => completedIds.includes(l.id)).length;
+    const foundationsPercentage = foundationsTotal > 0 ? Math.round((foundationsCompleted / foundationsTotal) * 100) : 0;
+
+    const curriculumTotal = allCurriculumLessons.length;
+    const curriculumCompleted = allCurriculumLessons.filter((l) => completedIds.includes(l.id)).length;
+    const curriculumPercentage = curriculumTotal > 0 ? Math.round((curriculumCompleted / curriculumTotal) * 100) : 0;
+
+    const missionsTotal = missions.length;
+    const missionsCompleted = (userProgress.completedMissions || []).length;
+    const missionsPercentage = missionsTotal > 0 ? Math.round((missionsCompleted / missionsTotal) * 100) : 0;
+
+    const total = foundationsTotal + curriculumTotal;
+    const completed = foundationsCompleted + curriculumCompleted;
+    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+    // Truthful weekly active day count
+    const now = new Date();
+    const dayOfWeek = now.getUTCDay();
+    const startOfWeek = new Date(now);
+    startOfWeek.setUTCDate(now.getUTCDate() - dayOfWeek);
+    startOfWeek.setUTCHours(0, 0, 0, 0);
+
+    const history = Array.isArray(userProgress.loginHistory) ? userProgress.loginHistory : [getUtcDateString()];
+    const activeDaysThisWeek = history.filter((d) => {
+      try {
+        const dateObj = new Date(d + "T00:00:00Z");
+        return dateObj >= startOfWeek && dateObj <= now;
+      } catch {
+        return false;
+      }
+    }).length;
+
+    const weeklyCompleted = Math.min(5, Math.max(1, activeDaysThisWeek));
+
+    return {
+      completed,
+      total,
+      percentage,
+      current: Math.min(total, completed + 1),
+      remaining: Math.max(0, total - completed),
+      weeklyCompleted,
+      weeklyGoal: 5,
+      foundations: {
+        completed: foundationsCompleted,
+        total: foundationsTotal,
+        percentage: foundationsPercentage,
+      },
+      curriculum: {
+        completed: curriculumCompleted,
+        total: curriculumTotal,
+        percentage: curriculumPercentage,
+      },
+      missions: {
+        completed: missionsCompleted,
+        total: missionsTotal,
+        percentage: missionsPercentage,
+      },
+    };
+  }, [currentCurriculum, userProgress.completedLessons, userProgress.completedMissions, userProgress.loginHistory]);
+
+  const curriculumProgressPercent = progressModel.curriculum.percentage;
 
   const resumeCurriculum = (): string | null => {
     const allLessons = currentCurriculum.flatMap((m) => m.lessons);
@@ -1674,7 +1738,8 @@ Provide:
       const updatedLessons = isAlreadyDone
         ? prev.completedLessons
         : [...prev.completedLessons, lessonId];
-      const percent = Math.min(100, Math.round((updatedLessons.length / totalCurriculumLessons) * 100));
+      const allTotal = currentCurriculum.flatMap((m) => m.lessons).length || 1;
+      const percent = Math.min(100, Math.round((updatedLessons.length / allTotal) * 100));
       const next = {
         ...prev,
         completedLessons: updatedLessons,
@@ -1850,6 +1915,7 @@ Provide:
         setTheme,
         isDarkMode,
         userProgress,
+        progressModel,
         curriculumProgressPercent,
         resumeCurriculum,
         persistenceStatus,

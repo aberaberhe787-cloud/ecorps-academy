@@ -23,8 +23,6 @@ import {
   TrendingUp,
   Award,
   Zap,
-  BookOpen,
-  CheckCircle2,
   Layers,
   Sparkles,
   BarChart3

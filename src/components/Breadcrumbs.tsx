@@ -6,7 +6,6 @@ import { NavTab } from "../types";
 export const Breadcrumbs: React.FC = () => {
   const { activeTab, activeLessonId, setActiveTab, setActiveLessonId, currentCurriculum } = useApp();
 
-  // If we are not logged in, or there is no tab selected, we shouldn't show breadcrumbs
   if (!activeTab) return null;
 
   const handleHomeClick = () => {
@@ -19,14 +18,14 @@ export const Breadcrumbs: React.FC = () => {
     if (setActiveLessonId) setActiveLessonId(null);
   };
 
-  // Find module & lesson title for active tab 'curriculum' and activeLessonId dynamically from active context
-  let moduleTitle = "";
+  // Find module code & lesson title from current dynamic curriculum in context
+  let moduleCode = "";
   let lessonTitle = "";
-  if (activeTab === "curriculum" && activeLessonId && currentCurriculum) {
+  if (activeTab === "curriculum" && activeLessonId) {
     for (const mod of currentCurriculum) {
       const les = mod.lessons.find((l) => l.id === activeLessonId);
       if (les) {
-        moduleTitle = mod.code || mod.title.split(":")[1]?.trim() || mod.title;
+        moduleCode = mod.code || mod.title;
         lessonTitle = les.title;
         break;
       }
@@ -42,7 +41,7 @@ export const Breadcrumbs: React.FC = () => {
       case "foundations":
         return { label: "Foundations", icon: Target };
       case "playground":
-        return { label: "Playground", icon: Terminal };
+        return { label: "Sandbox", icon: Terminal };
       case "patterns":
         return { label: "Patterns", icon: Grid3X3 };
       case "resources":
@@ -62,12 +61,12 @@ export const Breadcrumbs: React.FC = () => {
   return (
     <nav 
       aria-label="Breadcrumbs"
-      className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-1 sm:pb-2 flex items-center flex-wrap gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 select-none animate-in fade-in duration-150"
+      className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-1 flex items-center flex-wrap gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 select-none animate-in fade-in duration-150"
     >
       {/* Root - Academy */}
       <button
         onClick={handleHomeClick}
-        className="flex items-center gap-1 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+        className="flex items-center gap-1 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer"
       >
         <Home className="h-3.5 w-3.5" />
         <span className="hidden sm:inline">Academy</span>
@@ -78,7 +77,7 @@ export const Breadcrumbs: React.FC = () => {
       {/* Active Tab */}
       <button
         onClick={() => handleTabClick(activeTab)}
-        className={`flex items-center gap-1 hover:text-blue-500 dark:hover:text-blue-400 transition-colors ${
+        className={`flex items-center gap-1 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer ${
           !activeLessonId ? "text-slate-900 dark:text-slate-100 font-semibold" : ""
         }`}
       >
@@ -89,17 +88,17 @@ export const Breadcrumbs: React.FC = () => {
       {/* Conditional Sub-levels for active curriculum lesson */}
       {activeTab === "curriculum" && activeLessonId && (
         <>
-          {moduleTitle && (
+          {moduleCode && (
             <>
               <ChevronRight className="h-3.5 w-3.5 text-slate-400 shrink-0" />
               <button
                 onClick={() => {
                   if (setActiveLessonId) setActiveLessonId(null);
                 }}
-                className="hover:text-blue-500 dark:hover:text-blue-400 transition-colors truncate max-w-[120px] sm:max-w-[200px]"
-                title={moduleTitle}
+                className="hover:text-blue-500 dark:hover:text-blue-400 transition-colors truncate max-w-[120px] sm:max-w-[160px] cursor-pointer"
+                title={moduleCode}
               >
-                {moduleTitle}
+                {moduleCode}
               </button>
             </>
           )}

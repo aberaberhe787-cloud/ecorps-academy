@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import confetti from "canvas-confetti";
 import {
   Terminal,
@@ -8,15 +8,11 @@ import {
   Sparkles,
   RefreshCw,
   Code2,
-  Layers,
   HelpCircle,
   Zap,
-  ArrowRight,
   Check,
   X,
   Eye,
-  Sliders,
-  FileCode,
   ShieldAlert,
   Cpu
 } from "lucide-react";

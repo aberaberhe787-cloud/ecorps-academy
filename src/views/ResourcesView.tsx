@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion } from "motion/react";
 import { FileText, Trash2, Play, BookOpen, Search, ExternalLink, Copy, Check, Calendar, Sparkles } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { glossaryTerms, promptOfTheDayList, externalLearningResources } from "../data/resourcesData";
@@ -90,49 +91,41 @@ export const ResourcesView: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-full">
-              <button
-                onClick={() => setSelectedResourceSection("All")}
-                className={`rounded-lg px-2.5 py-1 font-medium transition-all ${
-                  selectedResourceSection === "All"
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-                }`}
-              >
-                All Resources
-              </button>
-              <button
-                onClick={() => setSelectedResourceSection("guides")}
-                className={`rounded-lg px-2.5 py-1 font-medium transition-all ${
-                  selectedResourceSection === "guides"
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-                }`}
-              >
-                Guides & Papers ({filteredGuides.length})
-              </button>
-              <button
-                onClick={() => setSelectedResourceSection("glossary")}
-                className={`rounded-lg px-2.5 py-1 font-medium transition-all ${
-                  selectedResourceSection === "glossary"
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-                }`}
-              >
-                Glossary ({filteredGlossary.length})
-              </button>
-              {userProgress.savedCustomPrompts.length > 0 && (
-                <button
-                  onClick={() => setSelectedResourceSection("saved")}
-                  className={`rounded-lg px-2.5 py-1 font-medium transition-all ${
-                    selectedResourceSection === "saved"
-                      ? "bg-blue-600 text-white shadow-sm"
-                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-                  }`}
-                >
-                  My Saved ({filteredSavedPrompts.length})
-                </button>
-              )}
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar max-w-full relative">
+              {[
+                { id: "All" as const, label: "All Resources" },
+                { id: "guides" as const, label: `Guides & Papers (${filteredGuides.length})` },
+                { id: "glossary" as const, label: `Glossary (${filteredGlossary.length})` },
+                ...(userProgress.savedCustomPrompts.length > 0
+                  ? [{ id: "saved" as const, label: `My Saved (${filteredSavedPrompts.length})` }]
+                  : []),
+              ].map((sec) => {
+                const isActive = selectedResourceSection === sec.id;
+                return (
+                  <button
+                    key={sec.id}
+                    onClick={() => setSelectedResourceSection(sec.id)}
+                    className={`relative rounded-lg px-2.5 py-1 font-medium transition-colors duration-200 z-10 ${
+                      isActive
+                        ? "text-white"
+                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="resourceSectionIndicator"
+                        className="absolute inset-0 bg-blue-600 rounded-lg shadow-sm shadow-blue-500/25 -z-10"
+                        transition={{
+                          type: "spring",
+                          stiffness: 450,
+                          damping: 34,
+                        }}
+                      />
+                    )}
+                    <span>{sec.label}</span>
+                  </button>
+                );
+              })}
             </div>
 
             {searchTerm && (

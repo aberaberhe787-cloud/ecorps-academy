@@ -4,19 +4,11 @@ import {
   Lock,
   Play,
   Sparkles,
-  BookOpen,
-  Award,
-  ChevronRight,
   Clock,
-  ArrowRight,
-  Shield,
-  Layers,
-  Zap,
   Info,
-  ExternalLink,
   Bookmark,
 } from "lucide-react";
-import { Lesson, CurriculumModule, BloomsTaxonomyLevel } from "../../types";
+import { Lesson, CurriculumModule } from "../../types";
 import { useApp } from "../../context/AppContext";
 
 interface SkillNode {
