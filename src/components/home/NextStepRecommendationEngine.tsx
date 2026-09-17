@@ -68,7 +68,7 @@ export const NextStepRecommendationEngine: React.FC = () => {
       const idx = FOUNDATION_LESSONS.findIndex((l) => l.id === nextFoundation.id);
       return {
         type: "foundation" as const,
-        priority: "HIGH PRIORITY • FOUNDATIONS",
+        priority: "Foundations Track",
         title: nextFoundation.title,
         subtitle: `Module ${idx + 1} of ${foundationsTotal} in Prompt Engineering Foundations`,
         summary: nextFoundation.summary,
@@ -100,7 +100,7 @@ export const NextStepRecommendationEngine: React.FC = () => {
 
       return {
         type: "curriculum" as const,
-        priority: "RECOMMENDED NEXT • CURRICULUM",
+        priority: "Next Recommended Lesson",
         title: nextCurriculumLesson.title,
         subtitle: `${parentModule?.code || "MODULE"} • ${parentModule?.title || "Advanced Prompt Engineering"}`,
         summary: nextCurriculumLesson.conceptSummary || nextCurriculumLesson.subtitle,
@@ -109,7 +109,7 @@ export const NextStepRecommendationEngine: React.FC = () => {
         xpReward: nextCurriculumLesson.xpReward || 50,
         badge: nextCurriculumLesson.difficulty || "Intermediate",
         badgeColor: "bg-emerald-950/80 border-emerald-800 text-emerald-300",
-        actionLabel: "Launch Curriculum Lesson",
+        actionLabel: "Launch Lesson",
         rationale: `You have mastered ${curriculumCompleted} lessons. Complete ${nextCurriculumLesson.title} to advance your mastery in ${parentModule?.title || "the academy"}.`,
         onAction: () => {
           setActiveLessonId(nextCurriculumLesson.id);
@@ -121,7 +121,7 @@ export const NextStepRecommendationEngine: React.FC = () => {
     // 3. If all lessons complete, recommend Capstone Certification or Sandbox Security Audit
     return {
       type: "capstone" as const,
-      priority: "MILESTONE ACHIEVED • CAPSTONE READY",
+      priority: "Capstone Certification",
       title: "Mastery Capstone & Certification Assessment",
       subtitle: "Official Enterprise Prompt Architect Credential Exam",
       summary:
@@ -216,7 +216,7 @@ export const NextStepRecommendationEngine: React.FC = () => {
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Dynamically calculated based on your completed lessons, mastery gaps, and curriculum milestones.
+                Pick up right where you left off or start your next recommended step.
               </p>
             </div>
           </div>
@@ -269,7 +269,7 @@ export const NextStepRecommendationEngine: React.FC = () => {
               <div className="flex items-start gap-2 rounded-xl bg-slate-950/70 border border-slate-800 p-3 text-xs text-slate-300">
                 <Target className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold text-emerald-400">Why this next: </span>
+                  <span className="font-bold text-emerald-400">Why this lesson: </span>
                   <span>{recommendation.rationale}</span>
                 </div>
               </div>
@@ -285,9 +285,6 @@ export const NextStepRecommendationEngine: React.FC = () => {
                 <span>{recommendation.actionLabel}</span>
                 <ArrowRight className="h-4 w-4" />
               </button>
-              <span className="text-[10px] text-slate-400 text-center sm:text-right font-mono">
-                Preserves all progress state
-              </span>
             </div>
           </div>
         </div>
