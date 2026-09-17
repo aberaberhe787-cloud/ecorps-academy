@@ -21,16 +21,17 @@ import { FOUNDATION_LESSONS } from "./PromptEngineeringPath";
 import { promptPatterns } from "../data/patternsData";
 import { NextStepRecommendationEngine } from "../components/home/NextStepRecommendationEngine";
 
+import { calculateProgressModel } from "../lib/progressModel";
+
 export const HomeView: React.FC = () => {
   const { setActiveTab, openSandbox, loadIntoPlayground, userProgress, currentCurriculum, t } = useApp();
 
   const allLessons = currentCurriculum.flatMap((module) => module.lessons);
-  const completedLessons = allLessons.filter((lesson) => userProgress.completedLessons.includes(lesson.id)).length;
+  const combinedLessons = [...FOUNDATION_LESSONS, ...allLessons];
+  const progress = calculateProgressModel(userProgress.completedLessons, combinedLessons);
+
   const nextLesson = allLessons.find((lesson) => !userProgress.completedLessons.includes(lesson.id));
   const nextFoundation = FOUNDATION_LESSONS.find((lesson) => !userProgress.completedLessons.includes(lesson.id));
-  const totalTrackedLessons = allLessons.length + FOUNDATION_LESSONS.length;
-  const totalCompletedLessons = completedLessons + FOUNDATION_LESSONS.filter((lesson) => userProgress.completedLessons.includes(lesson.id)).length;
-  const weeklyGoal = Math.min(5, totalCompletedLessons);
 
   const [quickPrompt, setQuickPrompt] = useState(
     `Act as a Principal Staff Engineer. Review the following SQL query for indexing bottlenecks: SELECT * FROM orders WHERE customer_id = 42 ORDER BY created_at DESC;`
@@ -64,20 +65,19 @@ export const HomeView: React.FC = () => {
             <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3.5 sm:p-4">
               <p className="text-xs text-slate-400">Active Module</p>
               <h3 className="mt-1.5 text-sm font-bold text-white">{nextFoundation?.title || nextLesson?.title || "All lessons complete"}</h3>
-              <div className="mt-2.5 h-2 rounded-full bg-slate-800"><div className="h-full rounded-full bg-blue-500" style={{ width: `${totalTrackedLessons ? (totalCompletedLessons / totalTrackedLessons) * 100 : 0}%` }} /></div>
-              <p className="mt-1 text-xs text-slate-400">Step {totalCompletedLessons + 1} of {totalTrackedLessons}</p>
+              <div className="mt-2.5 h-2 rounded-full bg-slate-800"><div className="h-full rounded-full bg-blue-500" style={{ width: `${progress.percentage}%` }} /></div>
+              <p className="mt-1 text-xs text-slate-400">Step {progress.current} of {progress.total}</p>
               <button onClick={() => nextFoundation ? setActiveTab("foundations") : setActiveTab("curriculum")} className="mt-2.5 w-full rounded-lg bg-slate-800 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700 transition-colors">Resume Lesson</button>
             </div>
 
             {/* Column 2 (Metrics & Goals) */}
             <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3.5 sm:p-4">
-              <p className="text-xs text-slate-400">Metrics & Goals</p>
+              <p className="text-xs text-slate-400">Metrics & Mastery</p>
               <div className="mt-1.5 flex gap-3 sm:gap-4">
-                <div><p className="text-xs sm:text-xs text-slate-400">Overall Progress</p><p className="text-base sm:text-lg font-bold text-white">{totalCompletedLessons}/{totalTrackedLessons}</p></div>
-                <div><p className="text-xs sm:text-xs text-slate-400">Weekly Goal</p><p className="text-base sm:text-lg font-bold text-emerald-400">{weeklyGoal}/5</p></div>
-                <div><p className="text-xs sm:text-xs text-slate-400">Streak/XP</p><p className="text-base sm:text-lg font-bold text-amber-300">{userProgress.streakDays} days</p></div>
+                <div><p className="text-xs sm:text-xs text-slate-400">Overall Progress</p><p className="text-base sm:text-lg font-bold text-white">{progress.completed}/{progress.total} ({progress.percentage}%)</p></div>
+                <div><p className="text-xs sm:text-xs text-slate-400">Activity Streak</p><p className="text-base sm:text-lg font-bold text-amber-300">{userProgress.streakDays} days</p></div>
               </div>
-              <button onClick={() => setActiveTab("curriculum")} className="mt-2.5 w-full rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500 transition-colors">Continue</button>
+              <button onClick={() => setActiveTab("curriculum")} className="mt-2.5 w-full rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500 transition-colors">View Curriculum</button>
             </div>
 
             {/* Column 3 (Saved & Library) */}

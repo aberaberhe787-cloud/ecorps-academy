@@ -4,9 +4,10 @@ import { useApp } from "../context/AppContext";
 import { NavTab } from "../types";
 
 export const MobileBottomNav: React.FC = () => {
-  const { activeTab, setActiveTab, userProgress, isDistractionFreeMode } = useApp();
+  const { activeTab, setActiveTab, userProgress, activeLessonId, isDistractionFreeMode } = useApp();
 
-  if (isDistractionFreeMode) return null;
+  // Hide bottom nav during active lesson view or distraction-free mode
+  if (isDistractionFreeMode || activeLessonId !== null) return null;
 
   const navItems: { id: NavTab; label: string; icon: React.FC<{ className?: string }> }[] = [
     { id: "home", label: "Home", icon: Compass },
@@ -43,13 +44,12 @@ export const MobileBottomNav: React.FC = () => {
                   }`}
                 />
                 {item.id === "profile" && userProgress.streakDays > 0 && (
-                  <span className="absolute -top-1 -right-1.5 flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>
+                  <span className="absolute -top-1 -right-1.5 flex h-2 w-2">
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
                   </span>
                 )}
               </div>
-              <span className="text-[10px] tracking-tight mt-0.5 whitespace-nowrap">
+              <span className="text-xs font-medium tracking-tight mt-0.5 whitespace-nowrap">
                 {item.label}
               </span>
               {isActive && (

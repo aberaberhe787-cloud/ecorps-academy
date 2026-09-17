@@ -66,16 +66,11 @@ export const ConceptCard: React.FC<ConceptCardProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-base font-bold text-white tracking-tight">{concept.title}</h3>
-              <span
-                className={`rounded px-1.5 py-0.5 text-xs font-mono font-semibold border ${bloomStyle.bg} ${bloomStyle.text} ${bloomStyle.border}`}
-              >
-                {bloom}
-              </span>
             </div>
             <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-400">
-              <span>Micro-Concept {index + 1} of {totalConcepts}</span>
+              <span className="font-mono">{bloom} · {concept.readMinutes || 5} min read</span>
               <span>•</span>
-              <span className="font-mono">{concept.readMinutes || 5} min read</span>
+              <span>Concept {index + 1} of {totalConcepts}</span>
             </div>
           </div>
         </div>

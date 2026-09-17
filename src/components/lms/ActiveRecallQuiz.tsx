@@ -82,10 +82,7 @@ export const ActiveRecallQuiz: React.FC<ActiveRecallQuizProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-mono font-bold uppercase tracking-wider text-blue-400">
-                Active Recall Checkpoint
-              </span>
-              <span className="rounded bg-slate-800 px-1.5 py-0.2 text-xs font-mono text-slate-300">
-                Checkpoint
+                CHECK YOUR UNDERSTANDING
               </span>
             </div>
             <h4 className="text-sm font-bold text-white">{challenge.title}</h4>
@@ -120,7 +117,7 @@ export const ActiveRecallQuiz: React.FC<ActiveRecallQuizProps> = ({
           <div className="rounded-xl border border-rose-900/50 bg-slate-950 p-4 space-y-2">
             <div className="flex items-center justify-between text-xs font-mono text-rose-300 font-semibold">
               <span className="flex items-center gap-1.5">
-                <Code2 className="h-3.5 w-3.5 text-rose-400" /> Inspect This Defective Prompt:
+                <Code2 className="h-3.5 w-3.5 text-rose-400" /> Inspect Prompt:
               </span>
             </div>
             <pre className="font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed">
@@ -156,7 +153,6 @@ export const ActiveRecallQuiz: React.FC<ActiveRecallQuizProps> = ({
                   key={option.id}
                   id={`quiz-option-${challenge.id}-${option.id}`}
                   onClick={() => handleSelectOption(option.id)}
-                  disabled={hasSubmitted && isCorrect}
                   className={`w-full text-left rounded-xl border p-3.5 transition-all text-xs flex items-start justify-between gap-3 ${optionStyle}`}
                 >
                   <div className="space-y-1 flex-1">
@@ -200,7 +196,7 @@ export const ActiveRecallQuiz: React.FC<ActiveRecallQuizProps> = ({
               disabled={!selectedOption}
               className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             >
-              <span>Validate Understanding</span>
+              <span>Check answer</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -218,7 +214,7 @@ export const ActiveRecallQuiz: React.FC<ActiveRecallQuizProps> = ({
                 {isCorrect ? (
                   <>
                     <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                    <span>Validated! {challenge.feedback.success}</span>
+                    <span>✓ Correct! {challenge.feedback.success}</span>
                   </>
                 ) : (
                   <>
@@ -230,13 +226,13 @@ export const ActiveRecallQuiz: React.FC<ActiveRecallQuizProps> = ({
 
               {!isCorrect && (
                 <div className="text-xs text-slate-300 leading-relaxed">
-                  <span className="font-semibold text-rose-300">Target Hint: </span>
+                  <span className="font-semibold text-rose-300">Hint: </span>
                   {challenge.feedback.failure}
                 </div>
               )}
 
               <div className="text-xs text-slate-300 border-t border-slate-800/80 pt-2 leading-relaxed">
-                <span className="font-semibold text-blue-300 font-mono">Pedagogical Rationale: </span>
+                <span className="font-semibold text-blue-300 font-mono">Why: </span>
                 {challenge.feedback.theoreticalRationale}
               </div>
             </div>

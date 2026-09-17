@@ -1,11 +1,10 @@
 import React from "react";
 import { ChevronRight, Home, BookOpen, Terminal, Grid3X3, Compass, Award, User, Target } from "lucide-react";
 import { useApp } from "../context/AppContext";
-import { curriculumModules } from "../data/lessonsData";
 import { NavTab } from "../types";
 
 export const Breadcrumbs: React.FC = () => {
-  const { activeTab, activeLessonId, setActiveTab, setActiveLessonId } = useApp();
+  const { activeTab, activeLessonId, setActiveTab, setActiveLessonId, currentCurriculum } = useApp();
 
   // If we are not logged in, or there is no tab selected, we shouldn't show breadcrumbs
   if (!activeTab) return null;
@@ -20,14 +19,14 @@ export const Breadcrumbs: React.FC = () => {
     if (setActiveLessonId) setActiveLessonId(null);
   };
 
-  // Find module & lesson title for active tab 'curriculum' and activeLessonId
+  // Find module & lesson title for active tab 'curriculum' and activeLessonId dynamically from active context
   let moduleTitle = "";
   let lessonTitle = "";
-  if (activeTab === "curriculum" && activeLessonId) {
-    for (const mod of curriculumModules) {
+  if (activeTab === "curriculum" && activeLessonId && currentCurriculum) {
+    for (const mod of currentCurriculum) {
       const les = mod.lessons.find((l) => l.id === activeLessonId);
       if (les) {
-        moduleTitle = mod.title.split(":")[1]?.trim() || mod.title;
+        moduleTitle = mod.code || mod.title.split(":")[1]?.trim() || mod.title;
         lessonTitle = les.title;
         break;
       }
@@ -37,21 +36,21 @@ export const Breadcrumbs: React.FC = () => {
   const getTabLabelAndIcon = (tab: NavTab) => {
     switch (tab) {
       case "home":
-        return { label: "Home Dashboard", icon: Home };
+        return { label: "Home", icon: Home };
       case "curriculum":
-        return { label: "Lesson Curriculum", icon: BookOpen };
+        return { label: "Curriculum", icon: BookOpen };
       case "foundations":
         return { label: "Foundations", icon: Target };
       case "playground":
-        return { label: "Prompt Sandbox", icon: Terminal };
+        return { label: "Playground", icon: Terminal };
       case "patterns":
-        return { label: "Pattern Library", icon: Grid3X3 };
+        return { label: "Patterns", icon: Grid3X3 };
       case "resources":
-        return { label: "Glossary & Resources", icon: Compass };
+        return { label: "Resources", icon: Compass };
       case "certification":
         return { label: "Certification", icon: Award };
       case "profile":
-        return { label: "User Profile", icon: User };
+        return { label: "Profile", icon: User };
       default:
         return { label: tab, icon: Home };
     }

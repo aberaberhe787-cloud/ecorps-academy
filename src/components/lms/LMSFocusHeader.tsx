@@ -5,13 +5,9 @@ import {
   Flame,
   Maximize2,
   Minimize2,
-  CheckCircle2,
-  GraduationCap,
-  Award,
   Bookmark
 } from "lucide-react";
 import { Lesson, CurriculumModule } from "../../types";
-import { EcorpLogo } from "../EcorpLogo";
 
 interface LMSFocusHeaderProps {
   currentLesson: Lesson;
@@ -54,7 +50,7 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
             className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-slate-300 hover:border-blue-500 hover:bg-slate-800 hover:text-white transition-all shrink-0 min-h-[36px]"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Syllabus Overview</span>
+            <span className="hidden sm:inline">Back</span>
             <span className="sm:hidden">Exit</span>
           </button>
 
@@ -73,7 +69,7 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
         {/* Center: Interactive Lesson Progress Bar (on medium+ screens) */}
         <div className="hidden md:flex flex-col items-center justify-center w-64">
           <div className="flex justify-between w-full text-xs sm:text-xs font-mono text-slate-400 mb-1">
-            <span>Lesson Mastery:</span>
+            <span>Lesson Progress:</span>
             <span className="text-blue-400 font-bold">{Math.round(progressPercent)}%</span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
@@ -84,7 +80,7 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
           </div>
         </div>
 
-        {/* Right: Streak, XP, and Distraction-free toggle */}
+        {/* Right: Streak, XP, and Focus Mode toggle */}
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {/* Streak */}
           <div className="flex items-center gap-1 rounded-lg bg-orange-500/10 border border-orange-500/30 px-2 sm:px-2.5 py-1 text-xs sm:text-xs font-semibold text-orange-300">
@@ -98,11 +94,11 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
             <span>{totalXp} XP</span>
           </div>
 
-          {/* Distraction Free Toggle */}
+          {/* Focus Mode Toggle */}
           <button
             id="toggle-distraction-free-btn"
             onClick={onToggleDistractionFree}
-            title={isDistractionFree ? "Exit Distraction-Free Mode" : "Enter Distraction-Free Mode"}
+            title={isDistractionFree ? "Exit Focus Mode" : "Enter Focus Mode"}
             className={`hidden sm:flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-all ${
               isDistractionFree
                 ? "border-blue-500 bg-blue-950 text-blue-300"
@@ -112,12 +108,12 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
             {isDistractionFree ? (
               <>
                 <Minimize2 className="h-3.5 w-3.5" />
-                <span className="text-xs">Compact</span>
+                <span className="text-xs">Exit Focus</span>
               </>
             ) : (
               <>
                 <Maximize2 className="h-3.5 w-3.5" />
-                <span className="text-xs">Focus Mode</span>
+                <span className="text-xs">Focus mode</span>
               </>
             )}
           </button>
