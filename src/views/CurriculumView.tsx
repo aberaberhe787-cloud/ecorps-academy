@@ -107,8 +107,8 @@ export const CurriculumView: React.FC = () => {
   const [readConceptIds, setReadConceptIds] = useState<string[]>([]);
   const [passedCheckpointIds, setPassedCheckpointIds] = useState<string[]>([]);
   const [selectedBloomFilter, setSelectedBloomFilter] = useState<BloomsTaxonomyLevel | "All">("All");
-  const [viewMode, setViewMode] = useState<"learningmap" | "syllabus" | "skilltree" | "lesson">(
-    activeLessonId ? "lesson" : "learningmap"
+  const [viewMode, setViewMode] = useState<"syllabus" | "learningmap" | "skilltree" | "lesson">(
+    activeLessonId ? "lesson" : "syllabus"
   );
   const [showCaseStudy, setShowCaseStudy] = useState<boolean>(true);
 
@@ -990,40 +990,39 @@ export const CurriculumView: React.FC = () => {
             </div>
           </div>
 
-          {/* Navigation Mode Switcher & Search Bar */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-3 sm:p-4 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
-            {/* View Mode Buttons */}
-            <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-950 p-1 shrink-0">
-              <button
-                id="view-learningmap-tab"
-                onClick={() => setViewMode("learningmap")}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
-                  viewMode === "learningmap"
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-900/30"
-                    : "text-slate-400 hover:text-white hover:bg-slate-800/60"
-                }`}
-              >
-                <Route className="h-3.5 w-3.5" />
-                <span>Learning Map</span>
-              </button>
-
+          {/* Navigation Mode Switcher */}
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-3 sm:p-4 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-950 p-1">
               <button
                 id="view-syllabus-tab"
                 onClick={() => setViewMode("syllabus")}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                   viewMode === "syllabus"
                     ? "bg-blue-600 text-white shadow-md shadow-blue-900/30"
                     : "text-slate-400 hover:text-white hover:bg-slate-800/60"
                 }`}
               >
                 <BookOpen className="h-3.5 w-3.5" />
-                <span>Syllabus Pathway</span>
+                <span>Curriculum Modules</span>
+              </button>
+
+              <button
+                id="view-learningmap-tab"
+                onClick={() => setViewMode("learningmap")}
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                  viewMode === "learningmap"
+                    ? "bg-blue-600 text-white shadow-md shadow-blue-900/30"
+                    : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                }`}
+              >
+                <Route className="h-3.5 w-3.5" />
+                <span>Visual Learning Map</span>
               </button>
 
               <button
                 id="view-skilltree-tab"
                 onClick={() => setViewMode("skilltree")}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                   viewMode === "skilltree"
                     ? "bg-blue-600 text-white shadow-md shadow-blue-900/30"
                     : "text-slate-400 hover:text-white hover:bg-slate-800/60"
@@ -1037,82 +1036,22 @@ export const CurriculumView: React.FC = () => {
                 <button
                   id="view-active-lesson-tab"
                   onClick={() => setViewMode("lesson")}
-                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                     viewMode === "lesson"
                       ? "bg-indigo-600 text-white shadow-md"
                       : "text-slate-400 hover:text-white hover:bg-slate-800/60"
                   }`}
                 >
                   <Code2 className="h-3.5 w-3.5" />
-                  <span>Study Mode</span>
+                  <span>Active Lesson</span>
                 </button>
               )}
             </div>
 
-            {/* Curriculum Search & Filter Bar */}
-            <div className="flex flex-wrap sm:flex-nowrap flex-1 items-center gap-2 max-w-2xl w-full">
-              <div className="relative flex-1 min-w-[180px]">
-                <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Filter lessons by topic, keyword, or concepts (e.g., delimiters, few-shot, injection)..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-xl border border-slate-700 bg-slate-950 pl-9 pr-8 py-1.5 text-xs text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-all z-50"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-2.5 top-2 text-xs text-slate-400 hover:text-white"
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-
-              {/* Difficulty filter */}
-              <select
-                value={difficultyFilter}
-                onChange={(e) => setDifficultyFilter(e.target.value)}
-                className="rounded-xl border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-xs text-slate-300 focus:border-blue-500 focus:outline-none"
-              >
-                <option value="All">All Tracks</option>
-                <option value="Beginner">Beginner Track</option>
-                <option value="Intermediate">Intermediate Track</option>
-                <option value="Advanced">Advanced Track</option>
-              </select>
-
-              {/* Status filter */}
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="rounded-xl border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-xs text-slate-300 focus:border-blue-500 focus:outline-none"
-              >
-                <option value="All">All Status</option>
-                <option value="bookmarked">⭐ Saved ({bookmarkedCount})</option>
-                <option value="uncompleted">In Progress ({inProgressCount})</option>
-                <option value="completed">Mastered ({completedCount})</option>
-              </select>
+            <div className="text-xs text-slate-400 font-mono hidden sm:block">
+              {allLessons.length} Total Lessons · 8 Core Modules
             </div>
           </div>
-
-          {searchQuery && (
-            <div className="flex items-center justify-between text-xs text-slate-400 px-1 font-mono">
-              <span>
-                Filtering for: <strong className="text-blue-300">"{searchQuery}"</strong> ({totalMatchingLessons} matching lessons)
-              </span>
-              <button
-                onClick={() => {
-                  setSearchQuery("");
-                  setDifficultyFilter("All");
-                  setStatusFilter("All");
-                }}
-                className="text-blue-400 hover:underline"
-              >
-                Reset Filters
-              </button>
-            </div>
-          )}
         </div>
 
         {/* ========================================================================= */}
