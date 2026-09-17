@@ -1398,13 +1398,14 @@ export const CurriculumView: React.FC = () => {
             />
 
             {/* =================================================================== */}
-            {/* MICROLEARNING CONCEPT BLOCKS                                        */}
+            {/* 1. CONCEPT: MICROLEARNING CONCEPT BLOCKS                            */}
             {/* =================================================================== */}
             <div id="lesson-concepts-section" className="space-y-6 scroll-mt-24">
               <div className="flex items-center justify-between gap-2 px-1">
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <h2 className="text-base font-bold text-white flex items-center gap-2 font-mono">
                   <BookOpen className="h-4 w-4 text-blue-400" />
-                  {t.curriculum.microConceptFoundations} ({currentLesson.concepts?.length || 0} {t.curriculum.units})
+                  <span>1. CONCEPT · {t.curriculum.microConceptFoundations || "Core Mechanics"}</span>
+                  <span className="text-xs text-slate-400 font-normal">({currentLesson.concepts?.length || 0} {t.curriculum.units || "units"})</span>
                 </h2>
                 <span className="text-xs text-slate-400 font-mono">
                   {readConceptIds.length}/{currentLesson.concepts?.length || 0} {t.curriculum.understood}
@@ -1434,47 +1435,15 @@ export const CurriculumView: React.FC = () => {
             </div>
 
             {/* =================================================================== */}
-            {/* ACTIVE RECALL QUIZZES                                               */}
-            {/* =================================================================== */}
-            {quizCheckpoints.length > 0 && (
-              <div id="lesson-quizzes-section" className="space-y-6 scroll-mt-24">
-                <div className="flex items-center justify-between gap-2 px-1">
-                  <h2 className="text-base font-bold text-white flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 text-blue-400" />
-                    Active Recall Verification ({quizCheckpoints.length} {t.curriculum.checkpoints})
-                  </h2>
-                  <span className="text-xs text-slate-400 font-mono">
-                    {solvedQuizzesCount}/{quizCheckpoints.length} {t.curriculum.solved}
-                  </span>
-                </div>
-
-                <div className="space-y-6">
-                  {quizCheckpoints.map((checkpoint) => {
-                    const isPassed =
-                      passedCheckpointIds.includes(checkpoint.id) || isCompleted;
-
-                    return (
-                      <ActiveRecallQuiz
-                        key={checkpoint.id}
-                        challenge={checkpoint}
-                        isCompleted={isPassed}
-                        onPassed={(xp) => handleCheckpointPassed(checkpoint.id, xp)}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* =================================================================== */}
-            {/* EMBEDDED SANDBOX CHALLENGES                                         */}
+            {/* 2. PRACTICE: EMBEDDED SANDBOX CHALLENGES                            */}
             {/* =================================================================== */}
             {sandboxCheckpoints.length > 0 && (
               <div id="lesson-sandbox-section" className="space-y-6 scroll-mt-24">
                 <div className="flex items-center justify-between gap-2 px-1">
-                  <h2 className="text-base font-bold text-white flex items-center gap-2">
+                  <h2 className="text-base font-bold text-white flex items-center gap-2 font-mono">
                     <Code2 className="h-4 w-4 text-emerald-400" />
-                    Embedded Sandbox Challenge ({sandboxCheckpoints.length} Lab)
+                    <span>2. PRACTICE · Interactive Sandbox</span>
+                    <span className="text-xs text-slate-400 font-normal">({sandboxCheckpoints.length} Lab)</span>
                   </h2>
                   <span className="text-xs text-slate-400 font-mono">
                     {isSandboxPassed ? "Passed ✓" : "Pending Action"}
@@ -1500,13 +1469,47 @@ export const CurriculumView: React.FC = () => {
             )}
 
             {/* =================================================================== */}
-            {/* CASE STUDY: NAIVE VS ENGINEERED PROMPT ANATOMY                      */}
+            {/* 3. RECALL: ACTIVE RECALL QUIZZES                                    */}
+            {/* =================================================================== */}
+            {quizCheckpoints.length > 0 && (
+              <div id="lesson-quizzes-section" className="space-y-6 scroll-mt-24">
+                <div className="flex items-center justify-between gap-2 px-1">
+                  <h2 className="text-base font-bold text-white flex items-center gap-2 font-mono">
+                    <ShieldCheck className="h-4 w-4 text-blue-400" />
+                    <span>3. RECALL · Active Verification</span>
+                    <span className="text-xs text-slate-400 font-normal">({quizCheckpoints.length} {t.curriculum.checkpoints || "checkpoints"})</span>
+                  </h2>
+                  <span className="text-xs text-slate-400 font-mono">
+                    {solvedQuizzesCount}/{quizCheckpoints.length} {t.curriculum.solved}
+                  </span>
+                </div>
+
+                <div className="space-y-6">
+                  {quizCheckpoints.map((checkpoint) => {
+                    const isPassed =
+                      passedCheckpointIds.includes(checkpoint.id) || isCompleted;
+
+                    return (
+                      <ActiveRecallQuiz
+                        key={checkpoint.id}
+                        challenge={checkpoint}
+                        isCompleted={isPassed}
+                        onPassed={(xp) => handleCheckpointPassed(checkpoint.id, xp)}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* =================================================================== */}
+            {/* 4. ASSESSMENT: COMPARATIVE CASE STUDY ANATOMY                       */}
             {/* =================================================================== */}
             <div id="lesson-case-study-section" className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl space-y-4 scroll-mt-24">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2 font-mono">
                   <Layers className="h-4 w-4 text-indigo-400" />
-                  {t.curriculum.comparativeCaseStudy}
+                  <span>4. ASSESSMENT · {t.curriculum.comparativeCaseStudy || "Comparative Anatomy"}</span>
                 </h3>
                 <button
                   onClick={() => setShowCaseStudy(!showCaseStudy)}
@@ -1566,7 +1569,7 @@ export const CurriculumView: React.FC = () => {
             </div>
 
             {/* =================================================================== */}
-            {/* LESSON COMPLETION / FOOTER NAVIGATION                               */}
+            {/* 5. COMPLETION & NEXT LESSON                                         */}
             {/* =================================================================== */}
             <div id="lesson-mastery-section" className="rounded-2xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-5 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 scroll-mt-24">
               <div>

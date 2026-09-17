@@ -11,7 +11,7 @@ import {
 import { useApp } from "../../context/AppContext";
 
 export interface LessonStep {
-  id: "concepts" | "quizzes" | "sandbox" | "case-study" | "mastery";
+  id: "concepts" | "sandbox" | "quizzes" | "case-study" | "mastery";
   title: string;
   subtitle: string;
   icon: React.ElementType;
@@ -54,47 +54,47 @@ export const LessonProgressStepper: React.FC<LessonProgressStepperProps> = ({
   const steps: LessonStep[] = [
     {
       id: "concepts",
-      title: t.curriculum.stepperConcepts || "1. Micro-Concepts",
-      subtitle: `${readConceptsCount}/${totalConcepts} ${t.curriculum.understood || "units read"}`,
+      title: "1. CONCEPT",
+      subtitle: `${readConceptsCount}/${totalConcepts} read`,
       icon: BookOpen,
       isCompleted: conceptsDone,
       isActive: !conceptsDone,
       countBadge: `${readConceptsCount}/${totalConcepts}`,
     },
-    {
-      id: "quizzes",
-      title: t.curriculum.stepperQuizzes || "2. Recall Quizzes",
-      subtitle: `${solvedQuizzesCount}/${totalQuizzes} ${t.curriculum.solved || "checkpoints"}`,
-      icon: HelpCircle,
-      isCompleted: quizzesDone,
-      isActive: conceptsDone && !quizzesDone,
-      countBadge: `${solvedQuizzesCount}/${totalQuizzes}`,
-    },
     ...(hasSandboxChallenge
       ? [
           {
             id: "sandbox" as const,
-            title: t.curriculum.stepperSandbox || "3. Sandbox Challenge",
-            subtitle: isSandboxSolved ? (t.curriculum.solved || "Solved ✓") : (t.curriculum.stepperLiveLab || "Live Prompt Lab"),
+            title: "2. PRACTICE",
+            subtitle: isSandboxSolved ? "Lab Passed ✓" : "Interactive Sandbox",
             icon: Terminal,
             isCompleted: isSandboxSolved,
-            isActive: conceptsDone && quizzesDone && !isSandboxSolved,
+            isActive: conceptsDone && !isSandboxSolved,
             countBadge: isSandboxSolved ? "✓" : "Lab",
           },
         ]
       : []),
     {
+      id: "quizzes",
+      title: hasSandboxChallenge ? "3. RECALL" : "2. RECALL",
+      subtitle: `${solvedQuizzesCount}/${totalQuizzes} checkpoints`,
+      icon: HelpCircle,
+      isCompleted: quizzesDone,
+      isActive: conceptsDone && sandboxDone && !quizzesDone,
+      countBadge: `${solvedQuizzesCount}/${totalQuizzes}`,
+    },
+    {
       id: "case-study",
-      title: t.curriculum.stepperCaseStudy || "4. Case Anatomy",
-      subtitle: isCaseStudyViewed ? (t.curriculum.understood || "Analyzed ✓") : (t.curriculum.stepperComparative || "Naive vs Refined"),
+      title: hasSandboxChallenge ? "4. ASSESSMENT" : "3. ASSESSMENT",
+      subtitle: isCaseStudyViewed ? "Evaluated ✓" : "Comparative Anatomy",
       icon: Layers,
       isCompleted: isCaseStudyViewed,
       isActive: conceptsDone && quizzesDone && sandboxDone && !isCaseStudyViewed,
     },
     {
       id: "mastery",
-      title: t.curriculum.stepperMastery || "5. Verify Mastery",
-      subtitle: isLessonMastered ? (t.curriculum.mastered || "Mastered ✓") : (allPrereqsDone ? (t.curriculum.stepperReady || "Ready to Claim") : (t.curriculum.stepperPending || "Locked")),
+      title: hasSandboxChallenge ? "5. COMPLETION" : "4. COMPLETION",
+      subtitle: isLessonMastered ? "Mastered ✓" : (allPrereqsDone ? "Ready to Claim" : "Verify Mastery"),
       icon: Award,
       isCompleted: isLessonMastered,
       isActive: allPrereqsDone && !isLessonMastered,
