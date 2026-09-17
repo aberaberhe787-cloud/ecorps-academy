@@ -2,78 +2,6 @@
 @import "./theme.css";
 
 @layer base {
-  :root {
-    --bg-primary: #ffffff;
-    --text-primary: #0f172a;
-
-    /* ECORP DESIGN TOKENS - Light Mode */
-    --surface-0: #f8fafc;
-    --surface-1: #ffffff;
-    --surface-2: #f1f5f9;
-    --surface-elevated: #ffffff;
-    --surface-interactive: #e2e8f0;
-
-    --text-primary-color: #0f172a;
-    --text-secondary-color: #334155;
-    --text-muted-color: #64748b;
-    --text-disabled-color: #94a3b8;
-
-    --border-subtle: #f1f5f9;
-    --border-default: #e2e8f0;
-    --border-strong: #cbd5e1;
-    --border-focus: #3b82f6;
-
-    --accent-primary: #2563eb;
-    --accent-success: #10b981;
-    --accent-warning: #f59e0b;
-    --accent-danger: #ef4444;
-
-    /* Form input focus & feedback CSS variables for mobile keyboards & accessibility */
-    --input-focus-border: #3b82f6;
-    --input-focus-ring: #3b82f6;
-    --input-focus-ring-glow: rgba(59, 130, 246, 0.4);
-    --input-focus-ring-width: 3px;
-    --input-focus-bg: rgba(2, 6, 23, 0.9);
-    --input-error-border: #f43f5e;
-    --input-error-ring-glow: rgba(244, 63, 94, 0.38);
-    --input-success-border: #10b981;
-  }
-  .dark {
-    --bg-primary: #020617;
-    --text-primary: #f8fafc;
-
-    /* ECORP DESIGN TOKENS - Dark Mode */
-    --surface-0: #020617;
-    --surface-1: #0b132b;
-    --surface-2: #0f172a;
-    --surface-elevated: #1e293b;
-    --surface-interactive: #1e293b;
-
-    --text-primary-color: #f8fafc;
-    --text-secondary-color: #cbd5e1;
-    --text-muted-color: #94a3b8;
-    --text-disabled-color: #475569;
-
-    --border-subtle: rgba(255, 255, 255, 0.06);
-    --border-default: #1e293b;
-    --border-strong: #334155;
-    --border-focus: #3b82f6;
-
-    --accent-primary: #3b82f6;
-    --accent-success: #10b981;
-    --accent-warning: #f59e0b;
-    --accent-danger: #ef4444;
-
-    --input-focus-border: #60a5fa;
-    --input-focus-ring: #3b82f6;
-    --input-focus-ring-glow: rgba(59, 130, 246, 0.45);
-    --input-focus-ring-width: 3px;
-    --input-focus-bg: rgba(2, 6, 23, 0.92);
-    --input-error-border: #f87171;
-    --input-error-ring-glow: rgba(248, 113, 113, 0.42);
-    --input-success-border: #34d399;
-  }
-  
   html {
     background-color: var(--bg-primary);
     color: var(--text-primary);
@@ -94,7 +22,7 @@
 
   /* Smooth tab indicator transitions and interactive element feedback */
   .smooth-tab-transition {
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all var(--motion-panel, 0.28s) var(--motion-ease-standard, cubic-bezier(0.16, 1, 0.3, 1));
   }
 
   .smooth-scroll-container {
@@ -102,10 +30,10 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Global Keyboard Focus ring standards for accessibility */
+  /* Standardized Focus Ring for accessibility without destructive overrides */
   :focus-visible {
-    outline: 2px solid #3b82f6 !important;
-    outline-offset: 2px !important;
+    outline: var(--focus-ring-width, 2px) solid var(--focus-ring-color, #3b82f6);
+    outline-offset: var(--focus-ring-offset, 2px);
   }
 }
 

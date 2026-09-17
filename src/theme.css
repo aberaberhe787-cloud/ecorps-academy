@@ -1,111 +1,103 @@
-/* Light theme variables */
-:root.light {
-  --bg-color: #ffffff;
-  --text-color: #000000;
-  --accent-color: #007bff;
+/* =========================================================================
+   ECORP ACADEMY - UNIFIED DESIGN SYSTEM TOKENS
+   Single source of truth for surfaces, borders, typography, and states.
+   ========================================================================= */
+
+:root {
+  /* Surface Tokens - Light */
+  --bg-color: #f8fafc;
+  --bg-primary: #f8fafc;
+  --surface-0: #f8fafc;
+  --surface-1: #ffffff;
+  --surface-2: #f1f5f9;
+  --surface-elevated: #ffffff;
+  --surface-interactive: #e2e8f0;
+
+  /* Text Tokens - Light */
+  --text-color: #0f172a;
+  --text-primary: #0f172a;
+  --text-primary-color: #0f172a;
+  --text-secondary-color: #334155;
+  --text-muted-color: #64748b;
+  --text-disabled-color: #94a3b8;
+
+  /* Border Tokens - Light */
+  --border-subtle: #f1f5f9;
+  --border-default: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --border-focus: #3b82f6;
+
+  /* Accent & Status Tokens */
+  --accent-color: #2563eb;
+  --accent-primary: #2563eb;
+  --accent-success: #10b981;
+  --accent-warning: #f59e0b;
+  --accent-danger: #ef4444;
+
+  /* Focus & Input System */
+  --focus-ring-color: #3b82f6;
+  --focus-ring-offset: 2px;
+  --focus-ring-width: 2px;
+  --input-focus-border: #3b82f6;
+  --input-focus-ring: #3b82f6;
+  --input-focus-ring-glow: rgba(59, 130, 246, 0.35);
+  --input-focus-ring-width: 2px;
+  --input-focus-bg: #ffffff;
+  --input-error-border: #ef4444;
+  --input-error-ring-glow: rgba(239, 68, 68, 0.3);
+  --input-success-border: #10b981;
 }
 
-/* Dark theme variables */
-:root.dark {
-  --bg-color: #121212;
-  --text-color: #ffffff;
-  --accent-color: #ff9800;
+:root.dark,
+.dark {
+  /* Surface Tokens - Dark */
+  --bg-color: #020617;
+  --bg-primary: #020617;
+  --surface-0: #020617;
+  --surface-1: #0b132b;
+  --surface-2: #0f172a;
+  --surface-elevated: #1e293b;
+  --surface-interactive: #1e293b;
+
+  /* Text Tokens - Dark */
+  --text-color: #f8fafc;
+  --text-primary: #f8fafc;
+  --text-primary-color: #f8fafc;
+  --text-secondary-color: #cbd5e1;
+  --text-muted-color: #94a3b8;
+  --text-disabled-color: #475569;
+
+  /* Border Tokens - Dark */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: #1e293b;
+  --border-strong: #334155;
+  --border-focus: #3b82f6;
+
+  /* Accent & Status Tokens */
+  --accent-color: #3b82f6;
+  --accent-primary: #3b82f6;
+  --accent-success: #10b981;
+  --accent-warning: #f59e0b;
+  --accent-danger: #ef4444;
+
+  /* Focus & Input System */
+  --focus-ring-color: #60a5fa;
+  --focus-ring-offset: 2px;
+  --focus-ring-width: 2px;
+  --input-focus-border: #60a5fa;
+  --input-focus-ring: #3b82f6;
+  --input-focus-ring-glow: rgba(59, 130, 246, 0.45);
+  --input-focus-ring-width: 2px;
+  --input-focus-bg: rgba(2, 6, 23, 0.92);
+  --input-error-border: #f87171;
+  --input-error-ring-glow: rgba(248, 113, 113, 0.42);
+  --input-success-border: #34d399;
 }
 
-/* Apply globally */
-body {
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.app-view {
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-/* Most feature surfaces use slate utilities as their dark default. */
-:root.light [class*="bg-slate-950"] {
-  background-color: #f1f5f9 !important;
-}
-
-:root.light [class*="bg-slate-900"] {
-  background-color: #ffffff !important;
-}
-
-:root.light [class*="bg-slate-800"] {
-  background-color: #e2e8f0 !important;
-}
-
-:root.light [class*="from-slate-"],
-:root.light [class*="via-slate-"],
-:root.light [class*="to-slate-"] {
-  --tw-gradient-from: #ffffff !important;
-  --tw-gradient-to: rgb(255 255 255 / 0) !important;
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
-}
-
-:root.light [class*="text-white"] {
-  color: #0f172a !important;
-}
-
-:root.light [class*="text-slate-100"],
-:root.light [class*="text-slate-200"] {
-  color: #1e293b !important;
-}
-
-:root.light [class*="text-slate-300"],
-:root.light [class*="text-slate-400"] {
-  color: #475569 !important;
-}
-
-:root.light [class*="border-slate-800"],
-:root.light [class*="border-slate-700"] {
-  border-color: #cbd5e1 !important;
-}
-
-:root.light header[class],
-:root.light footer[class] {
-  background-color: #ffffff !important;
-  border-color: #cbd5e1 !important;
-  backdrop-filter: none;
-}
-
-:root.light .foundation-page [class*="bg-slate-950"],
-:root.light .foundation-page [class*="bg-slate-900"] {
-  background-color: #ffffff !important;
-}
-
-:root.light .foundation-page [class*="bg-blue-950"] {
-  background-color: #eff6ff !important;
-}
-
-:root.light .foundation-page [class*="bg-rose-950"] {
-  background-color: #fff1f2 !important;
-}
-
-:root.light .foundation-page [class*="bg-emerald-950"] {
-  background-color: #ecfdf5 !important;
-}
-
-:root.light .foundation-page [class*="border-slate-800"],
-:root.light .foundation-page [class*="border-slate-700"] {
-  border-color: #cbd5e1 !important;
-}
-
-:root.light .foundation-page [class*="text-white"] {
-  color: #0f172a !important;
-}
-
-:root.light .foundation-page [class*="text-slate-200"],
-:root.light .foundation-page [class*="text-slate-300"] {
-  color: #334155 !important;
-}
-
-:root.light .foundation-page textarea,
-:root.light .foundation-page select {
-  background-color: #f8fafc !important;
-  color: #0f172a !important;
-  border-color: #cbd5e1 !important;
+/* Motion Tokens */
+:root {
+  --motion-micro: 140ms;
+  --motion-component: 200ms;
+  --motion-panel: 280ms;
+  --motion-ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
 }

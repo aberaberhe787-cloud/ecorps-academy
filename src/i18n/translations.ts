@@ -231,6 +231,10 @@ export interface I18nTranslations {
     toolResources: string;
     copyright: string;
     designedFor: string;
+    engineeringCoreHeader: string;
+    engineeringCoreDesc: string;
+    systemStatus: string;
+    shortcuts: string;
   };
 }
 
@@ -467,8 +471,12 @@ export const translations: Record<Language, I18nTranslations> = {
       toolMissions: "የተመዘኑ የተልዕኮ ፈተናዎች",
       toolPatterns: "የተረጋገጡ የፓተርን ቤተ-መጽሐፍት",
       toolResources: "የጥናት ማጣቀሻዎች እና መመሪያዎች",
-      copyright: "መብቱ በህግ የተጠበቀ ነው። Ecorp Acadamy.",
-      designedFor: "ለከፍተኛ ትክክለኛነት እና ለትምህርት ጥራት የተዘጋጀ"
+      copyright: "መብቱ በህግ የተጠበቀ ነው። Ecorp Academy.",
+      designedFor: "ለከፍተኛ ትክክለኛነት እና ለትምህርት ጥራት የተዘጋጀ",
+      engineeringCoreHeader: "የኢንጂነሪንግ መሰረት",
+      engineeringCoreDesc: "በድርጅታዊ ምርጥ ተሞክሮዎች የተዘጋጀ፡ የተዋቀሩ XML ታጎች፣ የJSON ስኪማ ማረጋገጫ እና ዜሮ ቅዠት ጥበቃዎች።",
+      systemStatus: "ሁኔታ፡ ሁሉም የትንታኔ ሞተሮች በሙሉ ብቃት እየሰሩ ነው",
+      shortcuts: "የቁልፍ ሰሌዳ አቋራጮች"
     }
   },
 
@@ -688,7 +696,7 @@ export const translations: Record<Language, I18nTranslations> = {
       ruleOfThumbTitle: "Golden Rules of Prompting"
     },
     footer: {
-      brandDesc: "An interactive learning hub, real-time quality analyzer, and testing sandbox for prompt engineers, AI developers, and system architects by Ecorp Acadamy.",
+      brandDesc: "An interactive learning hub, real-time quality analyzer, and testing sandbox for prompt engineers, AI developers, and system architects by Ecorp Academy.",
       tracksHeader: "Curriculum Tracks",
       trackFoundations: "Foundations of Prompting",
       trackReasoning: "Advanced Reasoning & CoT",
@@ -699,8 +707,12 @@ export const translations: Record<Language, I18nTranslations> = {
       toolMissions: "Automated Missions Evaluation",
       toolPatterns: "Production Pattern Library",
       toolResources: "Research Reference Guide",
-      copyright: "All rights reserved. Ecorp Acadamy.",
-      designedFor: "Crafted for research-backed precision and instructional clarity"
+      copyright: "All rights reserved. Ecorp Academy.",
+      designedFor: "Crafted for research-backed precision and instructional clarity",
+      engineeringCoreHeader: "Engineering Core",
+      engineeringCoreDesc: "Designed with enterprise best practices: structured XML tags, typed JSON schema validation, zero hallucination guardrails, and deterministic temperature controls.",
+      systemStatus: "Status: All Heuristic Analyzers Operational",
+      shortcuts: "Shortcuts"
     }
   }
 };
