@@ -954,7 +954,7 @@ Provide:
               : (Array.isArray(progressNested.achievements) ? progressNested.achievements : (cachedState.achievements || [])),
             lastLessonId: data.lastLessonId || progressNested.lastLessonId || cachedState.lastLessonId || undefined,
             lastModuleId: data.lastModuleId || progressNested.lastModuleId || cachedState.lastModuleId || undefined,
-            curriculumProgressPercent: Math.min(100, Math.round((mergedLessons.length / 16) * 100)),
+            curriculumProgressPercent: Math.min(100, Math.round((mergedLessons.length / (curriculumModules.flatMap(m => m.lessons).length || 1)) * 100)),
             promptsEngineeredCount,
           };
 

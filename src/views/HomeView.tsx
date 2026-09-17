@@ -70,7 +70,7 @@ export const HomeView: React.FC = () => {
             <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3.5 sm:p-4">
               <p className="text-xs text-slate-400">Metrics & Goals</p>
               <div className="mt-1.5 flex gap-3 sm:gap-4">
-                <div><p className="text-xs sm:text-xs text-slate-400">Overall Progress</p><p className="text-base sm:text-lg font-bold text-white">{totalCompletedLessons}/12</p></div>
+                <div><p className="text-xs sm:text-xs text-slate-400">Overall Progress</p><p className="text-base sm:text-lg font-bold text-white">{totalCompletedLessons}/{totalTrackedLessons}</p></div>
                 <div><p className="text-xs sm:text-xs text-slate-400">Weekly Goal</p><p className="text-base sm:text-lg font-bold text-emerald-400">{weeklyGoal}/5</p></div>
                 <div><p className="text-xs sm:text-xs text-slate-400">Streak/XP</p><p className="text-base sm:text-lg font-bold text-amber-300">{userProgress.streakDays} days</p></div>
               </div>

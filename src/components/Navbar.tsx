@@ -445,7 +445,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/95 backdrop-blur-md" role="banner">
+      <header className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/95 backdrop-blur-md" role="banner">
         <nav className="mx-auto flex h-14 sm:h-16 max-w-7xl 2xl:max-w-[1536px] items-center justify-between gap-1.5 sm:gap-2 px-2.5 sm:px-6 lg:px-8" aria-label="Main navigation">
           
           {/* Brand Logo */}
