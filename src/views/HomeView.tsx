@@ -48,6 +48,9 @@ export const HomeView: React.FC = () => {
 
   return (
     <div className="app-view w-full max-w-full space-y-3.5 sm:space-y-8 lg:space-y-12 py-2 sm:py-6 pb-20 sm:pb-12">
+      {/* Primary Continue Learning Hero Card */}
+      <NextStepRecommendationEngine />
+
       {/* Learner control center */}
       <section className="w-full max-w-7xl 2xl:max-w-[1536px] mx-auto px-2.5 sm:px-6 lg:px-8">
         <div className="rounded-2xl border border-blue-900/60 bg-slate-900/90 p-3.5 sm:p-5 lg:p-6 shadow-xl text-center">
@@ -87,9 +90,6 @@ export const HomeView: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* Personalized Next Step Recommendation Engine */}
-      <NextStepRecommendationEngine />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden w-full max-w-7xl 2xl:max-w-[1536px] mx-auto px-2.5 sm:px-6 lg:px-8">
