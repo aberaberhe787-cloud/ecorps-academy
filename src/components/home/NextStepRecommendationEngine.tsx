@@ -90,16 +90,16 @@ export const NextStepRecommendationEngine: React.FC = () => {
   ]);
 
   return (
-    <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" id="continue-learning-section">
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 sm:p-6 shadow-xl transition-all">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" id="continue-learning-section">
+      <div className="relative overflow-hidden rounded-2xl border border-blue-500/20 bg-gradient-to-r from-slate-900 via-slate-900/95 to-blue-950/30 p-5 sm:p-6 shadow-xl transition-all">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-2 flex-1">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-blue-400">
-                CONTINUE LEARNING
+              <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold uppercase tracking-wider text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-md">
+                Next In Progress
               </span>
               <span className="text-slate-600 dark:text-slate-600">•</span>
-              <span className="text-xs text-slate-400 font-medium">
+              <span className="text-xs text-slate-400 font-mono">
                 {recommendation.track}
               </span>
             </div>
@@ -108,12 +108,12 @@ export const NextStepRecommendationEngine: React.FC = () => {
               <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
                 {recommendation.title}
               </h3>
-              <p className="text-xs sm:text-sm text-slate-300 mt-0.5 line-clamp-1">
+              <p className="text-xs sm:text-sm text-slate-300 mt-1 line-clamp-1">
                 {recommendation.subtitle}
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 pt-0.5">
+            <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 pt-1">
               <span className="inline-flex items-center gap-1 font-mono">
                 <Clock className="h-3.5 w-3.5 text-blue-400" />
                 {recommendation.estimatedTime}
@@ -124,7 +124,7 @@ export const NextStepRecommendationEngine: React.FC = () => {
                 +{recommendation.xpReward} XP
               </span>
               <span>•</span>
-              <span className="text-slate-400 italic">
+              <span className="text-slate-400 text-xs italic line-clamp-1">
                 {recommendation.rationale}
               </span>
             </div>
@@ -134,13 +134,13 @@ export const NextStepRecommendationEngine: React.FC = () => {
             <button
               id="continue-learning-action-btn"
               onClick={recommendation.onAction}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm shadow-md transition-all active:scale-95 cursor-pointer"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm shadow-md shadow-blue-600/20 transition-all active:scale-95 cursor-pointer"
             >
               <span>{recommendation.actionLabel}</span>
             </button>
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
