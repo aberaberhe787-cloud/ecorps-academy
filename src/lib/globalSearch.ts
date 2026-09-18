@@ -108,7 +108,7 @@ export function buildGlobalSearchIndex(language: 'en' | 'am' = 'en'): GlobalSear
         category: `Pattern · ${pat.category}`,
         tags: pat.tags,
         patternId: pat.id,
-        content: `${pat.title} ${pat.description} ${pat.category} ${(pat.tags || []).join(' ')} ${(pat.whyItWorks || []).join(' ')}`.toLowerCase(),
+        content: `${pat.title} ${pat.description} ${pat.category} ${pat.concept || ''} ${(pat.supportingTechniques || []).join(' ')} ${pat.learningObjective || ''} ${(pat.anatomy || []).map(a => `${a.name} ${a.technique}`).join(' ')} ${(pat.tags || []).join(' ')} ${(pat.whyItWorks || []).join(' ')}`.toLowerCase(),
       });
     }
   });

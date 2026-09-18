@@ -3,24 +3,82 @@
     "id": "foundation-clarity",
     "title": "Clarity Brief",
     "category": "Foundations",
+    "patternType": "pattern",
+    "concept": "Explicit Directive Specification & Success Criteria",
+    "learningObjective": "Learn how to formulate unambiguous task prompts by separating task action, intended audience, explicit success criteria, and input source material.",
+    "whenToUse": [
+      "Initiating unfamiliar or open-ended tasks where generic model responses would require repeated follow-up clarification.",
+      "Creating standard prompt templates for non-technical team members.",
+      "Setting strict criteria for summarization or synthesis."
+    ],
+    "whenNotToUse": [
+      "Quick exploratory chats where conversational ambiguity is acceptable.",
+      "Highly complex multi-stage agent workflows that require iterative state tracking."
+    ],
+    "limitations": [
+      "Does not eliminate hallucination risk on factual claims absent from the provided input.",
+      "Requires the prompt author to accurately define what success looks like."
+    ],
     "template": "Task: [specific action]\nAudience: [who will use the answer]\nSuccess criteria: [what a good answer must contain]\nInput:\n[add the relevant material]"
   },
   {
     "id": "foundation-role",
     "title": "Expert Role",
     "category": "Foundations",
+    "patternType": "pattern",
+    "concept": "Persona-Conditioned Prior Activation",
+    "learningObjective": "Learn how persona framing conditions the model's vocabulary and domain-specific heuristics to produce expert-level depth.",
+    "whenToUse": [
+      "Technical reviews requiring domain jargon and specialized perspective.",
+      "Simulating specific stakeholder perspectives during product strategy or user interview preparation."
+    ],
+    "whenNotToUse": [
+      "General-purpose factual lookups where role conditioning introduces unnecessary verbosity.",
+      "Using exaggerated or fictitious credentials to artificially induce model accuracy."
+    ],
+    "limitations": [
+      "Role prompting changes stylistic tone and domain heuristics but does not grant the model factual knowledge it did not possess during training."
+    ],
     "template": "Act as a [specific expert role]. Use the perspective and vocabulary of that role.\nTask: [what you need done]"
   },
   {
     "id": "foundation-constraints",
     "title": "Structured Output",
     "category": "Foundations",
+    "patternType": "pattern",
+    "concept": "Deterministic Schema Formatting & Output Bounding",
+    "learningObjective": "Learn how to constrain unstructured LLM text into predictable schemas (tables, JSON, itemized lists) suitable for downstream ingestion.",
+    "whenToUse": [
+      "Generating data payloads intended for programmatic parsing or spreadsheet import.",
+      "Enforcing length limits to prevent runaway token costs and redundant verbosity."
+    ],
+    "whenNotToUse": [
+      "Creative exploratory prose where strict structural rigidities dampen narrative nuance.",
+      "Complex nested database schemas that require formal JSON Schema schema-validation APIs."
+    ],
+    "limitations": [
+      "Markdown tables and raw JSON strings in plain text output are not syntax-guaranteed unless validated by a deterministic schema validator."
+    ],
     "template": "Return the answer as a [table / numbered list / JSON object].\nLimit: [word or item limit].\nRequired fields or columns: [list them]."
   },
   {
     "id": "foundation-context",
     "title": "Context Block",
     "category": "Foundations",
+    "patternType": "pattern",
+    "concept": "Grounding Delimitation & Knowledge Isolation",
+    "learningObjective": "Learn how to delimit authoritative reference text using XML tags to prevent the model from hallucinating external information or succumbing to prompt injection.",
+    "whenToUse": [
+      "Retrieval-Augmented Generation (RAG) tasks where the answer must only cite provided documents.",
+      "Preventing untrusted user text from escaping its intended context boundaries."
+    ],
+    "whenNotToUse": [
+      "Open-domain reasoning questions where external parametric knowledge is explicitly desired.",
+      "Very short prompts that do not reference any external document or text snippet."
+    ],
+    "limitations": [
+      "The model may still occasionally summarize outside context if negative constraints are not firmly stated alongside the tags."
+    ],
     "template": "Use only the context inside <context> tags.\n<context>\n[background, source material, constraints]\n</context>\nTask: [specific request]"
   }
 ]

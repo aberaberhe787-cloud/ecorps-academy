@@ -156,12 +156,42 @@ export interface Mission {
   };
 }
 
+export type PatternType = "pattern" | "workflow" | "evaluation";
+
+export interface PatternAnatomyItem {
+  name: string;
+  technique: string;
+  explanation: string;
+  purpose: string;
+}
+
+export interface WeakExample {
+  prompt: string;
+  problems: string[];
+}
+
+export interface ImprovedExample {
+  prompt: string;
+  changes: string[];
+  explanation: string;
+}
+
 export interface PromptPattern {
   id: string;
   title: string;
   category: "Coding" | "Writing" | "Analysis" | "Architecture" | "Reasoning";
   difficulty: "Beginner" | "Intermediate" | "Advanced";
   description: string;
+  concept: string;
+  supportingTechniques?: string[];
+  learningObjective: string;
+  whenToUse: string[];
+  whenNotToUse: string[];
+  limitations: string[];
+  patternType?: PatternType;
+  anatomy?: PatternAnatomyItem[];
+  weakExample?: WeakExample;
+  improvedExample?: ImprovedExample;
   template: string;
   variables: { name: string; label: string; placeholder: string; defaultValue: string }[];
   whyItWorks: string[];

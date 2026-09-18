@@ -201,6 +201,23 @@ export interface I18nTranslations {
     openInSandbox: string;
     useCase: string;
     whenToUse: string;
+    whenNotToUse: string;
+    limitations: string;
+    concept: string;
+    learningObjective: string;
+    patternType: string;
+    typePattern: string;
+    typeWorkflow: string;
+    typeEvaluation: string;
+    patternAnatomy: string;
+    anatomySubtitle: string;
+    beforeAfterComparison: string;
+    weakPromptTitle: string;
+    improvedPromptTitle: string;
+    whyWeakTitle: string;
+    whatChangedTitle: string;
+    whyItMattersTitle: string;
+    supportingTechniquesTitle: string;
     theoreticalUnderpinning: string;
     customParameters: string;
   };
@@ -445,6 +462,23 @@ export const translations: Record<Language, I18nTranslations> = {
       openInSandbox: "በ Sandbox ሞክር",
       useCase: "ተግባራዊ ጠቀሜታ:",
       whenToUse: "መቼ መጠቀም እንዳለብዎት:",
+      whenNotToUse: "መቼ መጠቀም የለብዎትም:",
+      limitations: "ገደቦች እና የቴክኒክ ድንበሮች:",
+      concept: "የፖርምፕት ምህንድስና መሰረታዊ ጽንሰ-ሀሳብ:",
+      learningObjective: "የትምህርት ግብ (Learning Objective):",
+      patternType: "የፓተርን አይነት",
+      typePattern: "Prompt Pattern",
+      typeWorkflow: "Prompt Workflow",
+      typeEvaluation: "Evaluation Pattern",
+      patternAnatomy: "የፓተርኑ መዋቅራዊ አሰራር (Pattern Anatomy):",
+      anatomySubtitle: "ይህ ፖርምፕት እንዴት እንደተዋቀረ እና እያንዳንዱ ክፍል ለምን እንደተካተተ ይረዱ",
+      beforeAfterComparison: "ከደካማ ወደ የተሻሻለ ፖርምፕት (Weak vs Improved):",
+      weakPromptTitle: "ደካማ ፖርምፕት (Anti-Pattern)",
+      improvedPromptTitle: "በምህንድስና የተሻሻለ ፖርምፕት",
+      whyWeakTitle: "ለምን ደካማ ሆነ?",
+      whatChangedTitle: "ምን ተቀየረ?",
+      whyItMattersTitle: "ለውጡ ለምን አስፈለገ?",
+      supportingTechniquesTitle: "ደጋፊ የፖርምፕት ቴክኒኮች:",
       theoreticalUnderpinning: "የንድፈ-ሀሳብ መሰረት:",
       customParameters: "ብጁ መለኪያዎችን አስገባ:"
     },
@@ -681,6 +715,23 @@ export const translations: Record<Language, I18nTranslations> = {
       openInSandbox: "Try in Sandbox",
       useCase: "Use Case:",
       whenToUse: "When to Use:",
+      whenNotToUse: "When NOT to Use:",
+      limitations: "Technical Boundaries & Limitations:",
+      concept: "Core Engineering Concept:",
+      learningObjective: "Learning Objective:",
+      patternType: "Pattern Type",
+      typePattern: "Prompt Pattern",
+      typeWorkflow: "Prompt Workflow",
+      typeEvaluation: "Evaluation Pattern",
+      patternAnatomy: "Pattern Anatomy & Architecture",
+      anatomySubtitle: "Deconstruct how this prompt is engineered and why each component is included",
+      beforeAfterComparison: "Weak Baseline → Engineered Transformation",
+      weakPromptTitle: "Weak Prompt (Naive Anti-Pattern)",
+      improvedPromptTitle: "Engineered Pattern Applied",
+      whyWeakTitle: "Why This Fails in Production",
+      whatChangedTitle: "Engineering Modifications",
+      whyItMattersTitle: "Why This Transformation Works",
+      supportingTechniquesTitle: "Supporting Techniques:",
       theoreticalUnderpinning: "Theoretical Underpinning:",
       customParameters: "Customize Parameters:"
     },
