@@ -248,6 +248,9 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
       {/* Activity Analytics Engine (Recharts Heatmap & Completion Trends) */}
       <ActivityAnalytics userProgress={userProgress} />
 
+      {/* Unified Learning & Competency Architecture (P2 Competency Progress Section) */}
+      <CompetencyPortfolio competencyStates={competencyStates} />
+
       {/* Multi-Track Overview Cards */}
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">

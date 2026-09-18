@@ -619,3 +619,28 @@ export function getCompetencyForCtf(challengeId: string): CompetencyDefinition |
   const meta = CTF_COMPETENCY_REGISTRY[challengeId];
   return meta ? getCompetencyById(meta.primaryCompetency) : undefined;
 }
+
+/**
+ * Analyzes existing foundation lesson and challenge identifiers in PromptEngineeringPath.tsx
+ * (e.g., foundation-clarity, foundation-role, foundation-constraints, foundation-iteration, foundation-context)
+ * and defines deterministic mapping rules converting completed activities into evidence objects for the competency model.
+ */
+export function mapPromptEngineeringPathActivityToEvidence(
+  lessonId: string,
+  timestamp: number = Date.now()
+): CompetencyEvidence | null {
+  const meta = LESSON_COMPETENCY_REGISTRY[lessonId];
+  if (!meta) return null;
+
+  return {
+    id: `ev_foundation_${lessonId}_${timestamp}`,
+    competencyId: meta.primaryCompetency,
+    type: "lesson_completed",
+    sourceId: lessonId,
+    title: meta.title,
+    timestamp,
+    weight: "exposure",
+    summary: `Completed Prompt Engineering Foundation lesson: ${meta.title}`,
+  };
+}
+
