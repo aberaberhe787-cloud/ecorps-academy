@@ -19,11 +19,13 @@ import {
   FileCode,
   ArrowRight,
   Split,
-  Tag
+  Tag,
+  Shield
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { promptPatterns } from "../data/patternsData";
 import { PromptPattern, PatternType } from "../types";
+import { getCompetenciesForPattern } from "../lib/competencyModel";
 
 export const PatternLibraryView: React.FC = () => {
   const { userProgress, toggleBookmarkPattern, loadIntoPlayground, t, selectedPatternId } = useApp();
@@ -279,6 +281,21 @@ export const PatternLibraryView: React.FC = () => {
                     </div>
                   )}
 
+                  {/* Competency Tags */}
+                  {pattern.competencies && pattern.competencies.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {getCompetenciesForPattern(pattern.id).map((comp) => (
+                        <span
+                          key={comp.id}
+                          className="inline-flex items-center gap-1 rounded bg-purple-950/50 border border-purple-800/60 px-1.5 py-0.5 text-[10px] font-mono text-purple-300 font-medium"
+                        >
+                          <Shield className="h-2.5 w-2.5 text-purple-400" />
+                          {comp.title}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
                   <p className="mt-2 text-xs text-slate-400 line-clamp-2 leading-relaxed">
                     {pattern.description}
                   </p>
@@ -396,6 +413,26 @@ export const PatternLibraryView: React.FC = () => {
                       >
                         <Tag className="h-2.5 w-2.5 text-blue-400" />
                         {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Associated Unified Competencies */}
+              {activePattern.competencies && activePattern.competencies.length > 0 && (
+                <div className="space-y-1.5">
+                  <span className="text-[10px] uppercase font-semibold tracking-wider text-purple-400 block">
+                    Unified Competency Alignment:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {getCompetenciesForPattern(activePattern.id).map((comp) => (
+                      <span
+                        key={comp.id}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-950/70 border border-purple-800/80 text-[11px] font-medium text-purple-200 font-mono"
+                      >
+                        <Shield className="h-3 w-3 text-purple-400" />
+                        {comp.title} ({comp.level})
                       </span>
                     ))}
                   </div>

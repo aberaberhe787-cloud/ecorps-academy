@@ -49,7 +49,7 @@ export const HomeView: React.FC = () => {
 
   const nextCurriculumLesson = allCurriculumLessons.find(
     (l) => !completedLessonIds.includes(l.id)
-  ) || allCurriculumLessons[3] || allCurriculumLessons[0];
+  ) || allCurriculumLessons[0];
 
   // Dynamic continue lesson calculation
   const lessonNumberDisplay = (() => {
@@ -58,11 +58,11 @@ export const HomeView: React.FC = () => {
       if (idx !== -1) return `Lesson ${String(idx + 1).padStart(2, "0")}`;
     }
     const idx = allCurriculumLessons.findIndex((l) => l.id === nextCurriculumLesson?.id);
-    return idx !== -1 ? `Lesson ${String(idx + 1).padStart(2, "0")}` : "Lesson 04";
+    return idx !== -1 ? `Lesson ${String(idx + 1).padStart(2, "0")}` : "Lesson 01";
   })();
 
-  // Calculate percentage complete for the continue block (e.g. 72% or progress calculation)
-  const continuePercentage = progressModel.percentage > 0 ? progressModel.percentage : 72;
+  // Calculate percentage complete truthfully from actual learner state
+  const continuePercentage = progressModel.percentage;
 
   let continueTarget: {
     track: string;
@@ -77,15 +77,17 @@ export const HomeView: React.FC = () => {
   };
 
   if (nextFoundation && completedLessonIds.length < 2) {
+    const fIdx = FOUNDATION_LESSONS.findIndex((l) => l.id === nextFoundation.id);
+    const fTag = fIdx !== -1 ? `Lesson ${String(fIdx + 1).padStart(2, "0")}` : "Lesson 01";
     continueTarget = {
       track: "Foundations Track",
-      lessonTag: "Lesson 01",
+      lessonTag: fTag,
       title: nextFoundation.title,
       subtitle: nextFoundation.summary,
       duration: "5 min",
       xp: 50,
       completionPercent: continuePercentage,
-      actionLabel: "Continue →",
+      actionLabel: completedLessonIds.length === 0 ? "Start Learning →" : "Continue →",
       onAction: () => setActiveTab("foundations"),
     };
   } else if (nextCurriculumLesson) {

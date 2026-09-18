@@ -561,8 +561,8 @@ Entities:`,
         ],
         keyRules: [
           "The Computation-Per-Token Theorem: Never ask an LLM to calculate a multi-step logical result in a single immediate token.",
-          "Scratchpad Isolation: Always instruct the model to write out explicit deductions before producing final JSON/code.",
-          "Self-Correction Anchors: Instruct the model to verify its intermediate intermediate sums or logic before finalizing."
+          "Selective Reasoning Application: Use explicit scratchpads or reasoning prompts for complex multi-hop or arithmetic tasks; avoid them on low-latency or simple retrieval queries where they introduce unnecessary token overhead.",
+          "Modern Model Architecture: Contemporary reasoning models feature native internal thinking tokens; explicit user-space scratchpads serve as an external verification technique rather than an absolute requirement."
         ],
         concepts: [
           {

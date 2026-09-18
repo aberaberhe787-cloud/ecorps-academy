@@ -7,11 +7,11 @@ import { analyzePrompt } from '../lib/promptAnalyzer';
 import promptPatterns from '../data/promptPatterns.json';
 
 export const FOUNDATION_LESSONS = [
-  { id: 'foundation-clarity', title: 'Clarity & Specificity', summary: 'Replace vague goals with an explicit task, audience, and success criteria.', example: 'Summarize this report.', refined: 'Summarize the report for a CFO in 5 bullets, highlighting cost, risk, and next action.' },
-  { id: 'foundation-role', title: 'Role Assignment', summary: 'Give the model a useful perspective, vocabulary, and level of expertise.', example: 'Explain this contract.', refined: 'Act as a contract lawyer. Explain the termination clause in plain language and flag negotiation risks.' },
-  { id: 'foundation-constraints', title: 'Constraints & Formatting', summary: 'Define length, structure, required fields, and exclusions before generation.', example: 'List the project risks.', refined: 'Return a 3-column table with Risk, Impact, and Mitigation. Include exactly 5 risks.' },
-  { id: 'foundation-iteration', title: 'Iterative Refinement', summary: 'Improve one dimension at a time: task, context, output shape, then edge cases.', example: 'Write a product update.', refined: 'Write a 100-word customer update with a headline, impact, timeline, and next step.' },
-  { id: 'foundation-context', title: 'Context Injection', summary: 'Place trusted background material in delimiters and tell the model how to use it.', example: 'Answer using this document.', refined: 'Use only the facts inside <context> tags. Cite the relevant section for each answer.' },
+  { id: 'foundation-clarity', title: 'Clarity & Specificity', summary: 'Replace vague goals with an explicit task, audience, and success criteria.', example: 'Summarize this report.', refined: 'Summarize the report for a CFO in 5 bullets, highlighting cost, risk, and next action.', competencies: ['prompt-foundations'] },
+  { id: 'foundation-role', title: 'Role Assignment', summary: 'Give the model a useful perspective, vocabulary, and level of expertise.', example: 'Explain this contract.', refined: 'Act as a contract lawyer. Explain the termination clause in plain language and flag negotiation risks.', competencies: ['role-persona-design'] },
+  { id: 'foundation-constraints', title: 'Constraints & Formatting', summary: 'Define length, structure, required fields, and exclusions before generation.', example: 'List the project risks.', refined: 'Return a 3-column table with Risk, Impact, and Mitigation. Include exactly 5 risks.', competencies: ['structured-output'] },
+  { id: 'foundation-iteration', title: 'Iterative Refinement', summary: 'Improve one dimension at a time: task, context, output shape, then edge cases.', example: 'Write a product update.', refined: 'Write a 100-word customer update with a headline, impact, timeline, and next step.', competencies: ['prompt-foundations'] },
+  { id: 'foundation-context', title: 'Context Injection', summary: 'Place trusted background material in delimiters and tell the model how to use it.', example: 'Answer using this document.', refined: 'Use only the facts inside <context> tags. Cite the relevant section for each answer.', competencies: ['context-engineering'] },
 ] as const;
 
 export const PromptEngineeringPath: React.FC = () => {

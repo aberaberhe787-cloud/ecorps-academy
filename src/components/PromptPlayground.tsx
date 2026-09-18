@@ -124,7 +124,7 @@ export const PromptPlayground: React.FC<{ initialPrompt?: string }> = ({ initial
               </span>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400">
-                  Rubric: {panel.analysis.score}/100
+                  Diagnostic: {panel.analysis.score}/100
                 </span>
                 <button
                   type="button"

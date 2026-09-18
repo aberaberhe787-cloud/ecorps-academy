@@ -95,6 +95,7 @@ export interface Lesson {
   difficulty: "Beginner" | "Intermediate" | "Advanced" | "Expert";
   bloomTaxonomyFocus?: BloomsTaxonomyLevel;
   prerequisites?: string[];
+  competencies?: CompetencyId[];
   xpReward?: number;
   conceptSummary: string;
   deepDive: string[];
@@ -140,6 +141,7 @@ export interface Mission {
   description: string;
   objective: string;
   targetCriteria: string[];
+  competencies?: CompetencyId[];
   initialPrompt: string;
   systemInstruction?: string;
   hints: string[];
@@ -184,6 +186,7 @@ export interface PromptPattern {
   description: string;
   concept: string;
   supportingTechniques?: string[];
+  competencies?: CompetencyId[];
   learningObjective: string;
   whenToUse: string[];
   whenNotToUse: string[];
@@ -367,4 +370,71 @@ export interface CtfLevel {
   hints: string[];
   xpReward: number;
 }
+
+// ---------------------------------------------------------------------------
+// Unified Learning & Competency Architecture (P2)
+// ---------------------------------------------------------------------------
+
+export type CompetencyId =
+  | "prompt-foundations"
+  | "context-engineering"
+  | "role-persona-design"
+  | "cognitive-reasoning"
+  | "structured-output"
+  | "adversarial-defense"
+  | "evaluation-orchestration";
+
+export type CompetencyLevel =
+  | "Not Started"
+  | "Introduced"
+  | "Practicing"
+  | "Proficient"
+  | "Mastered";
+
+export type EvidenceWeight = "exposure" | "practice" | "demonstration" | "assessment";
+
+export type EvidenceType =
+  | "lesson_completed"
+  | "checkpoint_passed"
+  | "sandbox_completed"
+  | "pattern_practice"
+  | "mission_completed"
+  | "ctf_completed"
+  | "assessment_passed";
+
+export interface CompetencyEvidence {
+  id: string;
+  type: EvidenceType;
+  competencyId: CompetencyId;
+  sourceId: string;
+  title: string;
+  timestamp: number;
+  weight: EvidenceWeight;
+  summary: string;
+}
+
+export interface CompetencyDefinition {
+  id: CompetencyId;
+  title: string;
+  domain: string;
+  description: string;
+  level: "Foundations" | "Intermediate" | "Advanced";
+  relatedTechniques: string[];
+  evidenceSources: {
+    lessons?: string[];
+    patterns?: string[];
+    missions?: string[];
+    ctfChallenges?: string[];
+    assessments?: string[];
+  };
+}
+
+export interface CompetencyState {
+  competency: CompetencyDefinition;
+  level: CompetencyLevel;
+  evidence: CompetencyEvidence[];
+  explanation: string;
+  nextMilestone: string;
+}
+
 

@@ -100,9 +100,13 @@ export const CtfSimulator: React.FC = () => {
     "ctf-challenge-2": null,
     "ctf-challenge-3": null,
   });
+  const { addXp, user } = useApp();
+  const storageKeySolved = user?.uid ? `ecorp_ctf_solved_${user.uid}` : "ecorp_ctf_solved_guest";
+  const storageKeyClaimed = user?.uid ? `ecorp_ctf_claimed_${user.uid}` : "ecorp_ctf_claimed_guest";
+
   const [solvedChallenges, setSolvedChallenges] = useState<Record<string, boolean>>(() => {
     try {
-      const saved = localStorage.getItem("ecorp_ctf_solved");
+      const saved = localStorage.getItem(storageKeySolved) || localStorage.getItem("ecorp_ctf_solved");
       return saved ? JSON.parse(saved) : {};
     } catch {
       return {};
@@ -110,15 +114,25 @@ export const CtfSimulator: React.FC = () => {
   });
   const [claimedXp, setClaimedXp] = useState<Record<string, boolean>>(() => {
     try {
-      const saved = localStorage.getItem("ecorp_ctf_claimed");
+      const saved = localStorage.getItem(storageKeyClaimed) || localStorage.getItem("ecorp_ctf_claimed");
       return saved ? JSON.parse(saved) : {};
     } catch {
       return {};
     }
   });
+
+  // Re-sync if user changes
+  useEffect(() => {
+    try {
+      const savedSolved = localStorage.getItem(storageKeySolved) || localStorage.getItem("ecorp_ctf_solved");
+      setSolvedChallenges(savedSolved ? JSON.parse(savedSolved) : {});
+      const savedClaimed = localStorage.getItem(storageKeyClaimed) || localStorage.getItem("ecorp_ctf_claimed");
+      setClaimedXp(savedClaimed ? JSON.parse(savedClaimed) : {});
+    } catch {}
+  }, [storageKeySolved, storageKeyClaimed]);
+
   const [showDefenseRules, setShowDefenseRules] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
-  const { addXp } = useApp();
 
   const activeChallenge =
     CTF_CHALLENGES.find((c) => c.id === activeChallengeId) || CTF_CHALLENGES[0];
@@ -159,7 +173,7 @@ export const CtfSimulator: React.FC = () => {
         setSolvedChallenges((prev) => {
           const updated = { ...prev, [activeChallenge.id]: true };
           try {
-            localStorage.setItem("ecorp_ctf_solved", JSON.stringify(updated));
+            localStorage.setItem(storageKeySolved, JSON.stringify(updated));
           } catch {}
           return updated;
         });
@@ -182,7 +196,7 @@ export const CtfSimulator: React.FC = () => {
     setClaimedXp((prev) => {
       const updated = { ...prev, [challengeId]: true };
       try {
-        localStorage.setItem("ecorp_ctf_claimed", JSON.stringify(updated));
+        localStorage.setItem(storageKeyClaimed, JSON.stringify(updated));
       } catch {}
       return updated;
     });

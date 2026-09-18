@@ -25,6 +25,7 @@ import { auth } from '../lib/firebase';
 import { BadgeComponent } from '../components/profile/BadgeComponent';
 import { DailyStreakCounter } from '../components/profile/DailyStreakCounter';
 import { ActivityAnalytics } from '../components/profile/ActivityAnalytics';
+import { CompetencyPortfolio } from '../components/profile/CompetencyPortfolio';
 import { MILESTONE_DEFINITIONS } from '../lib/achievementEngine';
 import { ProgressRing } from '../components/profile/ProgressRing';
 import { FOUNDATION_LESSONS } from './PromptEngineeringPath';
@@ -54,7 +55,8 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
     setTopP, 
     deleteCodeSnippet, 
     deleteCustomPrompt, 
-    isOnline 
+    isOnline,
+    competencyStates
   } = useApp();
   const [copiedSnippetId, setCopiedSnippetId] = useState<string | null>(null);
   const [activeSavedTab, setActiveSavedTab] = useState<'snippets' | 'prompts'>('snippets');
@@ -491,6 +493,9 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
             </div>
           </div>
         </section>
+
+        {/* Unified Competency Architecture Portfolio */}
+        <CompetencyPortfolio competencyStates={competencyStates} />
 
         {/* Saved Code Snippets & Custom Prompts Library */}
         <section className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 space-y-4 shadow-xl">

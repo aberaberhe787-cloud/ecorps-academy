@@ -15,6 +15,7 @@ export const missions: Mission[] = [
       "Enforce length constraint (e.g. 'under 150 words' or 'maximum 4 sentences')",
       "Include a tone guideline (e.g. 'punchy', 'urgent', or 'conversational')"
     ],
+    competencies: ["prompt-foundations"],
     initialPrompt: "Write a good post for LinkedIn about our new project management software. Make it sound exciting.",
     systemInstruction: "You are an AI copywriting assistant.",
     hints: [
@@ -59,6 +60,7 @@ Constraints:
       "Provide instructions for missing or ambiguous fields",
       "Enclose the raw customer input within clear delimiters (e.g. <review> or triple quotes)"
     ],
+    competencies: ["structured-output"],
     initialPrompt: "Give me the JSON data for this customer review: 'The app crashed twice when I tried to pay my bill. Your customer support chat was totally useless and didn't answer for 40 minutes.'",
     systemInstruction: "You are a headless data serialization pipeline.",
     hints: [
@@ -107,6 +109,7 @@ The app crashed twice when I tried to pay my bill. Your customer support chat wa
       "Require a self-verification check against original constraints",
       "Clearly separate internal reasoning from the final answer output"
     ],
+    competencies: ["cognitive-reasoning"],
     initialPrompt: "A company has 3 developers. Dev A codes twice as fast as Dev B. Dev C codes 50 lines less than Dev A. Together they wrote 700 lines in a day. How many lines did Dev A write?",
     systemInstruction: "You are a mathematical problem-solving tutor.",
     hints: [
@@ -148,6 +151,7 @@ A company has 3 developers. Dev A codes twice as fast as Dev B. Dev C codes 50 l
       "Include explicit negative constraints (words or jargon to avoid)",
       "Set interactive engagement questions at the end"
     ],
+    competencies: ["role-persona-design"],
     initialPrompt: "Explain Kubernetes to a 10-year-old kid.",
     systemInstruction: "You are an educator.",
     hints: [
@@ -187,6 +191,7 @@ Rules & Guidelines:
       "Maintain identical formatting schema between exemplar pairs and target prompt",
       "Provide category definitions or taxonomy rules"
     ],
+    competencies: ["context-engineering"],
     initialPrompt: "Categorize this customer email into Sales, Billing, or Tech: 'I love your product and want to upgrade to enterprise, but my last invoice had an extra $20 charge that needs fixing before I sign.'",
     systemInstruction: "You are an email routing classifier.",
     hints: [

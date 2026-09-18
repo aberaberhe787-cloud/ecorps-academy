@@ -17,6 +17,9 @@ import { analyzePrompt } from "../lib/promptAnalyzer";
 import { translations, Language, I18nTranslations } from "../i18n/translations";
 import { amharicCurriculumModules } from "../i18n/amharicLessons";
 import { curriculumModules } from "../data/lessonsData";
+import type { User } from "firebase/auth";
+import { CompetencyState } from "../types";
+import { deriveCompetencyStates } from "../lib/competencyModel";
 import {
   auth,
   db,
@@ -142,6 +145,10 @@ interface AppContextType {
   isDistractionFreeMode: boolean;
   setIsDistractionFreeMode: (v: boolean) => void;
 
+  // Unified Learning & Competency Architecture (P2)
+  user: User | null;
+  competencyStates: CompetencyState[];
+
   // User Preferences Persistence
   userPreferences: UserPreferences;
   updateUserPreferences: (partial: Partial<UserPreferences>) => void;
@@ -226,97 +233,60 @@ function getStorageKeyForUid(uid?: string | null): string {
 
 function loadCachedProgress(uid?: string | null): UserProgress {
   try {
-    let result: UserProgress = { ...initialProgress };
-    let hasLoaded = false;
-
-    // 1. Check legacy key first (guest or existing progress)
-    const legacy = localStorage.getItem(STORAGE_KEY);
-    if (legacy) {
-      try {
-        const parsed = JSON.parse(legacy);
-        result = {
-          ...result,
-          ...parsed,
-          completedLessons: Array.isArray(parsed.completedLessons) ? parsed.completedLessons : [],
-          completedMissions: Array.isArray(parsed.completedMissions) ? parsed.completedMissions : [],
-        };
-        hasLoaded = true;
-      } catch {}
-    }
-
-    // 2. Check UID-specific key if UID provided
+    // If a specific UID is provided, load ONLY from that user's scoped key
     if (uid) {
       const saved = localStorage.getItem(getStorageKeyForUid(uid));
       if (saved) {
         try {
-          const parsedUid = JSON.parse(saved);
-          result = {
-            ...result,
-            ...parsedUid,
-            completedLessons: Array.from(new Set([
-              ...(result.completedLessons || []),
-              ...(Array.isArray(parsedUid.completedLessons) ? parsedUid.completedLessons : [])
-            ])),
-            completedMissions: Array.from(new Set([
-              ...(result.completedMissions || []),
-              ...(Array.isArray(parsedUid.completedMissions) ? parsedUid.completedMissions : [])
-            ])),
-            completedAssessments: Array.from(new Set([
-              ...(result.completedAssessments || []),
-              ...(Array.isArray(parsedUid.completedAssessments) ? parsedUid.completedAssessments : [])
-            ])),
-            missionEvidence: {
-              ...(result.missionEvidence || {}),
-              ...(parsedUid.missionEvidence || {})
-            },
-            xp: Math.max(result.xp || 0, parsedUid.xp || 0, initialProgress.xp),
-            streakDays: Math.max(result.streakDays || 1, parsedUid.streakDays || 1),
+          const parsed = JSON.parse(saved);
+          return {
+            ...initialProgress,
+            ...parsed,
+            completedLessons: Array.isArray(parsed.completedLessons) ? parsed.completedLessons : [],
+            completedMissions: Array.isArray(parsed.completedMissions) ? parsed.completedMissions : [],
+            completedAssessments: Array.isArray(parsed.completedAssessments) ? parsed.completedAssessments : [],
+            missionScores: parsed.missionScores && typeof parsed.missionScores === 'object' ? parsed.missionScores : {},
+            missionEvidence: parsed.missionEvidence && typeof parsed.missionEvidence === 'object' ? parsed.missionEvidence : {},
+            bookmarkedPatterns: Array.isArray(parsed.bookmarkedPatterns) ? parsed.bookmarkedPatterns : [],
+            bookmarkedLessons: Array.isArray(parsed.bookmarkedLessons) ? parsed.bookmarkedLessons : [],
+            savedCustomPrompts: Array.isArray(parsed.savedCustomPrompts) ? parsed.savedCustomPrompts : [],
+            achievements: Array.isArray(parsed.achievements) ? parsed.achievements : [],
+            xp: typeof parsed.xp === 'number' ? parsed.xp : initialProgress.xp,
+            streakDays: typeof parsed.streakDays === 'number' ? parsed.streakDays : 1,
+            curriculumProgressPercent: typeof parsed.curriculumProgressPercent === 'number' ? parsed.curriculumProgressPercent : 0,
+            promptsEngineeredCount: typeof parsed.promptsEngineeredCount === 'number' ? parsed.promptsEngineeredCount : 0,
           };
-          hasLoaded = true;
-        } catch {}
-      }
-    }
-
-    // 3. Scan other promptlab progress keys in localStorage if any exist
-    if (typeof window !== 'undefined') {
-      try {
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && k.startsWith('promptlab_user_progress_')) {
-            const raw = localStorage.getItem(k);
-            if (raw) {
-              const p = JSON.parse(raw);
-              if (Array.isArray(p.completedLessons) && p.completedLessons.length > 0) {
-                result.completedLessons = Array.from(new Set([...result.completedLessons, ...p.completedLessons]));
-                hasLoaded = true;
-              }
-              if (typeof p.xp === 'number' && p.xp > result.xp) {
-                result.xp = p.xp;
-              }
-              if (typeof p.streakDays === 'number' && p.streakDays > result.streakDays) {
-                result.streakDays = p.streakDays;
-              }
-            }
-          }
+        } catch (e) {
+          console.warn("Could not parse UID-scoped cached progress", e);
         }
-      } catch {}
+      }
+      return { ...initialProgress };
     }
 
-    if (hasLoaded) {
-      return {
-        ...result,
-        bookmarkedLessons: Array.isArray(result.bookmarkedLessons) ? result.bookmarkedLessons : []
-      };
+    // Guest / unauthenticated fallback: load only guest storage key
+    const guestData = localStorage.getItem(STORAGE_KEY);
+    if (guestData) {
+      try {
+        const parsed = JSON.parse(guestData);
+        return {
+          ...initialProgress,
+          ...parsed,
+          completedLessons: Array.isArray(parsed.completedLessons) ? parsed.completedLessons : [],
+          completedMissions: Array.isArray(parsed.completedMissions) ? parsed.completedMissions : [],
+          completedAssessments: Array.isArray(parsed.completedAssessments) ? parsed.completedAssessments : [],
+        };
+      } catch {}
     }
   } catch (e) {
     console.warn("Could not load cached progress from localStorage", e);
   }
-  return initialProgress;
+  return { ...initialProgress };
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(() => auth.currentUser);
   const [activeTab, setActiveTab] = useState<NavTab>("home");
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [activeMissionId, setActiveMissionId] = useState<string | null>(null);
@@ -409,8 +379,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const uid = firestoreUserId.current;
         if (uid) {
           localStorage.setItem(getStorageKeyForUid(uid), JSON.stringify(latestUserProgressRef.current));
+        } else {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(latestUserProgressRef.current));
         }
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(latestUserProgressRef.current));
       } catch (cacheErr) {
         console.warn('Failed local offline cache write', cacheErr);
       }
@@ -440,7 +411,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       logger.debug('ECORP:PERSISTENCE', `OFFLINE_SAFEGUARD: Progress stored locally uid=${uid}`);
       try {
         localStorage.setItem(getStorageKeyForUid(uid), JSON.stringify(progressToPersist));
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(progressToPersist));
       } catch (cacheErr) {
         console.warn("Could not cache user progress locally", cacheErr);
       }
@@ -524,7 +494,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       try {
         localStorage.setItem(getStorageKeyForUid(uid), JSON.stringify(progressToPersist));
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(progressToPersist));
       } catch (cacheErr) {
         console.warn("Could not cache user progress locally", cacheErr);
       }
@@ -630,12 +599,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // 5. Clear session activity timestamp
     clearSessionActivity();
 
-    // 6. Reset local state to cached local state (NEVER reset to zero!)
+    // 6. Reset in-memory state cleanly to isolated guest/initial state
     firestoreUserId.current = null;
     persistenceLifecycle.current = 'idle';
-    const cached = loadCachedProgress(null);
-    lastSyncedFingerprint.current = getProgressFingerprint(cached);
-    setUserProgress(cached);
+    const cleanGuestState = { ...initialProgress };
+    lastSyncedFingerprint.current = getProgressFingerprint(cleanGuestState);
+    setUserProgress(cleanGuestState);
     setPersistenceStatus('synced');
     setActiveTab("home");
   };
@@ -779,6 +748,7 @@ Provide:
     try { useEmulatorsIfDev(); } catch {}
 
     const unsubscribeAuth = firebaseOnAuthStateChanged(auth, async (user) => {
+      setUser(user);
       // Detach existing listener if user changed
       if (activeUnsubscribeRef.current) {
         activeUnsubscribeRef.current();
@@ -826,7 +796,6 @@ Provide:
           const data = readResult.data;
           const progressNested = (data.progress && typeof data.progress === 'object') ? data.progress : {};
 
-          const legacyCached = loadCachedProgress(null);
           const cachedState = loadCachedProgress(user.uid);
 
           const existingStreak = typeof data.currentStreak === 'number'
@@ -838,7 +807,6 @@ Provide:
           const maxExistingStreak = Math.max(
             existingStreak,
             cachedState.streakDays || 1,
-            legacyCached.streakDays || 1,
             1
           );
 
@@ -849,7 +817,6 @@ Provide:
             typeof progressNested.lastLoginDate === 'string' ? progressNested.lastLoginDate : null,
             typeof progressNested.lastActivityDate === 'string' ? progressNested.lastActivityDate : null,
             typeof cachedState.lastActivityDate === 'string' ? cachedState.lastActivityDate : null,
-            typeof legacyCached.lastActivityDate === 'string' ? legacyCached.lastActivityDate : null,
           ];
 
           const streakResult = evaluateUserDailyStreak({
@@ -864,20 +831,18 @@ Provide:
             ? Object.keys(data.lessons).filter(k => data.lessons[k])
             : [];
 
-          // Merge completed lessons from ALL sources so NOTHING is ever lost
+          // Merge completed lessons from this user's cloud doc and isolated local cache
           const mergedLessons = Array.from(new Set([
             ...arrayFromDoc,
             ...arrayFromNested,
             ...mapKeys,
             ...(cachedState.completedLessons || []),
-            ...(legacyCached.completedLessons || []),
           ]));
 
           const mergedMissions = Array.from(new Set([
             ...(Array.isArray(data.completedMissions) ? data.completedMissions : []),
             ...(Array.isArray(progressNested.completedMissions) ? progressNested.completedMissions : []),
             ...(cachedState.completedMissions || []),
-            ...(legacyCached.completedMissions || []),
           ]));
 
           const mergedScores = {
@@ -896,14 +861,12 @@ Provide:
             ...(Array.isArray(data.completedAssessments) ? data.completedAssessments : []),
             ...(Array.isArray(progressNested.completedAssessments) ? progressNested.completedAssessments : []),
             ...(cachedState.completedAssessments || []),
-            ...(legacyCached.completedAssessments || []),
           ]));
 
           const mergedBookmarks = Array.from(new Set([
             ...(Array.isArray(data.bookmarkedPatterns) ? data.bookmarkedPatterns : []),
             ...(Array.isArray(progressNested.bookmarkedPatterns) ? progressNested.bookmarkedPatterns : []),
             ...(cachedState.bookmarkedPatterns || []),
-            ...(legacyCached.bookmarkedPatterns || []),
           ]));
 
           const allPrompts = [
@@ -917,7 +880,6 @@ Provide:
             typeof data.xp === "number" ? data.xp : 0,
             typeof progressNested.xp === "number" ? progressNested.xp : 0,
             cachedState.xp || 0,
-            legacyCached.xp || 0,
             initialProgress.xp
           );
 
@@ -926,8 +888,7 @@ Provide:
           const promptsEngineeredCount = Math.max(
             typeof data.promptsEngineeredCount === "number" ? data.promptsEngineeredCount : 0,
             typeof progressNested?.promptsEngineeredCount === "number" ? progressNested.promptsEngineeredCount : 0,
-            cachedState.promptsEngineeredCount || 0,
-            legacyCached.promptsEngineeredCount || 0
+            cachedState.promptsEngineeredCount || 0
           );
 
           const rawLoginHistory = Array.isArray(data.loginHistory)
@@ -1007,14 +968,10 @@ Provide:
         } else {
           // PHASE 2 CASE B: SUCCESS_MISSING
           logger.info('ECORP:PERSISTENCE', `HYDRATION_MISSING uid=${user.uid}`, 'HYDRATION_MISSING');
-          const legacyCached = loadCachedProgress(null);
           const cachedState = loadCachedProgress(user.uid);
-          const initialLessons = Array.from(new Set([
-            ...(cachedState.completedLessons || []),
-            ...(legacyCached.completedLessons || []),
-          ]));
-          const initialStreak = Math.max(cachedState.streakDays || 1, legacyCached.streakDays || 1, 1);
-          const initialXP = Math.max(cachedState.xp || 0, legacyCached.xp || 0, initialProgress.xp);
+          const initialLessons = Array.isArray(cachedState.completedLessons) ? cachedState.completedLessons : [];
+          const initialStreak = Math.max(cachedState.streakDays || 1, 1);
+          const initialXP = Math.max(cachedState.xp || 0, initialProgress.xp);
           const todayUtc = getUtcDateString();
           markStreakEvaluatedToday(user.uid, todayUtc);
 
@@ -1667,7 +1624,7 @@ Provide:
     startOfWeek.setUTCDate(now.getUTCDate() - dayOfWeek);
     startOfWeek.setUTCHours(0, 0, 0, 0);
 
-    const history = Array.isArray(userProgress.loginHistory) ? userProgress.loginHistory : [getUtcDateString()];
+    const history = Array.isArray(userProgress.loginHistory) ? userProgress.loginHistory : [];
     const activeDaysThisWeek = history.filter((d) => {
       try {
         const dateObj = new Date(d + "T00:00:00Z");
@@ -1677,7 +1634,7 @@ Provide:
       }
     }).length;
 
-    const weeklyCompleted = Math.min(5, Math.max(1, activeDaysThisWeek));
+    const weeklyCompleted = Math.min(5, Math.max(0, activeDaysThisWeek));
 
     return {
       completed,
@@ -1874,6 +1831,23 @@ Provide:
     setActiveTab("playground");
   };
 
+  // Read CTF solved challenges for current user to inform adversarial-defense competency
+  const ctfSolvedState = useMemo(() => {
+    try {
+      const storageKey = user?.uid ? `ecorp_ctf_solved_${user.uid}` : "ecorp_ctf_solved_guest";
+      const legacyKey = "ecorp_ctf_solved";
+      const saved = localStorage.getItem(storageKey) || localStorage.getItem(legacyKey);
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  }, [user?.uid, userProgress.xp]);
+
+  // Pure deterministic derivation of Unified Competency Architecture states
+  const competencyStates = useMemo(() => {
+    return deriveCompetencyStates(userProgress, ctfSolvedState);
+  }, [userProgress, ctfSolvedState]);
+
   return (
     <AppContext.Provider
       value={{
@@ -1945,7 +1919,9 @@ Provide:
         setLanguage,
         t,
         currentCurriculum,
-        loadIntoPlayground
+        loadIntoPlayground,
+        user,
+        competencyStates
       }}
     >
       {children}

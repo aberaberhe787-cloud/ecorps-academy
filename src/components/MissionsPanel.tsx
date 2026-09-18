@@ -9,11 +9,13 @@ import {
   Sparkles,
   Target,
   Award,
-  AlertCircle
+  AlertCircle,
+  Shield
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { missions } from "../data/missionsData";
 import { Mission } from "../types";
+import { getCompetencyForMission } from "../lib/competencyModel";
 
 export const MissionsPanel: React.FC = () => {
   const {
@@ -132,11 +134,20 @@ export const MissionsPanel: React.FC = () => {
         {/* Header */}
         <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-800 pb-4">
           <div>
-            <div className="flex items-center gap-2.5">
+            <div className="flex flex-wrap items-center gap-2">
               <span className={`rounded-md border px-2.5 py-0.5 text-xs font-semibold ${getDifficultyColor(selectedMission.difficulty)}`}>
                 {selectedMission.difficulty}
               </span>
               <span className="text-xs text-slate-400 font-medium">{selectedMission.category}</span>
+              {(() => {
+                const comp = getCompetencyForMission(selectedMission.id);
+                return comp ? (
+                  <span className="inline-flex items-center gap-1 rounded bg-purple-950/60 border border-purple-800/70 px-2 py-0.5 text-[11px] font-mono text-purple-300 font-medium">
+                    <Shield className="h-3 w-3 text-purple-400" />
+                    Target Competency: {comp.title}
+                  </span>
+                ) : null;
+              })()}
               {isCompleted && (
                 <span className="flex items-center gap-1 rounded-md bg-emerald-950/70 border border-emerald-700/60 px-2 py-0.5 text-xs font-semibold text-emerald-300">
                   <Trophy className="h-3 w-3 text-emerald-400" /> Completed (Best: {bestScore}%)

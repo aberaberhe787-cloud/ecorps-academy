@@ -33,7 +33,10 @@ export const PromptQualityMeter: React.FC<PromptQualityMeterProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-blue-400 shrink-0" />
-          <h3 className="text-xs sm:text-sm font-semibold text-slate-200">Real-Time Prompt Quality Score</h3>
+          <div>
+            <h3 className="text-xs sm:text-sm font-semibold text-slate-200">Diagnostic Heuristic Analysis</h3>
+            <p className="text-[10px] text-slate-500 font-mono">Structural heuristic estimate — not model performance evaluation</p>
+          </div>
         </div>
         <div className="flex items-center justify-between sm:justify-end gap-2">
           <span className="text-xs sm:text-xs text-slate-400 font-mono">
@@ -45,7 +48,7 @@ export const PromptQualityMeter: React.FC<PromptQualityMeterProps> = ({
               analysis.score
             )}`}
           >
-            Grade: {analysis.grade} ({analysis.score}/100)
+            Diagnostic: {analysis.score}/100 ({analysis.grade})
           </div>
         </div>
       </div>

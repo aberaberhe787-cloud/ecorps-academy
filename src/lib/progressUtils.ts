@@ -9,7 +9,6 @@ export const saveProgress = async (progress: UserProgress) => {
   // Always cache locally first to guarantee no data loss even if connection dropped
   try {
     localStorage.setItem(`ecorp_user_progress_${user.uid}`, JSON.stringify(progress));
-    localStorage.setItem('ecorp_user_progress', JSON.stringify(progress));
   } catch (e) {
     console.warn('[progressUtils] Failed local cache write', e);
   }

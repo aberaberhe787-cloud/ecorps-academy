@@ -49,12 +49,19 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
   const rules = challenge.validationRule;
 
   // Real-time criteria checker
+  const isModified = challenge.brokenPrompt ? userPrompt.trim() !== challenge.brokenPrompt.trim() : true;
+  const noForbidden = rules?.forbiddenKeywords?.length
+    ? !rules.forbiddenKeywords.some((kw) => userPrompt.toLowerCase().includes(kw.toLowerCase()))
+    : true;
+
   const criteriaStatus = {
+    modified: isModified,
     keywords: rules?.requiredKeywords?.length
       ? rules.requiredKeywords.every((kw) =>
           userPrompt.toLowerCase().includes(kw.toLowerCase())
         )
       : true,
+    forbidden: noForbidden,
     delimiters: rules?.requiresDelimiters
       ? analysis.detectedFeatures.hasDelimiters
       : true,
@@ -71,7 +78,9 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
   };
 
   const allCriteriaMet =
+    criteriaStatus.modified &&
     criteriaStatus.keywords &&
+    criteriaStatus.forbidden &&
     criteriaStatus.delimiters &&
     criteriaStatus.cot &&
     criteriaStatus.json &&
@@ -84,6 +93,15 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
 
     const errors: string[] = [];
 
+    if (challenge.brokenPrompt && userPrompt.trim() === challenge.brokenPrompt.trim()) {
+      errors.push("Prompt has not been modified from the broken starter template. Apply the required prompting techniques to fix it.");
+    }
+
+    const wordCount = userPrompt.trim().split(/\s+/).filter(Boolean).length;
+    if (wordCount < 4) {
+      errors.push("Prompt is too short to express a complete instruction. Provide a well-formed prompt.");
+    }
+
     if (rules) {
       if (rules.requiredKeywords && rules.requiredKeywords.length > 0) {
         const missing = rules.requiredKeywords.filter(
@@ -92,6 +110,17 @@ export const SandboxChallenge: React.FC<SandboxChallengeProps> = ({
         if (missing.length > 0) {
           errors.push(
             `Missing critical technique keyword(s): "${missing.join('", "')}"`
+          );
+        }
+      }
+
+      if (rules.forbiddenKeywords && rules.forbiddenKeywords.length > 0) {
+        const foundForbidden = rules.forbiddenKeywords.filter(
+          (kw) => userPrompt.toLowerCase().includes(kw.toLowerCase())
+        );
+        if (foundForbidden.length > 0) {
+          errors.push(
+            `Prompt contains forbidden pattern(s): "${foundForbidden.join('", "')}"`
           );
         }
       }

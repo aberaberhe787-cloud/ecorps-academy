@@ -15,6 +15,7 @@ export const promptPatterns: PromptPattern[] = [
       "Automated Regression Testing",
       "Minimal Patch Constraints"
     ],
+    competencies: ["cognitive-reasoning", "context-engineering"],
     learningObjective:
       "Learn how to decompose an ambiguous code failure into root-cause hypothesis generation, minimal surgical remediation, and automated regression verification rather than blindly rewriting functional code.",
     whenToUse: [
@@ -61,7 +62,7 @@ export const promptPatterns: PromptPattern[] = [
         name: "Regression Test Verification",
         technique: "Output Verification",
         explanation: "Demands an automated unit test reproducing the exact failure using the developer's test framework.",
-        purpose: "Guarantees test-driven repeatability and prevents future regressions in CI/CD pipelines."
+        purpose: "Provides an automated reproduction test to verify the fix and protect against regressions in CI/CD pipelines."
       }
     ],
     weakExample: {
@@ -182,6 +183,7 @@ it('returns empty array when users.data is undefined', async () => {
       "Grounded Diffs",
       "Rubric Evaluation"
     ],
+    competencies: ["structured-output", "context-engineering"],
     learningObjective:
       "Learn how to constrain a code review prompt with an explicit severity taxonomy (Critical, Performance, Clean Code, Highlights) and mandate concrete line-level diffs to eliminate vague or subjective feedback.",
     whenToUse: [
@@ -328,6 +330,7 @@ Format every issue with:
       "Negative Constraints",
       "Structured Output Schemas"
     ],
+    competencies: ["role-persona-design", "evaluation-orchestration"],
     learningObjective:
       "Learn how to apply strict length budgets, role framing, and fixed output sections to compress detailed technical narratives into decisive executive decision memos.",
     whenToUse: [
@@ -362,7 +365,7 @@ Format every issue with:
         name: "Fixed 4-Part Memo Schema",
         technique: "Structured Output Schema",
         explanation: "Mandates TL;DR, Key Metrics, Strategic Implications, and Action Items.",
-        purpose: "Guarantees high-density readability in under 60 seconds for executive decision-makers."
+        purpose: "Provides high-density readability formatted for rapid comprehension by executive decision-makers."
       },
       {
         name: "Word Budget & Tone Constraints",
@@ -428,7 +431,7 @@ Constraints:
     ],
     whyItWorks: [
       "Separates high-level decision factors from operational minutiae.",
-      "Enforces a strict 2-sentence TL;DR to guarantee immediate executive comprehension."
+      "Enforces a strict 2-sentence TL;DR to prioritize immediate executive clarity."
     ],
     sampleOutput: `### Executive Briefing Memo
 
@@ -462,6 +465,7 @@ Q2 cloud infrastructure spend surged 45% ($174k/mo) due to unoptimized vector qu
       "A/B Variant Generation",
       "Friction Reduction Constraints"
     ],
+    competencies: ["role-persona-design", "prompt-foundations"],
     learningObjective:
       "Learn how to structure persuasive copy using an established cognitive framework (Problem-Agitate-Solve) combined with negative constraints that eliminate conversational fluff and high-friction calendar requests.",
     whenToUse: [
@@ -538,9 +542,9 @@ Rules for both variants:
         "Capped length at 80 words and strictly forbade high-friction calendar requests."
       ],
       explanation:
-        "Banning high-commitment meeting asks and enforcing under-80-word PAS structures transforms spam into a polite, relevant peer inquiry that converts significantly higher."
+        "Banning high-commitment meeting asks and enforcing under-80-word PAS structures transforms spam into a polite, relevant peer inquiry that respects recipient time and reduces friction for higher response potential."
     },
-    description: "Generates high-converting cold outreach using the Problem-Agitation-Solution (PAS) framework with hyper-personalized hooks.",
+    description: "Generates concise, low-friction cold outreach using the Problem-Agitate-Solve (PAS) framework with targeted hooks.",
     template: `Act as an enterprise B2B Sales Development Representative specializing in concise, problem-focused email outreach.
 
 Prospect Information:
@@ -607,6 +611,7 @@ Worth sending over the architectural benchmark?`,
       "Quantitative Rubrics",
       "Countermeasure Pairing"
     ],
+    competencies: ["structured-output", "cognitive-reasoning"],
     learningObjective:
       "Learn how to guide an LLM through established strategic analysis frameworks (SWOT + Economic Moats) by enforcing structured table syntax and countermeasure pairings to prevent hand-waving generalities.",
     whenToUse: [
@@ -746,6 +751,7 @@ Linear has captured mindshare among top-tier developer startups by offering an o
       "Causal Chain Decomposition",
       "Prioritized Action Matrix"
     ],
+    competencies: ["cognitive-reasoning"],
     learningObjective:
       "Learn how to enforce causal reasoning chaining (5-Whys) that systematically traces surface technical symptoms down to organizational and infrastructure architectural root causes, paired with prioritized preventative action tables.",
     whenToUse: [
@@ -820,7 +826,7 @@ Execute a comprehensive 5-Whys Systemic Analysis:
       explanation:
         "The recursive 5-Whys chaining forces the model to uncover cascading vulnerabilities (like connection pool storms and lax alert thresholds) rather than settling on trivial surface explanations."
     },
-    description: "Conducts an blameless post-mortem using the 5-Whys methodology to identify systemic organizational and architectural vulnerabilities.",
+    description: "Conducts a blameless post-mortem using the 5-Whys methodology to identify systemic organizational and architectural vulnerabilities.",
     template: `Act as a Principal Site Reliability Engineer (SRE) leading a blameless post-mortem investigation.
 
 Incident Context:
