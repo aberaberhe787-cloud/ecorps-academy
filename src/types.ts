@@ -401,7 +401,12 @@ export type EvidenceType =
   | "pattern_practice"
   | "mission_completed"
   | "ctf_completed"
-  | "assessment_passed";
+  | "assessment_passed"
+  | "validated_prompt"
+  | "prompt_comparison"
+  | "batch_evaluation"
+  | "experiment_completed"
+  | "regression_detected";
 
 export interface CompetencyEvidence {
   id: string;

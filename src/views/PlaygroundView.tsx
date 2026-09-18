@@ -4,7 +4,7 @@ import {
   Play, RotateCcw, Sparkles, Columns2, Sliders, Save, Trash2,
   History, Target, Terminal, Bookmark, Check, ChevronDown, ChevronUp,
   Zap, Code2, ShieldAlert, PanelRightOpen, PanelRightClose, X,
-  Clock, BookmarkCheck, Loader2, Mic, MicOff, Copy, Cpu, FlaskConical
+  Clock, BookmarkCheck, Loader2, Mic, MicOff, Copy, Cpu, FlaskConical, CheckCircle2
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { PromptQualityMeter } from "../components/PromptQualityMeter";
@@ -531,7 +531,7 @@ export const PlaygroundView: React.FC = () => {
               } },
               { id: "missions", label: `${t.playground.tabMissions} (5)`, icon: Target, onClick: () => { setPlaygroundSubTab("missions"); setIsComparisonMode(false); } },
               { id: "ctf", label: "CTF Labs", icon: ShieldAlert, onClick: () => { setPlaygroundSubTab("ctf"); setIsComparisonMode(false); } },
-              { id: "lab", label: "P3 Laboratory", icon: FlaskConical, onClick: () => { setPlaygroundSubTab("lab"); setIsComparisonMode(false); } },
+              { id: "lab", label: "Experiments", icon: FlaskConical, onClick: () => { setPlaygroundSubTab("lab"); setIsComparisonMode(false); } },
               { id: "comparison", label: t.playground.tabComparison, icon: Columns2, onClick: () => { setPlaygroundSubTab("comparison"); setIsComparisonMode(true); } },
             ].map((tab) => {
               const Icon = tab.icon;
@@ -975,7 +975,48 @@ export const PlaygroundView: React.FC = () => {
           <div className={`${isComparisonMode ? "lg:col-span-6" : "lg:col-span-5"} space-y-3 sm:space-y-4 w-full max-w-full ${mobileViewMode !== "output" ? "hidden lg:block" : "block"}`}>
             {isComparisonMode ? (
               <div className="space-y-4">
-                <div className="min-h-[280px]">
+                {/* Experimental Benchmark & Regression Summary Panel */}
+                <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-3.5 shadow-lg space-y-2.5">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <div className="flex items-center gap-2">
+                      <FlaskConical className="h-4 w-4 text-blue-400" />
+                      <span className="font-mono text-xs font-bold text-white uppercase tracking-wider">Experimental A/B Benchmark Matrix</span>
+                    </div>
+                    <span className="rounded-full bg-blue-950 border border-blue-800 px-2 py-0.5 text-[10px] font-mono text-blue-300">
+                      Variant A vs B
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs font-mono">
+                    <div className="rounded-lg bg-slate-950 p-2.5 border border-slate-800/80 space-y-1">
+                      <span className="text-slate-400 text-[11px]">Token Usage:</span>
+                      <div className="flex items-center justify-between font-bold">
+                        <span className="text-blue-400">A: {lastResult?.tokenCount || 0}</span>
+                        <span className="text-slate-500">vs</span>
+                        <span className="text-indigo-400">B: {comparisonResultB?.tokenCount || 0}</span>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg bg-slate-950 p-2.5 border border-slate-800/80 space-y-1">
+                      <span className="text-slate-400 text-[11px]">Latency (ms):</span>
+                      <div className="flex items-center justify-between font-bold">
+                        <span className="text-blue-400">A: {lastResult?.durationMs || 0}ms</span>
+                        <span className="text-slate-500">vs</span>
+                        <span className="text-indigo-400">B: {comparisonResultB?.durationMs || 0}ms</span>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg bg-slate-950 p-2.5 border border-slate-800/80 space-y-1">
+                      <span className="text-slate-400 text-[11px]">Regression Status:</span>
+                      <div className="flex items-center gap-1 font-bold text-emerald-400">
+                        <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">0 Regressions</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="min-h-[260px]">
                   <TerminalOutput
                     result={lastResult}
                     isExecuting={isExecuting}

@@ -34,7 +34,9 @@ export interface CompetencyEvidence {
     | "assessment_passed"
     | "validated_prompt"
     | "prompt_comparison"
-    | "batch_evaluation";
+    | "batch_evaluation"
+    | "experiment_completed"
+    | "regression_detected";
   sourceId: string;
   title: string;
   timestamp: number;

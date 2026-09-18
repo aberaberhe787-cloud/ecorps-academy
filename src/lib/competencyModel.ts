@@ -580,7 +580,38 @@ export function deriveCompetencyStates(
     }
   });
 
-  // 5. Build final CompetencyState array
+  // 5. Experiments -> Evaluation & Adversarial Defense evidence
+  const experiments = progress.experiments || [];
+  experiments.forEach((exp) => {
+    if (exp.baselineResults || (exp.variants && exp.variants.some((v) => v.results))) {
+      addEvidence("evaluation-orchestration", {
+        id: `ev_exp_${exp.id}`,
+        type: "experiment_completed",
+        sourceId: exp.id,
+        title: exp.title,
+        timestamp: exp.updatedAt || exp.createdAt || Date.now(),
+        weight: "demonstration",
+        summary: `Executed prompt mutation experiment suite: ${exp.title}`,
+      });
+
+      const hasRegression = exp.variants.some(
+        (v) => v.results && ((v.results.regressionsCount || 0) > 0 || v.results.status === "Regressed")
+      );
+      if (hasRegression) {
+        addEvidence("adversarial-defense", {
+          id: `ev_reg_${exp.id}`,
+          type: "regression_detected",
+          sourceId: exp.id,
+          title: `Regression Analysis: ${exp.title}`,
+          timestamp: exp.updatedAt || exp.createdAt || Date.now(),
+          weight: "demonstration",
+          summary: `Identified and isolated test-suite regression in prompt mutation variant for: ${exp.title}`,
+        });
+      }
+    }
+  });
+
+  // 6. Build final CompetencyState array
   return COMPETENCIES.map((comp) => {
     const evidence = evidenceMap[comp.id] || [];
     const { level, explanation, nextMilestone } = calculateCompetencyLevel(comp, evidence);

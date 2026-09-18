@@ -24,10 +24,12 @@ import {
   Check,
   RefreshCw,
   Layers,
-  Award
+  Award,
+  ListTree
 } from "lucide-react";
 import { useApp } from "../../context/AppContext";
 import { PromptExperiment, PromptVariant, TestCase, TestCaseExpectationType, VariantResult } from "../../types";
+import { BatchRunner } from "../BatchRunner";
 
 const STARTER_EXPERIMENTS: Omit<PromptExperiment, "id" | "createdAt" | "updatedAt">[] = [
   {
@@ -108,7 +110,7 @@ export const AdvancedPromptLab: React.FC = () => {
   });
 
   const [activeExpId, setActiveExpId] = useState<string>(experiments[0]?.id || "");
-  const [activeTab, setActiveTab] = useState<"baseline" | "variants" | "runner" | "comparison">("baseline");
+  const [activeTab, setActiveTab] = useState<"baseline" | "variants" | "runner" | "comparison" | "batch">("baseline");
   const [isExecutingRun, setIsExecutingRun] = useState<boolean>(false);
   const [executionProgress, setExecutionProgress] = useState<string>("");
 
@@ -551,11 +553,42 @@ export const AdvancedPromptLab: React.FC = () => {
                   <GitCompare className="h-4 w-4" /> Trade-off & Regression
                 </span>
               </button>
+
+              <button
+                onClick={() => setActiveTab("batch")}
+                className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all ${
+                  activeTab === "batch" ? "bg-blue-600 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <ListTree className="h-4 w-4" /> Batch Runner Suite
+                </span>
+              </button>
             </div>
           </div>
 
           {/* Right Column: Active Tab Content */}
           <div className="lg:col-span-3 space-y-6">
+            {/* TAB: BATCH RUNNER SUITE */}
+            {activeTab === "batch" && (
+              <div className="space-y-6">
+                <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-5 space-y-4 shadow-xl">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div>
+                      <h2 className="text-base font-bold text-white flex items-center gap-2">
+                        <ListTree className="h-4 w-4 text-emerald-400" />
+                        Batch Runner Architecture Integration
+                      </h2>
+                      <p className="text-xs text-slate-400">Execute dynamic variable batches across prompt baseline templates.</p>
+                    </div>
+                  </div>
+                  <BatchRunner
+                    promptTemplate={activeExperiment.baselinePrompt}
+                    systemInstruction={activeExperiment.baselineSystemInstruction || ""}
+                  />
+                </div>
+              </div>
+            )}
             {/* TAB 1: BASELINE & TEST SUITE */}
             {activeTab === "baseline" && (
               <div className="space-y-6">
