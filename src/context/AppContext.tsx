@@ -66,9 +66,9 @@ interface AppContextType {
   setActiveLessonId: (id: string | null) => void;
   activeMissionId: string | null;
   setActiveMissionId: (id: string | null) => void;
-  playgroundSubTab: "sandbox" | "missions" | "comparison" | "history" | "saved" | "ctf";
-  setPlaygroundSubTab: (tab: "sandbox" | "missions" | "comparison" | "history" | "saved" | "ctf") => void;
-  openSandbox: (subTab?: "sandbox" | "missions" | "comparison" | "history" | "saved" | "ctf") => void;
+  playgroundSubTab: "sandbox" | "missions" | "comparison" | "history" | "saved" | "ctf" | "lab";
+  setPlaygroundSubTab: (tab: "sandbox" | "missions" | "comparison" | "history" | "saved" | "ctf" | "lab") => void;
+  openSandbox: (subTab?: "sandbox" | "missions" | "comparison" | "history" | "saved" | "ctf" | "lab") => void;
 
   // Language & Translation
   language: Language;
@@ -116,6 +116,7 @@ interface AppContextType {
 
   // User Progress
   userProgress: UserProgress;
+  setUserProgress: React.Dispatch<React.SetStateAction<UserProgress>>;
   progressModel: ProgressModel;
   curriculumProgressPercent: number;
   resumeCurriculum: () => string | null;
@@ -290,7 +291,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeTab, setActiveTab] = useState<NavTab>("home");
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [activeMissionId, setActiveMissionId] = useState<string | null>(null);
-  const [playgroundSubTab, setPlaygroundSubTab] = useState<"sandbox" | "missions" | "comparison" | "history" | "saved" | "ctf">("sandbox");
+  const [playgroundSubTab, setPlaygroundSubTab] = useState<"sandbox" | "missions" | "comparison" | "history" | "saved" | "ctf" | "lab">("sandbox");
   
   // Persistent user preferences layer (theme, distraction-free mode, language, AI mode, sampling)
   const initialPrefsRef = useRef<UserPreferences>(loadUserPreferences());
@@ -724,7 +725,7 @@ Provide:
   const currentCurriculum = language === "am" ? amharicCurriculumModules : curriculumModules;
 
   // Helper to directly open the sandbox view
-  const openSandbox = (subTab: "sandbox" | "missions" | "comparison" | "history" | "saved" | "ctf" = "sandbox") => {
+  const openSandbox = (subTab: "sandbox" | "missions" | "comparison" | "history" | "saved" | "ctf" | "lab" = "sandbox") => {
     setActiveTab("playground");
     setPlaygroundSubTab(subTab);
     if (subTab === "sandbox") {
@@ -1889,6 +1890,7 @@ Provide:
         setTheme,
         isDarkMode,
         userProgress,
+        setUserProgress,
         progressModel,
         curriculumProgressPercent,
         resumeCurriculum,

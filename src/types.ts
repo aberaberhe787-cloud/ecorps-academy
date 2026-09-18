@@ -305,6 +305,7 @@ export interface UserProgress {
   lastModuleId?: string;
   curriculumProgressPercent?: number;
   promptsEngineeredCount?: number;
+  experiments?: PromptExperiment[];
 }
 
 export interface GlossaryTerm {
@@ -436,5 +437,50 @@ export interface CompetencyState {
   explanation: string;
   nextMilestone: string;
 }
+
+export type TestCaseExpectationType = "exact" | "json" | "contains" | "no_forbidden";
+
+export interface TestCase {
+  id: string;
+  input: string;
+  expectedType: TestCaseExpectationType;
+  expectedValue?: string;
+  requiredKeywords?: string[];
+  forbiddenKeywords?: string[];
+}
+
+export interface VariantResult {
+  testResults: { testCaseId: string; passed: boolean; details: string }[];
+  passedCount: number;
+  totalCount: number;
+  regressionsCount: number;
+  outputSample?: string;
+  tokenCount?: number;
+  status: "Passed" | "Improved" | "Regressed" | "Mixed" | "Needs Review" | "Draft";
+}
+
+export interface PromptVariant {
+  id: string;
+  name: string;
+  prompt: string;
+  systemInstruction?: string;
+  mutationRationale: string;
+  hypothesis: string;
+  results?: VariantResult;
+}
+
+export interface PromptExperiment {
+  id: string;
+  title: string;
+  description: string;
+  baselinePrompt: string;
+  baselineSystemInstruction?: string;
+  baselineResults?: VariantResult;
+  variants: PromptVariant[];
+  testCases: TestCase[];
+  createdAt: number;
+  updatedAt: number;
+}
+
 
 

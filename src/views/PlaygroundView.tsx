@@ -4,7 +4,7 @@ import {
   Play, RotateCcw, Sparkles, Columns2, Sliders, Save, Trash2,
   History, Target, Terminal, Bookmark, Check, ChevronDown, ChevronUp,
   Zap, Code2, ShieldAlert, PanelRightOpen, PanelRightClose, X,
-  Clock, BookmarkCheck, Loader2, Mic, MicOff, Copy, Cpu
+  Clock, BookmarkCheck, Loader2, Mic, MicOff, Copy, Cpu, FlaskConical
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { PromptQualityMeter } from "../components/PromptQualityMeter";
@@ -15,6 +15,7 @@ import { TokenVisualizer } from "../components/TokenVisualizer";
 import { BatchRunner } from "../components/BatchRunner";
 import { JsonValidator } from "../components/JsonValidator";
 import { CtfSimulator } from "../components/CtfSimulator";
+import { AdvancedPromptLab } from "../components/laboratory/AdvancedPromptLab";
 import { Tooltip } from "../components/Tooltip";
 import { SaveCodeSnippetModal } from "../components/playground/SaveCodeSnippetModal";
 import { SavedCodeSnippet } from "../types";
@@ -530,6 +531,7 @@ export const PlaygroundView: React.FC = () => {
               } },
               { id: "missions", label: `${t.playground.tabMissions} (5)`, icon: Target, onClick: () => { setPlaygroundSubTab("missions"); setIsComparisonMode(false); } },
               { id: "ctf", label: "CTF Labs", icon: ShieldAlert, onClick: () => { setPlaygroundSubTab("ctf"); setIsComparisonMode(false); } },
+              { id: "lab", label: "P3 Laboratory", icon: FlaskConical, onClick: () => { setPlaygroundSubTab("lab"); setIsComparisonMode(false); } },
               { id: "comparison", label: t.playground.tabComparison, icon: Columns2, onClick: () => { setPlaygroundSubTab("comparison"); setIsComparisonMode(true); } },
             ].map((tab) => {
               const Icon = tab.icon;
@@ -600,6 +602,9 @@ export const PlaygroundView: React.FC = () => {
 
           {/* CTF Tab */}
           {playgroundSubTab === "ctf" && <CtfSimulator />}
+
+          {/* P3 Laboratory Tab */}
+          {playgroundSubTab === "lab" && <AdvancedPromptLab />}
 
           {/* Main Dual Pane (Sandbox + Comparison) */}
           {(playgroundSubTab === "sandbox" || playgroundSubTab === "comparison") && (
