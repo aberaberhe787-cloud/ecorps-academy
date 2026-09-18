@@ -9,6 +9,7 @@ import {
   RotateCcw,
   Info,
   ShieldCheck,
+  Shield,
   Zap,
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
