@@ -370,6 +370,56 @@ export const ASSESSMENT_COMPETENCY_REGISTRY: Record<string, SourceMetadata> = {
 };
 
 /**
+ * Deterministically maps completed lesson identifiers (from PromptEngineeringPath and curriculum)
+ * to competency evidence objects with exposure weight.
+ */
+export function mapLessonCompletionToEvidence(completedLessons: string[]): CompetencyEvidence[] {
+  const evidenceList: CompetencyEvidence[] = [];
+  const seenIds = new Set<string>();
+
+  completedLessons.forEach((lessonId) => {
+    const meta = LESSON_COMPETENCY_REGISTRY[lessonId];
+    if (meta) {
+      const primaryId = `ev_lesson_${lessonId}`;
+      if (!seenIds.has(primaryId)) {
+        seenIds.add(primaryId);
+        evidenceList.push({
+          id: primaryId,
+          competencyId: meta.primaryCompetency,
+          type: "lesson_completed",
+          sourceId: lessonId,
+          title: meta.title,
+          timestamp: Date.now(),
+          weight: "exposure",
+          summary: `Completed curriculum lesson: ${meta.title}`,
+        });
+      }
+
+      if (meta.secondaryCompetencies) {
+        meta.secondaryCompetencies.forEach((secComp) => {
+          const secId = `ev_lesson_sec_${lessonId}_${secComp}`;
+          if (!seenIds.has(secId)) {
+            seenIds.add(secId);
+            evidenceList.push({
+              id: secId,
+              competencyId: secComp,
+              type: "lesson_completed",
+              sourceId: lessonId,
+              title: meta.title,
+              timestamp: Date.now(),
+              weight: "exposure",
+              summary: `Completed curriculum lesson: ${meta.title}`,
+            });
+          }
+        });
+      }
+    }
+  });
+
+  return evidenceList;
+}
+
+/**
  * Deterministic mastery calculation:
  * - Mastered: Evidence includes authoritative assessment OR (at least 2 demonstrations AND at least 1 practice)
  * - Proficient: Evidence includes at least 1 demonstration
