@@ -187,8 +187,8 @@ const initialProgress: UserProgress = {
   bookmarkedLessons: [],
   savedCustomPrompts: [],
   savedCodeSnippets: [],
-  xp: 120, // Initial welcome XP
-  streakDays: 1,
+  xp: 0,
+  streakDays: 0,
   lastActivityDate: getUtcDateString(),
   loginHistory: [getUtcDateString()],
   achievements: [],
