@@ -1602,10 +1602,13 @@ Provide:
     const allCurriculumLessons = currentCurriculum.flatMap((m) => m.lessons);
     const completedIds = userProgress.completedLessons || [];
 
-    const foundationsTotal = FOUNDATION_LESSONS.length;
-    const foundationsCompleted = FOUNDATION_LESSONS.filter((l) => completedIds.includes(l.id)).length;
+    // Module 00 lessons (Core Prompt Foundations)
+    const foundationModuleLessons = currentCurriculum[0]?.lessons || [];
+    const foundationsTotal = foundationModuleLessons.length;
+    const foundationsCompleted = foundationModuleLessons.filter((l) => completedIds.includes(l.id)).length;
     const foundationsPercentage = foundationsTotal > 0 ? Math.round((foundationsCompleted / foundationsTotal) * 100) : 0;
 
+    // Authoritative Unified Curriculum
     const curriculumTotal = allCurriculumLessons.length;
     const curriculumCompleted = allCurriculumLessons.filter((l) => completedIds.includes(l.id)).length;
     const curriculumPercentage = curriculumTotal > 0 ? Math.round((curriculumCompleted / curriculumTotal) * 100) : 0;
@@ -1614,8 +1617,8 @@ Provide:
     const missionsCompleted = (userProgress.completedMissions || []).length;
     const missionsPercentage = missionsTotal > 0 ? Math.round((missionsCompleted / missionsTotal) * 100) : 0;
 
-    const total = foundationsTotal + curriculumTotal;
-    const completed = foundationsCompleted + curriculumCompleted;
+    const total = curriculumTotal;
+    const completed = curriculumCompleted;
     const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
     // Truthful weekly active day count

@@ -42,23 +42,29 @@ export const HomeView: React.FC = () => {
   const completedLessonIds = userProgress.completedLessons || [];
   const allCurriculumLessons: Lesson[] = currentCurriculum.flatMap((m) => m.lessons);
 
-  // Determine current active or next target lesson
-  const nextFoundation = FOUNDATION_LESSONS.find(
+  // Determine current active or next target lesson in the unified sequence
+  const nextCurriculumLesson = allCurriculumLessons.find(
     (l) => !completedLessonIds.includes(l.id)
   );
 
-  const nextCurriculumLesson = allCurriculumLessons.find(
-    (l) => !completedLessonIds.includes(l.id)
-  ) || allCurriculumLessons[0];
+  // Resume lesson priority: if user has a valid lastLessonId, resume there; otherwise pick next incomplete
+  const activeResumeLesson = (() => {
+    if (userProgress.lastLessonId) {
+      const found = allCurriculumLessons.find((l) => l.id === userProgress.lastLessonId);
+      if (found && !completedLessonIds.includes(found.id)) {
+        return found;
+      }
+    }
+    return nextCurriculumLesson || null;
+  })();
 
   // Dynamic continue lesson calculation
   const lessonNumberDisplay = (() => {
-    if (userProgress.lastLessonId) {
-      const idx = allCurriculumLessons.findIndex((l) => l.id === userProgress.lastLessonId);
+    if (activeResumeLesson) {
+      const idx = allCurriculumLessons.findIndex((l) => l.id === activeResumeLesson.id);
       if (idx !== -1) return `Lesson ${String(idx + 1).padStart(2, "0")}`;
     }
-    const idx = allCurriculumLessons.findIndex((l) => l.id === nextCurriculumLesson?.id);
-    return idx !== -1 ? `Lesson ${String(idx + 1).padStart(2, "0")}` : "Lesson 01";
+    return "Lesson 01";
   })();
 
   // Calculate percentage complete truthfully from actual learner state
@@ -76,35 +82,21 @@ export const HomeView: React.FC = () => {
     onAction: () => void;
   };
 
-  if (nextFoundation && completedLessonIds.length < 2) {
-    const fIdx = FOUNDATION_LESSONS.findIndex((l) => l.id === nextFoundation.id);
-    const fTag = fIdx !== -1 ? `Lesson ${String(fIdx + 1).padStart(2, "0")}` : "Lesson 01";
-    continueTarget = {
-      track: "Foundations Track",
-      lessonTag: fTag,
-      title: nextFoundation.title,
-      subtitle: nextFoundation.summary,
-      duration: "5 min",
-      xp: 50,
-      completionPercent: continuePercentage,
-      actionLabel: completedLessonIds.length === 0 ? "Start Learning →" : "Continue →",
-      onAction: () => setActiveTab("foundations"),
-    };
-  } else if (nextCurriculumLesson) {
+  if (activeResumeLesson) {
     const parentModule = currentCurriculum.find((m) =>
-      m.lessons.some((l) => l.id === nextCurriculumLesson.id)
+      m.lessons.some((l) => l.id === activeResumeLesson.id)
     );
     continueTarget = {
       track: parentModule?.code ? `${parentModule.code} · ${parentModule.title}` : "Curriculum Track",
       lessonTag: lessonNumberDisplay,
-      title: nextCurriculumLesson.title,
-      subtitle: nextCurriculumLesson.conceptSummary || nextCurriculumLesson.subtitle || "Master core prompt conditioning, causal reasoning, and structured outputs.",
-      duration: `${nextCurriculumLesson.estimatedMinutes || 8} min`,
-      xp: nextCurriculumLesson.xpReward || 50,
+      title: activeResumeLesson.title,
+      subtitle: activeResumeLesson.conceptSummary || activeResumeLesson.subtitle || "Master core prompt conditioning, causal reasoning, and structured outputs.",
+      duration: `${activeResumeLesson.estimatedMinutes || 5} min`,
+      xp: activeResumeLesson.xpReward || 50,
       completionPercent: continuePercentage,
-      actionLabel: "Continue →",
+      actionLabel: completedLessonIds.length === 0 ? "Start Learning →" : "Continue →",
       onAction: () => {
-        setActiveLessonId(nextCurriculumLesson.id);
+        setActiveLessonId(activeResumeLesson.id);
         setActiveTab("curriculum");
       },
     };

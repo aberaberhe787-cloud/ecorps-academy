@@ -1,6 +1,478 @@
-import { CurriculumModule } from "../types";
+import { CurriculumModule, Lesson } from "../types";
 
 export const curriculumModules: CurriculumModule[] = [
+  {
+    id: "module-0",
+    code: "FOUND-001",
+    title: "Module 0: Core Prompt Foundations",
+    level: "Foundations",
+    academicTrack: "Prompt Engineering Core Principles",
+    description:
+      "Master the fundamental empirical pillars of prompt construction: clarity and specificity, explicit role assignment, structured constraints, iterative refinement, and trusted context injection.",
+    badge: "Foundations",
+    iconName: "Target",
+    estimatedTotalHours: 0.8,
+    lessons: [
+      {
+        id: "foundation-clarity",
+        moduleId: "module-0",
+        moduleTitle: "Core Prompt Foundations",
+        title: "Clarity & Specificity",
+        subtitle: "Replace vague goals with an explicit task, audience, and success criteria",
+        objective:
+          "Formulate clear, unambiguous instructions that eliminate semantic entropy by specifying the exact task, target audience, and output criteria.",
+        estimatedMinutes: 5,
+        difficulty: "Beginner",
+        bloomTaxonomyFocus: "Applying",
+        xpReward: 50,
+        conceptSummary:
+          "Vague prompts produce generic, ungrounded completions because large language models must infer missing goals. Supplying an explicit task, target audience, and concrete success criteria directs the model toward precise, deterministic outputs.",
+        deepDive: [
+          "Eliminate ambiguity: Avoid open-ended verbs like 'write about' or 'tell me'. Use concrete actions like 'summarize in 5 bullets', 'compare in a table', or 'synthesize key takeaways'.",
+          "Audience framing: Specifying who the output is for (e.g., 'for a CFO', 'for a junior engineer') guides lexical density and technical depth.",
+          "Measurable criteria: Define constraints such as bullet count, tone, and specific data points to highlight."
+        ],
+        keyRules: [
+          "Always state the primary objective in the very first sentence.",
+          "Specify the exact target audience to calibrate depth and tone.",
+          "Define measurable constraints (bullet counts, length, required highlights)."
+        ],
+        concepts: [
+          {
+            id: "f-clarity-c1",
+            title: "The Specificity Principle",
+            bloomLevel: "Understanding",
+            type: "theory",
+            readMinutes: 2,
+            academicCitation: "Brown et al., 2020 (Language Models are Few-Shot Learners)",
+            content: `Large language models predict the next most probable tokens based on context. When a prompt is underspecified (such as *"Summarize this report"*), the probability distribution remains broad, leading to generic summaries.
+
+When you specify the exact **target audience**, **key dimensions of interest** (e.g., cost, risk, timeline), and **structural constraints** (e.g., 5 bullets, plain language), you narrow the probability space and generate high-fidelity output.`,
+            keyTakeaway: "Unambiguous goals and explicit constraints concentrate token probabilities into high-value responses.",
+            codeSnippet: {
+              language: "markdown",
+              caption: "Vague vs. Specific Framing",
+              code: `// Vague
+Summarize this report.
+
+// Specific & Engineered
+Summarize the quarterly financial report for an executive CFO.
+Highlight:
+1. Total revenue vs. target
+2. Top 3 operational risk factors
+3. Next required board action
+Format as 5 concise bullet points under 150 words total.`
+            }
+          }
+        ],
+        checkpoints: [
+          {
+            id: "f-clarity-q1",
+            type: "quiz",
+            title: "Check Your Understanding: Specificity",
+            bloomLevel: "Understanding",
+            instructions: "Evaluate the principles of prompt specificity and token entropy.",
+            question: "Which modification makes a prompt easiest for an LLM to reliably follow?",
+            options: [
+              { id: "a", text: "Making the prompt longer without structured goals" },
+              { id: "b", text: "Adding an explicit task, target audience, and concrete success criteria" },
+              { id: "c", text: "Using poetic and figurative language" },
+              { id: "d", text: "Increasing the temperature parameter to maximum" }
+            ],
+            correctAnswer: "b",
+            feedback: {
+              success: "Correct! Explicit task definitions, audience framing, and concrete criteria eliminate ambiguity and constrain the model's output distribution.",
+              failure: "Review the Specificity Principle. LLMs require explicit goal boundaries to avoid stochastic divergence.",
+              theoreticalRationale: "Autoregressive generation samples from narrower conditional probability spaces when explicit audience and structural constraints are specified."
+            },
+            xpReward: 25
+          }
+        ],
+        badPrompt: {
+          prompt: "Summarize this report.",
+          explanation: "Lacks audience, length limit, and specific dimensions of interest.",
+          sampleOutput: "This report covers various financial details, operations, and future updates across several departments."
+        },
+        goodPrompt: {
+          prompt: "Summarize the report for a CFO in 5 bullets, highlighting cost, risk, and next action.",
+          explanation: "Identifies the persona/audience (CFO), structural format (5 bullets), and required thematic coverage (cost, risk, next action).",
+          sampleOutput: "• Revenue grew 12% YoY, trailing forecast by $1.2M.\n• Infrastructure operating costs increased 18% due to cloud compute expansion.\n• Key operational risk: vendor renewal pricing escalation in Q3.\n• Recommended next action: mandate vendor renegotiation prior to October board vote.\n• Projected Year-End cash reserve remains stable at $14.5M."
+        },
+        playgroundPreset: {
+          systemInstruction: "You are a concise executive communication assistant. Follow instructions precisely.",
+          prompt: "Summarize the report for a CFO in 5 bullets, highlighting cost, risk, and next action:\n\n[Insert Report Text]",
+          temperature: 0.2,
+          description: "Executive Briefing Clarity Pattern"
+        }
+      },
+      {
+        id: "foundation-role",
+        moduleId: "module-0",
+        moduleTitle: "Core Prompt Foundations",
+        title: "Role Assignment",
+        subtitle: "Give the model a useful perspective, vocabulary, and level of expertise",
+        objective:
+          "Calibrate perspective, terminology, and reasoning depth by assigning explicit personas and domain roles.",
+        estimatedMinutes: 5,
+        difficulty: "Beginner",
+        bloomTaxonomyFocus: "Applying",
+        xpReward: 50,
+        conceptSummary:
+          "Assigning an expert role acts as a latent conditioning prompt. It primes the model to adopt appropriate technical vocabulary, analytical rigor, and contextual priorities.",
+        deepDive: [
+          "Role priming: Telling the model 'Act as a contract lawyer' activates legal reasoning schemas and risk-oriented vocabulary.",
+          "Target audience matching: Instruct the expert persona to communicate at the user's comprehension level (e.g., 'explain in plain language to a non-lawyer').",
+          "Operational scope: Clarify what the role should prioritize (e.g., flag negotiation risks and termination liabilities)."
+        ],
+        keyRules: [
+          "Assign a specific professional title with domain expertise.",
+          "Specify the communication style (e.g., rigorous, plain language, executive).",
+          "State the primary lens through which content should be evaluated."
+        ],
+        concepts: [
+          {
+            id: "f-role-c1",
+            title: "Latent Persona Conditioning",
+            bloomLevel: "Understanding",
+            type: "theory",
+            readMinutes: 2,
+            academicCitation: "Sanh et al., 2022 (Multitask Prompted Training Enables Zero-Shot Task Generalization)",
+            content: `Role assignment is more than a decorative instruction. In transformer-based language models, setting a persona at the beginning of the context window activates attention heads tuned to that domain's terminology, standard procedures, and evaluation criteria.`,
+            keyTakeaway: "Role assignment steers the model's vocabulary, analytical perspective, and decision-making priorities.",
+            codeSnippet: {
+              language: "markdown",
+              caption: "Persona Specification Pattern",
+              code: `// Unprimed
+Explain this contract.
+
+// Role-Engineered
+You are a senior contract attorney specializing in commercial SaaS agreements.
+Review the following contract clause.
+1. Explain the termination clause in plain language.
+2. Flag the top 2 legal and financial risks for our company.
+3. Suggest specific alternative wording for negotiation.`
+            }
+          }
+        ],
+        checkpoints: [
+          {
+            id: "f-role-q1",
+            type: "quiz",
+            title: "Check Your Understanding: Role Assignment",
+            bloomLevel: "Understanding",
+            instructions: "Evaluate the mechanics of persona conditioning in neural language models.",
+            question: "Why is assigning a role effective in prompt engineering?",
+            options: [
+              { id: "a", text: "It increases the token limit of the model" },
+              { id: "b", text: "It primes the model's vocabulary, domain expertise, and analytical perspective" },
+              { id: "c", text: "It allows the model to access private databases" },
+              { id: "d", text: "It disables content filtering" }
+            ],
+            correctAnswer: "b",
+            feedback: {
+              success: "Correct! Role prompts activate domain-specific lexical representations and analytical frameworks within the model's parameters.",
+              failure: "Review Latent Persona Conditioning. Role assignment primes internal representations towards domain vocabularies.",
+              theoreticalRationale: "Role directives steer self-attention towards specific latent semantic subspaces."
+            },
+            xpReward: 25
+          }
+        ],
+        badPrompt: {
+          prompt: "Explain this contract.",
+          explanation: "Fails to establish legal perspective or output focus.",
+          sampleOutput: "This is a standard contract between two parties that describes terms, duration, and conditions."
+        },
+        goodPrompt: {
+          prompt: "Act as a contract lawyer. Explain the termination clause in plain language and flag negotiation risks.",
+          explanation: "Establishes a qualified persona, requests plain-language translation, and mandates identification of negotiation risks.",
+          sampleOutput: "Plain-Language Summary: Either party can terminate this agreement with 30 days notice, but prepaid fees are strictly non-refundable.\n\nKey Negotiation Risks:\n1. Lack of pro-rata refund upon termination without cause.\n2. One-sided indemnification liability."
+        },
+        playgroundPreset: {
+          systemInstruction: "You are an expert commercial contract attorney. Provide clear, objective legal risk assessments.",
+          prompt: "Act as a contract lawyer. Explain the termination clause in plain language and flag negotiation risks:\n\n<clause>\nEither party may terminate immediately upon notice...\n</clause>",
+          temperature: 0.2,
+          description: "Legal Contract Analysis Pattern"
+        }
+      },
+      {
+        id: "foundation-constraints",
+        moduleId: "module-0",
+        moduleTitle: "Core Prompt Foundations",
+        title: "Constraints & Formatting",
+        subtitle: "Define length, structure, required fields, and exclusions before generation",
+        objective:
+          "Enforce deterministic output schemas, tabular structures, and negative constraints to prevent hallucination and conversational drift.",
+        estimatedMinutes: 5,
+        difficulty: "Beginner",
+        bloomTaxonomyFocus: "Applying",
+        xpReward: 50,
+        conceptSummary:
+          "Without strict constraints, language models default to verbose paragraphs and conversational pleasantries. Explicit structural constraints (such as markdown tables, JSON keys, or exact item counts) guarantee machine-parsable and standardized outputs.",
+        deepDive: [
+          "Format declarations: Mandate formats like Markdown tables, JSON schemas, or numbered lists.",
+          "Cardinality bounds: Use exact numbers (e.g., 'exactly 5 risks') rather than vague ranges.",
+          "Negative constraints: Explicitly prohibit conversational filler (e.g., 'Do not include introductory or concluding conversational text')."
+        ],
+        keyRules: [
+          "Specify the exact structure and column names for tabular data.",
+          "Set hard cardinality limits on lists and items.",
+          "Add negative constraints to eliminate unwanted conversational padding."
+        ],
+        concepts: [
+          {
+            id: "f-constraints-c1",
+            title: "Structural Constraint Bounding",
+            bloomLevel: "Understanding",
+            type: "theory",
+            readMinutes: 2,
+            academicCitation: "PromptingGuide.ai (Formatting & Constraints Architecture)",
+            content: `Providing negative constraints and explicit output schemas reduces model uncertainty. When an LLM knows exactly which columns or fields are expected, it focuses its generation budget on populating those fields rather than inventing transitional text.`,
+            keyTakeaway: "Structural schemas and cardinality constraints produce predictable, machine-ready responses.",
+            codeSnippet: {
+              language: "markdown",
+              caption: "Tabular Constraint Pattern",
+              code: `// Unconstrained
+List the project risks.
+
+// Constrained & Structured
+Analyze the project plan and output a Markdown table.
+Required columns:
+| Risk Description | Severity (High/Med/Low) | Impact | Mitigation Strategy |
+Rules:
+- Include exactly 5 distinct technical risks.
+- Output ONLY the table without introductory or concluding text.`
+            }
+          }
+        ],
+        checkpoints: [
+          {
+            id: "f-constraints-q1",
+            type: "quiz",
+            title: "Check Your Understanding: Constraints",
+            bloomLevel: "Understanding",
+            instructions: "Identify the purpose of output format and negative constraint bounding.",
+            question: "What is the primary benefit of adding explicit output structure and negative constraints?",
+            options: [
+              { id: "a", text: "It increases the model's creative storytelling ability" },
+              { id: "b", text: "It eliminates conversational preamble and guarantees consistent, structured formatting" },
+              { id: "c", text: "It reduces the token processing speed" },
+              { id: "d", text: "It makes the prompt unpredictable" }
+            ],
+            correctAnswer: "b",
+            feedback: {
+              success: "Correct! Explicit constraints ensure outputs conform to predictable schemas and eliminate extraneous conversational chatter.",
+              failure: "Review the constraints principle. Enforcing output structure eliminates ambiguity and preamble.",
+              theoreticalRationale: "Formatting schemas force deterministic parsing boundaries on autoregressive generation."
+            },
+            xpReward: 25
+          }
+        ],
+        badPrompt: {
+          prompt: "List the project risks.",
+          explanation: "No table structure, no severity ratings, no item count constraints.",
+          sampleOutput: "Here are some risks for your project:\n- You might run out of budget.\n- The schedule could slip.\n- Bugs might happen."
+        },
+        goodPrompt: {
+          prompt: "Return a 3-column table with Risk, Impact, and Mitigation. Include exactly 5 risks.",
+          explanation: "Specifies exact column headers (Risk, Impact, Mitigation) and exact cardinality (5 risks).",
+          sampleOutput: "| Risk | Impact | Mitigation |\n|---|---|---|\n| Database migration timeout | Data inconsistency | Execute dry runs on staging and establish automated rollback scripts |\n| Third-party API rate limits | Service degradation | Implement client-side exponential backoff caching |\n| Cloud egress bandwidth surge | Unbudgeted cost | Configure egress alerts and Cloudflare caching |\n| Key engineer attrition | Knowledge loss | Enforce comprehensive architectural RFCs and documentation |\n| Authentication token leakage | Security breach | Implement automatic token rotation and IP binding |"
+        },
+        playgroundPreset: {
+          systemInstruction: "You are a structured data formatting assistant. Output only requested schemas.",
+          prompt: "Return a 3-column table with Risk, Impact, and Mitigation. Include exactly 5 risks for a cloud migration project.",
+          temperature: 0.1,
+          description: "Tabular Risk Matrix Pattern"
+        }
+      },
+      {
+        id: "foundation-iteration",
+        moduleId: "module-0",
+        moduleTitle: "Core Prompt Foundations",
+        title: "Iterative Refinement",
+        subtitle: "Improve one dimension at a time: task, context, output shape, then edge cases",
+        objective:
+          "Systematically debug and elevate prompt performance through targeted, single-variable iterations.",
+        estimatedMinutes: 5,
+        difficulty: "Beginner",
+        bloomTaxonomyFocus: "Applying",
+        xpReward: 50,
+        conceptSummary:
+          "Effective prompt engineering is an empirical, iterative discipline. Rather than rewriting prompts randomly, systematically adjust one variable at a time: clarify the core instruction, inject missing context, define output constraints, and test boundary conditions.",
+        deepDive: [
+          "Single-variable debugging: Modify only one component per test run to isolate cause and effect.",
+          "Targeted constraints: Replace loose adjectives with explicit words count and structural headers.",
+          "Feedback loop integration: Use model outputs to identify failure modes and patch prompt instructions."
+        ],
+        keyRules: [
+          "Iterate on one dimension at a time (task, role, constraints, examples).",
+          "Test against realistic edge-case inputs before finalizing.",
+          "Document prompt revisions and observable changes in output quality."
+        ],
+        concepts: [
+          {
+            id: "f-iteration-c1",
+            title: "The Empirical Prompt Refinement Loop",
+            bloomLevel: "Understanding",
+            type: "theory",
+            readMinutes: 2,
+            academicCitation: "Prompt Engineering Guide (Iterative Prompt Development)",
+            content: `Prompt development mirrors software engineering. An initial prompt serves as a baseline. By inspecting model output, identifying gaps, and incrementally adding constraints (e.g., word count, headline, sections), you reach an optimized, production-grade prompt.`,
+            keyTakeaway: "Systematic, incremental refinements yield robust, deterministic prompt behaviors.",
+            codeSnippet: {
+              language: "markdown",
+              caption: "Prompt Iteration Steps",
+              code: `// Iteration 1 (Baseline)
+Write a product update.
+
+// Iteration 2 (Adding structure & word budget)
+Write a 100-word customer product update. Include a headline, impact statement, timeline, and next step.
+
+// Iteration 3 (Production grade with tone & negative constraint)
+Write a 100-word customer product update announcing the new API caching feature.
+Structure:
+- **Headline**: Impactful 1-line announcement
+- **What's New**: Core capability in 2 sentences
+- **Timeline**: Available globally starting today
+- **Action**: Link to developer docs
+Tone: Professional, direct. Do not include marketing fluff.`
+            }
+          }
+        ],
+        checkpoints: [
+          {
+            id: "f-iteration-q1",
+            type: "quiz",
+            title: "Check Your Understanding: Iteration",
+            bloomLevel: "Understanding",
+            instructions: "Determine the scientific approach to empirical prompt debugging.",
+            question: "When refining an underperforming prompt, what is the best practice?",
+            options: [
+              { id: "a", text: "Delete the prompt and start over randomly" },
+              { id: "b", text: "Modify one specific dimension at a time (e.g., context, format, or constraints) and evaluate results" },
+              { id: "c", text: "Increase the temperature to 1.0" },
+              { id: "d", text: "Add 500 words of generic instructions" }
+            ],
+            correctAnswer: "b",
+            feedback: {
+              success: "Correct! Changing one variable at a time allows you to accurately measure which adjustment improved or degraded output quality.",
+              failure: "Review empirical iteration. Single-variable adjustment is essential for isolating causal effects in prompting.",
+              theoreticalRationale: "Single-variable ablation testing isolates confounding factors in LLM prompt optimization."
+            },
+            xpReward: 25
+          }
+        ],
+        badPrompt: {
+          prompt: "Write a product update.",
+          explanation: "Lacks product details, target audience, length constraints, and required sections.",
+          sampleOutput: "We are excited to share our latest product updates! We worked really hard on exciting new features that will help your team do great things."
+        },
+        goodPrompt: {
+          prompt: "Write a 100-word customer update with a headline, impact, timeline, and next step.",
+          explanation: "Specifies exact word budget (100 words), clear customer audience, and exact 4-part section structure.",
+          sampleOutput: "**Global Edge Caching is Now Live**\n\nWe have deployed edge caching across 45 global regions, reducing median API latency by 65% for international queries. All requests to `/v1/data` are automatically optimized starting today at no additional cost.\n\n**Next Step**: Check your updated latency analytics in the Developer Console."
+        },
+        playgroundPreset: {
+          systemInstruction: "You are a concise technical writer creating structured customer product updates.",
+          prompt: "Write a 100-word customer update with a headline, impact, timeline, and next step for the following release:\n\nFeature: Multi-region failover",
+          temperature: 0.3,
+          description: "Customer Product Update Refinement"
+        }
+      },
+      {
+        id: "foundation-context",
+        moduleId: "module-0",
+        moduleTitle: "Core Prompt Foundations",
+        title: "Context Injection",
+        subtitle: "Place trusted background material in delimiters and tell the model how to use it",
+        objective:
+          "Inject external context using explicit XML delimiters and enforce epistemic fallbacks to eliminate hallucination.",
+        estimatedMinutes: 5,
+        difficulty: "Beginner",
+        bloomTaxonomyFocus: "Applying",
+        xpReward: 50,
+        conceptSummary:
+          "When asking language models to reason over documents, always encapsulate reference text within unambiguous delimiter tags (such as `<context>...</context>`). Explicitly instruct the model to ground its response solely on the provided text and cite relevant sections.",
+        deepDive: [
+          "Delimiter encapsulation: Use XML-style tags (`<context>`, `<document>`, `<source>`) to clearly separate instructions from user-provided data.",
+          "Strict ground truth rule: State 'Answer using ONLY the facts provided inside the tags. Do not extrapolate.'",
+          "Epistemic fallback: Instruct the model to say 'Information not found in document' if the source lacks sufficient evidence, preventing hallucination."
+        ],
+        keyRules: [
+          "Wrap external reference text in structured XML tags.",
+          "Direct the model to ground its response exclusively on the provided context.",
+          "Mandate a clear fallback phrase when facts are missing."
+        ],
+        concepts: [
+          {
+            id: "f-context-c1",
+            title: "Delimited Context Engineering",
+            bloomLevel: "Understanding",
+            type: "theory",
+            readMinutes: 2,
+            academicCitation: "Anthropic / OpenAI Context Engineering Best Practices",
+            content: `Delimiters like \`<context>\` or \`"""\` act as structural barriers that prevent prompt injection and keep models focused. Combining delimited context with explicit grounding constraints ensures responses cite factual evidence rather than hallucinating from pre-training memory.`,
+            keyTakeaway: "Encapsulating source documents in delimiter tags creates clear boundaries between system instructions and reference data.",
+            codeSnippet: {
+              language: "markdown",
+              caption: "Delimited Context Grounding Pattern",
+              code: `// Vulnerable & Ungrounded
+Answer using this document.
+
+// Delimited & Grounded
+You are a factual research assistant.
+Answer the user's question using ONLY the facts provided in the <context> tags below.
+If the answer cannot be found in the context, respond with: "The provided document does not contain this information."
+
+<context>
+[Insert Reference Document Here]
+</context>
+
+Question: What is the refund policy for annual enterprise plans?`
+            }
+          }
+        ],
+        checkpoints: [
+          {
+            id: "f-context-q1",
+            type: "quiz",
+            title: "Check Your Understanding: Context Delimiters",
+            bloomLevel: "Understanding",
+            instructions: "Evaluate the role of delimiter tags in context injection and grounding.",
+            question: "Why should background reference material be placed inside XML delimiter tags (e.g., <context>)?",
+            options: [
+              { id: "a", text: "To compress the text and reduce token consumption" },
+              { id: "b", text: "To clearly separate trusted reference data from system instructions and prevent prompt injection or confusion" },
+              { id: "c", text: "To automatically translate the text into multiple languages" },
+              { id: "d", text: "To enable web browsing" }
+            ],
+            correctAnswer: "b",
+            feedback: {
+              success: "Correct! Delimiters create unambiguous syntactic boundaries between instructions and data, reducing confusion and injection risks.",
+              failure: "Review delimited context engineering. Delimiters structurally separate data payload from control logic.",
+              theoreticalRationale: "Syntactic boundary demarcation prevents instruction collision and semantic contamination."
+            },
+            xpReward: 25
+          }
+        ],
+        badPrompt: {
+          prompt: "Answer using this document.",
+          explanation: "No delimiter boundaries, no grounding rule, no fallback for missing facts.",
+          sampleOutput: "Based on the document and general knowledge, the system might support various configurations."
+        },
+        goodPrompt: {
+          prompt: "Use only the facts inside <context> tags. Cite the relevant section for each answer.",
+          explanation: "Uses XML delimiter grounding, enforces strict in-context evidence, and requires citation of relevant sections.",
+          sampleOutput: "According to Section 4.2 of the <context>, enterprise subscribers receive 99.99% uptime guarantees with automated credit issuance for downtime exceeding 15 minutes."
+        },
+        playgroundPreset: {
+          systemInstruction: "You are a factual question-answering assistant. Rely strictly on provided context.",
+          prompt: "Use only the facts inside <context> tags. Cite the relevant section for each answer.\n\n<context>\nSection 1.1: Standard shipping takes 3-5 business days.\nSection 1.2: Overnight express delivery is available for orders placed before 2 PM EST.\n</context>\n\nQuestion: What is the cutoff time for overnight delivery?",
+          temperature: 0.1,
+          description: "Delimited Context Q&A Pattern"
+        }
+      }
+    ]
+  },
   {
     id: "module-1",
     code: "PROMPT-101",
@@ -1154,3 +1626,19 @@ Thought:`,
     ]
   }
 ];
+
+// Backwards compatibility export: derived directly from authoritative Module 00
+export const FOUNDATION_LESSONS = curriculumModules[0].lessons.map((lesson) => ({
+  id: lesson.id as "foundation-clarity" | "foundation-role" | "foundation-constraints" | "foundation-iteration" | "foundation-context",
+  title: lesson.title,
+  summary: lesson.conceptSummary,
+  example: lesson.badPrompt.prompt,
+  refined: lesson.goodPrompt.prompt,
+  competencies: lesson.id === 'foundation-clarity' || lesson.id === 'foundation-iteration'
+    ? ['prompt-foundations']
+    : lesson.id === 'foundation-role'
+    ? ['role-persona-design']
+    : lesson.id === 'foundation-constraints'
+    ? ['structured-output']
+    : ['context-engineering'],
+}));

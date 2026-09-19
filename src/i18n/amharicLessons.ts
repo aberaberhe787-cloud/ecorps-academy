@@ -2,6 +2,397 @@ import { CurriculumModule } from "../types";
 
 export const amharicCurriculumModules: CurriculumModule[] = [
   {
+    id: "module-0",
+    code: "FOUND-001",
+    title: "ሞጁል 0፡ የፖርምፕት መሰረቶች (Core Prompt Foundations)",
+    level: "Foundations",
+    academicTrack: "የፖርምፕት ኢንጂነሪንግ መሰረታዊ መርሆዎች",
+    description:
+      "የፖርምፕት (Prompt) ግንባታ መሰረታዊ የተግባር ምሰሶዎችን ይማሩ፡ ግልጽነት እና ዝርዝር መግለጫ፣ የባለሙያ ሚና አሰጣጥ፣ የተዋቀሩ ገደቦች፣ ቀጣይነት ያለው ማሻሻያ እና አስተማማኝ የዐውደ-ጽሑፍ ማካተት።",
+    badge: "Foundations",
+    iconName: "Target",
+    estimatedTotalHours: 0.8,
+    lessons: [
+      {
+        id: "foundation-clarity",
+        moduleId: "module-0",
+        moduleTitle: "የፖርምፕት መሰረቶች",
+        title: "ግልጽነት እና ዝርዝር መግለጫ (Clarity & Specificity)",
+        subtitle: "አሻሚ ግቦችን ወደ ግልጽ ተግባር፣ የታለመ አንባቢ እና የውጤት መስፈርት መቀየር",
+        objective:
+          "የተግባሩን ትክክለኛ አላማ፣ የታለመውን አንባቢ እና የውጤት መስፈርቶችን በግልጽ በማስቀመጥ አሻሚነትን ማስወገድ።",
+        estimatedMinutes: 5,
+        difficulty: "Beginner",
+        bloomTaxonomyFocus: "Applying",
+        xpReward: 50,
+        conceptSummary:
+          "አሻሚ ፖርምፕቶች ያልተሟሉ እና አጠቃላይ ምላሾችን ያመጣሉ ምክንያቱም ሞዴሉ ያልተገለጹ ግቦችን በዘፈቀደ ለመገመት ይገደዳል። ግልጽ ተግባር እና የታለመ አንባቢ ማቅረብ ጥራት ያለው ውጤት ያስገኛል።",
+        deepDive: [
+          "አሻሚነትን ማስወገድ፡ 'ስለዚህ ጻፍ' ከማለት ይልቅ 'በ 5 ነጥቦች አጠቃልል' ወይም 'በሰንጠረዥ አወዳድር' የሚሉ ቀጥተኛ ትዕዛዞችን ተጠቀም።",
+          "የአንባቢ መደብ፡ ጽሑፉ ለማን እንደተዘጋጀ መግለጽ የቃላትን ጥልቀት ይወስናል።",
+          "ሊለኩ የሚችሉ መስፈርቶች፡ የነጥብ ብዛት፣ ርዝመት እና የትኩረት መስኮችን አስቀድመህ ወስን።"
+        ],
+        keyRules: [
+          "ዋናውን አላማ በመጀመሪያው ዓረፍተ ነገር ውስጥ በግልጽ አስቀምጥ።",
+          "የታለመውን አንባቢ በመግለጽ የይዘቱን ጥልቀት አመጣጥን።",
+          "ሊለኩ የሚችሉ ገደቦችን (የነጥብ ብዛት፣ የቃላት ገደብ) ተግብር።"
+        ],
+        concepts: [
+          {
+            id: "f-clarity-c1",
+            title: "የዝርዝር ትክክለኛነት መርህ (The Specificity Principle)",
+            bloomLevel: "Understanding",
+            type: "theory",
+            readMinutes: 2,
+            content: `ትላልቅ የቋንቋ ሞዴሎች (LLMs) የቀጣይ ቶከንን እድል ይተነብያሉ። ፖርምፕቱ አሻሚ ሲሆን (ለምሳሌ *"ይህን ሪፖርት አጠቃልል"* ሲባል)፣ ምላሹ አጠቃላይ እና ጥራት የሌለው ይሆናል።
+
+የታለመውን **አንባቢ**፣ **ቁልፍ የትኩረት ነጥቦች** (ለምሳሌ ወጪ፣ ስጋት) እና **የቅርጸት ገደቦችን** ስትገልጽ፣ ሞዴሉ ትክክለኛውን መልስ ያዘጋጃል።`,
+            keyTakeaway: "ግልጽ ግቦች እና ገደቦች የሞዴሉን ትኩረት ወደ ጥራት ያለው ምላሽ ይመራሉ ።"
+          }
+        ],
+        checkpoints: [
+          {
+            id: "f-clarity-q1",
+            type: "quiz",
+            title: "ግንዛቤዎን ይፈትሹ፡ ግልጽነት",
+            bloomLevel: "Understanding",
+            instructions: "የፖርምፕት ግልጽነት እና የቶከን ትንበያ መርሆችን ይገምግሙ።",
+            question: "የትኛው ማሻሻያ ነው ሞዴሉ ትክክለኛውን መመሪያ እንዲከተል የሚያደርገው?",
+            options: [
+              { id: "a", text: "ያለ ግልጽ አላማ ፖርምፕቱን ማስረዘም" },
+              { id: "b", text: "ግልጽ ተግባር፣ የታለመ አንባቢ እና የውጤት መስፈርቶችን ማካተት" },
+              { id: "c", text: "ተምሳሌታዊ እና ቅኔያዊ ቃላትን መጠቀም" },
+              { id: "d", text: "የሙቀት መጠንን (Temperature) ወደ ከፍተኛ መጨመር" }
+            ],
+            correctAnswer: "b",
+            feedback: {
+              success: "ትክክል! ግልጽ ትዕዛዞች እና መስፈርቶች አሻሚነትን በማስወገድ ሞዴሉ ጥራት ያለው ምላሽ እንዲሰጥ ያደርጋሉ።",
+              failure: "የግልጽነት መርህን እንደገና ይከልሱ።",
+              theoreticalRationale: "ግልጽ ግቦች የሞዴሉን የቃላት ትንበያ ትክክለኛነት ይጨምራሉ።"
+            },
+            xpReward: 25
+          }
+        ],
+        badPrompt: {
+          prompt: "ይህን ሪፖርት አጠቃልል።",
+          explanation: "የአንባቢ ማንነት፣ የርዝመት ገደብ እና የትኩረት ነጥቦች የሉትም።",
+          sampleOutput: "ይህ ሪፖርት ስለ ተለያዩ የገንዘብ እና የሥራ እንቅስቃሴዎች ይገልጻል።"
+        },
+        goodPrompt: {
+          prompt: "ለዋና የፋይናንስ ኦፊሰር (CFO) ሪፖርቱን በ 5 ነጥቦች አጠቃልል፣ ወጪን፣ ስጋትን እና ቀጣይ እርምጃን አድምቅ።",
+          explanation: "የአንባቢን ሚና (CFO)፣ ቅርጸቱን (5 ነጥቦች) እና ዋና የትኩረት ነጥቦችን ይዟል።",
+          sampleOutput: "• ገቢ በ 12% አድጓል፣ ነገር ግን ከግቡ በ $1.2M ዝቅ ብሏል።\n• የክላውድ ሲስተም ማስፋፊያ ወጪ በ 18% ጨምሯል።\n• ዋና የስራ ስጋት፡ የሶስተኛ ወገን አገልግሎት ክፍያ መጨመር።\n• ቀጣይ እርምጃ፡ የኮንትራት ድርድር ማድረግ።\n• የዓመቱ መጨረሻ የገንዘብ ክምችት በ $14.5M የተረጋጋ ነው።"
+        },
+        playgroundPreset: {
+          systemInstruction: "እርስዎ አጭር እና ግልጽ የፋይናንስ ረዳት ነዎት።",
+          prompt: "ለዋና የፋይናንስ ኦፊሰር (CFO) ሪፖርቱን በ 5 ነጥቦች አጠቃልል፣ ወጪን፣ ስጋትን እና ቀጣይ እርምጃን አድምቅ፡\n\n[የሪፖርት ጽሑፍ]",
+          temperature: 0.2,
+          description: "Executive Briefing Clarity Pattern"
+        }
+      },
+      {
+        id: "foundation-role",
+        moduleId: "module-0",
+        moduleTitle: "የፖርምፕት መሰረቶች",
+        title: "የባለሙያ ሚና አሰጣጥ (Role Assignment)",
+        subtitle: "ለሞዴሉ ተስማሚ እይታ፣ የቃላት አጠቃቀም እና የሙያ ደረጃ መስጠት",
+        objective:
+          "ግልጽ የሆነ የባለሙያ ሚና በመስጠት ተገቢውን የሙያ ቋንቋ እና የትንተና ጥልቀት ማረጋገጥ።",
+        estimatedMinutes: 5,
+        difficulty: "Beginner",
+        bloomTaxonomyFocus: "Applying",
+        xpReward: 50,
+        conceptSummary:
+          "ለሞዴሉ የባለሙያ ሚና መስጠት ተገቢውን የቴክኒክ ቃላት፣ የአሰራር ደንቦች እና ትክክለኛ የሙያ ትንተና እንዲጠቀም ያደርገዋል።",
+        deepDive: [
+          "የሚና ዝግጅት፡ 'እንደ ኮንትራት ጠበቃ ሁን' ማለት የህግ ትንተና እና የስጋት ነጥቦችን እንዲያተኩር ያደርገዋል።",
+          "ከአንባቢ ጋር ማጣጣም፡ ባለሙያው በቀላል ቋንቋ እንዲያስረዳ ማዘዝ።",
+          "የትንተና ትኩረት፡ ሚናው ቅድሚያ የሚሰጣቸውን ጉዳዮች በግልጽ ማስቀመጥ።"
+        ],
+        keyRules: [
+          "ግልጽ የሆነ የሙያ ማዕረግ ስጥ።",
+          "የአቀራረብ ዘይቤውን (ለምሳሌ ጥብቅ፣ ግልጽ፣ ሙያዊ) ግለጽ።",
+          "ዋናውን የትንተና መስፈርት አስቀምጥ።"
+        ],
+        concepts: [
+          {
+            id: "f-role-c1",
+            title: "የገጸ-ባህሪ ሚና መርህ (Latent Persona Conditioning)",
+            bloomLevel: "Understanding",
+            type: "theory",
+            readMinutes: 2,
+            content: `ለሞዴሉ ሚና መስጠት የዚያን የሙያ መስክ ቃላት፣ የአሰራር ደንቦች እና የትንተና ልምዶችን እንዲያስታውስ ያደርጋል።`,
+            keyTakeaway: "የባለሙያ ሚና የሞዴሉን የቃላት ምርጫ እና የአስተሳሰብ አቅጣጫ ይመራል ።"
+          }
+        ],
+        checkpoints: [
+          {
+            id: "f-role-q1",
+            type: "quiz",
+            title: "ግንዛቤዎን ይፈትሹ፡ ሚና አሰጣጥ",
+            bloomLevel: "Understanding",
+            instructions: "የባለሙያ ሚና በሞዴሉ አሰራር ላይ ያለውን ተፅእኖ ይገምግሙ።",
+            question: "ለሞዴሉ ሚና መስጠት ለምን ይጠቅማል?",
+            options: [
+              { id: "a", text: "የሞዴሉን የቶከን ገደብ ይጨምራል" },
+              { id: "b", text: "ተገቢውን የሙያ ቃላት እና የትንተና ጥልቀት ያነቃቃል" },
+              { id: "c", text: "የግል መረጃዎችን እንዲያገኝ ያስችለዋል" },
+              { id: "d", text: "የደህንነት ቁጥጥርን ያጠፋል" }
+            ],
+            correctAnswer: "b",
+            feedback: {
+              success: "ትክክል! የባለሙያ ሚና መስጠት በዚያ ዘርፍ ያሉ የሙያ ቃላትን እና የአሰራር ልምዶችን ያነቃቃል።",
+              failure: "የሚና አሰጣጥ መርህን እንደገና ይከልሱ።",
+              theoreticalRationale: "ሚና መስጠት ተገቢውን የሙያ ቃላት ትንበያ ያነቃቃል።"
+            },
+            xpReward: 25
+          }
+        ],
+        badPrompt: {
+          prompt: "ይህን ኮንትራት አስረዳ።",
+          explanation: "የህግ እይታ እና የውጤት ትኩረት የለውም።",
+          sampleOutput: "ይህ በሁለት ወገኖች መካከል የተደረገ የውል ስምምነት ነው።"
+        },
+        goodPrompt: {
+          prompt: "እንደ ኮንትራት ጠበቃ ሁን። የውል ማቋረጫ አንቀጹን በቀላል ቋንቋ አስረዳ እና የስጋት ነጥቦችን አድምቅ።",
+          explanation: "የህግ ባለሙያ ሚና፣ የቀላል ቋንቋ ማብራሪያ እና የስጋት ነጥቦች ትንተና ይዟል።",
+          sampleOutput: "ቀላል ማብራሪያ፡ ማንኛውም ወገን የ 30 ቀናት ማስጠንቀቂያ በመስጠት ውሉን ማቋረጥ ይችላል፣ ነገር ግን ቅድመ ክፍያዎች አይመለሱም።\n\nዋና የስጋት ነጥቦች፡\n1. ያለምክንያት ውል ሲቋረጥ ገንዘብ አለመመለሱ።\n2. የአንድ ወገን የጉዳት ካሳ ተጠያቂነት።"
+        },
+        playgroundPreset: {
+          systemInstruction: "እርስዎ የንግድ ኮንትራት ጠበቃ ነዎት። ግልጽ የህግ ስጋት ትንተናዎችን ያቅርቡ።",
+          prompt: "እንደ ኮንትራት ጠበቃ ሁን። የውል ማቋረጫ አንቀጹን በቀላል ቋንቋ አስረዳ እና የስጋት ነጥቦችን አድምቅ፡\n\n<clause>\nማንኛውም ወገን ውሉን ወዲያውኑ ማቋረጥ ይችላል...\n</clause>",
+          temperature: 0.2,
+          description: "Legal Contract Analysis Pattern"
+        }
+      },
+      {
+        id: "foundation-constraints",
+        moduleId: "module-0",
+        moduleTitle: "የፖርምፕት መሰረቶች",
+        title: "ገደቦች እና ቅርጸት (Constraints & Formatting)",
+        subtitle: "ርዝመትን፣ አወቃቀርን እና የተከለከሉ ነገሮችን አስቀድሞ መወሰን",
+        objective:
+          "የተዋቀሩ የሰንጠረዥ እና የአሉታዊ ገደቦችን በመጠቀም አስተማማኝ ውጤት ማረጋገጥ።",
+        estimatedMinutes: 5,
+        difficulty: "Beginner",
+        bloomTaxonomyFocus: "Applying",
+        xpReward: 50,
+        conceptSummary:
+          "ጥብቅ ገደቦች ከሌሉ ሞዴሎች ረጅም እና አላስፈላጊ ጽሑፎችን ያመጣሉ። እንደ ማርክዳውን ሰንጠረዥ ወይም የነጥብ ብዛት ያሉ ገደቦችን ማስቀመጥ ጥራት ያለው ምላሽ ያስገኛል።",
+        deepDive: [
+          "የቅርጸት መግለጫ፡ እንደ ሰንጠረዥ ወይም የተቆጠሩ ነጥቦች ያሉ ቅርጸቶችን እዘዝ።",
+          "ትክክለኛ ብዛት፡ 'በትክክል 5 ስጋቶች' በማለት ቁጥሩን ወስን።",
+          "አሉታዊ ገደቦች፡ አላስፈላጊ ጨዋታዎችን እና መግቢያዎችን ከልክል።"
+        ],
+        keyRules: [
+          "የሰንጠረዥ አምዶችን ስም በግልጽ አስቀምጥ።",
+          "የነጥቦችን ትክክለኛ ቁጥር ወስን።",
+          "አላስፈላጊ መግቢያዎችን እና መደምደሚያዎችን ከልክል።"
+        ],
+        concepts: [
+          {
+            id: "f-constraints-c1",
+            title: "የተዋቀሩ ገደቦች መርህ (Structural Constraint Bounding)",
+            bloomLevel: "Understanding",
+            type: "theory",
+            readMinutes: 2,
+            content: `የውጤት ቅርጸት እና አሉታዊ ገደቦችን መስጠት የሞዴሉን እርግጠኝነት ይጨምራል። ምን አይነት ቅርጸት እንደሚፈለግ ሲያውቅ፣ ትኩረቱን በይዘቱ ላይ ብቻ ያደርጋል።`,
+            keyTakeaway: "የተዋቀሩ ገደቦች አስተማማኝ እና ወጥ የሆነ ውጤት ያስገኛሉ።"
+          }
+        ],
+        checkpoints: [
+          {
+            id: "f-constraints-q1",
+            type: "quiz",
+            title: "ግንዛቤዎን ይፈትሹ፡ ገደቦች",
+            bloomLevel: "Understanding",
+            instructions: "የውጤት ቅርጸት እና አሉታዊ ገደቦች ጥቅምን ይገምግሙ።",
+            question: "የውጤት ቅርጸት እና አሉታዊ ገደቦችን መጠቀም ዋናው ጥቅሙ ምንድን ነው?",
+            options: [
+              { id: "a", text: "የፈጠራ ታሪክ አተራረክን ይጨምራል" },
+              { id: "b", text: "አላስፈላጊ ቃላትን በማስቀረት ወጥ እና የተዋቀረ ቅርጸት ያስገኛል" },
+              { id: "c", text: "የመስሪያ ፍጥነትን ይቀንሳል" },
+              { id: "d", text: "ውጤቱን የማይታወቅ ያደርገዋል" }
+            ],
+            correctAnswer: "b",
+            feedback: {
+              success: "ትክክል! ግልጽ ገደቦች አላስፈላጊ መግቢያዎችን በማስቀረት ውጤቱ በተፈለገው ቅርጸት እንዲመጣ ያደርጋሉ።",
+              failure: "የገደቦችን መርህ እንደገና ይከልሱ።",
+              theoreticalRationale: "ቅርጸት መወሰን ሞዴሉ በይዘቱ ላይ ብቻ እንዲያተኩር ያደርጋል።"
+            },
+            xpReward: 25
+          }
+        ],
+        badPrompt: {
+          prompt: "የፕሮጀክት ስጋቶችን ዘርዝር።",
+          explanation: "የሰንጠረዥ ቅርጸት እና የብዛት ገደብ የለውም።",
+          sampleOutput: "የፕሮጀክትዎ ስጋቶች የሚከተሉት ናቸው፡\n- በጀት ሊያልቅ ይችላል።\n- ጊዜው ሊራዘም ይችላል።"
+        },
+        goodPrompt: {
+          prompt: "በ 3 አምድ ሰንጠረዥ ስጋት፣ ተፅእኖ እና መፍትሄ የያዘ በትክክል 5 ስጋቶችን አቅርብ።",
+          explanation: "የሰንጠረዥ አምዶችን እና የ 5 ስጋቶች ገደብ ይዟል።",
+          sampleOutput: "| ስጋት | ተፅእኖ | መፍትሄ |\n|---|---|---|\n| የዳታቤዝ ሽግግር መዘግየት | የዳታ መዛባት | በቅድመ-ሙከራ ሰርቨር መሞከር |\n| የኤፒአይ (API) ገደብ | የአገልግሎት መቆራረጥ | የመረጃ ክምችት (Caching) መጠቀም |\n| የኢንተርኔት ባንድዊድዝ ወጪ | ያልታሰበ ወጪ | የማስጠንቀቂያ ሲስተም ማዘጋጀት |\n| የቁልፍ ኢንጂነር መልቀቅ | የዕውቀት ማጣት | ዝርዝር ሰነዶችን ማዘጋጀት |\n| የደህንነት ቶከን መፍሰስ | የዳታ ስርቆት | ቶከን በየጊዜው እንዲቀየር ማድረግ |"
+        },
+        playgroundPreset: {
+          systemInstruction: "እርስዎ የተዋቀረ ዳታ ረዳት ነዎት። የተጠየቀውን ሰንጠረዥ ብቻ ያቅርቡ።",
+          prompt: "በ 3 አምድ ሰንጠረዥ ስጋት፣ ተፅእኖ እና መፍትሄ የያዘ በትክክል 5 ስጋቶችን ለክላውድ ሲስተም አቅርብ።",
+          temperature: 0.1,
+          description: "Tabular Risk Matrix Pattern"
+        }
+      },
+      {
+        id: "foundation-iteration",
+        moduleId: "module-0",
+        moduleTitle: "የፖርምፕት መሰረቶች",
+        title: "ቀጣይነት ያለው ማሻሻያ (Iterative Refinement)",
+        subtitle: "በአንድ ጊዜ አንድ ነገር ማስተካከል፡ ተግባር፣ ዐውደ-ጽሑፍ፣ ቅርጸት",
+        objective:
+          "ፖርምፕትን ደረጃ በደረጃ በመፈተሽ እና በማሻሻል ጥራቱን ማሳደግ።",
+        estimatedMinutes: 5,
+        difficulty: "Beginner",
+        bloomTaxonomyFocus: "Applying",
+        xpReward: 50,
+        conceptSummary:
+          "የፖርምፕት ኢንጂነሪንግ ደረጃ በደረጃ የሚሻሻል ተግባር ነው። በአንድ ጊዜ ሁሉንም ነገር ከመቀየር ይልቅ አንዱን መመሪያ በመጨመር ውጤቱን መፈተሽ የተሻለ ነው።",
+        deepDive: [
+          "አንድ ነገር ብቻ ማስተካከል፡ የትኛው ለውጥ ውጤቱን እንዳሻሻለው ለማወቅ በአንድ ጊዜ አንዱን ብቻ ቀይር።",
+          "የተወሰኑ ገደቦች፡ ግልጽ የቃላት ብዛት እና አርዕስቶችን ተጠቀም።",
+          "የውጤት ግብረ-መልስ፡ ሞዴሉ የሰጠውን ስህተት አይተህ መመሪያውን አስተካክል።"
+        ],
+        keyRules: [
+          "በአንድ ጊዜ አንዱን ክፍል ብቻ አሻሽል።",
+          "እውነተኛ ሁኔታዎችን በመጠቀም ሞክረው።",
+          "ያደረግካቸውን ማሻሻያዎች መዝግብ።"
+        ],
+        concepts: [
+          {
+            id: "f-iteration-c1",
+            title: "የማሻሻያ ዑደት መርህ (The Prompt Refinement Loop)",
+            bloomLevel: "Understanding",
+            type: "theory",
+            readMinutes: 2,
+            content: `የፖርምፕት እድገት ልክ እንደ ሶፍትዌር ስራ ነው። የመጀመሪያውን ሞክረህ፣ የታዩትን ክፍተቶች በመለየት ተጨማሪ ገደቦችን በማካተት የተሻለ ደረጃ ላይ ትደርሳለህ።`,
+            keyTakeaway: "ደረጃ በደረጃ ማሻሻል አስተማማኝ እና ጥራት ያለው ፖርምፕት ይፈጥራል።"
+          }
+        ],
+        checkpoints: [
+          {
+            id: "f-iteration-q1",
+            type: "quiz",
+            title: "ግንዛቤዎን ይፈትሹ፡ ማሻሻያ",
+            bloomLevel: "Understanding",
+            instructions: "የፖርምፕት ማሻሻያ ሳይንሳዊ ሂደትን ይገምግሙ።",
+            question: "ጥራቱ ያልተስተካከለን ፖርምፕት ለማሻሻል ትክክለኛው መንገድ ምንድን ነው?",
+            options: [
+              { id: "a", text: "ሙሉውን አጥፍቶ በዘፈቀደ እንደገና መጀመር" },
+              { id: "b", text: "በአንድ ጊዜ አንድ ገጽታ (ለምሳሌ ዐውደ-ጽሑፍ ወይም ቅርጸት) ቀይሮ መፈተሽ" },
+              { id: "c", text: "የሙቀት መጠንን ወደ 1.0 መጨመር" },
+              { id: "d", text: "500 አጠቃላይ ቃላትን መጨመር" }
+            ],
+            correctAnswer: "b",
+            feedback: {
+              success: "ትክክል! አንድ ነገር ብቻ ቀይሮ መሞከር የትኛው ለውጥ ውጤቱን እንዳሻሻለው ለማወቅ ያስችላል።",
+              failure: "የደረጃ በደረጃ ማሻሻያ መርህን እንደገና ይከልሱ።",
+              theoreticalRationale: "አንድ ተለዋዋጭ ብቻ መቀየር የስህተት መንስኤውን በትክክል ለመለየት ይረዳል።"
+            },
+            xpReward: 25
+          }
+        ],
+        badPrompt: {
+          prompt: "የምርት ማሻሻያ ዜና ጻፍ።",
+          explanation: "የምርት ዝርዝር፣ አንባቢ፣ የርዝመት ገደብ እና አርዕስቶች የሉትም።",
+          sampleOutput: "አዳዲስ የምርት ማሻሻያዎችን ስላደረግን ደስ ብሎናል!"
+        },
+        goodPrompt: {
+          prompt: "የ 100 ቃላት የምርት ማሻሻያ ዜና ከአርዕስት፣ ተፅእኖ፣ የጊዜ ሰሌዳ እና ቀጣይ እርምጃ ጋር አዘጋጅ።",
+          explanation: "የ 100 ቃላት ገደብ እና 4 ቁልፍ ክፍሎችን አካቷል።",
+          sampleOutput: "**ዓለም አቀፍ የዳታ ማፋጠን ሲስተም ስራ ጀመረ**\n\nበ 45 ዓለም አቀፍ ማዕከላት ፈጣን ዳታ መያዣ ዘርግተናል፣ ይህም ፍጥነትን በ 65% ያሻሽላል።\n\n**ቀጣይ እርምጃ**፡ በዴቨሎፐር ኮንሶል ውስጥ የፍጥነት ሪፖርቱን ይመልከቱ።"
+        },
+        playgroundPreset: {
+          systemInstruction: "እርስዎ አጭር የቴክኒክ ጸሐፊ ነዎት።",
+          prompt: "የ 100 ቃላት የምርት ማሻሻያ ዜና ከአርዕስት፣ ተፅእኖ፣ የጊዜ ሰሌዳ እና ቀጣይ እርምጃ ጋር አዘጋጅ፡\n\nአዲስ ሲስተም፡ ፈጣን የዳታ ማስቀመጫ",
+          temperature: 0.3,
+          description: "Customer Product Update Refinement"
+        }
+      },
+      {
+        id: "foundation-context",
+        moduleId: "module-0",
+        moduleTitle: "የፖርምፕት መሰረቶች",
+        title: "የዐውደ-ጽሑፍ ማካተት (Context Injection)",
+        subtitle: "አስፈላጊ መረጃዎችን በወሰን ምልክቶች (Delimiters) ውስጥ ማስቀመጥ",
+        objective:
+          "የውጭ መረጃዎችን በ XML ወሰን ምልክቶች ውስጥ በማስቀመጥ የሀሰት መረጃዎችን (Hallucination) ማስቀረት።",
+        estimatedMinutes: 5,
+        difficulty: "Beginner",
+        bloomTaxonomyFocus: "Applying",
+        xpReward: 50,
+        conceptSummary:
+          "ሞዴሉ በሰነዶች ላይ ተመስርቶ እንዲመልስ ስትፈልግ፣ መረጃውን በወሰን ምልክቶች (ለምሳሌ `<context>...</context>`) ውስጥ አስቀምጥ። ከተሰጠው ሰነድ ውጭ እንዳይመልስ እዘዝ።",
+        deepDive: [
+          "የወሰን ምልክቶች፡ መመሪያውን ከመረጃው ለመለየት እንደ `<context>` ያሉ የ XML ምልክቶችን ተጠቀም።",
+          "በሰነዱ ላይ ብቻ መመስረት፡ 'ከተሰጠው መረጃ ውጭ አትጨምር' በማለት እዘዝ።",
+          "መረጃ ሲጠፋ የሚሰጥ ምላሽ፡ መረጃው ካልተገኘ 'መረጃው በሰነዱ ውስጥ የለም' እንዲል እዘዝ።"
+        ],
+        keyRules: [
+          "የውጭ መረጃዎችን በግልጽ የ XML ምልክቶች ውስጥ አስቀምጥ።",
+          "ሞዴሉ በተሰጠው መረጃ ላይ ብቻ እንዲመሰረት አድርግ።",
+          "መረጃ ሲጎድል የሚሰጠውን አጭር መልስ አስቀድመህ ወስን።"
+        ],
+        concepts: [
+          {
+            id: "f-context-c1",
+            title: "የወሰን ምልክቶች መርህ (Delimited Context Engineering)",
+            bloomLevel: "Understanding",
+            type: "theory",
+            readMinutes: 2,
+            content: `እንደ \`<context>\` ያሉ ምልክቶች መመሪያዎችን ከመረጃው በመለየት ሞዴሉ እንዳይዘበራረቅ ይረዳሉ። ይህ የሀሰት መረጃዎችን (Hallucination) ያስቀራል።`,
+            keyTakeaway: "መረጃዎችን በወሰን ምልክቶች ማስቀመጥ መመሪያውን ከመረጃው ይለያል።"
+          }
+        ],
+        checkpoints: [
+          {
+            id: "f-context-q1",
+            type: "quiz",
+            title: "ግንዛቤዎን ይፈትሹ፡ የወሰን ምልክቶች",
+            bloomLevel: "Understanding",
+            instructions: "የወሰን ምልክቶች (Delimiters) ጥቅምን ይገምግሙ።",
+            question: "የማጣቀሻ ሰነዶች ለምን በ XML የወሰን ምልክቶች (ለምሳሌ <context>) ውስጥ መቀመጥ አለባቸው?",
+            options: [
+              { id: "a", text: "ጽሑፉን አሳጥሮ የቶከን ፍጆታን ለመቀነስ" },
+              { id: "b", text: "መረጃውን ከመመሪያው በመለየት ሞዴሉ እንዳይዘበራረቅ ለማድረግ" },
+              { id: "c", text: "ጽሑፉን በራሱ ወደ ተለያዩ ቋንቋዎች ለመተርጎም" },
+              { id: "d", text: "የኢንተርኔት ፍለጋን ለማስቻል" }
+            ],
+            correctAnswer: "b",
+            feedback: {
+              success: "ትክክል! የወሰን ምልክቶች መመሪያዎችን ከመረጃው በመለየት ትክክለኛውን መረጃ እንዲጠቀም ያደርጋሉ።",
+              failure: "የወሰን ምልክቶችን መርህ እንደገና ይከልሱ።",
+              theoreticalRationale: "የወሰን ምልክቶች መረጃውን ከመመሪያው በግልጽ ይለያሉ።"
+            },
+            xpReward: 25
+          }
+        ],
+        badPrompt: {
+          prompt: "ይህን ሰነድ ተጠቅመህ መልስ።",
+          explanation: "የወሰን ምልክቶች እና መረጃ ሲጎድል የሚሰጥ ትእዛዝ የለውም።",
+          sampleOutput: "በሰነዱ እና በአጠቃላይ እውቀቴ መሰረት..."
+        },
+        goodPrompt: {
+          prompt: "በ <context> ውስጥ ያሉትን እውነታዎች ብቻ ተጠቀም። ለያንዳንዱ መልስ የክፍሉን ቁጥር ጥቀስ።",
+          explanation: "የ XML ወሰን ምልክቶች እና ትክክለኛ የክፍል ጥቅስ ማካተትን ይዟል።",
+          sampleOutput: "በ <context> ክፍል 4.2 መሰረት፣ የ 99.99% የስራ ዝግጁነት ዋስትና ተሰጥቷል።"
+        },
+        playgroundPreset: {
+          systemInstruction: "እርስዎ በተሰጠው መረጃ ላይ ብቻ የሚመሰረቱ ረዳት ነዎት።",
+          prompt: "በ <context> ውስጥ ያሉትን እውነታዎች ብቻ ተጠቀም። ለያንዳንዱ መልስ የክፍሉን ቁጥር ጥቀስ፡\n\n<context>\nክፍል 1.1: መደበኛ ዕቃ ማድረስ ከ 3-5 ቀናት ይወስዳል።\nክፍል 1.2: ፈጣን ማድረስ ከቀኑ 8 ሰዓት በፊት ለታዘዙ ይሰራል።\n</context>\n\nጥያቄ፡ የፈጣን ማድረስ የመጨረሻው ሰዓት ስንት ነው?",
+          temperature: 0.1,
+          description: "Delimited Context Q&A Pattern"
+        }
+      }
+    ]
+  },
+  {
     id: "module-1",
     code: "PROMPT-101",
     title: "ሞጁል 1፡ የዐውደ-ጽሑፍ መካኒክስ መሰረቶች (In-Context Mechanics)",

@@ -49,8 +49,15 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
 
     // Explicit curriculum graph definitions
     const PREREQUISITE_MAP: Record<string, { prereqs: string[]; crossPrereqs?: string[] }> = {
-      // Tier 1: Foundations
-      "m1-l1": { prereqs: [] }, // Root: always unlocked
+      // Tier 0 / Module 0: Core Prompt Foundations
+      "foundation-clarity": { prereqs: [] }, // Root: always unlocked
+      "foundation-role": { prereqs: ["foundation-clarity"] },
+      "foundation-constraints": { prereqs: ["foundation-role"] },
+      "foundation-iteration": { prereqs: ["foundation-constraints"] },
+      "foundation-context": { prereqs: ["foundation-iteration"] },
+
+      // Tier 1: In-Context Mechanics
+      "m1-l1": { prereqs: ["foundation-context"] },
       "m1-l2": { prereqs: ["m1-l1"] },
       "m1-l3": { prereqs: ["m1-l2"] },
       "m1-l4": { prereqs: ["m1-l3"] },
@@ -83,9 +90,9 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
         nodes.push({
           lesson,
           moduleId: mod.id,
-          moduleCode: mod.code || `TIER-${modIdx + 1}`,
+          moduleCode: mod.code || `TIER-${modIdx}`,
           moduleTitle: mod.title,
-          tier: modIdx + 1,
+          tier: modIdx,
           indexInTier: lessonIdx,
           prerequisites: dep.prereqs,
           crossPrereqs: dep.crossPrereqs,
@@ -141,40 +148,24 @@ export const InteractiveSkillTree: React.FC<InteractiveSkillTreeProps> = ({
     return matchesSearch && matchesDifficulty;
   };
 
-  const tiers = [
-    {
-      tier: 1,
-      name: "Tier 1: Foundations",
-      code: "PROMPT-101",
-      description: "Latent space steering, deterministic bounding & in-context tokens",
-      color: "from-blue-600/20 to-cyan-600/10 border-blue-500/30",
-      accent: "text-blue-400",
-    },
-    {
-      tier: 2,
-      name: "Tier 2: Cognitive Framing",
-      code: "PROMPT-201",
-      description: "Few-shot calibration, structured outputs & reasoning chains",
-      color: "from-indigo-600/20 to-purple-600/10 border-indigo-500/30",
-      accent: "text-indigo-400",
-    },
-    {
-      tier: 3,
-      name: "Tier 3: Reasoning & Tools",
-      code: "PROMPT-301",
-      description: "ReAct patterns, metaprompting & self-consistency ensembles",
-      color: "from-emerald-600/20 to-teal-600/10 border-emerald-500/30",
-      accent: "text-emerald-400",
-    },
-    {
-      tier: 4,
-      name: "Tier 4: Adversarial Safety",
-      code: "PROMPT-401",
-      description: "Injection defense, constitutional alignment & red-teaming",
-      color: "from-rose-600/20 to-amber-600/10 border-rose-500/30",
-      accent: "text-rose-400",
-    },
-  ];
+  const tiers = useMemo(() => {
+    const tierThemeMap: Record<number, { color: string; accent: string }> = {
+      0: { color: "from-blue-600/20 to-indigo-600/10 border-blue-500/30", accent: "text-blue-400" },
+      1: { color: "from-cyan-600/20 to-blue-600/10 border-cyan-500/30", accent: "text-cyan-400" },
+      2: { color: "from-indigo-600/20 to-purple-600/10 border-indigo-500/30", accent: "text-indigo-400" },
+      3: { color: "from-emerald-600/20 to-teal-600/10 border-emerald-500/30", accent: "text-emerald-400" },
+      4: { color: "from-rose-600/20 to-amber-600/10 border-rose-500/30", accent: "text-rose-400" },
+    };
+
+    return modules.map((mod, modIdx) => ({
+      tier: modIdx,
+      name: mod.title,
+      code: mod.code,
+      description: mod.description || mod.academicTrack || "Core prompt engineering module",
+      color: tierThemeMap[modIdx]?.color || "from-slate-800/40 to-slate-900/60 border-slate-700/40",
+      accent: tierThemeMap[modIdx]?.accent || "text-blue-400",
+    }));
+  }, [modules]);
 
   return (
     <div className="space-y-4 sm:space-y-6">

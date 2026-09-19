@@ -97,7 +97,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
 
   // Global Multi-Track Stats
   const totalCompletedLessonsAllTracks = userProgress.completedLessons.length;
-  const totalLessonsAllTracks = foundationsTrack.lessons.length + comprehensiveCurriculumTrack.lessons.length;
+  const totalLessonsAllTracks = comprehensiveCurriculumTrack.lessons.length;
   const foundationsComplete = foundationsTrack.lessons.every((l) => l.completed);
   const curriculumComplete = comprehensiveCurriculumTrack.lessons.every((l) => l.completed);
   const totalCertificatesEarned = (foundationsComplete ? 1 : 0) + (curriculumComplete ? 1 : 0);
