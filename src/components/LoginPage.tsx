@@ -127,7 +127,13 @@ const FOOTER_FEATURES = [
   },
 ];
 
-export const LoginPage: React.FC = () => {
+interface LoginPageProps {
+  message?: string;
+  onSuccess?: () => void;
+  isModal?: boolean;
+}
+
+export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModal = false }) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -285,6 +291,7 @@ export const LoginPage: React.FC = () => {
         await signInWithEmailAndPassword(auth, email.trim(), password);
       }
       recordUserActivity();
+      if (onSuccess) onSuccess();
     } catch (authError: any) {
       const code = authError?.code;
       const genericMsg = getAuthErrorMessage(authError);
@@ -331,6 +338,7 @@ export const LoginPage: React.FC = () => {
 
       await signInWithPopup(auth, provider);
       recordUserActivity();
+      if (onSuccess) onSuccess();
     } catch (authError: any) {
       if (authError?.code === 'auth/popup-blocked') {
         try {
@@ -542,6 +550,14 @@ export const LoginPage: React.FC = () => {
                     : 'Sign in to access your curriculum and credentials'}
                 </p>
               </div>
+
+              {/* Action Banner Message */}
+              {message && (
+                <div className="mb-4 p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 text-xs text-blue-300 font-medium flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-blue-400 shrink-0" />
+                  <span>{message}</span>
+                </div>
+              )}
 
               {/* Password Reset Alert Confirmation */}
               {resetSuccess && (

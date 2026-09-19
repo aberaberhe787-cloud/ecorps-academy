@@ -48,6 +48,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
     setLanguage,
     t,
     logout,
+    openAuthModal,
     resumeCurriculum,
   } = useApp();
 
@@ -332,22 +333,35 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
               </div>
             </div>
 
-            {/* Footer / Log out */}
+            {/* Footer / Auth action */}
             <div className="p-3 border-t border-slate-800 bg-slate-950">
-              <button
-                onClick={async () => {
-                  onClose();
-                  try {
-                    await logout();
-                  } catch (e) {
-                    console.error("Logout failed", e);
-                  }
-                }}
-                className="w-full py-2 px-3 rounded-xl border border-rose-900/40 bg-rose-950/20 hover:bg-rose-950/40 text-rose-400 hover:text-rose-300 font-medium text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-                <span>Log Out</span>
-              </button>
+              {auth.currentUser ? (
+                <button
+                  onClick={async () => {
+                    onClose();
+                    try {
+                      await logout();
+                    } catch (e) {
+                      console.error("Logout failed", e);
+                    }
+                  }}
+                  className="w-full py-2 px-3 rounded-xl border border-rose-900/40 bg-rose-950/20 hover:bg-rose-950/40 text-rose-400 hover:text-rose-300 font-medium text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  <span>Log Out</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    onClose();
+                    openAuthModal("Sign in to save your progress and unlock learner features.");
+                  }}
+                  className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer active:scale-95"
+                >
+                  <User className="h-3.5 w-3.5" />
+                  <span>Sign In / Register</span>
+                </button>
+              )}
             </div>
           </motion.div>
         </div>

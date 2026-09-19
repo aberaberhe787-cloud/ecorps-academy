@@ -5,7 +5,7 @@ import { auth } from "../../lib/firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
 
 export const AccountMenu: React.FC = () => {
-  const { userProgress, setActiveTab, logout } = useApp();
+  const { userProgress, setActiveTab, logout, openAuthModal } = useApp();
   const [accountOpen, setAccountOpen] = useState(false);
   const [resetStatus, setResetStatus] = useState<string | null>(null);
   const accountMenuRef = useRef<HTMLDivElement>(null);
@@ -21,6 +21,22 @@ export const AccountMenu: React.FC = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  if (!auth.currentUser) {
+    return (
+      <div ref={accountMenuRef} className="relative" id="account-menu-container">
+        <button
+          id="navbar-guest-signin-btn"
+          onClick={() => openAuthModal("Sign in to save your progress and unlock learner features.")}
+          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 px-3 py-1.5 text-xs font-bold text-white shadow-sm transition-all cursor-pointer active:scale-95 shrink-0"
+          aria-label="Sign in"
+        >
+          <User className="h-3.5 w-3.5 text-white" />
+          <span className="whitespace-nowrap">Sign In</span>
+        </button>
+      </div>
+    );
+  }
 
   const handlePasswordReset = async () => {
     if (!auth.currentUser?.email) {
