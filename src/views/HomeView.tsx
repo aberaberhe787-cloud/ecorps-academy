@@ -20,6 +20,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
+import { auth } from "../lib/firebase";
 import { FOUNDATION_LESSONS } from "./PromptEngineeringPath";
 import { Lesson, CurriculumModule } from "../types";
 import { Button } from "../components/ui/Button";
@@ -34,6 +35,7 @@ export const HomeView: React.FC = () => {
     setActiveTab,
     setActiveLessonId,
     openSandbox,
+    openAuthModal,
     currentCurriculum,
     progressModel,
     userProgress,
@@ -215,22 +217,34 @@ export const HomeView: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-center">
-          <div className="flex items-center gap-2 rounded-xl bg-slate-900/90 border border-slate-800 px-3.5 py-2">
-            <Flame className="h-4 w-4 text-orange-400 fill-orange-400/20" />
-            <div className="text-left">
-              <div className="text-[10px] text-slate-400 font-mono">STUDY STREAK</div>
-              <div className="text-xs font-bold text-white font-mono">{userProgress.streakDays || 1} Days Active</div>
+        {auth.currentUser ? (
+          <div className="flex items-center gap-2 self-start sm:self-center">
+            <div className="flex items-center gap-2 rounded-xl bg-slate-900/90 border border-slate-800 px-3.5 py-2">
+              <Flame className="h-4 w-4 text-orange-400 fill-orange-400/20" />
+              <div className="text-left">
+                <div className="text-[10px] text-slate-400 font-mono">STUDY STREAK</div>
+                <div className="text-xs font-bold text-white font-mono">{userProgress.streakDays || 0} Days Active</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 rounded-xl bg-slate-900/90 border border-slate-800 px-3.5 py-2">
+              <Award className="h-4 w-4 text-amber-400" />
+              <div className="text-left">
+                <div className="text-[10px] text-slate-400 font-mono">EXPERIENCE</div>
+                <div className="text-xs font-bold text-amber-300 font-mono">{userProgress.xp || 0} XP</div>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 rounded-xl bg-slate-900/90 border border-slate-800 px-3.5 py-2">
-            <Award className="h-4 w-4 text-amber-400" />
-            <div className="text-left">
-              <div className="text-[10px] text-slate-400 font-mono">EXPERIENCE</div>
-              <div className="text-xs font-bold text-amber-300 font-mono">{userProgress.xp || 0} XP</div>
-            </div>
+        ) : (
+          <div className="flex items-center gap-2 self-start sm:self-center">
+            <button
+              onClick={() => openAuthModal("Sign in to save your progress and earn XP.")}
+              className="flex items-center gap-2 rounded-xl bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 px-4 py-2 text-xs font-bold text-blue-300 transition-colors cursor-pointer"
+            >
+              <Sparkles className="h-4 w-4 text-blue-400" />
+              <span>Guest Preview Mode</span>
+            </button>
           </div>
-        </div>
+        )}
       </div>
 
       {/* ========================================================================= */}

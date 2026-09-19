@@ -1,6 +1,7 @@
 import React from "react";
 import { Flame, Menu } from "lucide-react";
 import { useApp } from "../../context/AppContext";
+import { auth } from "../../lib/firebase";
 import { ThemeToggle } from "../ThemeToggle";
 import { NetworkStatusBadge } from "../NetworkStatusIndicator";
 import { AccountMenu } from "./AccountMenu";
@@ -18,7 +19,7 @@ export const SystemControls: React.FC<SystemControlsProps> = ({
 
   return (
     <div className="flex shrink-0 items-center gap-1.5 sm:gap-2" id="navbar-system-controls">
-      {userProgress && (
+      {auth.currentUser && userProgress && (
         <div 
           title={`${userProgress.streakDays} Day Activity Streak!`}
           onClick={() => setActiveTab("profile")}

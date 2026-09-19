@@ -1,4 +1,5 @@
 import { robustApiFetch } from "./apiErrorHandler";
+import { auth } from "./firebase";
 
 /**
  * Resilient API client for server-side Google Gemini endpoints
@@ -132,6 +133,10 @@ export async function callGeminiGenerate(params: {
   topP?: number;
   signal?: AbortSignal;
 }): Promise<GeminiGenerateResponse> {
+  if (!auth.currentUser) {
+    throw new Error("Authentication required to execute real Gemini model.");
+  }
+
   const { prompt, systemInstruction, temperature = 0.7, topP = 0.95, signal } = params;
 
   const result = await safeFetchJson<GeminiGenerateResponse>("/api/gemini/generate", {
@@ -176,6 +181,10 @@ export async function callGeminiEvaluate(params: {
   type?: "mission" | "assessment";
   signal?: AbortSignal;
 }): Promise<GeminiEvaluateResponse> {
+  if (!auth.currentUser) {
+    throw new Error("Authentication required to execute real Gemini evaluation.");
+  }
+
   const { prompt, rubric, missionId, missionContext, type = "mission", signal } = params;
 
   const result = await safeFetchJson<GeminiEvaluateResponse>("/api/gemini/evaluate", {
