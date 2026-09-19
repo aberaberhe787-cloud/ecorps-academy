@@ -254,6 +254,25 @@ body, #root {
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
+/* Fluid Layout & Container Safety for Mobile Desktop Site Modes */
+.fluid-container {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Ensure flex and grid children do not overflow parent containers */
+.min-w-0 {
+  min-width: 0 !important;
+}
+
+/* Fluid image, svg, and canvas responsive containment */
+img, svg, canvas {
+  max-width: 100%;
+  height: auto;
+}
+
 /* Print Styles */
 @media print {
   /* Hide navigation, footer, and interactive UI elements */
