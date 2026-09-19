@@ -52,7 +52,7 @@ export const AccountMenu: React.FC = () => {
 
       {accountOpen && (
         <div 
-          className="absolute right-0 mt-2 w-64 rounded-xl bg-slate-950 border border-slate-800 shadow-2xl z-50 p-2 text-xs animate-in fade-in duration-150"
+          className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-1.5rem)] rounded-xl bg-slate-950 border border-slate-800 shadow-2xl z-50 p-2 text-xs animate-in fade-in duration-150"
           role="menu"
         >
           <div className="px-3 py-2 border-b border-slate-800/80 mb-1">

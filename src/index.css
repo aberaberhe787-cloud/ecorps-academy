@@ -2,11 +2,21 @@
 @import "./theme.css";
 
 @layer base {
-  html {
+  html, body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     scroll-behavior: smooth;
-    max-width: 100vw;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    position: relative;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    box-sizing: border-box;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
   }
 
   /* Universal smooth scroll behavior on all scroll containers */
@@ -18,6 +28,17 @@
     * {
       scroll-behavior: smooth;
     }
+  }
+
+  /* Media and embedding responsiveness */
+  img, svg, video, canvas, audio, iframe, embed, object {
+    max-width: 100%;
+    height: auto;
+  }
+
+  pre, code, kbd, samp {
+    max-width: 100%;
+    overflow-x: auto;
   }
 
   /* Smooth tab indicator transitions and interactive element feedback */

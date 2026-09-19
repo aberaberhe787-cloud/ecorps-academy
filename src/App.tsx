@@ -43,7 +43,7 @@ const MainContent: React.FC = () => {
   }, [activeTab]);
 
   return (
-    <main className="w-full relative flex-1 flex flex-col pb-16 md:pb-0">
+    <main className="w-full max-w-full overflow-x-hidden min-w-0 relative flex-1 flex flex-col pb-16 md:pb-0">
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
@@ -54,7 +54,7 @@ const MainContent: React.FC = () => {
             duration: 0.28,
             ease: [0.22, 1, 0.36, 1], // Custom cubic bezier for smooth, snappy deceleration
           }}
-          className="w-full flex-1 flex flex-col"
+          className="w-full max-w-full min-w-0 flex-1 flex flex-col"
         >
           {activeTab === "home" && <HomeView />}
           {activeTab === "curriculum" && <RequireAuth><CurriculumView /></RequireAuth>}
@@ -76,7 +76,7 @@ const AppShell: React.FC = () => {
     isDistractionFreeMode && activeTab === "curriculum" && !!activeLessonId;
 
   return (
-    <div className="flex min-h-dvh flex-col w-full  bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-blue-600 selection:text-white font-sans antialiased">
+    <div className="flex min-h-dvh flex-col w-full max-w-full overflow-x-hidden bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-blue-600 selection:text-white font-sans antialiased">
       {!hideGlobalChrome && <Navbar />}
       {!hideGlobalChrome && <Breadcrumbs />}
       <MainContent />

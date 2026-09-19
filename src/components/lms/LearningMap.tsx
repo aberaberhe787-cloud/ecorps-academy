@@ -353,7 +353,7 @@ export const LearningMap: React.FC<LearningMapProps> = ({
         <span className="text-slate-400">↔ Pan</span>
       </div>
 
-      <div className="relative rounded-3xl border border-slate-800/90 bg-slate-950/90 shadow-2xl overflow-x-auto overflow-y-hidden p-4 sm:p-8 backdrop-blur-xl">
+      <div className="relative w-full max-w-full rounded-3xl border border-slate-800/90 bg-slate-950/90 shadow-2xl overflow-x-auto overflow-y-hidden p-4 sm:p-8 backdrop-blur-xl touch-pan-x overscroll-x-contain">
         {/* Subtle grid backdrop */}
         <div
           className="absolute inset-0 opacity-[0.03] pointer-events-none"

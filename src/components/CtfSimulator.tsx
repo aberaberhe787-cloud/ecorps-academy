@@ -294,9 +294,13 @@ export const CtfSimulator: React.FC = () => {
       <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-4 space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
           <div className="space-y-0.5">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className={`rounded-md px-2 py-0.5 text-xs font-mono font-bold uppercase border ${activeChallenge.badgeClass}`}>
                 {activeChallenge.difficulty} Tier
+              </span>
+              <span className="inline-flex items-center gap-1 rounded bg-purple-950/60 border border-purple-800/70 px-2 py-0.5 text-[11px] font-mono text-purple-300 font-medium">
+                <Shield className="h-3 w-3 text-purple-400" />
+                Target Competency: System Alignment & Adversarial Robustness
               </span>
               <h4 className="text-sm font-bold text-white">
                 Challenge {activeChallenge.number}: {activeChallenge.title}
