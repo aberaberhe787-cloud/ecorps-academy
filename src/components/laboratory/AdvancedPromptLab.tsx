@@ -28,6 +28,7 @@ import {
   ListTree
 } from "lucide-react";
 import { useApp } from "../../context/AppContext";
+import { auth } from "../../lib/firebaseClient";
 import { PromptExperiment, PromptVariant, TestCase, TestCaseExpectationType, VariantResult } from "../../types";
 import { BatchRunner } from "../BatchRunner";
 
@@ -96,7 +97,7 @@ const STARTER_EXPERIMENTS: Omit<PromptExperiment, "id" | "createdAt" | "updatedA
 ];
 
 export const AdvancedPromptLab: React.FC = () => {
-  const { userProgress, setUserProgress, executeCurrentPrompt: executePrompt } = useApp();
+  const { userProgress, setUserProgress, executeCurrentPrompt: executePrompt, openAuthModal } = useApp();
   
   const [experiments, setExperiments] = useState<PromptExperiment[]>(() => {
     return userProgress.experiments && userProgress.experiments.length > 0
@@ -137,6 +138,10 @@ export const AdvancedPromptLab: React.FC = () => {
   const activeExperiment = experiments.find((e) => e.id === activeExpId) || experiments[0];
 
   const saveExperimentsToState = (updatedList: PromptExperiment[]) => {
+    if (!auth.currentUser) {
+      openAuthModal("Sign in to save experiments and earn XP.");
+      return;
+    }
     setExperiments(updatedList);
     setUserProgress((prev) => ({
       ...prev,

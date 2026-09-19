@@ -46,6 +46,7 @@ import {
   callGeminiGenerate,
   callGeminiEvaluate,
 } from "../lib/geminiApi";
+import { generateMockAiResponse } from "../lib/mockAiEngine";
 import {
   robustApiFetch,
   isPageResumedAfterLongIdle,
@@ -194,6 +195,24 @@ const initialProgress: UserProgress = {
   promptsEngineeredCount: 0
 };
 
+const cleanGuestProgress: UserProgress = {
+  completedLessons: [],
+  completedMissions: [],
+  completedAssessments: [],
+  missionEvidence: {},
+  missionScores: {},
+  bookmarkedPatterns: [],
+  bookmarkedLessons: [],
+  savedCustomPrompts: [],
+  savedCodeSnippets: [],
+  xp: 0,
+  streakDays: 0,
+  lastActivityDate: undefined,
+  loginHistory: [],
+  achievements: [],
+  promptsEngineeredCount: 0
+};
+
 function getProgressFingerprint(p: UserProgress): string {
   return JSON.stringify({
     xp: p.xp,
@@ -270,24 +289,12 @@ function loadCachedProgress(uid?: string | null): UserProgress {
       return { ...initialProgress };
     }
 
-    // Guest / unauthenticated fallback: load only guest storage key
-    const guestData = localStorage.getItem(STORAGE_KEY);
-    if (guestData) {
-      try {
-        const parsed = JSON.parse(guestData);
-        return {
-          ...initialProgress,
-          ...parsed,
-          completedLessons: Array.isArray(parsed.completedLessons) ? parsed.completedLessons : [],
-          completedMissions: Array.isArray(parsed.completedMissions) ? parsed.completedMissions : [],
-          completedAssessments: Array.isArray(parsed.completedAssessments) ? parsed.completedAssessments : [],
-        };
-      } catch {}
-    }
+    // Guest / unauthenticated fallback: return clean guest state
+    return { ...cleanGuestProgress };
   } catch (e) {
     console.warn("Could not load cached progress from localStorage", e);
   }
-  return { ...initialProgress };
+  return { ...cleanGuestProgress };
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -630,7 +637,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // 6. Reset in-memory state cleanly to isolated guest/initial state
     firestoreUserId.current = null;
     persistenceLifecycle.current = 'idle';
-    const cleanGuestState = { ...initialProgress };
+    const cleanGuestState = { ...cleanGuestProgress };
     lastSyncedFingerprint.current = getProgressFingerprint(cleanGuestState);
     setUserProgress(cleanGuestState);
     setPersistenceStatus('synced');
@@ -1295,6 +1302,36 @@ Provide:
     const startTime = Date.now();
     const analysis = analyzePrompt(textToExecute);
 
+    // Guest execution route: use Mock AI Engine and do NOT award XP or mutate learner state
+    if (!auth.currentUser) {
+      const mockData = generateMockAiResponse(textToExecute, sysToExecute);
+      const duration = Date.now() - startTime;
+      const execResult: ExecutionResult = {
+        id: "exec-mock-" + Date.now() + "-" + Math.random().toString(36).substring(2, 7),
+        prompt: textToExecute,
+        systemInstruction: sysToExecute,
+        output: mockData.text,
+        timestamp: Date.now(),
+        durationMs: Math.max(10, duration),
+        tokenCount: analysis.tokenEstimate + 45,
+        isMock: true,
+        model: "Ecorp Mock AI Engine (Guest Sandbox)",
+        status: "success",
+        detectedTechniques: analysis.techniqueBadges,
+        executionMode: "mock",
+        provider: "Mock AI Gateway",
+      };
+
+      if (isolated || currentSeq === activeExecutionIdRef.current) {
+        setIsExecuting(false);
+        if (!isolated) {
+          setLastResult(execResult);
+          setExecutionHistory((prev) => [execResult, ...prev.slice(0, 19)]);
+        }
+      }
+      return execResult;
+    }
+
     let resultText = "";
     let modelName = "Google Gemini";
     let duration = 0;
@@ -1385,6 +1422,10 @@ Provide:
   };
 
   const executeComparison = async () => {
+    if (!auth.currentUser) {
+      openAuthModal("Sign in to compare prompt models with real Gemini AI.");
+      return;
+    }
     // Clear outputs immediately
     setLastResult(null);
     setComparisonResultB(null);
@@ -1516,6 +1557,10 @@ Provide:
   };
 
   const evaluateMission = async (missionId: string, submittedPrompt: string): Promise<MissionEvaluationResult> => {
+    if (!auth.currentUser) {
+      openAuthModal("Sign in to evaluate missions and earn XP.");
+      throw new Error("Authentication required to evaluate missions.");
+    }
     setIsEvaluatingMission(true);
     const mission = missions.find((m) => m.id === missionId);
 
@@ -1732,6 +1777,10 @@ Provide:
   };
 
   const markLessonComplete = (lessonId: string) => {
+    if (!auth.currentUser) {
+      openAuthModal("Sign in to save your lesson progress and earn XP.");
+      return;
+    }
     // Optimistic local update with duplicate completion protection
     setUserProgress((prev) => {
       const isAlreadyDone = prev.completedLessons.includes(lessonId);
@@ -1755,6 +1804,10 @@ Provide:
   };
 
   const addXp = (amount: number) => {
+    if (!auth.currentUser) {
+      openAuthModal("Sign in to earn XP and save your achievements.");
+      return;
+    }
     setUserProgress((prev) => processUserActivity({
       ...prev,
       xp: prev.xp + amount
@@ -1762,6 +1815,10 @@ Provide:
   };
 
   const completeAssessment = (assessmentId: string, submission: string) => {
+    if (!auth.currentUser) {
+      openAuthModal("Sign in to submit assessments and unlock certification credentials.");
+      return;
+    }
     setUserProgress((prev) => {
       const isAlreadyCompleted = (prev.completedAssessments || []).includes(assessmentId);
       const nextAssessments = isAlreadyCompleted ? (prev.completedAssessments || []) : [...(prev.completedAssessments || []), assessmentId];
@@ -1775,6 +1832,10 @@ Provide:
   };
 
   const saveCustomPrompt = (title: string, promptText: string) => {
+    if (!auth.currentUser) {
+      openAuthModal("Sign in to save custom prompts to your library.");
+      return;
+    }
     setUserProgress((prev) => processUserActivity({
       ...prev,
       savedCustomPrompts: [
@@ -1786,6 +1847,10 @@ Provide:
   };
 
   const deleteCustomPrompt = (id: string) => {
+    if (!auth.currentUser) {
+      openAuthModal("Sign in to manage your saved custom prompts.");
+      return;
+    }
     setUserProgress((prev) => ({
       ...prev,
       savedCustomPrompts: prev.savedCustomPrompts.filter((p) => p.id !== id)
@@ -1793,6 +1858,10 @@ Provide:
   };
 
   const saveCodeSnippet = (snippet: Omit<SavedCodeSnippet, "id" | "createdAt">) => {
+    if (!auth.currentUser) {
+      openAuthModal("Sign in to save code snippets to your library.");
+      return;
+    }
     const newSnippet: SavedCodeSnippet = {
       ...snippet,
       id: "snip-" + Date.now() + "-" + Math.random().toString(36).substring(2, 7),
@@ -1809,6 +1878,10 @@ Provide:
   };
 
   const deleteCodeSnippet = (id: string) => {
+    if (!auth.currentUser) {
+      openAuthModal("Sign in to manage your saved code snippets.");
+      return;
+    }
     setUserProgress((prev) => ({
       ...prev,
       savedCodeSnippets: (prev.savedCodeSnippets || []).filter((s) => s.id !== id)
@@ -1816,6 +1889,10 @@ Provide:
   };
 
   const toggleBookmarkPattern = (patternId: string) => {
+    if (!auth.currentUser) {
+      openAuthModal("Sign in to bookmark patterns to your library.");
+      return;
+    }
     setUserProgress((prev) => {
       const isBookmarked = prev.bookmarkedPatterns.includes(patternId);
       return {
@@ -1828,6 +1905,10 @@ Provide:
   };
 
   const toggleBookmarkLesson = (lessonId: string) => {
+    if (!auth.currentUser) {
+      openAuthModal("Sign in to bookmark lessons to your library.");
+      return;
+    }
     setUserProgress((prev) => {
       const current = prev.bookmarkedLessons || [];
       const isBookmarked = current.includes(lessonId);
@@ -1841,6 +1922,10 @@ Provide:
   };
 
   const submitLessonFeedback = (feedback: LessonFeedback) => {
+    if (!auth.currentUser) {
+      openAuthModal("Sign in to submit lesson feedback and earn XP.");
+      return;
+    }
     setUserProgress((prev) => {
       const currentFeedbacks = prev.lessonFeedbacks || {};
       const isFirstTime = !currentFeedbacks[feedback.lessonId];
