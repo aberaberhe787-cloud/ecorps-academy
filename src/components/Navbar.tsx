@@ -48,7 +48,7 @@ export const Navbar: React.FC = () => {
           {/* Desktop & Compact Primary Navigation */}
           <PrimaryNavigation />
 
-          {/* System Controls & Account Menu */}
+          {/* System Controls & Account / Authentication Menu */}
           <SystemControls 
             mobileMenuOpen={mobileMenuOpen} 
             onToggleMobileMenu={() => setMobileMenuOpen(prev => !prev)} 

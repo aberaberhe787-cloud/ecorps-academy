@@ -154,6 +154,12 @@ interface AppContextType {
   userPreferences: UserPreferences;
   updateUserPreferences: (partial: Partial<UserPreferences>) => void;
   
+  // Auth Modal
+  isAuthModalOpen: boolean;
+  authModalMessage: string;
+  openAuthModal: (msg?: string) => void;
+  closeAuthModal: () => void;
+
   // Helper to load into playground
   loadIntoPlayground: (options: {
     prompt: string;
@@ -292,6 +298,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [activeMissionId, setActiveMissionId] = useState<string | null>(null);
   const [playgroundSubTab, setPlaygroundSubTab] = useState<"sandbox" | "missions" | "comparison" | "history" | "saved" | "ctf" | "lab">("sandbox");
+  
+  // Guest Auth Modal State
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [authModalMessage, setAuthModalMessage] = useState<string>("");
+
+  const openAuthModal = (msg?: string) => {
+    setAuthModalMessage(msg || "Sign in to save your progress and unlock learner features.");
+    setIsAuthModalOpen(true);
+  };
+
+  const closeAuthModal = () => {
+    setIsAuthModalOpen(false);
+  };
   
   // Persistent user preferences layer (theme, distraction-free mode, language, AI mode, sampling)
   const initialPrefsRef = useRef<UserPreferences>(loadUserPreferences());
@@ -1949,7 +1968,11 @@ Provide:
         currentCurriculum,
         loadIntoPlayground,
         user,
-        competencyStates
+        competencyStates,
+        isAuthModalOpen,
+        authModalMessage,
+        openAuthModal,
+        closeAuthModal,
       }}
     >
       {children}
