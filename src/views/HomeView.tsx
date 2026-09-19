@@ -359,8 +359,13 @@ export const HomeView: React.FC = () => {
             {/* Step 2: Concept */}
             <div 
               onClick={() => {
-                setActiveLessonId(nextCurriculumLesson.id);
-                setActiveTab("curriculum");
+                const target = nextCurriculumLesson || activeResumeLesson;
+                if (target) {
+                  setActiveLessonId(target.id);
+                  setActiveTab("curriculum");
+                } else {
+                  setActiveTab("certification");
+                }
               }}
               className="group rounded-xl border border-slate-800 bg-slate-950/80 p-3.5 hover:border-blue-500/50 hover:bg-blue-950/20 transition-all cursor-pointer flex flex-col justify-between"
             >
@@ -412,8 +417,13 @@ export const HomeView: React.FC = () => {
             {/* Step 4: Recall */}
             <div 
               onClick={() => {
-                setActiveLessonId(nextCurriculumLesson.id);
-                setActiveTab("curriculum");
+                const target = nextCurriculumLesson || activeResumeLesson;
+                if (target) {
+                  setActiveLessonId(target.id);
+                  setActiveTab("curriculum");
+                } else {
+                  setActiveTab("certification");
+                }
               }}
               className="group rounded-xl border border-slate-800 bg-slate-950/80 p-3.5 hover:border-amber-500/50 hover:bg-amber-950/20 transition-all cursor-pointer flex flex-col justify-between"
             >
@@ -440,8 +450,13 @@ export const HomeView: React.FC = () => {
             {/* Step 5: Assessment */}
             <div 
               onClick={() => {
-                setActiveLessonId(nextCurriculumLesson.id);
-                setActiveTab("curriculum");
+                const target = nextCurriculumLesson || activeResumeLesson;
+                if (target) {
+                  setActiveLessonId(target.id);
+                  setActiveTab("curriculum");
+                } else {
+                  setActiveTab("certification");
+                }
               }}
               className="group rounded-xl border border-slate-800 bg-slate-950/80 p-3.5 hover:border-purple-500/50 hover:bg-purple-950/20 transition-all cursor-pointer flex flex-col justify-between"
             >
@@ -467,7 +482,13 @@ export const HomeView: React.FC = () => {
 
             {/* Step 6: Completion & Next */}
             <div 
-              onClick={() => setActiveTab("curriculum")}
+              onClick={() => {
+                if (nextCurriculumLesson || activeResumeLesson) {
+                  setActiveTab("curriculum");
+                } else {
+                  setActiveTab("certification");
+                }
+              }}
               className="group rounded-xl border border-slate-800 bg-slate-950/80 p-3.5 hover:border-teal-500/50 hover:bg-teal-950/20 transition-all cursor-pointer flex flex-col justify-between"
             >
               <div className="space-y-1.5">

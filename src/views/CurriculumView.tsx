@@ -233,7 +233,7 @@ export const CurriculumView: React.FC = () => {
     const total = tierLessons.length;
     const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
     const totalXp = tierLessons.reduce((acc, l) => acc + (l.xpReward || 50), 0);
-    const nextLesson = tierLessons.find((l) => !userProgress.completedLessons.includes(l.id)) || tierLessons[0] || allLessons[0];
+    const nextLesson = tierLessons.find((l) => !userProgress.completedLessons.includes(l.id));
     return { tierLessons, completed, total, percent, totalXp, nextLesson };
   };
 
@@ -242,15 +242,28 @@ export const CurriculumView: React.FC = () => {
 
   // Determine target lesson to resume (globally or for active tier)
   const targetResumeLesson = React.useMemo(() => {
-    if (difficultyFilter !== "All" && activeTierStats.nextLesson) {
-      return activeTierStats.nextLesson;
+    if (difficultyFilter !== "All") {
+      const tierLessons = getTierLessons(difficultyFilter);
+      if (
+        userProgress.lastLessonId &&
+        !userProgress.completedLessons.includes(userProgress.lastLessonId)
+      ) {
+        const found = tierLessons.find((l) => l.id === userProgress.lastLessonId);
+        if (found) return found;
+      }
+      return tierLessons.find((l) => !userProgress.completedLessons.includes(l.id));
     }
-    if (userProgress.lastLessonId) {
+
+    if (
+      userProgress.lastLessonId &&
+      !userProgress.completedLessons.includes(userProgress.lastLessonId)
+    ) {
       const found = allLessons.find((l) => l.id === userProgress.lastLessonId);
       if (found) return found;
     }
-    return allLessons.find((l) => !userProgress.completedLessons.includes(l.id)) || allLessons[0];
-  }, [difficultyFilter, activeTierStats.nextLesson, userProgress.lastLessonId, userProgress.completedLessons, allLessons]);
+
+    return allLessons.find((l) => !userProgress.completedLessons.includes(l.id));
+  }, [difficultyFilter, userProgress.lastLessonId, userProgress.completedLessons, allLessons]);
 
   // Filtered modules for syllabus and visual map views
   const filteredModules = React.useMemo(() => {
@@ -796,12 +809,18 @@ export const CurriculumView: React.FC = () => {
               <button
                 id="curriculum-resume-hero-btn"
                 onClick={() => {
-                  handleSelectLesson(targetResumeLesson);
+                  if (targetResumeLesson) {
+                    handleSelectLesson(targetResumeLesson);
+                  } else {
+                    setActiveTab("certification");
+                  }
                 }}
-                className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-900/30 transition-all w-full sm:w-auto"
+                className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-blue-900/30 transition-all w-full sm:w-auto cursor-pointer"
               >
                 <Play className="h-3.5 w-3.5 fill-white shrink-0" />
-                <span className="truncate">Resume Lesson: {targetResumeLesson.title}</span>
+                <span className="truncate">
+                  {targetResumeLesson ? `Resume Lesson: ${targetResumeLesson.title}` : "Claim Certification →"}
+                </span>
                 <ArrowRight className="h-3.5 w-3.5 shrink-0" />
               </button>
             </div>

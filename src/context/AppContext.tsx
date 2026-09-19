@@ -455,8 +455,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     try {
       const lessonsMap = Object.fromEntries(progressToPersist.completedLessons.map(id => [id, true]));
-      const totalCurriculumLessons = 16;
-      const progressPercent = Math.min(100, Math.round((lessonsCount / totalCurriculumLessons) * 100));
+      const totalCurriculumLessons = currentCurriculum
+        .flatMap((module) => module.lessons)
+        .length;
+      const progressPercent =
+        totalCurriculumLessons > 0
+          ? Math.min(
+              100,
+              Math.round((lessonsCount / totalCurriculumLessons) * 100)
+            )
+          : 0;
       const payload = {
         displayName: currentUser.displayName || "Ecorp Scholar",
         photoURL: currentUser.photoURL || null,
@@ -919,7 +927,17 @@ Provide:
               : (Array.isArray(progressNested.achievements) ? progressNested.achievements : (cachedState.achievements || [])),
             lastLessonId: data.lastLessonId || progressNested.lastLessonId || cachedState.lastLessonId || undefined,
             lastModuleId: data.lastModuleId || progressNested.lastModuleId || cachedState.lastModuleId || undefined,
-            curriculumProgressPercent: Math.min(100, Math.round((mergedLessons.length / 16) * 100)),
+            curriculumProgressPercent: (() => {
+              const totalLessonsCount = currentCurriculum
+                .flatMap((module) => module.lessons)
+                .length;
+              return totalLessonsCount > 0
+                ? Math.min(
+                    100,
+                    Math.round((mergedLessons.length / totalLessonsCount) * 100)
+                  )
+                : 0;
+            })(),
             promptsEngineeredCount,
           };
 
@@ -1673,13 +1691,18 @@ Provide:
     const allLessonIds = allLessons.map((l) => l.id);
     let targetLessonId: string | null = null;
 
-    if (userProgress.lastLessonId && allLessonIds.includes(userProgress.lastLessonId)) {
+    if (
+      userProgress.lastLessonId &&
+      allLessonIds.includes(userProgress.lastLessonId) &&
+      !userProgress.completedLessons.includes(userProgress.lastLessonId)
+    ) {
       targetLessonId = userProgress.lastLessonId;
     } else {
       const firstIncomplete = allLessonIds.find(
         (id) => !userProgress.completedLessons.includes(id)
       );
-      targetLessonId = firstIncomplete || allLessonIds[0] || null;
+
+      targetLessonId = firstIncomplete || null;
     }
 
     if (targetLessonId) {
