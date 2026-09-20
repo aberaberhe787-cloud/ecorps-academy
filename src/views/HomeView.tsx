@@ -29,6 +29,7 @@ import { Card } from "../components/ui/Card";
 import { ProgressBar } from "../components/ui/ProgressBar";
 import { StatCard } from "../components/ui/StatCard";
 import { EcorpLogo } from "../components/EcorpLogo";
+import { LearningRouteDiagnostic } from "../components/LearningRouteDiagnostic";
 
 export const HomeView: React.FC = () => {
   const {
@@ -246,6 +247,8 @@ export const HomeView: React.FC = () => {
           </div>
         )}
       </div>
+
+      {!auth.currentUser && <LearningRouteDiagnostic />}
 
       {/* ========================================================================= */}
       {/* 1. CONTINUE LEARNING (Dominant Architecture Hero Card)                     */}

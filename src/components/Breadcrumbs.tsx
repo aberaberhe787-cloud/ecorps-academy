@@ -66,6 +66,7 @@ export const Breadcrumbs: React.FC = () => {
       {/* Root - Academy */}
       <button
         onClick={handleHomeClick}
+        aria-label="Go to Academy home"
         className="flex items-center gap-1 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer"
       >
         <Home className="h-3.5 w-3.5" />
@@ -95,6 +96,7 @@ export const Breadcrumbs: React.FC = () => {
                 onClick={() => {
                   if (setActiveLessonId) setActiveLessonId(null);
                 }}
+                aria-label={`Return to ${moduleCode} lessons`}
                 className="hover:text-blue-500 dark:hover:text-blue-400 transition-colors truncate max-w-[120px] sm:max-w-[160px] cursor-pointer"
                 title={moduleCode}
               >

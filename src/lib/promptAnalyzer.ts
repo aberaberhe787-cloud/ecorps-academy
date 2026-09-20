@@ -35,7 +35,7 @@ export function analyzePrompt(promptText: string): PromptAnalysis {
   const hasRole = /(act as|you are a|you are an|persona|assume the role of|expert in|specialist)/i.test(text);
   const hasDelimiters = /(<{1,2}[a-z_-]+>{1,2}|"{3}|`{3}|---|\n### )/i.test(text);
   const hasFormattingConstraints = /(json|schema|bullet|table|markdown|numbered|max words|under \d+ words|\d+ sentences|raw json|format:)/i.test(text);
-  const hasChainOfThought = /(step[- ]by[- ]step|think|reasoning|scratchpad|deduction|first,|stage 1|calculate|verify)/i.test(text);
+  const hasChainOfThought = /(task decomposition|verification|sanity check|quality check|acceptance criteria|first,|stage 1|calculate|verify)/i.test(text);
   const hasFewShot = /(example \d+:|input:.*output:|exemplar|---[\s\S]*---)/i.test(text);
   const hasNegativeConstraints = /(do not|don't|forbidden|never|avoid|prohibited|without using)/i.test(text);
   const hasVariablePlaceholders = /{{[a-zA-Z0-9_-]+}}/.test(text);
@@ -95,10 +95,10 @@ export function analyzePrompt(promptText: string): PromptAnalysis {
   }
 
   if (hasChainOfThought) {
-    strengths.push("Reasoning Steps Triggered: Chain-of-Thought minimizes cognitive shortcuts.");
-    techniqueBadges.push("Chain-of-Thought (CoT)");
+    strengths.push("Task decomposition and verification criteria are explicit.");
+    techniqueBadges.push("Decomposition & Verification");
   } else if (score > 60) {
-    suggestions.push("Pedagogical Tip: For complex tasks, add 'Think step-by-step' to enable reasoning tokens, which drastically improves accuracy on multi-step problems.");
+    suggestions.push("Pedagogical Tip: For complex tasks, specify task phases, acceptance criteria, and a concise final rationale. Do not request hidden reasoning traces.");
   }
 
   if (hasFewShot) {

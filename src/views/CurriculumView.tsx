@@ -121,7 +121,8 @@ export const CurriculumView: React.FC = () => {
 
   const bookmarkedLessons = useMemo(() => userProgress.bookmarkedLessons || [], [userProgress.bookmarkedLessons]);
   const bookmarkedCount = bookmarkedLessons.length;
-  const completedCount = userProgress.completedLessons.length;
+  const curriculumLessonIds = useMemo(() => new Set(allLessons.map((lesson) => lesson.id)), [allLessons]);
+  const completedCount = userProgress.completedLessons.filter((id) => curriculumLessonIds.has(id)).length;
   const inProgressCount = Math.max(0, allLessons.length - completedCount);
 
   // Pathway Track Profiles & Metadata
@@ -791,7 +792,7 @@ export const CurriculumView: React.FC = () => {
                 </div>
 
                 <span className="text-xs text-slate-400 font-mono">
-                  {userProgress.completedLessons.length} / {allLessons.length} Lessons Mastered ({curriculumProgressPercent}%)
+                  {completedCount} / {allLessons.length} Lessons Mastered ({curriculumProgressPercent}%)
                 </span>
               </div>
 
@@ -1205,15 +1206,15 @@ export const CurriculumView: React.FC = () => {
                   <div className="flex justify-between text-xs text-slate-400 font-mono mb-1.5">
                     <span className="font-semibold text-slate-300">{t.curriculum.theoryMastery}</span>
                     <span className="text-blue-400 font-bold">
-                      {userProgress.completedLessons.length} / {allLessons.length} {t.curriculum.modulesMastered} (
-                      {Math.round((userProgress.completedLessons.length / allLessons.length) * 100)}%)
+                      {completedCount} / {allLessons.length} {t.curriculum.modulesMastered} (
+                      {Math.round((completedCount / allLessons.length) * 100)}%)
                     </span>
                   </div>
                   <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-800">
                     <div
                       className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 transition-all duration-500"
                       style={{
-                        width: `${(userProgress.completedLessons.length / allLessons.length) * 100}%`
+                        width: `${(completedCount / allLessons.length) * 100}%`
                       }}
                     />
                   </div>

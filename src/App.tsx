@@ -44,7 +44,11 @@ const MainContent: React.FC = () => {
   }, [activeTab]);
 
   return (
-    <main className="w-full max-w-full overflow-x-hidden min-w-0 relative flex-1 flex flex-col pb-16 md:pb-0">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="w-full max-w-full overflow-x-hidden min-w-0 relative flex-1 flex flex-col pb-16 md:pb-0"
+    >
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
@@ -78,6 +82,12 @@ const AppShell: React.FC = () => {
 
   return (
     <div className="flex min-h-dvh flex-col w-full max-w-full overflow-x-hidden bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-blue-600 selection:text-white font-sans antialiased">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-blue-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
+      >
+        Skip to main content
+      </a>
       {!hideGlobalChrome && <Navbar />}
       {!hideGlobalChrome && <Breadcrumbs />}
       <MainContent />
