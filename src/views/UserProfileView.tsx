@@ -23,14 +23,28 @@ import {
 import { useApp } from '../context/AppContext';
 import { auth } from '../lib/firebase';
 import { BadgeComponent } from '../components/profile/BadgeComponent';
+import { MasteryBadges } from '../components/profile/MasteryBadges';
+import { GlobalLeaderboard } from '../components/profile/GlobalLeaderboard';
+import { LearningTimeline } from '../components/profile/LearningTimeline';
+import { CompetencyTrendChart } from '../components/profile/CompetencyTrendChart';
 import { DailyStreakCounter } from '../components/profile/DailyStreakCounter';
 import { ActivityAnalytics } from '../components/profile/ActivityAnalytics';
 import { CompetencyPortfolio } from '../components/profile/CompetencyPortfolio';
+import { CompetencyRadarChart } from '../components/profile/CompetencyRadarChart';
 import { MILESTONE_DEFINITIONS } from '../lib/achievementEngine';
 import { ProgressRing } from '../components/profile/ProgressRing';
 import { FOUNDATION_LESSONS } from './PromptEngineeringPath';
 import { curriculumModules } from '../data/lessonsData';
-import { NavTab } from '../types';
+import { LESSON_COMPETENCY_REGISTRY } from '../lib/competencyModel';
+import { NavTab, levelMap } from '../types';
+
+const GLOBAL_COMPETENCY_AVERAGES: Record<string, number> = {
+  'foundations-01': 2.5,
+  'foundations-02': 2.2,
+  'foundations-03': 2.8,
+  'foundations-04': 2.1,
+  'foundations-05': 2.6,
+};
 
 export interface LearningPath {
   id: string;
@@ -60,6 +74,8 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
   } = useApp();
   const [copiedSnippetId, setCopiedSnippetId] = useState<string | null>(null);
   const [activeSavedTab, setActiveSavedTab] = useState<'snippets' | 'prompts'>('snippets');
+  const [showGlobalBenchmark, setShowGlobalBenchmark] = useState(false);
+  const [highlightedCompetencyId, setHighlightedCompetencyId] = useState<string | null>(null);
   
   // Build both tracks from system source data
   const foundationsTrack: LearningPath = {
@@ -105,6 +121,15 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
   const userName = auth.currentUser?.displayName || auth.currentUser?.email?.split('@')[0] || 'Ecorp Scholar';
   const photoUrl = auth.currentUser?.photoURL;
   const level = Math.floor(userProgress.xp / 500) + 1;
+
+  const allLessons = [...FOUNDATION_LESSONS, ...curriculumModules.flatMap(m => m.lessons)];
+  const weakestCompetency = [...competencyStates].sort((a, b) => levelMap[a.level] - levelMap[b.level])[0];
+  const recommendedLesson = allLessons.find(l => 
+    !userProgress.completedLessons.includes(l.id) &&
+    LESSON_COMPETENCY_REGISTRY[l.id]?.primaryCompetency === weakestCompetency?.competency.id
+  );
+
+  const knowledgeGaps = competencyStates.filter(state => levelMap[state.level] < 2);
 
   const downloadCertificate = (track: LearningPath) => {
     const isTrackComplete = track.lessons.every((l) => l.completed);
@@ -497,8 +522,98 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
           </div>
         </section>
 
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 space-y-6 shadow-xl">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-blue-400" />
+              Recommended Next Lesson
+            </h2>
+            {recommendedLesson ? (
+              <div className="bg-slate-950 p-4 rounded-xl border border-blue-900/50 space-y-2">
+                <h3 className="text-blue-300 font-bold">{recommendedLesson.title}</h3>
+                <p className="text-sm text-slate-400">Targeting: {weakestCompetency?.competency.title}</p>
+                <button
+                  onClick={() => setActiveTab('curriculum')}
+                  className="mt-2 text-sm font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                >
+                  Start Lesson <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <p className="text-slate-400">All caught up! Excellent work.</p>
+            )}
+            <div className="pt-4 border-t border-slate-800">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2 mb-3">
+                <ShieldCheck className="h-4 w-4 text-rose-400" />
+                Knowledge Gaps
+              </h3>
+              {knowledgeGaps.length > 0 ? (
+                <div className="space-y-2">
+                  {knowledgeGaps.map(gap => (
+                    <div key={gap.competency.id} className="text-xs text-slate-400 bg-slate-950 px-3 py-2 rounded border border-rose-900/20">
+                      {gap.competency.title}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-emerald-400">No major knowledge gaps detected!</p>
+              )}
+            </div>
+            <LearningTimeline allLessons={allLessons} completedLessonIds={userProgress.completedLessons} />
+          </div>
+
+          <CompetencyPortfolio competencyStates={competencyStates} />
+        </section>
+
         {/* Unified Competency Architecture Portfolio */}
-        <CompetencyPortfolio competencyStates={competencyStates} />
+        <section className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 space-y-4 shadow-xl">
+          <div className="flex items-center justify-between">
+            <h2 className="flex items-center gap-2 text-base font-bold text-white">
+              <Sparkles className="text-blue-400 h-5 w-5" /> 
+              <span>Competency Radar</span>
+            </h2>
+            <label className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showGlobalBenchmark}
+                onChange={(e) => setShowGlobalBenchmark(e.target.checked)}
+                className="rounded border-slate-700 bg-slate-800 text-blue-600 focus:ring-blue-500"
+              />
+              Show Global Benchmark
+            </label>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <CompetencyRadarChart 
+                competencyStates={competencyStates} 
+                showGlobalBenchmark={showGlobalBenchmark}
+                globalAverages={GLOBAL_COMPETENCY_AVERAGES}
+                highlightedCompetencyId={highlightedCompetencyId}
+              />
+              <div className="flex flex-wrap gap-2 mt-4">
+                {competencyStates.map(state => (
+                  <button
+                    key={state.competency.id}
+                    onClick={() => setHighlightedCompetencyId(highlightedCompetencyId === state.competency.id ? null : state.competency.id)}
+                    className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                      highlightedCompetencyId === state.competency.id 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                    }`}
+                  >
+                    {state.competency.title}
+                  </button>
+                ))}
+              </div>
+              <MasteryBadges competencyStates={competencyStates} />
+            </div>
+            <GlobalLeaderboard userCompetencyStates={competencyStates} />
+          </div>
+        </section>
+
+        <section>
+          <CompetencyTrendChart />
+        </section>
 
         {/* Saved Code Snippets & Custom Prompts Library */}
         <section className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 space-y-4 shadow-xl">
