@@ -98,41 +98,41 @@ The app crashed twice when I tried to pay my bill. Your customer support chat wa
   },
   {
     id: "mission-3",
-    title: "Mission 3: Chain-of-Thought Logic Solver",
+    title: "Mission 3: Structured Reasoning & Verification",
     difficulty: "Intermediate",
-    category: "Reasoning & CoT",
-    description: "Prevent intuitive mistakes on tricky multi-step word math and logic problems by forcing the model into explicit scratchpad step-by-step reasoning.",
-    objective: "Create a prompt that forces the model to define algebraic variables, write intermediate equations, self-verify results, and output a verified final answer.",
+    category: "Reasoning & Verification",
+    description: "Prevent intuitive mistakes on multi-step problems by defining a concise solution plan, checking constraints, and returning a verifiable final answer without requesting hidden reasoning.",
+    objective: "Create a prompt that defines variables and equations, requests a concise derivation appropriate for the task, verifies the result, and returns a clearly structured final answer.",
     targetCriteria: [
-      "Mandate intermediate reasoning steps (e.g., 'Step 1: Identify given facts', 'Step 2: Formulate equations')",
-      "Include a dedicated scratchpad or <thinking> block",
+      "Define a concise solution plan (e.g., identify facts, formulate equations, calculate)",
+      "Request only the necessary visible rationale; do not ask for hidden reasoning or a <thinking> block",
       "Require a self-verification check against original constraints",
-      "Clearly separate internal reasoning from the final answer output"
+      "Separate the concise rationale from the final answer output"
     ],
     competencies: ["cognitive-reasoning"],
     initialPrompt: "A company has 3 developers. Dev A codes twice as fast as Dev B. Dev C codes 50 lines less than Dev A. Together they wrote 700 lines in a day. How many lines did Dev A write?",
     systemInstruction: "You are a mathematical problem-solving tutor.",
     hints: [
       "Use explicit step headers: Step 1 (Variables), Step 2 (Equations), Step 3 (Calculations), Step 4 (Verification).",
-      "Tell the model to show all algebraic substitution lines.",
+      "Ask for a concise derivation that includes only equations needed to verify the result.",
       "Instruct it to verify total sum equals 700 before concluding."
     ],
-    solutionExample: `Solve the following programming productivity word problem using explicit Chain-of-Thought reasoning.
+    solutionExample: `Solve the following programming productivity word problem using a concise, verifiable solution process.
 
 Follow this 5-step deduction protocol:
 1. [VARIABLE_DECLARATION]: Assign algebraic variables to each developer.
 2. [EQUATION_FORMULATION]: Translate all word problem constraints into linear equations.
-3. [STEP_BY_STEP_DERIVATION]: Solve for the primary variable with complete arithmetic steps shown.
+3. [CONCISE_DERIVATION]: Solve for the primary variable using only the equations needed to check the result.
 4. [SANITY_CHECK_VERIFICATION]: Plug the computed values back into the original premises to verify the sum equals 700.
 5. [FINAL_ANSWER]: Present a clean summary table showing lines written by Dev A, Dev B, and Dev C.
 
 Problem:
 A company has 3 developers. Dev A codes twice as fast as Dev B. Dev C codes 50 lines less than Dev A. Together they wrote 700 lines in a day. How many lines did Dev A write?`,
     validator: {
-      requiredKeywords: ["step", "equation", "verif", "variable", "reasoning"],
+      requiredKeywords: ["step", "equation", "verif", "variable", "final"],
       requiresRole: false,
       requiresDelimiters: false,
-      requiresCoT: true,
+      requiresCoT: false,
       requiresOutputFormat: true,
       minCharLength: 140
     }

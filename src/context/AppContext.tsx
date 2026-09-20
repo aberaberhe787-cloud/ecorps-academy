@@ -9,6 +9,8 @@ import {
   CurriculumModule,
   LessonFeedback,
   SavedCodeSnippet,
+  ReviewScheduleItem,
+  WorkplaceProject,
   ProgressModel
 } from "../types";
 import { missions } from "../data/missionsData";
@@ -133,6 +135,9 @@ interface AppContextType {
   toggleBookmarkPattern: (patternId: string) => void;
   toggleBookmarkLesson: (lessonId: string) => void;
   submitLessonFeedback: (feedback: LessonFeedback) => void;
+  completeScheduledReview: (lessonId: string) => void;
+  createWorkplaceProject: (project: Omit<WorkplaceProject, "id" | "createdAt" | "updatedAt">) => void;
+  updateWorkplaceProject: (id: string, update: Partial<Pick<WorkplaceProject, "status" | "title" | "problem" | "successMetric" | "linkedMissionIds">>) => void;
   syncProgressToDb: (email?: string) => Promise<void>;
   logout: () => Promise<void>;
   
@@ -186,6 +191,8 @@ const initialProgress: UserProgress = {
   bookmarkedLessons: [],
   savedCustomPrompts: [],
   savedCodeSnippets: [],
+  reviewSchedule: [],
+  workplaceProjects: [],
   xp: 120, // Initial welcome XP
   streakDays: 1,
   lastActivityDate: getUtcDateString(),
@@ -206,6 +213,8 @@ function getProgressFingerprint(p: UserProgress): string {
     bookmarkedLessons: [...(p.bookmarkedLessons || [])].sort(),
     achievements: p.achievements.map(x => x.id).sort(),
     promptsEngineeredCount: p.promptsEngineeredCount || 0,
+    reviews: (p.reviewSchedule || []).map((review) => [review.lessonId, review.dueAt, review.intervalDays]),
+    projects: (p.workplaceProjects || []).map((project) => [project.id, project.status, project.updatedAt]),
   });
 }
 
@@ -257,6 +266,8 @@ function loadCachedProgress(uid?: string | null): UserProgress {
             bookmarkedPatterns: Array.isArray(parsed.bookmarkedPatterns) ? parsed.bookmarkedPatterns : [],
             bookmarkedLessons: Array.isArray(parsed.bookmarkedLessons) ? parsed.bookmarkedLessons : [],
             savedCustomPrompts: Array.isArray(parsed.savedCustomPrompts) ? parsed.savedCustomPrompts : [],
+            reviewSchedule: Array.isArray(parsed.reviewSchedule) ? parsed.reviewSchedule : [],
+            workplaceProjects: Array.isArray(parsed.workplaceProjects) ? parsed.workplaceProjects : [],
             achievements: Array.isArray(parsed.achievements) ? parsed.achievements : [],
             xp: typeof parsed.xp === 'number' ? parsed.xp : initialProgress.xp,
             streakDays: typeof parsed.streakDays === 'number' ? parsed.streakDays : 1,
@@ -477,18 +488,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const totalCurriculumLessons = currentCurriculum
         .flatMap((module) => module.lessons)
         .length;
+      const curriculumLessonIds = new Set(
+        currentCurriculum.flatMap((module) => module.lessons.map((lesson) => lesson.id))
+      );
+      const curriculumCompletedCount = progressToPersist.completedLessons.filter((id) =>
+        curriculumLessonIds.has(id)
+      ).length;
       const progressPercent =
         totalCurriculumLessons > 0
           ? Math.min(
               100,
-              Math.round((lessonsCount / totalCurriculumLessons) * 100)
+              Math.round((curriculumCompletedCount / totalCurriculumLessons) * 100)
             )
           : 0;
       const payload = {
         displayName: currentUser.displayName || "Ecorp Scholar",
         photoURL: currentUser.photoURL || null,
-        curriculumProgress: lessonsCount,
-        completedLessonCount: lessonsCount,
+        curriculumProgress: curriculumCompletedCount,
+        completedLessonCount: curriculumCompletedCount,
         curriculumProgressPercent: progressPercent,
         lastLessonId: progressToPersist.lastLessonId || null,
         lastModuleId: progressToPersist.lastModuleId || null,
@@ -506,6 +523,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         missionEvidence: progressToPersist.missionEvidence || {},
         bookmarkedPatterns: progressToPersist.bookmarkedPatterns,
         savedCustomPrompts: progressToPersist.savedCustomPrompts,
+        reviewSchedule: progressToPersist.reviewSchedule || [],
+        workplaceProjects: progressToPersist.workplaceProjects || [],
         achievements: progressToPersist.achievements,
         promptsEngineeredCount: progressToPersist.promptsEngineeredCount || 0,
         // Also save progress object for backward-compatibility with progressUtils
@@ -903,6 +922,16 @@ Provide:
             ...(Array.isArray(data.savedCustomPrompts) ? data.savedCustomPrompts : []),
           ];
           const uniquePrompts = Array.from(new Map(allPrompts.map(p => [p.id, p])).values());
+          const mergedReviews = Array.from(new Map([
+            ...(cachedState.reviewSchedule || []),
+            ...(Array.isArray(progressNested.reviewSchedule) ? progressNested.reviewSchedule : []),
+            ...(Array.isArray(data.reviewSchedule) ? data.reviewSchedule : []),
+          ].map((review: ReviewScheduleItem) => [review.lessonId, review])).values());
+          const mergedProjects = Array.from(new Map([
+            ...(cachedState.workplaceProjects || []),
+            ...(Array.isArray(progressNested.workplaceProjects) ? progressNested.workplaceProjects : []),
+            ...(Array.isArray(data.workplaceProjects) ? data.workplaceProjects : []),
+          ].map((project: WorkplaceProject) => [project.id, project])).values());
 
           const maxXP = Math.max(
             typeof data.xp === "number" ? data.xp : 0,
@@ -937,6 +966,8 @@ Provide:
             missionEvidence: mergedEvidence,
             bookmarkedPatterns: mergedBookmarks,
             savedCustomPrompts: uniquePrompts,
+            reviewSchedule: mergedReviews,
+            workplaceProjects: mergedProjects,
             xp: maxXP,
             streakDays: finalStreak,
             lastActivityDate: streakResult.date,
@@ -947,13 +978,15 @@ Provide:
             lastLessonId: data.lastLessonId || progressNested.lastLessonId || cachedState.lastLessonId || undefined,
             lastModuleId: data.lastModuleId || progressNested.lastModuleId || cachedState.lastModuleId || undefined,
             curriculumProgressPercent: (() => {
-              const totalLessonsCount = currentCurriculum
-                .flatMap((module) => module.lessons)
-                .length;
+              const curriculumLessonIds = new Set(
+                currentCurriculum.flatMap((module) => module.lessons.map((lesson) => lesson.id))
+              );
+              const totalLessonsCount = curriculumLessonIds.size;
+              const completedCurriculumLessons = mergedLessons.filter((id) => curriculumLessonIds.has(id)).length;
               return totalLessonsCount > 0
                 ? Math.min(
                     100,
-                    Math.round((mergedLessons.length / totalLessonsCount) * 100)
+                    Math.round((completedCurriculumLessons / totalLessonsCount) * 100)
                   )
                 : 0;
             })(),
@@ -1042,6 +1075,8 @@ Provide:
             missionEvidence: initialUserProgress.missionEvidence || {},
             bookmarkedPatterns: initialUserProgress.bookmarkedPatterns,
             savedCustomPrompts: initialUserProgress.savedCustomPrompts,
+            reviewSchedule: initialUserProgress.reviewSchedule || [],
+            workplaceProjects: initialUserProgress.workplaceProjects || [],
             achievements: initialUserProgress.achievements,
             promptsEngineeredCount: initialUserProgress.promptsEngineeredCount || 0,
             progress: initialUserProgress,
@@ -1093,6 +1128,8 @@ Provide:
               completedLessons: merged2,
               completedMissions: Array.isArray(docData.completedMissions) ? docData.completedMissions : currentProg.completedMissions,
               missionScores: docData.missionScores && typeof docData.missionScores === "object" ? docData.missionScores : currentProg.missionScores,
+              reviewSchedule: Array.isArray(docData.reviewSchedule) ? docData.reviewSchedule : currentProg.reviewSchedule,
+              workplaceProjects: Array.isArray(docData.workplaceProjects) ? docData.workplaceProjects : currentProg.workplaceProjects,
               completedAssessments: Array.isArray(docData.completedAssessments) ? docData.completedAssessments : currentProg.completedAssessments,
               missionEvidence: docData.missionEvidence && typeof docData.missionEvidence === "object" ? docData.missionEvidence : currentProg.missionEvidence,
               bookmarkedPatterns: Array.isArray(docData.bookmarkedPatterns) ? docData.bookmarkedPatterns : currentProg.bookmarkedPatterns,
@@ -1741,14 +1778,21 @@ Provide:
       const updatedLessons = isAlreadyDone
         ? prev.completedLessons
         : [...prev.completedLessons, lessonId];
-      const allTotal = currentCurriculum.flatMap((m) => m.lessons).length || 1;
-      const percent = Math.min(100, Math.round((updatedLessons.length / allTotal) * 100));
+      const curriculumLessonIds = new Set(
+        currentCurriculum.flatMap((module) => module.lessons.map((lesson) => lesson.id))
+      );
+      const allTotal = curriculumLessonIds.size || 1;
+      const completedCurriculumLessons = updatedLessons.filter((id) => curriculumLessonIds.has(id)).length;
+      const percent = Math.min(100, Math.round((completedCurriculumLessons / allTotal) * 100));
       const next = {
         ...prev,
         completedLessons: updatedLessons,
         xp: isAlreadyDone ? prev.xp : prev.xp + 40,
         lastLessonId: lessonId,
         curriculumProgressPercent: percent,
+        reviewSchedule: isAlreadyDone
+          ? (prev.reviewSchedule || [])
+          : [{ lessonId, dueAt: Date.now() + 24 * 60 * 60 * 1000, intervalDays: 1 } as ReviewScheduleItem, ...(prev.reviewSchedule || []).filter((review) => review.lessonId !== lessonId)],
       };
       return processUserActivity(next);
     });
@@ -1856,6 +1900,33 @@ Provide:
     });
   };
 
+  const completeScheduledReview = (lessonId: string) => {
+    setUserProgress((prev) => processUserActivity({
+      ...prev,
+      reviewSchedule: (prev.reviewSchedule || []).map((review) => review.lessonId !== lessonId ? review : {
+        ...review,
+        completedAt: Date.now(),
+        intervalDays: Math.min(review.intervalDays * 2, 30),
+        dueAt: Date.now() + Math.min(review.intervalDays * 2, 30) * 24 * 60 * 60 * 1000,
+      }),
+    }));
+  };
+
+  const createWorkplaceProject = (project: Omit<WorkplaceProject, "id" | "createdAt" | "updatedAt">) => {
+    const now = Date.now();
+    setUserProgress((prev) => processUserActivity({
+      ...prev,
+      workplaceProjects: [{ ...project, id: `project-${now}`, createdAt: now, updatedAt: now }, ...(prev.workplaceProjects || [])],
+    }));
+  };
+
+  const updateWorkplaceProject = (id: string, update: Partial<Pick<WorkplaceProject, "status" | "title" | "problem" | "successMetric" | "linkedMissionIds">>) => {
+    setUserProgress((prev) => processUserActivity({
+      ...prev,
+      workplaceProjects: (prev.workplaceProjects || []).map((project) => project.id === id ? { ...project, ...update, updatedAt: Date.now() } : project),
+    }));
+  };
+
   const loadIntoPlayground = (options: {
     prompt: string;
     systemInstruction?: string;
@@ -1952,6 +2023,9 @@ Provide:
         toggleBookmarkPattern,
         toggleBookmarkLesson,
         submitLessonFeedback,
+        completeScheduledReview,
+        createWorkplaceProject,
+        updateWorkplaceProject,
         syncProgressToDb,
         logout,
         selectedPatternId,

@@ -285,6 +285,24 @@ export interface SavedCodeSnippet {
   updatedAt?: number;
 }
 
+export interface ReviewScheduleItem {
+  lessonId: string;
+  dueAt: number;
+  intervalDays: number;
+  completedAt?: number;
+}
+
+export interface WorkplaceProject {
+  id: string;
+  title: string;
+  problem: string;
+  successMetric: string;
+  status: "planned" | "in_progress" | "complete";
+  linkedMissionIds: string[];
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface UserProgress {
   completedLessons: string[];
   completedMissions: string[];
@@ -306,6 +324,8 @@ export interface UserProgress {
   curriculumProgressPercent?: number;
   promptsEngineeredCount?: number;
   experiments?: PromptExperiment[];
+  reviewSchedule?: ReviewScheduleItem[];
+  workplaceProjects?: WorkplaceProject[];
 }
 
 export interface GlossaryTerm {

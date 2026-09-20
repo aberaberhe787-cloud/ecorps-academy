@@ -23,12 +23,16 @@ export const AssessmentView: React.FC = () => {
         prompt: submission,
         rubric: {
           title: 'Prompt Engineering Capstone Assessment',
-          objective: 'Demonstrate production-grade prompt engineering mastery by constructing an end-to-end engineered prompt adhering to persona adoption, XML delimitation, and strict output constraints.',
+          objective: 'Demonstrate production-grade prompt engineering mastery through a safe, testable workplace prompt with explicit output, verification, revision, and success criteria.',
           targetCriteria: [
             "Explicit persona formulation (e.g., 'Act as a Senior...')",
             "Structured delimiters (e.g., <system_specs> or ```)",
             "Strict output format constraints (JSON, Schema, or Table)",
-            "Negative constraints, boundary limits, or error handling"
+            "Negative constraints, boundary limits, or error handling",
+            "Observable verification criteria without requesting hidden reasoning traces",
+            "A safe-data boundary or escalation condition for missing evidence",
+            "A revision loop for incomplete or low-confidence output",
+            "A measurable success signal tied to the intended workplace outcome"
           ],
           minPassingScore: 70
         }
@@ -97,6 +101,8 @@ export const AssessmentView: React.FC = () => {
           <li className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-blue-400 shrink-0" /> Delimiters (e.g. &lt;context&gt; or ```)</li>
           <li className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-blue-400 shrink-0" /> Strict Output Format (JSON / Table / Schema)</li>
           <li className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-blue-400 shrink-0" /> Negative Constraints or Success Criteria</li>
+          <li className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-blue-400 shrink-0" /> Observable verification and quality-control loop</li>
+          <li className="flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-blue-400 shrink-0" /> Safe-data boundary and measurable outcome</li>
         </ul>
       </div>
 
@@ -111,7 +117,7 @@ export const AssessmentView: React.FC = () => {
               className="w-full h-56 bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-200 focus:border-blue-500 focus:outline-none transition-colors"
               value={submission}
               onChange={(e) => setSubmission(e.target.value)}
-              placeholder="Act as a Senior Cloud Security Architect. Analyze the following configuration inside <config>...</config>. Return a JSON response with keys: 'risk_level', 'vulnerabilities', and 'remediation_steps'. Do not include markdown preamble."
+              placeholder="Act as a Senior Cloud Security Architect. Analyze <config>...</config>. Return JSON with risk_level, vulnerabilities, remediation_steps, confidence, and verification_checks. Do not expose hidden reasoning. If evidence is missing or sensitive data is required, state the gap and escalate. Validate required fields before returning; if validation fails, revise once. Success: every finding references supplied evidence."
             />
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">

@@ -28,6 +28,7 @@ import { ActivityAnalytics } from '../components/profile/ActivityAnalytics';
 import { CompetencyPortfolio } from '../components/profile/CompetencyPortfolio';
 import { MILESTONE_DEFINITIONS } from '../lib/achievementEngine';
 import { ProgressRing } from '../components/profile/ProgressRing';
+import { LearningOperationsPanel } from '../components/profile/LearningOperationsPanel';
 import { FOUNDATION_LESSONS } from './PromptEngineeringPath';
 import { curriculumModules } from '../data/lessonsData';
 import { NavTab } from '../types';
@@ -96,8 +97,12 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
   const isCurrentTrackComplete = totalCount > 0 && completedCount === totalCount;
 
   // Global Multi-Track Stats
-  const totalCompletedLessonsAllTracks = userProgress.completedLessons.length;
-  const totalLessonsAllTracks = comprehensiveCurriculumTrack.lessons.length;
+  const allTrackLessonIds = new Set([
+    ...foundationsTrack.lessons.map((lesson) => lesson.id),
+    ...comprehensiveCurriculumTrack.lessons.map((lesson) => lesson.id),
+  ]);
+  const totalCompletedLessonsAllTracks = userProgress.completedLessons.filter((id) => allTrackLessonIds.has(id)).length;
+  const totalLessonsAllTracks = allTrackLessonIds.size;
   const foundationsComplete = foundationsTrack.lessons.every((l) => l.completed);
   const curriculumComplete = comprehensiveCurriculumTrack.lessons.every((l) => l.completed);
   const totalCertificatesEarned = (foundationsComplete ? 1 : 0) + (curriculumComplete ? 1 : 0);
@@ -498,9 +503,11 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
         </section>
 
         {/* Unified Competency Architecture Portfolio */}
-        <CompetencyPortfolio competencyStates={competencyStates} />
+      <CompetencyPortfolio competencyStates={competencyStates} />
 
-        {/* Saved Code Snippets & Custom Prompts Library */}
+      <LearningOperationsPanel />
+
+      {/* Saved Code Snippets & Custom Prompts Library */}
         <section className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 space-y-4 shadow-xl">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <h2 className="flex items-center gap-2 text-base font-bold text-white">
