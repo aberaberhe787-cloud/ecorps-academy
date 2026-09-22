@@ -59,6 +59,10 @@ import { EcorpLogo } from "../components/EcorpLogo";
 import { CertificateGenerator } from "../components/CertificateGenerator";
 import { InteractiveSkillTree } from "../components/lms/InteractiveSkillTree";
 import { LessonFeedbackModal } from "../components/lms/LessonFeedbackModal";
+import { LessonSidebar } from "../components/lms/LessonSidebar";
+import { generateLessonJsonLd } from "../lib/structuredData";
+import { PrintableLessonHeader } from "../components/lms/PrintableLessonHeader";
+import { PrintableLessonFooter } from "../components/lms/PrintableLessonFooter";
 
 const BLOOM_COLORS: Record<BloomsTaxonomyLevel, { bg: string; text: string; border: string }> = {
   Remembering: { bg: "bg-slate-800", text: "text-slate-300", border: "border-slate-700" },
@@ -96,6 +100,29 @@ export const CurriculumView: React.FC = () => {
   const currentModule: CurriculumModule | undefined = currentCurriculum.find((m) =>
     m.lessons.some((l) => l.id === currentLesson.id)
   );
+
+  useEffect(() => {
+    if (currentLesson && currentModule) {
+      const jsonLd = generateLessonJsonLd(currentLesson, currentModule);
+      const script = document.createElement("script");
+      script.type = "application/ld+json";
+      script.text = JSON.stringify(jsonLd);
+      script.id = "lesson-jsonld";
+      
+      const existingScript = document.getElementById("lesson-jsonld");
+      if (existingScript) {
+        document.head.removeChild(existingScript);
+      }
+      document.head.appendChild(script);
+      
+      return () => {
+        const scriptToRemove = document.getElementById("lesson-jsonld");
+        if (scriptToRemove) {
+          document.head.removeChild(scriptToRemove);
+        }
+      };
+    }
+  }, [currentLesson, currentModule]);
 
   const currentIndex = allLessons.findIndex((l) => l.id === currentLesson.id);
   const prevLesson = currentIndex > 0 ? allLessons[currentIndex - 1] : null;
@@ -1265,405 +1292,424 @@ export const CurriculumView: React.FC = () => {
         {/* VIEW MODE 2: ACTIVE LESSON INSTRUCTIONAL STUDY                            */}
         {/* ========================================================================= */}
         {viewMode === "lesson" && (
-          <div className="space-y-8 animate-in fade-in duration-300" id="lms-active-lesson-view">
-            {/* Lesson Banner & Objective */}
-            <div className="rounded-3xl border border-slate-800 bg-slate-900/90 p-4 sm:p-8 shadow-2xl backdrop-blur-md space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
-                <div className="space-y-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-md bg-blue-950 border border-blue-800 px-2 py-0.5 font-mono text-xs font-semibold text-blue-300">
-                      {currentModule?.code || "MODULE"} • {currentModule?.title}
-                    </span>
-                    {(() => {
-                      const diffConfig = getDifficultyBadgeConfig(currentLesson.difficulty);
-                      return (
-                        <span
-                          className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-mono font-bold border ${diffConfig.bg} ${diffConfig.text} ${diffConfig.border}`}
-                          title={`Difficulty Level: ${diffConfig.label}`}
-                        >
-                          <span className={`h-1.5 w-1.5 rounded-full ${diffConfig.dotBg}`} />
-                          <span>{diffConfig.label}</span>
-                        </span>
-                      );
-                    })()}
-                    <span
-                      className={`rounded-md border px-2 py-0.5 text-xs font-semibold ${bloomStyle.bg} ${bloomStyle.text} ${bloomStyle.border}`}
-                    >
-                      {t.curriculum.bloomLevel}: {bloomFocus}
-                    </span>
-                    {(() => {
-                      const readingStats = calculateLessonReadingStats(currentLesson);
-                      return (
-                        <span
-                          className="flex items-center gap-1 text-xs text-slate-300 font-mono"
-                          title={`Estimated read time based on ~${readingStats.wordCount} words`}
-                        >
-                          <Clock className="h-3.5 w-3.5 text-blue-400" />
-                          <span className="font-semibold">{readingStats.display}</span>
-                        </span>
-                      );
-                    })()}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr,280px] gap-8 animate-in fade-in duration-300" id="lms-active-lesson-view">
+            <div className="space-y-8">
+              {/* Printable-Only Header Component (Renders only when @media print is active) */}
+              <PrintableLessonHeader
+                title={currentLesson.title}
+                subtitle={currentLesson.subtitle}
+                moduleTitle={currentModule?.title}
+                author="ECORP Academy Faculty"
+              />
+              
+              {/* Printable-Only Footer Component with Auto-Generated Page Numbers */}
+              <PrintableLessonFooter
+                moduleTitle={currentModule?.title}
+              />
+              
+              {/* Lesson Banner & Objective */}
+              <div className="rounded-3xl border border-slate-800 bg-slate-900/90 p-4 sm:p-8 shadow-2xl backdrop-blur-md space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
+                  <div className="space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-md bg-blue-950 border border-blue-800 px-2 py-0.5 font-mono text-xs font-semibold text-blue-300">
+                        {currentModule?.code || "MODULE"} • {currentModule?.title}
+                      </span>
+                      {(() => {
+                        const diffConfig = getDifficultyBadgeConfig(currentLesson.difficulty);
+                        return (
+                          <span
+                            className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-mono font-bold border ${diffConfig.bg} ${diffConfig.text} ${diffConfig.border}`}
+                            title={`Difficulty Level: ${diffConfig.label}`}
+                          >
+                            <span className={`h-1.5 w-1.5 rounded-full ${diffConfig.dotBg}`} />
+                            <span>{diffConfig.label}</span>
+                          </span>
+                        );
+                      })()}
+                      <span
+                        className={`rounded-md border px-2 py-0.5 text-xs font-semibold ${bloomStyle.bg} ${bloomStyle.text} ${bloomStyle.border}`}
+                      >
+                        {t.curriculum.bloomLevel}: {bloomFocus}
+                      </span>
+                      {(() => {
+                        const readingStats = calculateLessonReadingStats(currentLesson);
+                        return (
+                          <span
+                            className="flex items-center gap-1 text-xs text-slate-300 font-mono"
+                            title={`Estimated read time based on ~${readingStats.wordCount} words`}
+                          >
+                            <Clock className="h-3.5 w-3.5 text-blue-400" />
+                            <span className="font-semibold">{readingStats.display}</span>
+                          </span>
+                        );
+                      })()}
+                    </div>
+                    <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white mt-1">
+                      {currentLesson.title}
+                    </h1>
+                    <p className="text-xs sm:text-sm text-blue-400/90 font-medium">
+                      {currentLesson.subtitle}
+                    </p>
                   </div>
-                  <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white mt-1">
-                    {currentLesson.title}
-                  </h1>
-                  <p className="text-xs sm:text-sm text-blue-400/90 font-medium">
-                    {currentLesson.subtitle}
+
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
+                    <button
+                      id="lesson-bookmark-top-btn"
+                      onClick={() => toggleBookmarkLesson(currentLesson.id)}
+                      className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold min-h-[40px] transition-all ${
+                        bookmarkedLessons.includes(currentLesson.id)
+                          ? "border-amber-500/60 bg-amber-950/80 text-amber-300 shadow-sm shadow-amber-950/40"
+                          : "border-slate-700 bg-slate-800/90 text-slate-200 hover:text-white hover:border-slate-600"
+                      }`}
+                      title={bookmarkedLessons.includes(currentLesson.id) ? "Remove from bookmarked topics" : "Bookmark this topic for later review"}
+                    >
+                      <Bookmark className={`h-3.5 w-3.5 ${bookmarkedLessons.includes(currentLesson.id) ? "fill-amber-400 text-amber-400" : ""}`} />
+                      <span>{bookmarkedLessons.includes(currentLesson.id) ? "Saved" : "Save"}</span>
+                    </button>
+
+                    <button
+                      id="lesson-export-pdf-top-btn"
+                      onClick={() => exportLessonToPdf(currentLesson)}
+                      className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/90 px-3 py-2 text-xs font-semibold text-slate-200 hover:text-white hover:border-slate-600 min-h-[40px] transition-all"
+                      title="Export clean, print-friendly study guide PDF"
+                    >
+                      <Download className="h-3.5 w-3.5 text-emerald-400" />
+                      <span>PDF</span>
+                    </button>
+
+                    <button
+                      id="lesson-try-sandbox-top-btn"
+                      onClick={handleTryInPlayground}
+                      className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/90 px-3 py-2 text-xs font-semibold text-slate-200 hover:text-white hover:border-slate-600 min-h-[40px] transition-all"
+                    >
+                      <Play className="h-3.5 w-3.5 text-blue-400 fill-blue-400/20" />
+                      <span>Sandbox</span>
+                    </button>
+
+                    {isCompleted ? (
+                      <span className="w-full sm:w-auto flex items-center justify-center gap-1.5 rounded-lg bg-emerald-950/90 border border-emerald-700 px-3.5 py-2 text-xs font-bold text-emerald-300 min-h-[40px]">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-400" /> {t.curriculum.mastered} (+{currentLesson.xpReward || 50} XP)
+                      </span>
+                    ) : (
+                      <div className="w-full sm:w-auto flex flex-col items-stretch sm:items-end gap-1">
+                        <button
+                          id="lesson-mark-mastered-btn"
+                          onClick={handleCompleteFullLesson}
+                          disabled={!allMilestonesReached}
+                          className={`flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold min-h-[40px] transition-all ${
+                            allMilestonesReached
+                              ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-950/60 hover:brightness-110 active:scale-95 cursor-pointer"
+                              : "bg-slate-900 text-slate-400 border border-slate-800 cursor-not-allowed opacity-60"
+                          }`}
+                        >
+                          <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                          <span>
+                            {allMilestonesReached
+                              ? `${t.curriculum.verifyMastery} (+${currentLesson.xpReward || 50} XP)`
+                              : `Unlock Mastery (+${currentLesson.xpReward || 50} XP)`}
+                          </span>
+                        </button>
+                        {!allMilestonesReached && (
+                          <span className="text-[11px] sm:text-xs font-mono text-amber-300/90 bg-amber-950/40 border border-amber-900/50 px-2 py-0.5 rounded text-center sm:text-right">
+                            Pending: {[
+                              (totalConcepts - readConceptIds.length) > 0 ? `${totalConcepts - readConceptIds.length} Concept${(totalConcepts - readConceptIds.length) > 1 ? 's' : ''}` : '',
+                              (totalCheckpoints - passedCheckpointIds.length) > 0 ? `${totalCheckpoints - passedCheckpointIds.length} Quiz${(totalCheckpoints - passedCheckpointIds.length) > 1 ? 'zes' : ''}` : ''
+                            ].filter(Boolean).join(' & ')}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Single Core Objective Callout */}
+                <div className="rounded-2xl border border-blue-900/40 bg-gradient-to-r from-blue-950/30 to-slate-950 p-4 space-y-1">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-300 font-mono">
+                    <GraduationCap className="h-4 w-4 text-blue-400" /> {t.curriculum.primaryObjective}:
+                  </div>
+                  <p className="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed">
+                    {currentLesson.objective || currentLesson.conceptSummary}
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
-                  <button
-                    id="lesson-bookmark-top-btn"
-                    onClick={() => toggleBookmarkLesson(currentLesson.id)}
-                    className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold min-h-[40px] transition-all ${
-                      bookmarkedLessons.includes(currentLesson.id)
-                        ? "border-amber-500/60 bg-amber-950/80 text-amber-300 shadow-sm shadow-amber-950/40"
-                        : "border-slate-700 bg-slate-800/90 text-slate-200 hover:text-white hover:border-slate-600"
-                    }`}
-                    title={bookmarkedLessons.includes(currentLesson.id) ? "Remove from bookmarked topics" : "Bookmark this topic for later review"}
-                  >
-                    <Bookmark className={`h-3.5 w-3.5 ${bookmarkedLessons.includes(currentLesson.id) ? "fill-amber-400 text-amber-400" : ""}`} />
-                    <span>{bookmarkedLessons.includes(currentLesson.id) ? "Saved" : "Save"}</span>
-                  </button>
+                {/* Web Speech API Lesson Audio Player */}
+                <LessonAudioPlayer lesson={currentLesson} />
 
-                  <button
-                    id="lesson-export-pdf-top-btn"
-                    onClick={() => exportLessonToPdf(currentLesson)}
-                    className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/90 px-3 py-2 text-xs font-semibold text-slate-200 hover:text-white hover:border-slate-600 min-h-[40px] transition-all"
-                    title="Export clean, print-friendly study guide PDF"
-                  >
-                    <Download className="h-3.5 w-3.5 text-emerald-400" />
-                    <span>PDF</span>
-                  </button>
+                {/* Offline IndexedDB Lesson Notes Scratchpad */}
+                <LessonScratchpad
+                  lessonId={currentLesson.id}
+                  lessonTitle={currentLesson.title}
+                />
+              </div>
 
-                  <button
-                    id="lesson-try-sandbox-top-btn"
-                    onClick={handleTryInPlayground}
-                    className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/90 px-3 py-2 text-xs font-semibold text-slate-200 hover:text-white hover:border-slate-600 min-h-[40px] transition-all"
-                  >
-                    <Play className="h-3.5 w-3.5 text-blue-400 fill-blue-400/20" />
-                    <span>Sandbox</span>
-                  </button>
+              {/* =================================================================== */}
+              {/* LESSON PROGRESS STEPPER                                             */}
+              {/* =================================================================== */}
+              <LessonProgressStepper
+                totalConcepts={currentLesson.concepts?.length || 1}
+                readConceptsCount={readConceptIds.length}
+                totalQuizzes={quizCheckpoints.length}
+                solvedQuizzesCount={solvedQuizzesCount}
+                hasSandboxChallenge={hasSandbox}
+                isSandboxSolved={isSandboxPassed}
+                isCaseStudyViewed={showCaseStudy}
+                isLessonMastered={isCompleted}
+                onStepClick={handleStepperClick}
+              />
 
-                  {isCompleted ? (
-                    <span className="w-full sm:w-auto flex items-center justify-center gap-1.5 rounded-lg bg-emerald-950/90 border border-emerald-700 px-3.5 py-2 text-xs font-bold text-emerald-300 min-h-[40px]">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-400" /> {t.curriculum.mastered} (+{currentLesson.xpReward || 50} XP)
+              {/* =================================================================== */}
+              {/* 1. CONCEPT: MICROLEARNING CONCEPT BLOCKS                            */}
+              {/* =================================================================== */}
+              <div id="lesson-concepts-section" className="space-y-6 scroll-mt-24">
+                <div className="flex items-center justify-between gap-2 px-1">
+                  <h2 className="text-base font-bold text-white flex items-center gap-2 font-mono">
+                    <BookOpen className="h-4 w-4 text-blue-400" />
+                    <span>1. CONCEPT · {t.curriculum.microConceptFoundations || "Core Mechanics"}</span>
+                    <span className="text-xs text-slate-400 font-normal">({currentLesson.concepts?.length || 0} {t.curriculum.units || "units"})</span>
+                  </h2>
+                  <span className="text-xs text-slate-400 font-mono">
+                    {readConceptIds.length}/{currentLesson.concepts?.length || 0} {t.curriculum.understood}
+                  </span>
+                </div>
+
+                {currentLesson.concepts && currentLesson.concepts.length > 0 ? (
+                  <div className="space-y-6">
+                    {currentLesson.concepts.map((concept, idx) => (
+                      <ConceptCard
+                        key={concept.id}
+                        concept={concept}
+                        index={idx}
+                        totalConcepts={currentLesson.concepts!.length}
+                        isRead={readConceptIds.includes(concept.id) || isCompleted}
+                        onMarkRead={() => handleMarkConceptRead(concept.id)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  /* Fallback if concepts not explicitly split */
+                  <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 space-y-4">
+                    <h3 className="text-sm font-bold text-white">{t.curriculum.theoreticalSummary}</h3>
+                    <p className="text-xs text-slate-300 leading-relaxed">{currentLesson.conceptSummary}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* =================================================================== */}
+              {/* 2. PRACTICE: EMBEDDED SANDBOX CHALLENGES                            */}
+              {/* =================================================================== */}
+              {sandboxCheckpoints.length > 0 && (
+                <div id="lesson-sandbox-section" className="space-y-6 scroll-mt-24">
+                  <div className="flex items-center justify-between gap-2 px-1">
+                    <h2 className="text-base font-bold text-white flex items-center gap-2 font-mono">
+                      <Code2 className="h-4 w-4 text-emerald-400" />
+                      <span>2. PRACTICE · Interactive Sandbox</span>
+                      <span className="text-xs text-slate-400 font-normal">({sandboxCheckpoints.length} Lab)</span>
+                    </h2>
+                    <span className="text-xs text-slate-400 font-mono">
+                      {isSandboxPassed ? "Passed ✓" : "Pending Action"}
                     </span>
-                  ) : (
-                    <div className="w-full sm:w-auto flex flex-col items-stretch sm:items-end gap-1">
-                      <button
-                        id="lesson-mark-mastered-btn"
-                        onClick={handleCompleteFullLesson}
-                        disabled={!allMilestonesReached}
-                        className={`flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold min-h-[40px] transition-all ${
-                          allMilestonesReached
-                            ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-950/60 hover:brightness-110 active:scale-95 cursor-pointer"
-                            : "bg-slate-900 text-slate-400 border border-slate-800 cursor-not-allowed"
-                        }`}
-                      >
-                        <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                        <span>
-                          {allMilestonesReached
-                            ? `${t.curriculum.verifyMastery} (+${currentLesson.xpReward || 50} XP)`
-                            : `Unlock Mastery (+${currentLesson.xpReward || 50} XP)`}
-                        </span>
-                      </button>
-                      {!allMilestonesReached && (
-                        <span className="text-[11px] sm:text-xs font-mono text-amber-300/90 bg-amber-950/40 border border-amber-900/50 px-2 py-0.5 rounded text-center sm:text-right">
-                          Pending: {[
-                            (totalConcepts - readConceptIds.length) > 0 ? `${totalConcepts - readConceptIds.length} Concept${(totalConcepts - readConceptIds.length) > 1 ? 's' : ''}` : '',
-                            (totalCheckpoints - passedCheckpointIds.length) > 0 ? `${totalCheckpoints - passedCheckpointIds.length} Quiz${(totalCheckpoints - passedCheckpointIds.length) > 1 ? 'zes' : ''}` : ''
-                          ].filter(Boolean).join(' & ')}
-                        </span>
-                      )}
+                  </div>
+
+                  <div className="space-y-6">
+                    {sandboxCheckpoints.map((checkpoint) => {
+                      const isPassed =
+                        passedCheckpointIds.includes(checkpoint.id) || isCompleted;
+
+                      return (
+                        <SandboxChallenge
+                          key={checkpoint.id}
+                          challenge={checkpoint}
+                          isCompleted={isPassed}
+                          onPassed={(xp) => handleCheckpointPassed(checkpoint.id, xp)}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* =================================================================== */}
+              {/* 3. RECALL: ACTIVE RECALL QUIZZES                                    */}
+              {/* =================================================================== */}
+              {quizCheckpoints.length > 0 && (
+                <div id="lesson-quizzes-section" className="space-y-6 scroll-mt-24">
+                  <div className="flex items-center justify-between gap-2 px-1">
+                    <h2 className="text-base font-bold text-white flex items-center gap-2 font-mono">
+                      <ShieldCheck className="h-4 w-4 text-blue-400" />
+                      <span>3. RECALL · Active Verification</span>
+                      <span className="text-xs text-slate-400 font-normal">({quizCheckpoints.length} {t.curriculum.checkpoints || "checkpoints"})</span>
+                    </h2>
+                    <span className="text-xs text-slate-400 font-mono">
+                      {solvedQuizzesCount}/{quizCheckpoints.length} {t.curriculum.solved}
+                    </span>
+                  </div>
+
+                  <div className="space-y-6">
+                    {quizCheckpoints.map((checkpoint) => {
+                      const isPassed =
+                        passedCheckpointIds.includes(checkpoint.id) || isCompleted;
+
+                      return (
+                        <ActiveRecallQuiz
+                          key={checkpoint.id}
+                          challenge={checkpoint}
+                          isCompleted={isPassed}
+                          onPassed={(xp) => handleCheckpointPassed(checkpoint.id, xp)}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* =================================================================== */}
+              {/* 4. ASSESSMENT: COMPARATIVE CASE STUDY ANATOMY                       */}
+              {/* =================================================================== */}
+              <div id="lesson-case-study-section" className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl space-y-4 scroll-mt-24">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2 font-mono">
+                    <Layers className="h-4 w-4 text-indigo-400" />
+                    <span>4. ASSESSMENT · {t.curriculum.comparativeCaseStudy || "Comparative Anatomy"}</span>
+                  </h3>
+                  <button
+                    onClick={() => setShowCaseStudy(!showCaseStudy)}
+                    className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                  >
+                    {showCaseStudy ? t.curriculum.collapse : t.curriculum.expandBreakdown}
+                  </button>
+                </div>
+
+                {showCaseStudy && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    {/* Bad Naive Prompt */}
+                    <div className="rounded-xl border border-rose-900/60 bg-rose-950/10 p-4 space-y-3">
+                      <div className="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
+                        ❌ {t.curriculum.naiveInput}
+                      </div>
+                      <div>
+                        <span className="text-xs font-semibold text-slate-400 block mb-1 font-mono">{t.curriculum.promptLabel}:</span>
+                        <pre className="rounded-lg bg-slate-950 p-3 font-mono text-xs text-rose-200/90 whitespace-pre-wrap border border-rose-950 max-h-40 overflow-y-auto">
+                          {currentLesson.badPrompt.prompt}
+                        </pre>
+                      </div>
+                      <div>
+                        <span className="text-xs font-semibold text-slate-400 block mb-1 font-mono">{t.curriculum.modelOutputLabel}:</span>
+                        <div className="rounded-lg bg-slate-950 p-3 text-xs text-slate-300 border border-slate-800 leading-relaxed max-h-40 overflow-y-auto">
+                          {currentLesson.badPrompt.sampleOutput}
+                        </div>
+                      </div>
+                      <div className="rounded-lg bg-rose-950/40 p-2.5 text-xs text-rose-200 border border-rose-900/40">
+                        <span className="font-bold">{t.curriculum.defects}:</span> {currentLesson.badPrompt.explanation}
+                      </div>
                     </div>
+
+                    {/* Masterfully Engineered Prompt */}
+                    <div className="rounded-xl border border-emerald-900/60 bg-emerald-950/10 p-4 space-y-3">
+                      <div className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                        ✅ {t.curriculum.engineeredPrompt}
+                      </div>
+                      <div>
+                        <span className="text-xs font-semibold text-slate-400 block mb-1 font-mono">{t.curriculum.promptLabel}:</span>
+                        <pre className="rounded-lg bg-slate-950 p-3 font-mono text-xs text-emerald-200/90 whitespace-pre-wrap border border-emerald-950 max-h-40 overflow-y-auto">
+                          {currentLesson.goodPrompt.prompt}
+                        </pre>
+                      </div>
+                      <div>
+                        <span className="text-xs font-semibold text-slate-400 block mb-1 font-mono">{t.curriculum.modelOutputLabel}:</span>
+                        <div className="rounded-lg bg-slate-950 p-3 text-xs text-slate-200 border border-slate-800 leading-relaxed max-h-40 overflow-y-auto">
+                          {currentLesson.goodPrompt.sampleOutput}
+                        </div>
+                      </div>
+                      <div className="rounded-lg bg-emerald-950/40 p-2.5 text-xs text-emerald-200 border border-emerald-900/40">
+                        <span className="font-bold">{t.curriculum.theoreticalRationale}:</span> {currentLesson.goodPrompt.explanation}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* =================================================================== */}
+              {/* 5. COMPLETION & NEXT LESSON                                         */}
+              {/* =================================================================== */}
+              <div id="lesson-mastery-section" className="rounded-2xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-5 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 scroll-mt-24">
+                <div>
+                  {prevLesson ? (
+                    <button
+                      id="prev-lesson-nav-btn"
+                      onClick={() => handleSelectLesson(prevLesson)}
+                      className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700 hover:text-white transition-colors"
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5" />
+                      <span>{t.curriculum.previous}: {prevLesson.title}</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleExitLesson}
+                      className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900 px-3.5 py-2 text-xs text-slate-400 hover:text-white"
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5" />
+                      <span>{t.curriculum.backToSyllabus}</span>
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3">
+                  {isCompleted && (
+                    <button
+                      id="lesson-feedback-trigger-btn"
+                      onClick={() => setIsFeedbackModalOpen(true)}
+                      className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/90 hover:bg-slate-700 px-3.5 py-2 text-xs font-semibold text-amber-300 hover:text-amber-200 transition-colors shadow-sm"
+                      title="Rate this lesson and send qualitative feedback"
+                    >
+                      <MessageSquare className="h-3.5 w-3.5 text-amber-400" />
+                      <span>{userProgress.lessonFeedbacks?.[currentLesson.id] ? "Update Feedback" : "Send Feedback"}</span>
+                    </button>
+                  )}
+
+                  {!isCompleted && (
+                    <button
+                      id="bottom-complete-lesson-btn"
+                      onClick={handleCompleteFullLesson}
+                      disabled={!allMilestonesReached}
+                      className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold transition-all ${
+                        allMilestonesReached
+                          ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-md"
+                          : "bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed opacity-60"
+                      }`}
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span>{t.curriculum.masterLesson} (+{currentLesson.xpReward || 50} XP)</span>
+                    </button>
+                  )}
+
+                  {nextLesson ? (
+                    <button
+                      id="next-lesson-nav-btn"
+                      onClick={() => handleSelectLesson(nextLesson)}
+                      className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-blue-500 transition-colors"
+                    >
+                      <span>{t.curriculum.nextLesson}: {nextLesson.title}</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        handleExitLesson();
+                        setActiveTab("certification");
+                      }}
+                      className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:brightness-110 transition-all"
+                    >
+                      <Award className="h-4 w-4" />
+                      <span>Advance to Capstone Assessment &rarr;</span>
+                    </button>
                   )}
                 </div>
               </div>
-
-              {/* Single Core Objective Callout */}
-              <div className="rounded-2xl border border-blue-900/40 bg-gradient-to-r from-blue-950/30 to-slate-950 p-4 space-y-1">
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-300 font-mono">
-                  <GraduationCap className="h-4 w-4 text-blue-400" /> {t.curriculum.primaryObjective}:
-                </div>
-                <p className="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed">
-                  {currentLesson.objective || currentLesson.conceptSummary}
-                </p>
-              </div>
-
-              {/* Web Speech API Lesson Audio Player */}
-              <LessonAudioPlayer lesson={currentLesson} />
-
-              {/* Offline IndexedDB Lesson Notes Scratchpad */}
-              <LessonScratchpad
-                lessonId={currentLesson.id}
-                lessonTitle={currentLesson.title}
-              />
             </div>
-
-            {/* =================================================================== */}
-            {/* LESSON PROGRESS STEPPER                                             */}
-            {/* =================================================================== */}
-            <LessonProgressStepper
-              totalConcepts={currentLesson.concepts?.length || 1}
-              readConceptsCount={readConceptIds.length}
-              totalQuizzes={quizCheckpoints.length}
-              solvedQuizzesCount={solvedQuizzesCount}
-              hasSandboxChallenge={hasSandbox}
-              isSandboxSolved={isSandboxPassed}
-              isCaseStudyViewed={showCaseStudy}
-              isLessonMastered={isCompleted}
-              onStepClick={handleStepperClick}
-            />
-
-            {/* =================================================================== */}
-            {/* 1. CONCEPT: MICROLEARNING CONCEPT BLOCKS                            */}
-            {/* =================================================================== */}
-            <div id="lesson-concepts-section" className="space-y-6 scroll-mt-24">
-              <div className="flex items-center justify-between gap-2 px-1">
-                <h2 className="text-base font-bold text-white flex items-center gap-2 font-mono">
-                  <BookOpen className="h-4 w-4 text-blue-400" />
-                  <span>1. CONCEPT · {t.curriculum.microConceptFoundations || "Core Mechanics"}</span>
-                  <span className="text-xs text-slate-400 font-normal">({currentLesson.concepts?.length || 0} {t.curriculum.units || "units"})</span>
-                </h2>
-                <span className="text-xs text-slate-400 font-mono">
-                  {readConceptIds.length}/{currentLesson.concepts?.length || 0} {t.curriculum.understood}
-                </span>
-              </div>
-
-              {currentLesson.concepts && currentLesson.concepts.length > 0 ? (
-                <div className="space-y-6">
-                  {currentLesson.concepts.map((concept, idx) => (
-                    <ConceptCard
-                      key={concept.id}
-                      concept={concept}
-                      index={idx}
-                      totalConcepts={currentLesson.concepts!.length}
-                      isRead={readConceptIds.includes(concept.id) || isCompleted}
-                      onMarkRead={() => handleMarkConceptRead(concept.id)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                /* Fallback if concepts not explicitly split */
-                <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 space-y-4">
-                  <h3 className="text-sm font-bold text-white">{t.curriculum.theoreticalSummary}</h3>
-                  <p className="text-xs text-slate-300 leading-relaxed">{currentLesson.conceptSummary}</p>
-                </div>
-              )}
-            </div>
-
-            {/* =================================================================== */}
-            {/* 2. PRACTICE: EMBEDDED SANDBOX CHALLENGES                            */}
-            {/* =================================================================== */}
-            {sandboxCheckpoints.length > 0 && (
-              <div id="lesson-sandbox-section" className="space-y-6 scroll-mt-24">
-                <div className="flex items-center justify-between gap-2 px-1">
-                  <h2 className="text-base font-bold text-white flex items-center gap-2 font-mono">
-                    <Code2 className="h-4 w-4 text-emerald-400" />
-                    <span>2. PRACTICE · Interactive Sandbox</span>
-                    <span className="text-xs text-slate-400 font-normal">({sandboxCheckpoints.length} Lab)</span>
-                  </h2>
-                  <span className="text-xs text-slate-400 font-mono">
-                    {isSandboxPassed ? "Passed ✓" : "Pending Action"}
-                  </span>
-                </div>
-
-                <div className="space-y-6">
-                  {sandboxCheckpoints.map((checkpoint) => {
-                    const isPassed =
-                      passedCheckpointIds.includes(checkpoint.id) || isCompleted;
-
-                    return (
-                      <SandboxChallenge
-                        key={checkpoint.id}
-                        challenge={checkpoint}
-                        isCompleted={isPassed}
-                        onPassed={(xp) => handleCheckpointPassed(checkpoint.id, xp)}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* =================================================================== */}
-            {/* 3. RECALL: ACTIVE RECALL QUIZZES                                    */}
-            {/* =================================================================== */}
-            {quizCheckpoints.length > 0 && (
-              <div id="lesson-quizzes-section" className="space-y-6 scroll-mt-24">
-                <div className="flex items-center justify-between gap-2 px-1">
-                  <h2 className="text-base font-bold text-white flex items-center gap-2 font-mono">
-                    <ShieldCheck className="h-4 w-4 text-blue-400" />
-                    <span>3. RECALL · Active Verification</span>
-                    <span className="text-xs text-slate-400 font-normal">({quizCheckpoints.length} {t.curriculum.checkpoints || "checkpoints"})</span>
-                  </h2>
-                  <span className="text-xs text-slate-400 font-mono">
-                    {solvedQuizzesCount}/{quizCheckpoints.length} {t.curriculum.solved}
-                  </span>
-                </div>
-
-                <div className="space-y-6">
-                  {quizCheckpoints.map((checkpoint) => {
-                    const isPassed =
-                      passedCheckpointIds.includes(checkpoint.id) || isCompleted;
-
-                    return (
-                      <ActiveRecallQuiz
-                        key={checkpoint.id}
-                        challenge={checkpoint}
-                        isCompleted={isPassed}
-                        onPassed={(xp) => handleCheckpointPassed(checkpoint.id, xp)}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* =================================================================== */}
-            {/* 4. ASSESSMENT: COMPARATIVE CASE STUDY ANATOMY                       */}
-            {/* =================================================================== */}
-            <div id="lesson-case-study-section" className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl space-y-4 scroll-mt-24">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-white flex items-center gap-2 font-mono">
-                  <Layers className="h-4 w-4 text-indigo-400" />
-                  <span>4. ASSESSMENT · {t.curriculum.comparativeCaseStudy || "Comparative Anatomy"}</span>
-                </h3>
-                <button
-                  onClick={() => setShowCaseStudy(!showCaseStudy)}
-                  className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
-                >
-                  {showCaseStudy ? t.curriculum.collapse : t.curriculum.expandBreakdown}
-                </button>
-              </div>
-
-              {showCaseStudy && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                  {/* Bad Naive Prompt */}
-                  <div className="rounded-xl border border-rose-900/60 bg-rose-950/10 p-4 space-y-3">
-                    <div className="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
-                      ❌ {t.curriculum.naiveInput}
-                    </div>
-                    <div>
-                      <span className="text-xs font-semibold text-slate-400 block mb-1 font-mono">{t.curriculum.promptLabel}:</span>
-                      <pre className="rounded-lg bg-slate-950 p-3 font-mono text-xs text-rose-200/90 whitespace-pre-wrap border border-rose-950 max-h-40 overflow-y-auto">
-                        {currentLesson.badPrompt.prompt}
-                      </pre>
-                    </div>
-                    <div>
-                      <span className="text-xs font-semibold text-slate-400 block mb-1 font-mono">{t.curriculum.modelOutputLabel}:</span>
-                      <div className="rounded-lg bg-slate-950 p-3 text-xs text-slate-300 border border-slate-800 leading-relaxed max-h-40 overflow-y-auto">
-                        {currentLesson.badPrompt.sampleOutput}
-                      </div>
-                    </div>
-                    <div className="rounded-lg bg-rose-950/40 p-2.5 text-xs text-rose-200 border border-rose-900/40">
-                      <span className="font-bold">{t.curriculum.defects}:</span> {currentLesson.badPrompt.explanation}
-                    </div>
-                  </div>
-
-                  {/* Masterfully Engineered Prompt */}
-                  <div className="rounded-xl border border-emerald-900/60 bg-emerald-950/10 p-4 space-y-3">
-                    <div className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                      ✅ {t.curriculum.engineeredPrompt}
-                    </div>
-                    <div>
-                      <span className="text-xs font-semibold text-slate-400 block mb-1 font-mono">{t.curriculum.promptLabel}:</span>
-                      <pre className="rounded-lg bg-slate-950 p-3 font-mono text-xs text-emerald-200/90 whitespace-pre-wrap border border-emerald-950 max-h-40 overflow-y-auto">
-                        {currentLesson.goodPrompt.prompt}
-                      </pre>
-                    </div>
-                    <div>
-                      <span className="text-xs font-semibold text-slate-400 block mb-1 font-mono">{t.curriculum.modelOutputLabel}:</span>
-                      <div className="rounded-lg bg-slate-950 p-3 text-xs text-slate-200 border border-slate-800 leading-relaxed max-h-40 overflow-y-auto">
-                        {currentLesson.goodPrompt.sampleOutput}
-                      </div>
-                    </div>
-                    <div className="rounded-lg bg-emerald-950/40 p-2.5 text-xs text-emerald-200 border border-emerald-900/40">
-                      <span className="font-bold">{t.curriculum.theoreticalRationale}:</span> {currentLesson.goodPrompt.explanation}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* =================================================================== */}
-            {/* 5. COMPLETION & NEXT LESSON                                         */}
-            {/* =================================================================== */}
-            <div id="lesson-mastery-section" className="rounded-2xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-5 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 scroll-mt-24">
-              <div>
-                {prevLesson ? (
-                  <button
-                    id="prev-lesson-nav-btn"
-                    onClick={() => handleSelectLesson(prevLesson)}
-                    className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700 hover:text-white transition-colors"
-                  >
-                    <ArrowLeft className="h-3.5 w-3.5" />
-                    <span>{t.curriculum.previous}: {prevLesson.title}</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleExitLesson}
-                    className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900 px-3.5 py-2 text-xs text-slate-400 hover:text-white"
-                  >
-                    <ArrowLeft className="h-3.5 w-3.5" />
-                    <span>{t.curriculum.backToSyllabus}</span>
-                  </button>
-                )}
-              </div>
-
-              <div className="flex items-center gap-3">
-                {isCompleted && (
-                  <button
-                    id="lesson-feedback-trigger-btn"
-                    onClick={() => setIsFeedbackModalOpen(true)}
-                    className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800/90 hover:bg-slate-700 px-3.5 py-2 text-xs font-semibold text-amber-300 hover:text-amber-200 transition-colors shadow-sm"
-                    title="Rate this lesson and send qualitative feedback"
-                  >
-                    <MessageSquare className="h-3.5 w-3.5 text-amber-400" />
-                    <span>{userProgress.lessonFeedbacks?.[currentLesson.id] ? "Update Feedback" : "Send Feedback"}</span>
-                  </button>
-                )}
-
-                {!isCompleted && (
-                  <button
-                    id="bottom-complete-lesson-btn"
-                    onClick={handleCompleteFullLesson}
-                    disabled={!allMilestonesReached}
-                    className={`flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold transition-all ${
-                      allMilestonesReached
-                        ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-md"
-                        : "bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed opacity-60"
-                    }`}
-                  >
-                    <CheckCircle2 className="h-4 w-4" />
-                    <span>{t.curriculum.masterLesson} (+{currentLesson.xpReward || 50} XP)</span>
-                  </button>
-                )}
-
-                {nextLesson ? (
-                  <button
-                    id="next-lesson-nav-btn"
-                    onClick={() => handleSelectLesson(nextLesson)}
-                    className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:bg-blue-500 transition-colors"
-                  >
-                    <span>{t.curriculum.nextLesson}: {nextLesson.title}</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => {
-                      handleExitLesson();
-                      setActiveTab("certification");
-                    }}
-                    className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:brightness-110 transition-all"
-                  >
-                    <Award className="h-4 w-4" />
-                    <span>Advance to Capstone Assessment &rarr;</span>
-                  </button>
-                )}
-              </div>
+            
+            <div className="hidden lg:block">
+              <LessonSidebar lesson={currentLesson} />
             </div>
           </div>
         )}

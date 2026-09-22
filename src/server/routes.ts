@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import PDFDocument from 'pdfkit';
+import { createCanvas } from 'canvas';
 import { desc, eq, and, sql } from 'drizzle-orm';
 import { foundationProgress, lessonProgress, lessons, promptAttempts, savedPrompts, users, certificates } from '../db/schema';
 import { requireDatabase } from './db';
@@ -152,6 +153,30 @@ apiRouter.get('/certificate/:userId', requireAuth, async (req: AuthRequest, res)
     document.fontSize(12).text(new Date().toLocaleDateString(), { align: 'center' });
     document.end();
   } catch (error: any) { return res.status(400).json({ error: error.message }); }
+});
+
+apiRouter.get('/og-image/:title/:difficulty', (req, res) => {
+  const { title, difficulty } = req.params;
+  const width = 1200;
+  const height = 630;
+  const canvas = createCanvas(width, height);
+  const ctx = canvas.getContext('2d');
+  
+  // Background
+  ctx.fillStyle = '#050a19';
+  ctx.fillRect(0, 0, width, height);
+  
+  // Text
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 60px sans-serif';
+  ctx.fillText(decodeURIComponent(title), 100, 300);
+  ctx.font = '40px sans-serif';
+  ctx.fillStyle = '#64748b';
+  ctx.fillText(`Difficulty: ${difficulty}`, 100, 400);
+  
+  const buffer = canvas.toBuffer('image/png');
+  res.setHeader('Content-Type', 'image/png');
+  res.send(buffer);
 });
 
 apiRouter.get('/seo/:page', (req, res) => {

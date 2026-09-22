@@ -20,6 +20,7 @@ import { UserProfileView } from "./views/UserProfileView";
 import { PromptEngineeringPath, FOUNDATION_LESSONS } from "./views/PromptEngineeringPath";
 import { AssessmentView } from "./views/AssessmentView";
 import { LoginPage } from "./components/LoginPage";
+import { LoadingOverlay } from "./components/LoadingOverlay";
 import { auth } from "./lib/firebase";
 import { DashboardHeader } from "./components/DashboardHeader";
 import { RequireAuth } from "./components/RequireAuth";
@@ -147,13 +148,14 @@ const AuthGate: React.FC = () => {
   }, []);
 
   if (isAuthLoading) {
-    return <div className="flex min-h-dvh items-center justify-center bg-[#050a19] text-sm text-slate-400">Loading your learning space...</div>;
+    return <LoadingOverlay />;
   }
 
   return <AppShell />;
 };
 
 export default function App() {
+  console.log('App component mounting...');
   return (
     <AppProvider>
       <ThemeProvider>

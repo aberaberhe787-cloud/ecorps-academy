@@ -8,6 +8,7 @@ import { Pool } from 'pg';
 import * as schema from './src/db/schema';
 import { apiRouter } from './src/server/routes';
 import { getEcorpAiGateway } from "./src/lib/ai/gateway";
+import { curriculumModules } from "./src/data/lessonsData";
 
 dotenv.config();
 
@@ -37,6 +38,39 @@ app.use('/api', apiRouter);
       hasGeminiKey: Boolean(process.env.GEMINI_API_KEY),
       hasDb: Boolean(process.env.DATABASE_URL),
     });
+  });
+
+  app.get("/sitemap.xml", (req, res) => {
+    const host = process.env.PUBLIC_URL || "https://ais-dev-ztbbfrg76zqvlfz65b2evn-155414644206.europe-west2.run.app";
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${host}/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>`;
+
+    curriculumModules.forEach(module => {
+      xml += `
+  <url>
+    <loc>${host}/curriculum/${module.id}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+      module.lessons.forEach(lesson => {
+        xml += `
+  <url>
+    <loc>${host}/curriculum/${module.id}/lesson/${lesson.id}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+      });
+    });
+
+    xml += `
+</urlset>`;
+    res.header("Content-Type", "application/xml");
+    res.send(xml);
   });
 
   // Learning Content Endpoints
