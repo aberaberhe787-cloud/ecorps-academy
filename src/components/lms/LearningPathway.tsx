@@ -7,7 +7,8 @@ import {
   ChevronRight,
   GraduationCap,
   Play,
-  Bookmark
+  Bookmark,
+  ShieldCheck
 } from "lucide-react";
 import { CurriculumModule, Lesson, BloomsTaxonomyLevel } from "../../types";
 import { useApp } from "../../context/AppContext";
@@ -20,6 +21,7 @@ interface LearningPathwayProps {
   onSelectLesson: (lesson: Lesson) => void;
   selectedBloomFilter?: BloomsTaxonomyLevel | "All";
   onSelectBloomFilter?: (level: BloomsTaxonomyLevel | "All") => void;
+  isPreviewMode?: boolean;
 }
 
 const BLOOM_COLORS: Record<BloomsTaxonomyLevel, { bg: string; text: string; border: string }> = {
@@ -38,8 +40,9 @@ export const LearningPathway: React.FC<LearningPathwayProps> = ({
   onSelectLesson,
   selectedBloomFilter = "All",
   onSelectBloomFilter,
+  isPreviewMode = false,
 }) => {
-  const { t, userProgress, toggleBookmarkLesson } = useApp();
+  const { t, userProgress, toggleBookmarkLesson, openAuthModal } = useApp();
   const bookmarkedLessonIds = userProgress.bookmarkedLessons || [];
 
   const bloomLevels: (BloomsTaxonomyLevel | "All")[] = [
@@ -175,11 +178,10 @@ export const LearningPathway: React.FC<LearningPathwayProps> = ({
               {/* Lesson Stepper Nodes */}
               <div className="p-3 sm:p-4 space-y-2.5">
                 {filteredLessons.map((lesson, lIdx) => {
+                  if (isPreviewMode && lIdx > 0) return null;
                   const isCurrent = lesson.id === currentLessonId;
                   const isCompleted = completedLessonIds.includes(lesson.id);
-                  
-                  const prevLesson = lIdx > 0 ? filteredLessons[lIdx - 1] : null;
-                  const isUnlocked = lIdx === 0 || (prevLesson && completedLessonIds.includes(prevLesson.id)) || isCompleted || true;
+                  const isLocked = isPreviewMode && lIdx > 0;
                   
                   const bloom = lesson.bloomTaxonomyFocus || "Understanding";
                   const bloomStyle = BLOOM_COLORS[bloom] || BLOOM_COLORS.Understanding;
@@ -191,8 +193,16 @@ export const LearningPathway: React.FC<LearningPathwayProps> = ({
                     <div
                       key={lesson.id}
                       id={`pathway-node-${lesson.id}`}
-                      onClick={() => onSelectLesson(lesson)}
-                      className={`group relative flex flex-wrap items-center justify-between gap-3 rounded-2xl cursor-pointer transition-all ${
+                      onClick={() => {
+                        if (isLocked) {
+                          openAuthModal("Sign up to unlock this lesson and the rest of the curriculum.");
+                        } else {
+                          onSelectLesson(lesson);
+                        }
+                      }}
+                      className={`group relative flex flex-wrap items-center justify-between gap-3 rounded-2xl transition-all ${
+                        isLocked ? "border border-slate-800 bg-slate-950/40 p-3 sm:p-4 opacity-70" : "cursor-pointer"
+                      } ${
                         isCurrent
                           ? "border-2 border-blue-500 bg-gradient-to-r from-blue-900/60 to-slate-900 shadow-[0_0_20px_rgba(37,99,235,0.15)] ring-2 ring-blue-500/20 ring-offset-2 ring-offset-slate-950 p-4 sm:p-5"
                           : isCompleted
@@ -298,7 +308,11 @@ export const LearningPathway: React.FC<LearningPathwayProps> = ({
                             <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-amber-400 text-amber-400" : ""}`} />
                           </button>
 
-                          {isCurrent ? (
+                          {isLocked ? (
+                            <span className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                                <ShieldCheck className="h-3.5 w-3.5" /> Locked
+                            </span>
+                          ) : isCurrent ? (
                             <span className="rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-1.5 text-sm font-bold text-white shadow-lg flex items-center gap-1.5 transition-colors">
                               {t.curriculum.current} <ChevronRight className="h-4 w-4" />
                             </span>

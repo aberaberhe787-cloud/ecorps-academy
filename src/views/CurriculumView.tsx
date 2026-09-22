@@ -63,6 +63,8 @@ import { LessonSidebar } from "../components/lms/LessonSidebar";
 import { generateLessonJsonLd } from "../lib/structuredData";
 import { PrintableLessonHeader } from "../components/lms/PrintableLessonHeader";
 import { PrintableLessonFooter } from "../components/lms/PrintableLessonFooter";
+import { Button } from "../components/ui/Button";
+import { motion } from "motion/react";
 
 const BLOOM_COLORS: Record<BloomsTaxonomyLevel, { bg: string; text: string; border: string }> = {
   Remembering: { bg: "bg-slate-800", text: "text-slate-300", border: "border-slate-700" },
@@ -91,11 +93,23 @@ export const CurriculumView: React.FC = () => {
     setActiveTab,
     toggleBookmarkLesson,
     t,
+    user,
+    openAuthModal,
   } = useApp();
 
+  const isPreviewMode = !user;
+
   const allLessons: Lesson[] = currentCurriculum.flatMap((m) => m.lessons);
+  
+  // Apply preview restriction
+  const availableLessons = useMemo(() => {
+    if (!isPreviewMode) return allLessons;
+    // Allow only the first lesson of each module
+    return currentCurriculum.map(m => m.lessons[0]).filter(Boolean);
+  }, [isPreviewMode, allLessons, currentCurriculum]);
+
   const currentLesson: Lesson =
-    allLessons.find((l) => l.id === activeLessonId) || allLessons[0];
+    allLessons.find((l) => l.id === activeLessonId) || availableLessons[0];
 
   const currentModule: CurriculumModule | undefined = currentCurriculum.find((m) =>
     m.lessons.some((l) => l.id === currentLesson.id)
@@ -1279,6 +1293,7 @@ export const CurriculumView: React.FC = () => {
                 onSelectLesson={handleSelectLesson}
                 selectedBloomFilter={selectedBloomFilter}
                 onSelectBloomFilter={setSelectedBloomFilter}
+                isPreviewMode={isPreviewMode}
               />
             </div>
 
@@ -1793,6 +1808,18 @@ export const CurriculumView: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+      {isPreviewMode && (
+        <motion.div
+          initial={{ y: 100 }}
+          animate={{ y: 0 }}
+          className="fixed bottom-0 left-0 right-0 z-50 bg-blue-600/90 backdrop-blur-md p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.3)] flex items-center justify-center gap-4 text-white"
+        >
+          <span className="font-bold text-sm">Unlock full access to continue your journey and earn certifications.</span>
+          <Button variant="secondary" size="sm" onClick={() => openAuthModal("Sign up to unlock the full curriculum.")}>
+            Unlock Full Access
+          </Button>
+        </motion.div>
       )}
     </div>
   );
