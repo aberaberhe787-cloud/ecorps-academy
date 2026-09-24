@@ -8,6 +8,7 @@ import { LearningRouteDiagnostic } from "../components/LearningRouteDiagnostic";
 import { CapabilityBaselineChallenge } from "../components/CapabilityBaselineChallenge";
 import { PerformanceMetrics } from "../components/PerformanceMetrics";
 import { CredibilityStrip } from "../components/CredibilityStrip";
+import { TestimonialsCarousel } from "../components/TestimonialsCarousel";
 import { InstructorsSection } from "../components/home/InstructorsSection";
 import { Button } from "../components/ui/Button";
 
@@ -43,6 +44,8 @@ export const HomeView: React.FC = () => {
       </section>
       
       <CredibilityStrip />
+
+      <TestimonialsCarousel />
 
       {/* 1.5 Baseline Challenge */}
       <CapabilityBaselineChallenge />
