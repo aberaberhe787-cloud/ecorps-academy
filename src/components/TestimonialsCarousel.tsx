@@ -43,7 +43,17 @@ export const TestimonialsCarousel: React.FC = () => {
               key={index}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
+              whileHover={{ 
+                scale: 1.05, 
+                rotateY: 5, 
+                rotateX: 5, 
+                boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.4)" 
+              }}
+              transition={{ 
+                initial: { delay: index * 0.1 },
+                hover: { type: "spring", stiffness: 300, damping: 20 }
+              }}
+              style={{ perspective: "1000px" }}
               className="bg-slate-950 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between"
             >
               <div className="space-y-4">

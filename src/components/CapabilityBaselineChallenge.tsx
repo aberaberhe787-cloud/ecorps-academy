@@ -23,10 +23,10 @@ export const CapabilityBaselineChallenge: React.FC = () => {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="rounded-3xl border border-blue-900/30 bg-slate-950 p-8 shadow-2xl"
+      className="rounded-3xl bg-slate-900/40 p-8 shadow-2xl"
     >
       <div className="flex items-center gap-4 mb-8">
-        <div className="p-3 rounded-2xl bg-blue-950 border border-blue-800">
+        <div className="p-3 rounded-2xl bg-blue-950">
           <BrainCircuit className="h-6 w-6 text-blue-400" />
         </div>
         <div>
@@ -39,7 +39,7 @@ export const CapabilityBaselineChallenge: React.FC = () => {
         {steps.map((step, idx) => (
           <motion.div 
             key={idx}
-            className={`p-6 rounded-2xl border ${idx === activeStep ? 'border-blue-500 bg-blue-950/20' : 'border-slate-800 bg-slate-900/50'}`}
+            className={`p-6 rounded-2xl ${idx === activeStep ? 'bg-blue-950/20' : 'bg-slate-900/50'}`}
           >
             <h3 className="font-bold text-white mb-3">{step.title}</h3>
             <code className="block p-4 bg-slate-950 rounded-lg text-xs font-mono text-slate-300 mb-4">{step.prompt}</code>

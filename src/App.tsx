@@ -77,7 +77,7 @@ const MainContent: React.FC = () => {
 };
 
 const AppShell: React.FC = () => {
-  const { activeTab, activeLessonId, isDistractionFreeMode, isAuthModalOpen, authModalMessage, closeAuthModal } = useApp();
+  const { activeTab, activeLessonId, isDistractionFreeMode, isAuthModalOpen, authModalMessage, closeAuthModal, redirectPath } = useApp();
   const hideGlobalChrome =
     isDistractionFreeMode && activeTab === "curriculum" && !!activeLessonId;
 
@@ -125,7 +125,7 @@ const AppShell: React.FC = () => {
                 </div>
               </div>
 
-              <LoginPage message={authModalMessage} onSuccess={closeAuthModal} isModal />
+              <LoginPage message={authModalMessage} onSuccess={closeAuthModal} isModal redirectPath={redirectPath} />
             </motion.div>
           </div>
         )}

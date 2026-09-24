@@ -10,7 +10,7 @@ export const CredibilityStrip: React.FC = () => {
   ];
 
   return (
-    <section className="py-8 border-y border-slate-800 bg-slate-950/50">
+    <section className="py-8 bg-slate-950/50 border border-slate-800 rounded-2xl">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
           {/* Metrics */}
@@ -25,7 +25,7 @@ export const CredibilityStrip: React.FC = () => {
           </div>
 
           {/* Branding */}
-          <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-slate-900 border border-slate-700">
+          <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-slate-900 border border-slate-800">
             <ShieldCheck className="h-5 w-5 text-emerald-500" />
             <span className="text-xs font-semibold text-slate-300">
               <span className="text-emerald-500 font-bold">Pilot Program:</span> Academic Beta Phase

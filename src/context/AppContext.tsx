@@ -310,7 +310,15 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => auth.currentUser);
-  const [activeTab, setActiveTab] = useState<NavTab>("home");
+  const [activeTab, setActiveTabState] = useState<NavTab>("home");
+  
+  const setActiveTab = (tab: NavTab) => {
+    if (tab !== "home" && !user) {
+      openAuthModal("Sign in to access this feature.", tab);
+      return;
+    }
+    setActiveTabState(tab);
+  };
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [activeMissionId, setActiveMissionId] = useState<string | null>(null);
   const [playgroundSubTab, setPlaygroundSubTab] = useState<"sandbox" | "missions" | "comparison" | "history" | "saved" | "ctf" | "lab">("sandbox");
@@ -318,14 +326,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Guest Auth Modal State
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authModalMessage, setAuthModalMessage] = useState<string>("");
+  const [redirectPath, setRedirectPath] = useState<NavTab | null>(null);
 
-  const openAuthModal = (msg?: string) => {
+  const openAuthModal = (msg?: string, path?: NavTab) => {
     setAuthModalMessage(msg || "Sign in to save your progress and unlock learner features.");
+    if (path) setRedirectPath(path);
     setIsAuthModalOpen(true);
   };
 
   const closeAuthModal = () => {
     setIsAuthModalOpen(false);
+    setRedirectPath(null);
   };
   
   // Persistent user preferences layer (theme, distraction-free mode, language, AI mode, sampling)
@@ -2128,6 +2139,7 @@ Provide:
         competencyStates,
         isAuthModalOpen,
         authModalMessage,
+        redirectPath,
         openAuthModal,
         closeAuthModal,
       }}
