@@ -103,10 +103,8 @@ export const CurriculumView: React.FC = () => {
   
   // Apply preview restriction
   const availableLessons = useMemo(() => {
-    if (!isPreviewMode) return allLessons;
-    // Allow only the first lesson of each module
-    return currentCurriculum.map(m => m.lessons[0]).filter(Boolean);
-  }, [isPreviewMode, allLessons, currentCurriculum]);
+    return allLessons;
+  }, [allLessons]);
 
   const currentLesson: Lesson =
     allLessons.find((l) => l.id === activeLessonId) || availableLessons[0];
@@ -114,19 +112,6 @@ export const CurriculumView: React.FC = () => {
   const currentModule: CurriculumModule | undefined = currentCurriculum.find((m) =>
     m.lessons.some((l) => l.id === currentLesson.id)
   );
-
-  // --- Taster Banner ---
-  const TasterBanner = () => {
-    if (!isPreviewMode) return null;
-    return (
-      <div className="bg-indigo-950 border border-indigo-500/30 p-4 rounded-xl mb-6 text-center text-indigo-100 shadow-lg">
-        <h3 className="font-bold text-lg mb-1">Optimal Taster Experience</h3>
-        <p className="text-sm mb-4">You're exploring our foundational lessons. Create an account to unlock the full curriculum, track progress, and earn certificates!</p>
-        <Button onClick={() => openAuthModal()} variant="indigo" size="sm">Create Account & Unlock All</Button>
-      </div>
-    );
-  };
-  // --------------------
 
   useEffect(() => {
     if (currentLesson && currentModule) {
@@ -585,7 +570,6 @@ export const CurriculumView: React.FC = () => {
       )}
 
       <div className="w-full max-w-7xl 2xl:max-w-[1536px] mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 space-y-3 sm:space-y-6 ">
-        <TasterBanner />
         {/* ========================================================================= */}
         {/* TOP CURRICULUM SEARCH & FILTER BAR                                        */}
         {/* ========================================================================= */}
