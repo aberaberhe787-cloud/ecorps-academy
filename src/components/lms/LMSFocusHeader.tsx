@@ -36,9 +36,9 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
   return (
     <div
       id="lms-focus-header"
-      className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/95 backdrop-blur-md px-3 sm:px-4 py-2 sm:py-2.5 shadow-sm"
+      className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/95 backdrop-blur-md px-3 sm:px-4 py-2 sm:py-2.5 shadow-sm safe-top"
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
+      <div className="mx-auto flex max-w-7xl 2xl:max-w-[1536px] items-center justify-between gap-2 sm:gap-3 min-w-0 w-full">
         {/* Left: Back & Title */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
@@ -63,7 +63,7 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
         </div>
 
         {/* Center: Clean Progress */}
-        <div className="hidden md:flex flex-col items-center justify-center w-48">
+        <div className="hidden md:flex flex-col items-center justify-center w-40 lg:w-48 min-w-0 shrink">
           <div className="flex justify-between w-full text-xs font-mono text-slate-400 mb-1">
             <span>Progress</span>
             <span className="text-blue-400 font-bold">{Math.round(progressPercent)}%</span>
@@ -71,7 +71,7 @@ export const LMSFocusHeader: React.FC<LMSFocusHeaderProps> = ({
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
             <div
               className="h-full bg-blue-500 transition-all duration-300"
-              style={{ width: `${progressPercent}%` }}
+              style={{ width: `${Math.min(100, Math.max(0, progressPercent))}%` }}
             />
           </div>
         </div>

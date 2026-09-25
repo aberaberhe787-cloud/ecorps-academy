@@ -407,11 +407,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
   };
 
   return (
-    <main className="login-page min-h-dvh bg-[#030712] text-slate-100 flex flex-col justify-between items-center w-full px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-8 lg:py-10 relative">
+    <main className="login-page min-h-dvh bg-[#030712] text-slate-100 flex flex-col justify-between items-center w-full max-w-full overflow-x-hidden px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-8 lg:py-10 relative">
       {/* Background Ambient Glows & Cyber Gradients */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden z-0" aria-hidden="true">
-        <div className="absolute top-[-10%] left-[10%] w-[300px] sm:w-[500px] lg:w-[700px] h-[300px] sm:h-[500px] lg:h-[700px] rounded-full bg-blue-600/10 blur-[100px] lg:blur-[140px]" />
-        <div className="absolute bottom-[-10%] right-[10%] w-[250px] sm:w-[450px] lg:w-[600px] h-[250px] sm:h-[450px] lg:h-[600px] rounded-full bg-indigo-600/10 blur-[90px] lg:blur-[130px]" />
+        <div className="absolute top-[-10%] left-[10%] w-[min(700px,90vw)] h-[min(700px,90vw)] max-w-[700px] rounded-full bg-blue-600/10 blur-[100px] lg:blur-[140px]" />
+        <div className="absolute bottom-[-10%] right-[10%] w-[min(600px,80vw)] h-[min(600px,80vw)] max-w-[600px] rounded-full bg-indigo-600/10 blur-[90px] lg:blur-[130px]" />
         <div className="absolute inset-0 opacity-[0.03] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem]" />
       </div>
 

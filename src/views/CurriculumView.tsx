@@ -512,7 +512,7 @@ export const CurriculumView: React.FC = () => {
   const bloomStyle = BLOOM_COLORS[bloomFocus] || BLOOM_COLORS.Understanding;
 
   return (
-    <div className="min-h-dvh bg-slate-950 text-slate-100 selection:bg-blue-600 selection:text-white">
+    <div className="min-h-dvh bg-slate-950 text-slate-100 selection:bg-blue-600 selection:text-white w-full max-w-full overflow-x-hidden">
       {/* If in active lesson mode, show LMS Focus Header */}
       {viewMode === "lesson" && (
         <LMSFocusHeader
@@ -530,7 +530,7 @@ export const CurriculumView: React.FC = () => {
         />
       )}
 
-      <div className="w-full max-w-7xl 2xl:max-w-[1536px] mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 space-y-3 sm:space-y-6 ">
+      <div className={`page-shell app-view space-y-3 sm:space-y-6 ${viewMode === "lesson" ? "py-3 sm:py-5" : "py-2.5 sm:py-6"}`}>
         {/* ========================================================================= */}
         {/* TOP CURRICULUM SEARCH & FILTER BAR                                        */}
         {/* ========================================================================= */}
@@ -1160,7 +1160,7 @@ export const CurriculumView: React.FC = () => {
 
                 {/* 4 Pedagogical Pillars - Swipeable carousel on mobile */}
                 <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar pb-2 sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3">
-                  <button type="button" onClick={() => handlePillarClick("lesson-concepts-section")} className="shrink-0 w-[82vw] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-blue-500/60 hover:bg-blue-950/30">
+                  <button type="button" onClick={() => handlePillarClick("lesson-concepts-section")} className="shrink-0 w-[min(82vw,280px)] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-blue-500/60 hover:bg-blue-950/30">
                     <div className="text-xs font-bold text-blue-300 flex items-center gap-1.5">
                       <span className="flex h-5 w-5 items-center justify-center rounded bg-blue-950 text-xs font-mono text-blue-400 font-bold">1</span>
                       {t.curriculum.pillarMicroTitle}
@@ -1170,7 +1170,7 @@ export const CurriculumView: React.FC = () => {
                     </p>
                   </button>
 
-                  <button type="button" onClick={() => handlePillarClick("lesson-quizzes-section")} className="shrink-0 w-[82vw] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-emerald-500/60 hover:bg-emerald-950/30">
+                  <button type="button" onClick={() => handlePillarClick("lesson-quizzes-section")} className="shrink-0 w-[min(82vw,280px)] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-emerald-500/60 hover:bg-emerald-950/30">
                     <div className="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
                       <span className="flex h-5 w-5 items-center justify-center rounded bg-emerald-950 text-xs font-mono text-emerald-400 font-bold">2</span>
                       {t.curriculum.pillarRecallTitle}
@@ -1180,7 +1180,7 @@ export const CurriculumView: React.FC = () => {
                     </p>
                   </button>
 
-                  <button type="button" onClick={() => handlePillarClick("lesson-case-study-section")} className="shrink-0 w-[82vw] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-amber-500/60 hover:bg-amber-950/30">
+                  <button type="button" onClick={() => handlePillarClick("lesson-case-study-section")} className="shrink-0 w-[min(82vw,280px)] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-amber-500/60 hover:bg-amber-950/30">
                     <div className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
                       <span className="flex h-5 w-5 items-center justify-center rounded bg-amber-950 text-xs font-mono text-amber-400 font-bold">3</span>
                       {t.curriculum.pillarBloomTitle}
@@ -1190,7 +1190,7 @@ export const CurriculumView: React.FC = () => {
                     </p>
                   </button>
 
-                  <button type="button" onClick={() => handlePillarClick("lesson-sandbox-section")} className="shrink-0 w-[82vw] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-purple-500/60 hover:bg-purple-950/30">
+                  <button type="button" onClick={() => handlePillarClick("lesson-sandbox-section")} className="shrink-0 w-[min(82vw,280px)] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-purple-500/60 hover:bg-purple-950/30">
                     <div className="text-xs font-bold text-purple-300 flex items-center gap-1.5">
                       <span className="flex h-5 w-5 items-center justify-center rounded bg-purple-950 text-xs font-mono text-purple-400 font-bold">4</span>
                       {t.curriculum.pillarSandboxTitle}
@@ -1420,7 +1420,7 @@ export const CurriculumView: React.FC = () => {
             {/* =================================================================== */}
             {/* 1. CONCEPT: MICROLEARNING CONCEPT BLOCKS                            */}
             {/* =================================================================== */}
-            <div id="lesson-concepts-section" className="space-y-6 scroll-mt-24">
+            <div id="lesson-concepts-section" className="space-y-6 scroll-mt-28 sm:scroll-mt-32">
               <div className="flex items-center justify-between gap-2 px-1">
                 <h2 className="text-base font-bold text-white flex items-center gap-2 font-mono">
                   <BookOpen className="h-4 w-4 text-blue-400" />
@@ -1458,7 +1458,7 @@ export const CurriculumView: React.FC = () => {
             {/* 2. PRACTICE: EMBEDDED SANDBOX CHALLENGES                            */}
             {/* =================================================================== */}
             {sandboxCheckpoints.length > 0 && (
-              <div id="lesson-sandbox-section" className="space-y-6 scroll-mt-24">
+              <div id="lesson-sandbox-section" className="space-y-6 scroll-mt-28 sm:scroll-mt-32">
                 <div className="flex items-center justify-between gap-2 px-1">
                   <h2 className="text-base font-bold text-white flex items-center gap-2 font-mono">
                     <Code2 className="h-4 w-4 text-emerald-400" />
@@ -1492,7 +1492,7 @@ export const CurriculumView: React.FC = () => {
             {/* 3. RECALL: ACTIVE RECALL QUIZZES                                    */}
             {/* =================================================================== */}
             {quizCheckpoints.length > 0 && (
-              <div id="lesson-quizzes-section" className="space-y-6 scroll-mt-24">
+              <div id="lesson-quizzes-section" className="space-y-6 scroll-mt-28 sm:scroll-mt-32">
                 <div className="flex items-center justify-between gap-2 px-1">
                   <h2 className="text-base font-bold text-white flex items-center gap-2 font-mono">
                     <ShieldCheck className="h-4 w-4 text-blue-400" />
@@ -1525,7 +1525,7 @@ export const CurriculumView: React.FC = () => {
             {/* =================================================================== */}
             {/* 4. ASSESSMENT: COMPARATIVE CASE STUDY ANATOMY                       */}
             {/* =================================================================== */}
-            <div id="lesson-case-study-section" className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl space-y-4 scroll-mt-24">
+            <div id="lesson-case-study-section" className="rounded-2xl border border-slate-800 bg-slate-900/80 p-3.5 sm:p-6 shadow-xl space-y-4 scroll-mt-28 sm:scroll-mt-32">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2 font-mono">
                   <Layers className="h-4 w-4 text-indigo-400" />
@@ -1591,7 +1591,7 @@ export const CurriculumView: React.FC = () => {
             {/* =================================================================== */}
             {/* 5. COMPLETION & NEXT LESSON                                         */}
             {/* =================================================================== */}
-            <div id="lesson-mastery-section" className="rounded-2xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-5 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 scroll-mt-24">
+            <div id="lesson-mastery-section" className="rounded-2xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-5 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 scroll-mt-28 sm:scroll-mt-32">
               <div>
                 {prevLesson ? (
                   <button

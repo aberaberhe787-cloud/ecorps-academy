@@ -77,7 +77,7 @@ export const PromptEngineeringPath: React.FC = () => {
   };
 
   return (
-    <div className="app-view foundation-page w-full max-w-7xl 2xl:max-w-[1536px] mx-auto space-y-3 sm:space-y-6 px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 pb-20 sm:pb-6 ">
+    <div className="page-shell app-view foundation-page space-y-3 sm:space-y-6 py-2.5 sm:py-6">
       <header className="rounded-2xl border border-blue-900/60 bg-gradient-to-br from-blue-950/80 to-slate-950 p-3.5 sm:p-6">
         <div className="flex items-center gap-2 text-blue-300"><Sparkles className="h-5 w-5" /><span className="text-xs font-bold uppercase tracking-widest">Learning Path</span></div>
         <h1 className="mt-3 text-2xl sm:text-3xl font-black text-white">Prompt Engineering Foundations</h1>

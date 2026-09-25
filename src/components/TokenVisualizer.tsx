@@ -68,20 +68,20 @@ export const TokenVisualizer: React.FC<TokenVisualizerProps> = ({ text }) => {
         </div>
 
         {/* Cost Estimates */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-2.5 flex items-center justify-between">
-            <div>
-              <div className="text-xs sm:text-xs text-slate-500 font-mono">Gemini 1.5 Pro (Input)</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
+          <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-2.5 flex items-center justify-between min-w-0 overflow-hidden">
+            <div className="min-w-0">
+              <div className="text-xs text-slate-500 font-mono truncate">Gemini 1.5 Pro (Input)</div>
               <div className="text-xs font-bold text-slate-300 flex items-center gap-1 mt-0.5">
-                <DollarSign className="h-3 w-3 text-emerald-400" /> {estimatedCostGemini1_5}
+                <DollarSign className="h-3 w-3 text-emerald-400 shrink-0" /> {estimatedCostGemini1_5}
               </div>
             </div>
           </div>
-          <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-2.5 flex items-center justify-between">
-            <div>
-              <div className="text-xs sm:text-xs text-slate-500 font-mono">Gemini 1.5 Flash (Input)</div>
+          <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-2.5 flex items-center justify-between min-w-0 overflow-hidden">
+            <div className="min-w-0">
+              <div className="text-xs text-slate-500 font-mono truncate">Gemini 1.5 Flash (Input)</div>
               <div className="text-xs font-bold text-slate-300 flex items-center gap-1 mt-0.5">
-                <DollarSign className="h-3 w-3 text-emerald-400" /> {estimatedCostFlash}
+                <DollarSign className="h-3 w-3 text-emerald-400 shrink-0" /> {estimatedCostFlash}
               </div>
             </div>
           </div>

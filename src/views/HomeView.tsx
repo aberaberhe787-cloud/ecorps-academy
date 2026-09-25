@@ -194,7 +194,7 @@ export const HomeView: React.FC = () => {
 
   return (
     <div
-      className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 pb-20 sm:pb-16 space-y-8 sm:space-y-10"
+      className="page-shell app-view py-4 sm:py-8 space-y-8 sm:space-y-10"
       id="home-view-container"
     >
       {/* ========================================================================= */}
@@ -254,12 +254,12 @@ export const HomeView: React.FC = () => {
       {/* 1. CONTINUE LEARNING (Dominant Architecture Hero Card)                     */}
       {/* ========================================================================= */}
       <section id="home-continue-section" aria-label="Continue Learning">
-        <div className="rounded-3xl border-2 border-blue-500/40 bg-gradient-to-b from-slate-900 via-slate-900 to-blue-950/40 p-6 sm:p-8 shadow-2xl relative overflow-hidden backdrop-blur-md">
+        <div className="rounded-2xl sm:rounded-3xl border-2 border-blue-500/40 bg-gradient-to-b from-slate-900 via-slate-900 to-blue-950/40 p-4 sm:p-6 lg:p-8 shadow-2xl relative overflow-hidden backdrop-blur-md">
           {/* Subtle Ambient Glow */}
           <div className="absolute top-0 right-0 -mr-16 -mt-16 h-56 w-56 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
           <div className="absolute bottom-0 left-1/4 -mb-16 h-48 w-48 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
 
-          <div className="relative z-10 space-y-5">
+          <div className="relative z-10 space-y-4 sm:space-y-5">
             {/* Top Tag & Track */}
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
@@ -291,7 +291,7 @@ export const HomeView: React.FC = () => {
               <div className="text-xs font-mono font-bold uppercase tracking-wider text-blue-400">
                 {continueTarget.lessonTag}
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight leading-snug">
                 {continueTarget.title}
               </h2>
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed pt-1">
@@ -347,7 +347,7 @@ export const HomeView: React.FC = () => {
 
         {/* Visual Stage Roadmap */}
         <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 sm:p-6 shadow-xl backdrop-blur-md">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
             {/* Step 1: Track & Module */}
             <div 
               onClick={() => setActiveTab("curriculum")}

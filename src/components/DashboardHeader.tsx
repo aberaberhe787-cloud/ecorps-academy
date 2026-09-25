@@ -32,8 +32,8 @@ export const DashboardHeader: React.FC = () => {
 
   return (
     <header className="w-full bg-transparent overflow-hidden" id="dashboard-header">
-      <div className="w-full max-w-[calc(100vw-1.5rem)] sm:max-w-7xl 2xl:max-w-[1536px] mx-auto px-2 sm:px-6 lg:px-8">
-        <div className="relative min-h-[48px] py-1.5 flex flex-wrap items-center justify-between gap-2 w-full">
+      <div className="w-full max-w-7xl 2xl:max-w-[1536px] mx-auto px-3 sm:px-6 lg:px-8 min-w-0">
+        <div className="relative min-h-[48px] py-1.5 flex flex-wrap items-center justify-between gap-2 w-full min-w-0">
           {/* Daily Study Streak Counter */}
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap min-w-0">
             {userProgress && (

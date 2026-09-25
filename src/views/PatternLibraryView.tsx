@@ -156,7 +156,7 @@ export const PatternLibraryView: React.FC = () => {
   const activeTypeInfo = getPatternTypeInfo(activePattern.patternType);
 
   return (
-    <div className="app-view w-full max-w-7xl 2xl:max-w-[1536px] mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 space-y-3 sm:space-y-6 pb-20 sm:pb-6">
+    <div className="page-shell app-view py-2.5 sm:py-6 space-y-3 sm:space-y-6">
       {/* Header */}
       <div className="border-b border-slate-800 pb-3 sm:pb-5">
         <div className="flex items-center gap-2">
@@ -224,7 +224,7 @@ export const PatternLibraryView: React.FC = () => {
             <span>Click to study & customize</span>
           </div>
 
-          <div className="space-y-2.5 max-h-[calc(100vh-220px)] overflow-y-auto pr-1">
+          <div className="space-y-2.5 max-h-[calc(100dvh-220px)] overflow-y-auto pr-1">
             {filteredPatterns.map((pattern) => {
               const isSelected = activePattern.id === pattern.id;
               const isMarked = userProgress.bookmarkedPatterns.includes(pattern.id);
