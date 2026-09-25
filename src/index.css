@@ -396,36 +396,303 @@ img, svg, canvas {
 }
 
 /* Print Styles */
-@media print {
-  /* Hide navigation, footer, and interactive UI elements */
-  header, nav, footer, #mobile-menu-toggle-btn, .no-print {
-    display: none !important;
-  }
-  
-  /* Reset background and text color for print readability */
-  body, #root, main, .app-view, section, div {
-    background: transparent !important;
-    background-color: transparent !important;
-    color: #000 !important;
-    box-shadow: none !important;
-    border-color: #ddd !important;
+/* ========================================================================== */
+/* PRINT & PDF STYLESHEET                                                     */
+/* Formats lesson pages as clean, printable, PDF-ready long-form reading docs */
+/* ========================================================================== */
+@page {
+  size: A4 portrait;
+  margin: 1.8cm 1.6cm 2.2cm 1.6cm;
+
+  @bottom-right {
+    content: "Page " counter(page) " of " counter(pages);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 8.5pt;
+    font-weight: 600;
+    color: #475569;
   }
 
-  /* Prevent page breaks inside important components */
-  .concept-card, .lesson-card, .curriculum-module, .assessment-card {
-    page-break-inside: avoid;
-    break-inside: avoid;
+  @bottom-left {
+    content: "ECORP Academy • Official Study Guide";
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 8.5pt;
+    color: #475569;
   }
-  
-  /* Make text black and clear for readability */
-  h1, h2, h3, h4, h5, p, span, li, .concept-card, .lesson-card, .curriculum-module, .assessment-card {
-    color: #000 !important;
+}
+
+@media print {
+  /* Counter Reset for Page Numbers */
+  body {
+    counter-reset: page;
+  }
+
+  /* Printable-Only Lesson Header & Footer Rules */
+  .printable-lesson-header {
+    display: block !important;
+  }
+
+  .printable-footer {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background-color: #ffffff !important;
+  }
+
+  .printable-footer-page-number::after {
+    content: "Page " counter(page) " of " counter(pages);
+  }
+
+  /* 1. STRIP NAVIGATION, FOOTER, INTERACTIVE BUTTONS & OVERLAYS */
+  header,
+  nav,
+  footer,
+  #mobile-menu-toggle-btn,
+  .mobile-menu-overlay,
+  .mobile-bottom-nav,
+  #main-navbar,
+  #app-footer,
+  #top-filter-bar,
+  #lms-view-mode-tabs,
+  #lesson-bookmark-top-btn,
+  #lesson-export-pdf-top-btn,
+  #lesson-try-sandbox-top-btn,
+  #lesson-mark-mastered-btn,
+  #lesson-progress-stepper,
+  .lesson-progress-stepper,
+  .lesson-audio-player,
+  .lesson-scratchpad,
+  .no-print,
+  [data-no-print="true"],
+  [role="dialog"],
+  .toast-notification,
+  .goog-te-banner-frame,
+  #google_translate_element,
+  button:not(.print-keep),
+  .blur-3xl,
+  [class*="blur-"] {
+    display: none !important;
+  }
+
+  /* 2. ROOT & CONTAINER RESETS FOR MULTI-PAGE FLOW */
+  html,
+  body,
+  #root,
+  main,
+  .app-view,
+  .smooth-scroll-container,
+  [data-scroll-container] {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    transform: none !important;
+  }
+
+  /* 3. TYPOGRAPHY & LONG-FORM READABILITY */
+  body,
+  p,
+  li,
+  td,
+  th,
+  div,
+  span {
+    color: #1e293b !important;
     font-family: Georgia, Cambria, "Times New Roman", Times, serif !important;
+    font-size: 11pt !important;
+    line-height: 1.65 !important;
+    orphans: 3;
+    widows: 3;
   }
-  
-  /* Give links a readable format */
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    color: #0f172a !important;
+    font-weight: 700 !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  h1 {
+    font-size: 20pt !important;
+    line-height: 1.25 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  h2 {
+    font-size: 15pt !important;
+    line-height: 1.3 !important;
+    margin-top: 1.5rem !important;
+    margin-bottom: 0.5rem !important;
+    border-bottom: 1px solid #cbd5e1 !important;
+    padding-bottom: 0.25rem !important;
+  }
+
+  h3 {
+    font-size: 12.5pt !important;
+    line-height: 1.35 !important;
+    margin-top: 1.2rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  /* 4. PROSE & MARKDOWN CONTENT */
+  .prose,
+  .prose-invert {
+    color: #1e293b !important;
+    max-width: 100% !important;
+  }
+
+  .prose p,
+  .prose-invert p {
+    color: #1e293b !important;
+    font-size: 11pt !important;
+    line-height: 1.65 !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .prose strong,
+  .prose-invert strong {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+  }
+
+  .prose a,
+  .prose-invert a {
+    color: #1d4ed8 !important;
+    text-decoration: underline !important;
+  }
+
+  .prose ul,
+  .prose ol {
+    padding-left: 1.25rem !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .prose li {
+    margin-top: 0.2rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+
+  /* 5. CODE BLOCKS & ANATOMY SNIPPETS */
+  pre,
+  code,
+  kbd,
+  .prose pre,
+  .prose code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  }
+
+  pre,
+  .rounded-xl.border.border-slate-800.bg-slate-950 {
+    background-color: #f8fafc !important;
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    border-left: 4px solid #2563eb !important;
+    border-radius: 6px !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 9.5pt !important;
+    line-height: 1.45 !important;
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    overflow-x: visible !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    box-shadow: none !important;
+  }
+
+  code:not(pre code) {
+    background-color: #f1f5f9 !important;
+    color: #1e40af !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 3px !important;
+    padding: 0.15rem 0.35rem !important;
+    font-size: 9.5pt !important;
+  }
+
+  /* 6. CARDS, CALLOUTS & CONCEPT BLOCKS */
+  article,
+  .concept-card,
+  .lesson-card,
+  .curriculum-module,
+  .assessment-card,
+  [id*="concept-section"] {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 1rem 1.25rem !important;
+    margin-bottom: 1.25rem !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    box-shadow: none !important;
+  }
+
+  /* Key Takeaway & Callout Boxes */
+  [class*="bg-blue-950"],
+  [class*="bg-emerald-950"],
+  [class*="bg-amber-950"],
+  [class*="bg-purple-950"],
+  [class*="bg-rose-950"],
+  [class*="bg-slate-900"],
+  .rounded-3xl,
+  .rounded-2xl,
+  .rounded-xl {
+    background-color: #f8fafc !important;
+    background: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+  }
+
+  /* Badge styling */
+  span.rounded-md,
+  span.rounded-full,
+  span.rounded {
+    background-color: #f1f5f9 !important;
+    color: #334155 !important;
+    border: 1px solid #cbd5e1 !important;
+    font-size: 8.5pt !important;
+    padding: 2px 6px !important;
+    font-family: ui-sans-serif, system-ui, sans-serif !important;
+  }
+
+  /* 7. QUIZZES & CASE STUDIES (FORMATTED FOR READABILITY) */
+  [id*="quiz-"],
+  [id*="checkpoint-"],
+  .sandbox-challenge {
+    background: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 1rem !important;
+    border-radius: 6px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* 8. LINKS */
   a {
     text-decoration: underline !important;
-    color: #000 !important;
+    color: #1d4ed8 !important;
   }
 }

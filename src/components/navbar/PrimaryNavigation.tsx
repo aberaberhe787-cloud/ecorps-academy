@@ -12,9 +12,9 @@ import { useApp } from "../../context/AppContext";
 import { NavTab } from "../../types";
 
 export const PrimaryNavigation: React.FC = () => {
-  const { activeTab, setActiveTab, t } = useApp();
+  const { activeTab, setActiveTab, t, user } = useApp();
 
-  const navItems: { id: NavTab; label: string; icon: React.FC<{ className?: string }> }[] = [
+  const allNavItems: { id: NavTab; label: string; icon: React.FC<{ className?: string }> }[] = [
     { id: "home", label: t.nav.home, icon: Compass },
     { id: "curriculum", label: t.nav.curriculum, icon: BookOpen },
     { id: "foundations", label: "Foundations", icon: Target },
@@ -22,6 +22,11 @@ export const PrimaryNavigation: React.FC = () => {
     { id: "patterns", label: t.nav.patterns, icon: Grid3X3 },
     { id: "resources", label: t.nav.resources, icon: Award },
   ];
+
+  const navItems = allNavItems.filter(item => {
+    if (item.id === "home") return true;
+    return !!user;
+  });
 
   return (
     <nav 

@@ -412,6 +412,14 @@ export type CompetencyLevel =
   | "Proficient"
   | "Mastered";
 
+export const levelMap: Record<CompetencyLevel, number> = {
+  "Not Started": 0,
+  "Introduced": 1,
+  "Practicing": 2,
+  "Proficient": 3,
+  "Mastered": 4,
+};
+
 export type EvidenceWeight = "exposure" | "practice" | "demonstration" | "assessment";
 
 export type EvidenceType =

@@ -201,36 +201,60 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                 </kbd>
               </button>
 
-              {/* Learning Progress Summary */}
-              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1.5 font-mono text-blue-400 font-bold">
-                    <span>Level {level}</span>
-                    <span className="text-slate-600">•</span>
-                    <span className="text-amber-300">{userProgress.xp || 0} XP</span>
-                  </div>
-                  {userProgress.streakDays > 0 && (
-                    <div className="flex items-center gap-1 text-orange-400 font-bold font-mono">
-                      <Flame className="h-3 w-3 fill-orange-500" />
-                      <span>{userProgress.streakDays}d</span>
+              {/* Learning Progress Summary or Guest Preview Mode */}
+              {auth.currentUser ? (
+                <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-1.5 font-mono text-blue-400 font-bold">
+                      <span>Level {level}</span>
+                      <span className="text-slate-600">•</span>
+                      <span className="text-amber-300">{userProgress.xp || 0} XP</span>
                     </div>
-                  )}
+                    {userProgress.streakDays > 0 && (
+                      <div className="flex items-center gap-1 text-orange-400 font-bold font-mono">
+                        <Flame className="h-3 w-3 fill-orange-500" />
+                        <span>{userProgress.streakDays}d</span>
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => {
+                      onClose();
+                      if (resumeCurriculum) {
+                        resumeCurriculum();
+                      } else {
+                        setActiveTab("curriculum");
+                      }
+                    }}
+                    className="w-full py-2 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-sm shadow-blue-600/20"
+                  >
+                    <span>Continue Learning</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => {
-                    onClose();
-                    if (resumeCurriculum) {
-                      resumeCurriculum();
-                    } else {
-                      setActiveTab("curriculum");
-                    }
-                  }}
-                  className="w-full py-2 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-sm shadow-blue-600/20"
-                >
-                  <span>Continue Learning</span>
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
+              ) : (
+                <div className="p-3 rounded-xl bg-slate-900/80 border border-blue-500/30 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-mono text-xs font-bold text-blue-400 flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-blue-400" />
+                      <span>Guest Preview Mode</span>
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-tight">
+                    Explore prompt modules, foundations &amp; sandbox tools. Sign in to save progress and earn XP.
+                  </p>
+                  <button
+                    onClick={() => {
+                      onClose();
+                      openAuthModal("Sign in to save your progress and unlock learner features.");
+                    }}
+                    className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm"
+                  >
+                    <User className="h-3.5 w-3.5" />
+                    <span>Sign In / Register</span>
+                  </button>
+                </div>
+              )}
 
               {/* Primary Academy Navigation */}
               <div className="space-y-1">

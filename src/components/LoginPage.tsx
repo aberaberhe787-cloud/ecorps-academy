@@ -36,6 +36,7 @@ import {
 import { auth } from '../lib/firebase';
 import { recordUserActivity } from '../lib/sessionManager';
 import { AnimatedPromptRuntime } from './AnimatedPromptRuntime';
+import { useApp } from '../context/AppContext';
 
 function getAuthErrorMessage(authError: any): string {
   const code = authError?.code;
@@ -131,9 +132,14 @@ interface LoginPageProps {
   message?: string;
   onSuccess?: () => void;
   isModal?: boolean;
+  redirectPath?: string | null;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModal = false }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModal = false, redirectPath = null }) => {
+  const { setActiveTab } = useApp();
+  // ... inside handleEmailAuth onSuccess and handleProviderAuth onSuccess:
+  // if (redirectPath) setActiveTab(redirectPath as any);
+  // else if (onSuccess) onSuccess();
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -291,7 +297,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
         await signInWithEmailAndPassword(auth, email.trim(), password);
       }
       recordUserActivity();
-      if (onSuccess) onSuccess();
+      if (redirectPath) setActiveTab(redirectPath as any);
+      else if (onSuccess) onSuccess();
     } catch (authError: any) {
       const code = authError?.code;
       const genericMsg = getAuthErrorMessage(authError);
@@ -338,7 +345,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
 
       await signInWithPopup(auth, provider);
       recordUserActivity();
-      if (onSuccess) onSuccess();
+      if (redirectPath) setActiveTab(redirectPath as any);
+      else if (onSuccess) onSuccess();
     } catch (authError: any) {
       if (authError?.code === 'auth/popup-blocked') {
         try {
