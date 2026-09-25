@@ -31,7 +31,7 @@ export const Navbar: React.FC = () => {
                   <span className="font-mono text-xs sm:text-sm md:text-base font-bold tracking-tight text-white group-hover:text-blue-400 transition-colors truncate">
                     {t.nav.brandName}
                   </span>
-                  <span className="rounded bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.2 font-mono text-[9px] font-bold text-blue-400 shrink-0">
+                  <span className="hidden min-[360px]:inline rounded bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.2 font-mono text-[9px] font-bold text-blue-400 shrink-0">
                     ACADEMY
                   </span>
                 </div>

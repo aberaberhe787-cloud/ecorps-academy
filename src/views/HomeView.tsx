@@ -200,38 +200,38 @@ export const HomeView: React.FC = () => {
       {/* ========================================================================= */}
       {/* ECORP ACADEMY BRAND HEADER                                                */}
       {/* ========================================================================= */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-800/80 pb-4 sm:pb-6">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
           <EcorpLogo size="lg" />
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-sm font-bold text-blue-400 tracking-wider uppercase">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <span className="font-mono text-xs sm:text-sm font-bold text-blue-400 tracking-wider uppercase">
                 ECORP ACADEMY
               </span>
-              <span className="rounded bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 font-mono text-[10px] font-bold text-blue-300">
+              <span className="hidden sm:inline rounded bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 font-mono text-[10px] font-bold text-blue-300">
                 PROMPT ENGINEERING & AI SYSTEMS
               </span>
             </div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight text-white mt-0.5">
+            <h1 className="text-lg sm:text-2xl lg:text-3xl font-black tracking-tight text-white mt-0.5 leading-snug">
               Instructional Learning Framework
             </h1>
           </div>
         </div>
 
         {auth.currentUser ? (
-          <div className="flex items-center gap-2 self-start sm:self-center">
-            <div className="flex items-center gap-2 rounded-xl bg-slate-900/90 border border-slate-800 px-3.5 py-2">
-              <Flame className="h-4 w-4 text-orange-400 fill-orange-400/20" />
+          <div className="flex items-center gap-2 self-start sm:self-center w-full sm:w-auto overflow-x-auto no-scrollbar">
+            <div className="flex items-center gap-2 rounded-xl bg-slate-900/90 border border-slate-800 px-2.5 sm:px-3.5 py-2 shrink-0">
+              <Flame className="h-4 w-4 text-orange-400 fill-orange-400/20 shrink-0" />
               <div className="text-left">
-                <div className="text-[10px] text-slate-400 font-mono">STUDY STREAK</div>
-                <div className="text-xs font-bold text-white font-mono">{userProgress.streakDays || 0} Days Active</div>
+                <div className="text-[10px] text-slate-400 font-mono">STREAK</div>
+                <div className="text-xs font-bold text-white font-mono">{userProgress.streakDays || 0}d</div>
               </div>
             </div>
-            <div className="flex items-center gap-2 rounded-xl bg-slate-900/90 border border-slate-800 px-3.5 py-2">
-              <Award className="h-4 w-4 text-amber-400" />
+            <div className="flex items-center gap-2 rounded-xl bg-slate-900/90 border border-slate-800 px-2.5 sm:px-3.5 py-2 shrink-0">
+              <Award className="h-4 w-4 text-amber-400 shrink-0" />
               <div className="text-left">
-                <div className="text-[10px] text-slate-400 font-mono">EXPERIENCE</div>
-                <div className="text-xs font-bold text-amber-300 font-mono">{userProgress.xp || 0} XP</div>
+                <div className="text-[10px] text-slate-400 font-mono">XP</div>
+                <div className="text-xs font-bold text-amber-300 font-mono">{userProgress.xp || 0}</div>
               </div>
             </div>
           </div>

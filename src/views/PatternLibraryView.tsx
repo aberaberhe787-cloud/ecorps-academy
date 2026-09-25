@@ -37,6 +37,8 @@ export const PatternLibraryView: React.FC = () => {
   const [copiedWeak, setCopiedWeak] = useState(false);
   const [copiedImproved, setCopiedImproved] = useState(false);
   const [copied, setCopied] = useState(false);
+  /** On viewports < lg, show pattern detail full-width after selection */
+  const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
 
   // Sync when selectedPatternId is triggered from Global Search
   React.useEffect(() => {
@@ -80,6 +82,11 @@ export const PatternLibraryView: React.FC = () => {
       newVars[v.name] = v.defaultValue;
     });
     setVariableValues(newVars);
+    // Mobile/tablet: switch to full-width detail pane
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      setMobileDetailOpen(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   const handleVariableChange = (name: string, val: string) => {
@@ -217,14 +224,14 @@ export const PatternLibraryView: React.FC = () => {
 
       {/* Main Grid: Patterns List + Interactive Educational System */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8">
-        {/* Left Column: Pattern Grid/List (5 cols) */}
-        <div className="lg:col-span-5 space-y-3">
+        {/* Left Column: Pattern Grid/List (5 cols) — hidden on mobile when detail is open */}
+        <div className={`lg:col-span-5 space-y-3 ${mobileDetailOpen ? "hidden lg:block" : "block"}`}>
           <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
             <span>Available Patterns ({filteredPatterns.length})</span>
-            <span>Click to study & customize</span>
+            <span className="hidden sm:inline">Click to study & customize</span>
           </div>
 
-          <div className="space-y-2.5 max-h-[calc(100dvh-220px)] overflow-y-auto pr-1">
+          <div className="space-y-2.5 max-h-[min(70dvh,calc(100dvh-200px))] lg:max-h-[calc(100dvh-220px)] overflow-y-auto overscroll-contain pr-1">
             {filteredPatterns.map((pattern) => {
               const isSelected = activePattern.id === pattern.id;
               const isMarked = userProgress.bookmarkedPatterns.includes(pattern.id);
@@ -235,7 +242,7 @@ export const PatternLibraryView: React.FC = () => {
                   key={pattern.id}
                   id={`pattern-card-${pattern.id}`}
                   onClick={() => handleSelectPattern(pattern)}
-                  className={`cursor-pointer rounded-xl border p-4 transition-all ${
+                  className={`cursor-pointer rounded-xl border p-3 sm:p-4 transition-all active:scale-[0.99] ${
                     isSelected
                       ? "border-blue-500 bg-slate-900/90 shadow-lg shadow-blue-500/10"
                       : "border-slate-800 bg-slate-950/60 hover:border-slate-700 hover:bg-slate-900/40"
@@ -317,11 +324,20 @@ export const PatternLibraryView: React.FC = () => {
         </div>
 
         {/* Right Column: Educational System & Interactive Customizer (7 cols) */}
-        <div className="lg:col-span-7 space-y-5">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 sm:p-6 shadow-xl backdrop-blur-md space-y-6">
+        <div className={`lg:col-span-7 space-y-5 ${mobileDetailOpen ? "block" : "hidden lg:block"}`}>
+          {/* Mobile back to pattern list */}
+          <button
+            type="button"
+            onClick={() => setMobileDetailOpen(false)}
+            className="lg:hidden flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-white border border-slate-800 bg-slate-900/80 rounded-xl px-3 py-2 min-h-[40px] w-full sm:w-auto"
+          >
+            <span aria-hidden>←</span>
+            <span>Back to pattern list</span>
+          </button>
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-6 shadow-xl backdrop-blur-md space-y-5 sm:space-y-6">
             {/* 1. Pattern Header */}
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 border-b border-slate-800 pb-4">
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-md bg-blue-950 border border-blue-800 px-2 py-0.5 font-mono text-xs text-blue-300">
                     {activePattern.category}

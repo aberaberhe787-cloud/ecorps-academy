@@ -535,7 +535,7 @@ export const CurriculumView: React.FC = () => {
         {/* TOP CURRICULUM SEARCH & FILTER BAR                                        */}
         {/* ========================================================================= */}
         {viewMode !== "lesson" && (
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 sm:p-5 shadow-xl backdrop-blur-md space-y-3.5" id="curriculum-top-search-panel">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-3 sm:p-5 shadow-xl backdrop-blur-md space-y-3 sm:space-y-3.5" id="curriculum-top-search-panel">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
               {/* Main Search Input */}
               <div className="relative flex-1">

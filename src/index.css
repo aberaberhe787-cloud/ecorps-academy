@@ -56,6 +56,18 @@
     outline: var(--focus-ring-width, 2px) solid var(--focus-ring-color, #3b82f6);
     outline-offset: var(--focus-ring-offset, 2px);
   }
+
+  /*
+   * iOS Safari zooms the viewport when focused inputs use font-size < 16px.
+   * Keep 16px on narrow screens; restore denser type from sm upward.
+   */
+  @media (max-width: 639px) {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
+  }
 }
 
 /* Google Translate Widget & Layout Fixes */

@@ -61,7 +61,7 @@ export const Breadcrumbs: React.FC = () => {
   return (
     <nav 
       aria-label="Breadcrumbs"
-      className="w-full max-w-7xl 2xl:max-w-[1536px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 pb-1 flex items-center flex-wrap gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 select-none animate-in fade-in duration-150 min-w-0"
+      className="w-full max-w-7xl 2xl:max-w-[1536px] mx-auto px-3 sm:px-6 lg:px-8 pt-2 sm:pt-3 pb-0.5 sm:pb-1 flex items-center flex-wrap gap-1 text-[11px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 select-none animate-in fade-in duration-150 min-w-0 overflow-hidden"
     >
       {/* Root - Academy */}
       <button
