@@ -17,7 +17,7 @@ export const Navbar: React.FC = () => {
         aria-label="Ecorp Academy Platform Navigation"
         className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-slate-950/85 backdrop-blur-md transition-colors"
       >
-        <div className="mx-auto flex h-16 w-full max-w-[calc(100vw-1rem)] sm:max-w-[calc(100vw-2rem)] lg:max-w-7xl 2xl:max-w-[1536px] items-center justify-between gap-1.5 sm:gap-3 lg:gap-4 px-2 sm:px-4 lg:px-8 min-w-0">
+        <div className="mx-auto flex h-14 sm:h-16 w-full max-w-7xl 2xl:max-w-[1536px] items-center justify-between gap-1.5 sm:gap-3 lg:gap-4 px-3 sm:px-4 lg:px-8 min-w-0">
           {/* Brand Identity */}
           <div className="flex shrink-0 items-center gap-2 sm:gap-3 min-w-0">
             <button
@@ -31,7 +31,7 @@ export const Navbar: React.FC = () => {
                   <span className="font-mono text-xs sm:text-sm md:text-base font-bold tracking-tight text-white group-hover:text-blue-400 transition-colors truncate">
                     {t.nav.brandName}
                   </span>
-                  <span className="rounded bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.2 font-mono text-[9px] font-bold text-blue-400 shrink-0">
+                  <span className="hidden min-[360px]:inline rounded bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.2 font-mono text-[9px] font-bold text-blue-400 shrink-0">
                     ACADEMY
                   </span>
                 </div>

@@ -7,9 +7,9 @@ export const Footer: React.FC = () => {
   const { setActiveTab, t } = useApp();
 
   return (
-    <footer className="border-t border-slate-800/80 bg-slate-950/80 text-slate-400 text-xs py-10" id="ecorp-app-footer">
-      <div className="mx-auto max-w-7xl 2xl:max-w-[1536px] px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+    <footer className="border-t border-slate-800/80 bg-slate-950/80 text-slate-400 text-xs py-6 sm:py-10 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] md:pb-10" id="ecorp-app-footer">
+      <div className="mx-auto max-w-7xl 2xl:max-w-[1536px] px-3 sm:px-6 lg:px-8 min-w-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
           {/* Brand */}
           <div className="space-y-3 md:col-span-1">
             <div className="flex items-center gap-2">

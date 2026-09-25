@@ -234,15 +234,15 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
   };
 
   return (
-    <div className="app-view w-full max-w-6xl 2xl:max-w-[1536px] mx-auto space-y-3.5 sm:space-y-8 px-2.5 sm:px-6 py-2.5 sm:py-6 animate-in fade-in duration-200 pb-20 sm:pb-6 ">
+    <div className="page-shell page-shell--medium app-view space-y-3.5 sm:space-y-8 py-2.5 sm:py-6 animate-in fade-in duration-200">
       {/* Learner Profile Header */}
-      <div className="flex flex-col items-center gap-4 sm:gap-6 rounded-2xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-6 md:flex-row shadow-xl">
-        <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-4xl text-white font-bold shadow-lg shadow-blue-900/30">
+      <div className="flex flex-col items-center gap-3 sm:gap-6 rounded-2xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-6 md:flex-row shadow-xl min-w-0">
+        <div className="flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-3xl sm:text-4xl text-white font-bold shadow-lg shadow-blue-900/30 shrink-0">
           {photoUrl ? <img src={photoUrl} alt="" className="h-full w-full object-cover" /> : userName[0]}
         </div>
-        <div className="flex-1 text-center md:text-left space-y-1">
+        <div className="flex-1 text-center md:text-left space-y-1 min-w-0 w-full">
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-            <h1 className="text-2xl font-black text-white">{userName}</h1>
+            <h1 className="text-xl sm:text-2xl font-black text-white truncate max-w-full">{userName}</h1>
             <span className="rounded-full bg-blue-950/80 border border-blue-800 px-3 py-0.5 text-xs font-semibold text-blue-300 font-mono">
               Level {level} Scholar
             </span>
@@ -250,7 +250,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
           <p className="text-xs sm:text-sm text-slate-400">
             Enrolled in Multi-Track Prompt Engineering & Applied AI Curriculum
           </p>
-          <div className="mt-3 flex flex-wrap justify-center gap-4 md:justify-start text-xs font-medium">
+          <div className="mt-3 flex flex-wrap justify-center gap-2 sm:gap-3 md:justify-start text-xs font-medium">
             <span className="flex items-center gap-1.5 text-slate-300 bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700/60">
               <Flame className="h-4 w-4 text-orange-400" /> {userProgress.streakDays} Day Streak
             </span>
@@ -356,7 +356,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
       </section>
 
       {/* Selected Track Detail View & Certificate Download */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 space-y-6 shadow-xl">
+      <section className="rounded-2xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-6 space-y-4 sm:space-y-6 shadow-xl min-w-0">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
           <div>
             <div className="flex items-center gap-2">

@@ -158,14 +158,14 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed inset-y-0 right-0 w-full max-w-[320px] bg-slate-950 border-l border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden z-50"
+            className="fixed inset-y-0 right-0 w-[min(100%,320px)] bg-slate-950 border-l border-slate-800 shadow-2xl flex flex-col justify-between overflow-hidden z-50 pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]"
           >
             {/* Header */}
-            <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-950">
-              <div className="flex items-center gap-2">
+            <div className="shrink-0 flex items-center justify-between px-4 py-3 border-b border-slate-800 bg-slate-950 min-h-[52px]">
+              <div className="flex items-center gap-2 min-w-0">
                 <EcorpLogo size="sm" />
-                <div>
-                  <span className="font-mono font-bold text-white text-sm tracking-tight block">
+                <div className="min-w-0">
+                  <span className="font-mono font-bold text-white text-sm tracking-tight block truncate">
                     {t.nav.brandName} Academy
                   </span>
                 </div>
@@ -174,7 +174,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
               <button
                 id="close-mobile-menu-btn"
                 onClick={onClose}
-                className="h-9 w-9 flex items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                className="h-10 w-10 flex items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
                 aria-label="Close navigation menu"
               >
                 <X className="h-4 w-4" />
@@ -311,33 +311,33 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                 </button>
 
                 {/* Quick Theme Buttons */}
-                <div className="grid grid-cols-3 gap-1 p-1 bg-slate-900 rounded-xl border border-slate-800">
+                <div className="grid grid-cols-3 gap-1 p-1 bg-slate-900 rounded-xl border border-slate-800 min-w-0">
                   <button
                     onClick={() => setTheme("dark")}
-                    className={`flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer ${
+                    className={`flex items-center justify-center gap-1 py-2 min-h-[40px] rounded-lg text-[11px] font-medium transition-all cursor-pointer min-w-0 ${
                       theme === "dark" ? "bg-slate-800 text-white font-bold" : "text-slate-400 hover:text-slate-200"
                     }`}
                   >
-                    <Moon className="h-3 w-3" />
-                    <span>Dark</span>
+                    <Moon className="h-3 w-3 shrink-0" />
+                    <span className="truncate">Dark</span>
                   </button>
                   <button
                     onClick={() => setTheme("light")}
-                    className={`flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer ${
+                    className={`flex items-center justify-center gap-1 py-2 min-h-[40px] rounded-lg text-[11px] font-medium transition-all cursor-pointer min-w-0 ${
                       theme === "light" ? "bg-slate-800 text-white font-bold" : "text-slate-400 hover:text-slate-200"
                     }`}
                   >
-                    <Sun className="h-3 w-3" />
-                    <span>Light</span>
+                    <Sun className="h-3 w-3 shrink-0" />
+                    <span className="truncate">Light</span>
                   </button>
                   <button
                     onClick={() => setTheme("system")}
-                    className={`flex items-center justify-center gap-1 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer ${
+                    className={`flex items-center justify-center gap-1 py-2 min-h-[40px] rounded-lg text-[11px] font-medium transition-all cursor-pointer min-w-0 ${
                       theme === "system" ? "bg-slate-800 text-white font-bold" : "text-slate-400 hover:text-slate-200"
                     }`}
                   >
-                    <Laptop className="h-3 w-3" />
-                    <span>Auto</span>
+                    <Laptop className="h-3 w-3 shrink-0" />
+                    <span className="truncate">Auto</span>
                   </button>
                 </div>
 

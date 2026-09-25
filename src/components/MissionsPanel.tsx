@@ -102,9 +102,9 @@ export const MissionsPanel: React.FC = () => {
   const currentHintIndex = revealedHints[selectedMission.id] || 0;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 min-w-0 w-full max-w-full">
       {/* Mission Horizontal Selector Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+      <div className="flex items-center gap-2 overflow-x-auto overscroll-x-contain no-scrollbar pb-1 touch-pan-x">
         {missions.map((m, idx) => {
           const isDone = userProgress.completedMissions.includes(m.id);
           const isCurrent = m.id === selectedMission.id;
@@ -113,7 +113,7 @@ export const MissionsPanel: React.FC = () => {
               key={m.id}
               id={`mission-tab-${idx + 1}`}
               onClick={() => handleSelectMission(m)}
-              className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold whitespace-nowrap transition-all border ${
+              className={`flex items-center gap-2 rounded-xl px-3 py-2 sm:px-3.5 text-xs font-semibold whitespace-nowrap transition-all border shrink-0 min-h-[40px] ${
                 isCurrent
                   ? "bg-blue-600/90 text-white border-blue-500 shadow-md shadow-blue-500/20"
                   : "bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-slate-200"
@@ -130,7 +130,7 @@ export const MissionsPanel: React.FC = () => {
       </div>
 
       {/* Selected Mission Card */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl backdrop-blur-sm">
+      <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-5 shadow-xl backdrop-blur-sm min-w-0">
         {/* Header */}
         <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-800 pb-4">
           <div>
@@ -337,8 +337,8 @@ export const MissionsPanel: React.FC = () => {
 
       {/* Example Solution Modal */}
       {showSolutionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-          <div className="relative w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 p-0 sm:p-4 backdrop-blur-sm overflow-y-auto">
+          <div className="relative w-full max-w-2xl rounded-t-2xl sm:rounded-2xl border border-slate-800 bg-slate-900 p-4 sm:p-6 shadow-2xl max-h-[90dvh] overflow-y-auto my-0 sm:my-8">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-indigo-400" />

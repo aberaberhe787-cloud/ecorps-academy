@@ -505,7 +505,7 @@ export const PlaygroundView: React.FC = () => {
   const totalDrawerItems = executionHistory.length + userProgress.savedCustomPrompts.length;
 
   return (
-    <div className="app-view w-full max-w-7xl 2xl:max-w-[1536px] mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 space-y-3 sm:space-y-6 pb-20 md:pb-6 ">
+    <div className={`page-shell app-view py-2.5 sm:py-6 space-y-3 sm:space-y-6 ${(playgroundSubTab === "sandbox" || playgroundSubTab === "comparison") ? "pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))] md:pb-6" : ""}`}>
 
       {/* Header & Sub Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 border-b border-slate-800 pb-3 sm:pb-4 w-full">
@@ -519,9 +519,9 @@ export const PlaygroundView: React.FC = () => {
 
         <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
           {/* Sub-Nav Pills */}
-          <div className="flex items-center gap-1 rounded-xl border border-slate-800 bg-slate-900/80 p-1 overflow-x-auto no-scrollbar max-w-full touch-pan-x relative">
+          <div className="flex items-center gap-0.5 sm:gap-1 rounded-xl border border-slate-800 bg-slate-900/80 p-0.5 sm:p-1 overflow-x-auto no-scrollbar max-w-full touch-pan-x relative overscroll-x-contain">
             {[
-              { id: "sandbox", label: t.playground.tabSandbox, icon: Terminal, onClick: () => { 
+              { id: "sandbox", label: t.playground.tabSandbox, shortLabel: "Sandbox", icon: Terminal, onClick: () => { 
                 if (playgroundSubTab === "missions") {
                   setPrompt("");
                   setSystemInstruction("");
@@ -529,10 +529,10 @@ export const PlaygroundView: React.FC = () => {
                 setPlaygroundSubTab("sandbox"); 
                 setIsComparisonMode(false); 
               } },
-              { id: "missions", label: `${t.playground.tabMissions} (5)`, icon: Target, onClick: () => { setPlaygroundSubTab("missions"); setIsComparisonMode(false); } },
-              { id: "ctf", label: "CTF Labs", icon: ShieldAlert, onClick: () => { setPlaygroundSubTab("ctf"); setIsComparisonMode(false); } },
-              { id: "lab", label: "Experiments", icon: FlaskConical, onClick: () => { setPlaygroundSubTab("lab"); setIsComparisonMode(false); } },
-              { id: "comparison", label: t.playground.tabComparison, icon: Columns2, onClick: () => { setPlaygroundSubTab("comparison"); setIsComparisonMode(true); } },
+              { id: "missions", label: `${t.playground.tabMissions} (5)`, shortLabel: "Missions", icon: Target, onClick: () => { setPlaygroundSubTab("missions"); setIsComparisonMode(false); } },
+              { id: "ctf", label: "CTF Labs", shortLabel: "CTF", icon: ShieldAlert, onClick: () => { setPlaygroundSubTab("ctf"); setIsComparisonMode(false); } },
+              { id: "lab", label: "Experiments", shortLabel: "Labs", icon: FlaskConical, onClick: () => { setPlaygroundSubTab("lab"); setIsComparisonMode(false); } },
+              { id: "comparison", label: t.playground.tabComparison, shortLabel: "A/B", icon: Columns2, onClick: () => { setPlaygroundSubTab("comparison"); setIsComparisonMode(true); } },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = playgroundSubTab === tab.id || (tab.id === "comparison" && isComparisonMode);
@@ -542,7 +542,8 @@ export const PlaygroundView: React.FC = () => {
                   key={tab.id}
                   id={`tab-${tab.id}`}
                   onClick={tab.onClick}
-                  className={`relative flex items-center gap-1.5 rounded-lg px-2.5 sm:px-3 py-1.5 text-xs font-semibold transition-colors duration-200 whitespace-nowrap z-10 ${
+                  aria-label={tab.label}
+                  className={`relative flex items-center gap-1 sm:gap-1.5 rounded-lg px-2 sm:px-3 py-1.5 text-[11px] sm:text-xs font-semibold transition-colors duration-200 whitespace-nowrap z-10 shrink-0 min-h-[36px] ${
                     isActive
                       ? "text-white"
                       : "text-slate-400 hover:text-slate-200"
@@ -563,7 +564,7 @@ export const PlaygroundView: React.FC = () => {
                   )}
                   <Icon className="h-3.5 w-3.5 shrink-0" />
                   <span className="hidden sm:inline">{tab.label}</span>
-                  <span className="sm:hidden">{tab.id === "comparison" ? "A/B" : tab.label.split(" ")[0]}</span>
+                  <span className="sm:hidden">{tab.shortLabel}</span>
                 </button>
               );
             })}
@@ -609,8 +610,8 @@ export const PlaygroundView: React.FC = () => {
           {/* Main Dual Pane (Sandbox + Comparison) */}
           {(playgroundSubTab === "sandbox" || playgroundSubTab === "comparison") && (
         <>
-          {/* Mobile Responsive Workspace Switcher (< lg) */}
-          <div className="lg:hidden flex items-center p-1 bg-slate-950/90 border border-slate-800 rounded-xl mb-3 shadow-sm">
+          {/* Mobile Responsive Workspace Switcher (< lg) — sticky under top chrome */}
+          <div className="lg:hidden sticky top-14 z-30 flex items-center p-0.5 sm:p-1 bg-slate-950/95 border border-slate-800 rounded-xl mb-3 shadow-sm backdrop-blur-md -mx-0.5">
             <button
               type="button"
               id="mobile-tab-editor-btn"
@@ -843,11 +844,11 @@ export const PlaygroundView: React.FC = () => {
               <div className="p-2.5 sm:p-3">
                 <textarea
                   id="main-prompt-editor"
-                  rows={isComparisonMode ? 7 : 9}
+                  rows={isComparisonMode ? 6 : 8}
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="Enter your prompt here... Use delimiters like <context>, personas like 'Act as...', and explicit instructions."
-                  className="w-full resize-y rounded-lg bg-slate-950/80 p-3 font-mono text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500/50 leading-relaxed border border-slate-800/80"
+                  className="w-full min-h-[140px] sm:min-h-[180px] max-h-[50dvh] resize-y rounded-lg bg-slate-950/80 p-3 font-mono text-sm sm:text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500/50 leading-relaxed border border-slate-800/80"
                 />
               </div>
 
@@ -893,6 +894,7 @@ export const PlaygroundView: React.FC = () => {
                     <span className="hidden sm:inline">Save Snippet</span>
                   </button>
                 </div>
+                {/* Desktop/tablet execute — mobile uses sticky action bar above bottom nav */}
                 <button
                   id="run-prompt-btn"
                   onClick={() => {
@@ -906,7 +908,7 @@ export const PlaygroundView: React.FC = () => {
                     }
                   }}
                   disabled={isExecuting || !prompt.trim()}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="hidden md:flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   <Play className="h-4 w-4 fill-white" />
                   <span>{isExecuting ? "Generating..." : isComparisonMode ? "Run A/B Benchmark" : "Execute Prompt"}</span>
@@ -1016,7 +1018,7 @@ export const PlaygroundView: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="min-h-[260px]">
+                <div className="min-h-[200px] sm:min-h-[260px]">
                   <TerminalOutput
                     result={lastResult}
                     isExecuting={isExecuting}
@@ -1025,7 +1027,7 @@ export const PlaygroundView: React.FC = () => {
                     onRetry={() => executeComparison()}
                   />
                 </div>
-                <div className="min-h-[280px]">
+                <div className="min-h-[200px] sm:min-h-[280px]">
                   <TerminalOutput
                     result={comparisonResultB}
                     isExecuting={isExecuting}
@@ -1036,7 +1038,7 @@ export const PlaygroundView: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="min-h-[400px] h-full">
+              <div className="min-h-[240px] sm:min-h-[400px] h-full">
                 <TerminalOutput
                   result={lastResult}
                   isExecuting={isExecuting}
@@ -1064,22 +1066,35 @@ export const PlaygroundView: React.FC = () => {
         topP={topP}
       />
 
-      {/* Sticky Bottom Action Bar for Mobile (< 768px) */}
+      {/* Sticky Bottom Action Bar for Mobile — sits above MobileBottomNav */}
       {(playgroundSubTab === "sandbox" || playgroundSubTab === "comparison") && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 border-t border-slate-800 backdrop-blur-md px-3 py-2 sm:px-4 sm:py-3 md:hidden flex items-center justify-between gap-2 shadow-2xl">
+        <div
+          id="playground-mobile-action-bar"
+          className="fixed left-0 right-0 z-[45] bg-slate-950/95 border-t border-slate-800 backdrop-blur-md px-3 py-2 sm:px-4 md:hidden flex items-center justify-between gap-2 shadow-2xl bottom-[calc(3.75rem+env(safe-area-inset-bottom,0px))]"
+        >
           <button
             id="mobile-clear-prompt-btn"
             onClick={() => setPrompt("")}
-            className="flex items-center justify-center gap-1 text-xs text-slate-400 hover:text-slate-200 px-2.5 py-2 rounded-xl border border-slate-800 bg-slate-900 shrink-0"
+            className="flex items-center justify-center gap-1 text-xs text-slate-400 hover:text-slate-200 px-2.5 py-2 rounded-xl border border-slate-800 bg-slate-900 shrink-0 min-h-[44px]"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             <span>Reset</span>
           </button>
           <button
             id="mobile-execute-prompt-btn"
-            onClick={() => isComparisonMode ? executeComparison() : executeCurrentPrompt()}
+            onClick={() => {
+              // On mobile, switch to Output pane so the learner sees generation progress
+              if (typeof window !== "undefined" && window.innerWidth < 1024) {
+                setMobileViewMode("output");
+              }
+              if (isComparisonMode) {
+                executeComparison();
+              } else {
+                executeCurrentPrompt();
+              }
+            }}
             disabled={isExecuting || !prompt.trim()}
-            className="flex-1 min-w-0 flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-3 py-2 text-xs font-bold text-white shadow-lg shadow-blue-500/25 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[42px]"
+            className="flex-1 min-w-0 flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-3 py-2 text-xs font-bold text-white shadow-lg shadow-blue-500/25 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
           >
             <Play className="h-3.5 w-3.5 fill-white shrink-0" />
             <span className="truncate">{isExecuting ? "Generating..." : isComparisonMode ? "Run Benchmark" : "Execute Prompt"}</span>

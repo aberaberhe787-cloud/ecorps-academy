@@ -551,7 +551,7 @@ export const CurriculumView: React.FC = () => {
   const bloomStyle = BLOOM_COLORS[bloomFocus] || BLOOM_COLORS.Understanding;
 
   return (
-    <div className="min-h-dvh bg-slate-950 text-slate-100 selection:bg-blue-600 selection:text-white">
+    <div className="min-h-dvh bg-slate-950 text-slate-100 selection:bg-blue-600 selection:text-white w-full max-w-full overflow-x-hidden">
       {/* If in active lesson mode, show LMS Focus Header */}
       {viewMode === "lesson" && (
         <LMSFocusHeader
@@ -569,12 +569,12 @@ export const CurriculumView: React.FC = () => {
         />
       )}
 
-      <div className="w-full max-w-7xl 2xl:max-w-[1536px] mx-auto px-2.5 sm:px-6 lg:px-8 py-2.5 sm:py-6 space-y-3 sm:space-y-6 ">
+      <div className={`page-shell app-view space-y-3 sm:space-y-6 ${viewMode === "lesson" ? "py-3 sm:py-5" : "py-2.5 sm:py-6"}`}>
         {/* ========================================================================= */}
         {/* TOP CURRICULUM SEARCH & FILTER BAR                                        */}
         {/* ========================================================================= */}
         {viewMode !== "lesson" && (
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-4 sm:p-5 shadow-xl backdrop-blur-md space-y-3.5" id="curriculum-top-search-panel">
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-3 sm:p-5 shadow-xl backdrop-blur-md space-y-3 sm:space-y-3.5" id="curriculum-top-search-panel">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
               {/* Main Search Input */}
               <div className="relative flex-1">
@@ -1199,7 +1199,7 @@ export const CurriculumView: React.FC = () => {
 
                 {/* 4 Pedagogical Pillars - Swipeable carousel on mobile */}
                 <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar pb-2 sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3">
-                  <button type="button" onClick={() => handlePillarClick("lesson-concepts-section")} className="shrink-0 w-[82vw] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-blue-500/60 hover:bg-blue-950/30">
+                  <button type="button" onClick={() => handlePillarClick("lesson-concepts-section")} className="shrink-0 w-[min(82vw,280px)] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-blue-500/60 hover:bg-blue-950/30">
                     <div className="text-xs font-bold text-blue-300 flex items-center gap-1.5">
                       <span className="flex h-5 w-5 items-center justify-center rounded bg-blue-950 text-xs font-mono text-blue-400 font-bold">1</span>
                       {t.curriculum.pillarMicroTitle}
@@ -1209,7 +1209,7 @@ export const CurriculumView: React.FC = () => {
                     </p>
                   </button>
 
-                  <button type="button" onClick={() => handlePillarClick("lesson-quizzes-section")} className="shrink-0 w-[82vw] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-emerald-500/60 hover:bg-emerald-950/30">
+                  <button type="button" onClick={() => handlePillarClick("lesson-quizzes-section")} className="shrink-0 w-[min(82vw,280px)] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-emerald-500/60 hover:bg-emerald-950/30">
                     <div className="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
                       <span className="flex h-5 w-5 items-center justify-center rounded bg-emerald-950 text-xs font-mono text-emerald-400 font-bold">2</span>
                       {t.curriculum.pillarRecallTitle}
@@ -1219,7 +1219,7 @@ export const CurriculumView: React.FC = () => {
                     </p>
                   </button>
 
-                  <button type="button" onClick={() => handlePillarClick("lesson-case-study-section")} className="shrink-0 w-[82vw] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-amber-500/60 hover:bg-amber-950/30">
+                  <button type="button" onClick={() => handlePillarClick("lesson-case-study-section")} className="shrink-0 w-[min(82vw,280px)] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-amber-500/60 hover:bg-amber-950/30">
                     <div className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
                       <span className="flex h-5 w-5 items-center justify-center rounded bg-amber-950 text-xs font-mono text-amber-400 font-bold">3</span>
                       {t.curriculum.pillarBloomTitle}
@@ -1229,7 +1229,7 @@ export const CurriculumView: React.FC = () => {
                     </p>
                   </button>
 
-                  <button type="button" onClick={() => handlePillarClick("lesson-sandbox-section")} className="shrink-0 w-[82vw] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-purple-500/60 hover:bg-purple-950/30">
+                  <button type="button" onClick={() => handlePillarClick("lesson-sandbox-section")} className="shrink-0 w-[min(82vw,280px)] max-w-[280px] snap-center sm:w-auto rounded-xl border border-slate-800/80 bg-slate-950/60 p-3.5 space-y-1 text-left transition hover:border-purple-500/60 hover:bg-purple-950/30">
                     <div className="text-xs font-bold text-purple-300 flex items-center gap-1.5">
                       <span className="flex h-5 w-5 items-center justify-center rounded bg-purple-950 text-xs font-mono text-purple-400 font-bold">4</span>
                       {t.curriculum.pillarSandboxTitle}

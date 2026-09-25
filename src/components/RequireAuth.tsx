@@ -20,7 +20,7 @@ export const RequireAuth: React.FC<{ children: React.ReactNode; message?: string
 
   if (checking) {
     return (
-      <div className="flex items-center justify-center w-full h-64 text-sm text-slate-400 font-mono">
+      <div className="flex items-center justify-center w-full min-h-[12rem] py-12 text-sm text-slate-400 font-mono">
         Checking authentication status...
       </div>
     );
@@ -28,7 +28,7 @@ export const RequireAuth: React.FC<{ children: React.ReactNode; message?: string
 
   if (!authed) {
     return (
-      <div className="w-full max-w-4xl mx-auto px-4 py-8 space-y-6">
+      <div className="page-shell page-shell--narrow py-8 space-y-6">
         <div className="rounded-2xl border border-blue-500/30 bg-slate-900/90 p-6 sm:p-8 text-center space-y-3 shadow-xl">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
             <Lock className="h-6 w-6" />

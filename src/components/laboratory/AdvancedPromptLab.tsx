@@ -409,19 +409,19 @@ export const AdvancedPromptLab: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 pb-20 animate-in fade-in duration-200">
+    <div className="space-y-4 sm:space-y-6 pb-8 md:pb-6 animate-in fade-in duration-200 min-w-0 w-full max-w-full">
       {/* Header */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-xl">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-5 shadow-xl min-w-0">
+        <div className="space-y-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-blue-950/80 border border-blue-800 px-2.5 py-0.5 text-xs font-bold text-blue-300 font-mono">
               P3 Laboratory
             </span>
             <span className="text-xs text-slate-400 font-medium">Advanced Prompt Engineering & Regression Suite</span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-            <FlaskConical className="h-6 w-6 text-blue-400" />
-            Prompt Experimentation & Mutation Lab
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-black text-white flex items-center gap-2">
+            <FlaskConical className="h-5 w-5 sm:h-6 sm:w-6 text-blue-400 shrink-0" />
+            <span className="leading-snug">Prompt Experimentation & Mutation Lab</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-400">
             Design baselines, define rigorous test suites, execute controlled mutations, and detect regressions before deployment.
