@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { BookOpen, Terminal, ArrowRight, Flame, Award, Compass, Zap, Grid3X3, ShieldCheck, Target, CheckCircle2, ChevronRight, BriefcaseBusiness, Users, BarChart3, GraduationCap, X } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
+import { staggerContainer, staggerItem, staggerItemReduced } from "../lib/motionPresets";
 import { useApp } from "../context/AppContext";
 import { auth } from "../lib/firebase";
 import { EcorpLogo } from "../components/EcorpLogo";
@@ -22,6 +23,9 @@ const TRACKS = [
 ];
 
 export const HomeView: React.FC = () => {
+  const reduceMotion = useReducedMotion();
+  const itemMotion = reduceMotion ? staggerItemReduced : staggerItem;
+
   const { setActiveTab } = useApp();
   const [showDiagnostic, setShowDiagnostic] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -81,9 +85,19 @@ export const HomeView: React.FC = () => {
           {/* Tracks */}
           <section className="space-y-6">
             <h2 className="text-3xl font-bold text-white text-center">Outcome-led learning tracks</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+              variants={staggerContainer}
+              initial="initial"
+              whileInView="animate"
+              viewport={{ once: true, amount: 0.2 }}
+            >
               {TRACKS.map(track => (
-                <div key={track.title} className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6 space-y-4 hover:border-slate-600 transition-all flex flex-col justify-between">
+                <motion.div
+                  key={track.title}
+                  variants={itemMotion}
+                  className="rounded-2xl border border-slate-800 bg-slate-900/50 p-6 space-y-4 hover:border-slate-600 transition-colors flex flex-col justify-between"
+                >
                   <div>
                     <h3 className="font-bold text-white mb-2">{track.title}</h3>
                     <ul className="text-xs text-slate-400 space-y-1">
@@ -93,22 +107,32 @@ export const HomeView: React.FC = () => {
                     </ul>
                   </div>
                   <Button variant="ghost" size="sm" className="w-full mt-4 border border-slate-800">View Track →</Button>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </section>
 
           {/* Learn by Doing - Refined */}
           <section className="bg-slate-900/50 rounded-3xl p-8 border border-slate-800 text-center space-y-6">
             <h2 className="text-3xl font-bold text-white">"Learn by doing" proof</h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-4 gap-4"
+              variants={staggerContainer}
+              initial="initial"
+              whileInView="animate"
+              viewport={{ once: true, amount: 0.25 }}
+            >
               {["Weak prompt", "Structured prompt", "Evaluated output", "Measurable improvement"].map((step, i) => (
-                <div key={step} className="p-4 bg-slate-950 rounded-2xl border border-slate-800 text-center space-y-2">
-                  <div className="text-2xl font-black text-blue-900/50">0{i+1}</div>
+                <motion.div
+                  key={step}
+                  variants={itemMotion}
+                  className="p-4 bg-slate-950 rounded-2xl border border-slate-800 text-center space-y-2"
+                >
+                  <div className="text-2xl font-black text-indigo-900/50">0{i+1}</div>
                   <div className="text-sm font-bold text-white">{step}</div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </section>
 
           {/* Corporate */}

@@ -1,4 +1,6 @@
 import React from "react";
+import { motion, useReducedMotion } from "motion/react";
+import { progressFillTransition } from "../../lib/motionPresets";
 
 export interface ProgressBarProps {
   value: number; // 0 to 100
@@ -32,6 +34,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   label,
   className = "",
 }) => {
+  const reduceMotion = useReducedMotion();
   const percentage = Math.min(100, Math.max(0, Math.round((value / max) * 100)));
 
   return (
@@ -49,9 +52,11 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
         aria-valuemax={100}
         className={`w-full overflow-hidden rounded-full bg-slate-800/90 ring-1 ring-inset ring-white/5 ${sizeMap[size]}`}
       >
-        <div
-          className={`h-full transition-all duration-500 ease-out rounded-full ${variantMap[variant]}`}
-          style={{ width: `${percentage}%` }}
+        <motion.div
+          className={`h-full rounded-full ${variantMap[variant]}`}
+          initial={false}
+          animate={{ width: `${percentage}%` }}
+          transition={reduceMotion ? { duration: 0 } : progressFillTransition}
         />
       </div>
     </div>

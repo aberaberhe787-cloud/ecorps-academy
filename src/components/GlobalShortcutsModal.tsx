@@ -185,7 +185,7 @@ export const GlobalShortcutsModal: React.FC<GlobalShortcutsModalProps> = ({
           {/* Header */}
           <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-800 bg-slate-900">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 shrink-0">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 shrink-0">
                 <Keyboard className="h-5 w-5" />
               </div>
               <div>
@@ -241,7 +241,7 @@ export const GlobalShortcutsModal: React.FC<GlobalShortcutsModalProps> = ({
                   onClick={() => setSelectedCategory(cat)}
                   className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap transition-all cursor-pointer ${
                     selectedCategory === cat
-                      ? "bg-blue-600 text-white shadow-xs"
+                      ? "bg-indigo-600 text-white shadow-xs"
                       : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
                   }`}
                 >
@@ -265,7 +265,7 @@ export const GlobalShortcutsModal: React.FC<GlobalShortcutsModalProps> = ({
                         {item.description}
                       </span>
                       {item.badge && (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-blue-950/80 text-blue-300 border border-blue-800/60 shrink-0">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-indigo-950/80 text-indigo-300 border border-indigo-800/60 shrink-0">
                           {item.badge}
                         </span>
                       )}
