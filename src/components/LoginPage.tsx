@@ -414,140 +414,161 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
     }
   };
 
-  return (
-    <main className="login-page min-h-dvh bg-[#030712] text-slate-100 flex flex-col justify-between items-center w-full max-w-full overflow-x-hidden px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-8 lg:py-10 relative">
-      {/* Background Ambient Glows & Cyber Gradients */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden z-0" aria-hidden="true">
-        <div className="absolute top-[-10%] left-[10%] w-[min(700px,90vw)] h-[min(700px,90vw)] max-w-[700px] rounded-full bg-indigo-600/10 blur-[100px] lg:blur-[140px]" />
-        <div className="absolute bottom-[-10%] right-[10%] w-[min(600px,80vw)] h-[min(600px,80vw)] max-w-[600px] rounded-full bg-indigo-600/10 blur-[90px] lg:blur-[130px]" />
-        <div className="absolute inset-0 opacity-[0.03] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem]" />
-      </div>
-
-      {/* Top Mobile/Tablet Header Branding (< 1024px) */}
-      <header className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:hidden flex items-center justify-between mb-4 sm:mb-6 z-10 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-indigo-500/40 bg-indigo-950/80 shadow-md shadow-indigo-950/60">
-            <WandSparkles className="h-5 w-5 text-indigo-300" />
-          </div>
-          <div>
-            <span className="text-base font-extrabold tracking-tight text-white block leading-tight">Ecorp Academy</span>
-            <span className="text-xs text-indigo-300/90 font-medium leading-none block">Prompt Engineering &amp; AI</span>
-          </div>
-        </div>
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-200">
-          <Sparkles className="h-3 w-3 text-indigo-300 shrink-0" />
-          <span>v2.4 Live</span>
-        </div>
-      </header>
-
-      {/* Main Container: Mobile/Tablet centered stack (w-full max-w-md sm:max-w-xl md:max-w-2xl), Desktop 2-column balanced grid (lg:max-w-6xl xl:max-w-7xl lg:grid-cols-12) */}
-      <div className="w-full max-w-md sm:max-w-xl md:max-w-2xl lg:max-w-6xl xl:max-w-7xl my-auto z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-10 xl:gap-14 items-center"
-        >
-          {/* LEFT COLUMN: Authoritative Ecorp Academy Showcase (Streamlined on mobile/tablet below auth card, full power on desktop lg:col-span-7) */}
-          <section
-            id="marketing-info-section"
-            className="order-2 lg:order-1 lg:col-span-7 flex flex-col justify-center space-y-6 sm:space-y-7"
+  const forgotPasswordDialog = (
+      <AnimatePresence>
+        {isForgotPasswordOpen && (
+          <div
+            id="forgot-password-modal-backdrop"
+            className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm overflow-y-auto"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) closeForgotPasswordModal();
+            }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="forgot-password-title"
           >
-            {/* Desktop Brand Banner */}
-            <div className="hidden lg:flex items-center gap-3.5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-indigo-500/40 bg-gradient-to-br from-indigo-950/90 to-slate-900 shadow-lg shadow-indigo-950/60">
-                <WandSparkles className="h-6 w-6 text-indigo-300" />
-              </div>
-              <div>
-                <span className="text-xl font-black tracking-tight text-white block">Ecorp Academy</span>
-                <span className="text-xs text-indigo-300 font-semibold tracking-wide uppercase font-mono">Prompt Engineering &amp; AI Systems</span>
-              </div>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 12 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-6 sm:p-8 shadow-2xl shadow-indigo-950/50 text-slate-100 relative my-auto"
+            >
+              <button
+                type="button"
+                id="close-forgot-password-modal"
+                onClick={closeForgotPasswordModal}
+                className="absolute right-4 top-4 rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                aria-label="Close modal"
+              >
+                <X className="h-5 w-5" />
+              </button>
 
-            {/* Hero Value Headline */}
-            <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/40 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-200">
-                <Sparkles className="h-3.5 w-3.5 text-indigo-300" />
-                <span>Next-Gen LLM Architecture Curriculum</span>
-              </div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black tracking-tight text-white leading-tight">
-                Master the Architecture of{' '}
-                <span className="bg-gradient-to-r from-indigo-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
-                  Large Language Models
-                </span>
-              </h1>
-              <p className="text-sm sm:text-base text-slate-300/90 leading-relaxed max-w-2xl">
-                Hands-on, production-grade mastery in structured directives, in-context reasoning, autonomous agents, and multi-modal prompt synthesis.
-              </p>
-            </div>
-
-            {/* Live Interactive Code/Prompt Preview Sandbox Card (Animated Directive Runtime) */}
-            <AnimatedPromptRuntime />
-
-            {/* 4 Feature Value Pillars Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-              {[
-                {
-                  icon: BookOpen,
-                  title: 'Interactive Lessons',
-                  detail: '10+ structured modules with instant verification',
-                  color: 'text-indigo-300 bg-indigo-500/10 border-indigo-500/20',
-                },
-                {
-                  icon: Code2,
-                  title: 'Production Patterns',
-                  detail: 'CoT, Few-Shot, ReAct & RAG frameworks',
-                  color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-                },
-                {
-                  icon: WandSparkles,
-                  title: 'Live AI Sandbox',
-                  detail: 'Instant token benchmarks & output evaluations',
-                  color: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
-                },
-                {
-                  icon: Trophy,
-                  title: 'Graded Missions',
-                  detail: 'Earn verified certificates & ledger XP',
-                  color: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-                },
-              ].map(({ icon: Icon, title, detail, color }) => (
-                <div
-                  key={title}
-                  className="flex items-start gap-3 rounded-xl bg-slate-900/50 p-3 sm:p-3.5 border border-slate-800/80 backdrop-blur-sm transition-all hover:bg-slate-900/80 hover:border-slate-700/80"
-                >
-                  <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${color}`}>
-                    <Icon className="h-4.5 w-4.5" />
+              {!forgotSuccess ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-indigo-500/30 bg-indigo-500/10 text-indigo-300">
+                      <KeyRound className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 id="forgot-password-title" className="text-lg font-bold text-white">
+                        Reset Password
+                      </h3>
+                      <p className="text-xs text-slate-400">
+                        We'll send a secure password reset link to your email.
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-xs sm:text-sm font-bold text-slate-100">{title}</p>
-                    <p className="text-xs text-slate-400 leading-snug">{detail}</p>
-                  </div>
+
+                  <form onSubmit={handleSendPasswordReset} className="space-y-4" noValidate>
+                    <div className="space-y-1.5">
+                      <label
+                        htmlFor="forgot-password-email-input"
+                        className="block text-xs sm:text-sm font-semibold text-slate-300"
+                      >
+                        Account email address
+                      </label>
+                      <div className="relative">
+                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                        <input
+                          id="forgot-password-email-input"
+                          type="email"
+                          value={forgotEmail}
+                          onChange={(e) => {
+                            setForgotEmail(e.target.value);
+                            if (forgotEmailError) setForgotEmailError('');
+                            if (forgotError) setForgotError('');
+                          }}
+                          placeholder="you@domain.com"
+                          className={`login-input ${forgotEmailError ? 'has-error' : ''}`}
+                          autoComplete="email"
+                          autoFocus
+                          required
+                        />
+                      </div>
+                      {forgotEmailError && (
+                        <p className="text-xs text-rose-400 flex items-center gap-1 mt-1">
+                          <AlertCircle className="h-3.5 w-3.5" />
+                          <span>{forgotEmailError}</span>
+                        </p>
+                      )}
+                    </div>
+
+                    {forgotError && (
+                      <div role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300 flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" />
+                        <span>{forgotError}</span>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 pt-1">
+                      <button
+                        type="submit"
+                        disabled={isForgotSubmitting}
+                        className="w-full sm:flex-1 min-h-[44px] inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 px-4 py-2.5 text-sm font-bold text-white transition cursor-pointer disabled:opacity-60"
+                      >
+                        {isForgotSubmitting ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin text-white shrink-0" />
+                            <span>Sending link...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Send Reset Link</span>
+                            <ArrowRight className="h-4 w-4 shrink-0" />
+                          </>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={closeForgotPasswordModal}
+                        disabled={isForgotSubmitting}
+                        className="w-full sm:w-auto min-h-[44px] rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-300 transition cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
                 </div>
-              ))}
-            </div>
+              ) : (
+                <div className="text-center py-3 space-y-3">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
+                    <CheckCircle2 className="h-6 w-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">Check your inbox</h3>
+                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    We sent a password reset link to{' '}
+                    <strong className="text-indigo-300">{forgotEmail}</strong>. Follow the instructions to reset your password.
+                  </p>
+                  <button
+                    type="button"
+                    id="back-to-signin-after-reset-btn"
+                    onClick={closeForgotPasswordModal}
+                    className="w-full min-h-[44px] rounded-xl bg-slate-800 hover:bg-slate-700 text-white py-2.5 px-4 text-sm font-bold transition mt-2 cursor-pointer"
+                  >
+                    Return to Sign In
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+  );
 
-            {/* Social Trust Proof */}
-            <div className="flex items-center gap-4 pt-2 text-xs text-slate-400 border-t border-slate-800/70">
-              <div className="flex -space-x-2 overflow-hidden shrink-0">
-                <div className="inline-block h-7 w-7 rounded-full ring-2 ring-slate-900 bg-indigo-600 text-white font-bold flex items-center justify-center text-[10px]">EA</div>
-                <div className="inline-block h-7 w-7 rounded-full ring-2 ring-slate-900 bg-purple-600 text-white font-bold flex items-center justify-center text-[10px]">AI</div>
-                <div className="inline-block h-7 w-7 rounded-full ring-2 ring-slate-900 bg-emerald-600 text-white font-bold flex items-center justify-center text-[10px]">LLM</div>
-              </div>
-              <span className="leading-snug">Join <strong className="text-slate-200">10,000+</strong> engineers mastering prompt engineering worldwide.</span>
-            </div>
-          </section>
+  const authFormCard = (
+            <div
+              className={
+                isModal
+                  ? 'w-full relative'
+                  : 'w-full rounded-2xl sm:rounded-3xl border border-slate-800/90 bg-slate-900/90 p-5 sm:p-7 md:p-8 lg:p-8 xl:p-9 backdrop-blur-xl shadow-2xl shadow-indigo-950/40 relative'
+              }
+            >
+              {!isModal && (
+                <div className="absolute top-0 left-8 right-8 h-[2px] bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent rounded-full" />
+              )}
 
-          {/* RIGHT COLUMN: Elevated Authentication Form Card (Mobile full width, Desktop lg:col-span-5) */}
-          <section
-            id="auth-form-section"
-            className="order-1 lg:order-2 lg:col-span-5 w-full flex justify-center"
-          >
-            <div className="w-full rounded-2xl sm:rounded-3xl border border-slate-800/90 bg-slate-900/90 p-5 sm:p-7 md:p-8 lg:p-8 xl:p-9 backdrop-blur-xl shadow-2xl shadow-indigo-950/40 relative">
-              {/* Top Accent Line */}
-              <div className="absolute top-0 left-8 right-8 h-[2px] bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent rounded-full" />
-
-              {/* Form Title & Subtitle */}
+              {!isModal && (
               <div className="text-center space-y-1.5 mb-5 sm:mb-6">
                 <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
                   {isSignUp ? 'Create your account' : 'Welcome back'}
@@ -558,16 +579,54 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
                     : 'Sign in to access your curriculum and credentials'}
                 </p>
               </div>
+              )}
 
-              {/* Action Banner Message */}
-              {message && (
+              {isModal && (
+              <div className="mb-4 flex rounded-xl border border-slate-800 bg-slate-950/60 p-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSignUp(false);
+                    setError('');
+                    setFieldErrors({});
+                    setTouched({});
+                    setResetSuccess('');
+                  }}
+                  className={`flex-1 min-h-[40px] rounded-lg text-sm font-semibold transition cursor-pointer ${
+                    !isSignUp
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-900/40'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  Sign in
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSignUp(true);
+                    setError('');
+                    setFieldErrors({});
+                    setTouched({});
+                    setResetSuccess('');
+                  }}
+                  className={`flex-1 min-h-[40px] rounded-lg text-sm font-semibold transition cursor-pointer ${
+                    isSignUp
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-900/40'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  Create account
+                </button>
+              </div>
+              )}
+
+              {!isModal && message && (
                 <div className="mb-4 p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-xs text-indigo-200 font-medium flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-indigo-300 shrink-0" />
                   <span>{message}</span>
                 </div>
               )}
 
-              {/* Password Reset Alert Confirmation */}
               {resetSuccess && (
                 <div className="mb-4 flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-300">
                   <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
@@ -575,7 +634,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
                 </div>
               )}
 
-              {/* 1-Click Fast Social Auth Grid */}
               <div className="grid grid-cols-2 gap-3 mb-5">
                 <button
                   type="button"
@@ -585,7 +643,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
                   aria-busy={socialLoading === 'google'}
                   className={`group flex min-h-[44px] items-center justify-center gap-2 rounded-xl border py-2.5 px-3 text-xs sm:text-sm font-semibold transition-all duration-150 w-full shadow-sm touch-manipulation select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 ${
                     socialLoading === 'google'
-                      ? 'border-indigo-500/70 bg-indigo-950/50 text-blue-200 cursor-wait'
+                      ? 'border-indigo-500/70 bg-indigo-950/50 text-indigo-200 cursor-wait'
                       : isSubmitting || socialLoading !== null
                       ? 'border-slate-800 bg-slate-900/50 text-slate-500 cursor-not-allowed opacity-50'
                       : 'border-slate-700 bg-slate-800/80 text-slate-200 hover:border-slate-500 hover:bg-slate-800 active:scale-[0.98]'
@@ -629,14 +687,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
                 </button>
               </div>
 
-              {/* Horizontal Divider */}
               <div className="mb-5 flex items-center gap-3 text-xs uppercase font-mono tracking-wider text-slate-500">
                 <span className="h-px flex-1 bg-slate-800" />
                 <span>or with email</span>
                 <span className="h-px flex-1 bg-slate-800" />
               </div>
 
-              {/* Credentials Form */}
               <form onSubmit={handleEmailAuth} className="space-y-4" noValidate>
                 {isSignUp && (
                   <div className="space-y-1.5">
@@ -752,13 +808,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
                   </div>
                 )}
 
-                {/* Submit Button */}
                 <button
                   type="submit"
                   id="primary-auth-submit-btn"
                   disabled={isSubmitting || socialLoading !== null}
                   aria-busy={isSubmitting}
-                  className="w-full min-h-[46px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-600 to-indigo-600 bg-[length:200%_auto] hover:bg-right py-3 px-4 text-sm font-bold text-white shadow-lg shadow-indigo-900/40 transition-all duration-300 hover:brightness-110 active:scale-[0.99] disabled:opacity-60 cursor-pointer select-none mt-2"
+                  className="w-full min-h-[46px] flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 py-3 px-4 text-sm font-bold text-white shadow-lg shadow-indigo-900/40 transition-all duration-200 hover:brightness-110 active:scale-[0.99] disabled:opacity-60 cursor-pointer select-none mt-2"
                 >
                   {isSubmitting ? (
                     <>
@@ -773,7 +828,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
                   )}
                 </button>
 
-                {/* Remember Me & Forgot Password */}
                 {!isSignUp && (
                   <div className="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm pt-1">
                     <label
@@ -785,7 +839,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
                         type="checkbox"
                         checked={rememberMe}
                         onChange={(e) => handleRememberMeChange(e.target.checked)}
-                        className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-blue-600 focus:ring-indigo-500 accent-blue-600 cursor-pointer"
+                        className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-indigo-600 focus:ring-indigo-500 accent-indigo-600 cursor-pointer"
                       />
                       <span>Remember me</span>
                     </label>
@@ -801,7 +855,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
                 )}
               </form>
 
-              {/* Mode Switch Toggle */}
+              {!isModal && (
               <div className="mt-6 pt-5 border-t border-slate-800 text-center text-xs sm:text-sm text-slate-400">
                 <span>{isSignUp ? 'Already have an account?' : "Don't have an account?"}</span>{' '}
                 <button
@@ -818,7 +872,149 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
                   {isSignUp ? 'Sign in' : 'Create an account'}
                 </button>
               </div>
+              )}
             </div>
+  );
+
+  if (isModal) {
+    return (
+      <div className="login-page-modal w-full text-slate-100">
+        {authFormCard}
+        {forgotPasswordDialog}
+      </div>
+    );
+  }
+
+  return (
+    <main className="login-page min-h-dvh bg-[#030712] text-slate-100 flex flex-col justify-between items-center w-full max-w-full overflow-x-hidden px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-8 lg:py-10 relative">
+      {/* Background Ambient Glows & Cyber Gradients */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden z-0" aria-hidden="true">
+        <div className="absolute top-[-10%] left-[10%] w-[min(700px,90vw)] h-[min(700px,90vw)] max-w-[700px] rounded-full bg-indigo-600/10 blur-[100px] lg:blur-[140px]" />
+        <div className="absolute bottom-[-10%] right-[10%] w-[min(600px,80vw)] h-[min(600px,80vw)] max-w-[600px] rounded-full bg-indigo-600/10 blur-[90px] lg:blur-[130px]" />
+        <div className="absolute inset-0 opacity-[0.03] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem]" />
+      </div>
+
+      {/* Top Mobile/Tablet Header Branding (< 1024px) */}
+      <header className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:hidden flex items-center justify-between mb-4 sm:mb-6 z-10 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-indigo-500/40 bg-indigo-950/80 shadow-md shadow-indigo-950/60">
+            <WandSparkles className="h-5 w-5 text-indigo-300" />
+          </div>
+          <div>
+            <span className="text-base font-extrabold tracking-tight text-white block leading-tight">Ecorp Academy</span>
+            <span className="text-xs text-indigo-300/90 font-medium leading-none block">Prompt Engineering &amp; AI</span>
+          </div>
+        </div>
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-200">
+          <Sparkles className="h-3 w-3 text-indigo-300 shrink-0" />
+          <span>v2.4 Live</span>
+        </div>
+      </header>
+
+      {/* Main Container */}
+      <div className="w-full max-w-md sm:max-w-xl md:max-w-2xl lg:max-w-6xl xl:max-w-7xl my-auto z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-10 xl:gap-14 items-center"
+        >
+          {/* LEFT COLUMN: Marketing showcase */}
+          <section
+            id="marketing-info-section"
+            className="order-2 lg:order-1 lg:col-span-7 flex flex-col justify-center space-y-6 sm:space-y-7"
+          >
+            {/* Desktop Brand Banner */}
+            <div className="hidden lg:flex items-center gap-3.5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-indigo-500/40 bg-gradient-to-br from-indigo-950/90 to-slate-900 shadow-lg shadow-indigo-950/60">
+                <WandSparkles className="h-6 w-6 text-indigo-300" />
+              </div>
+              <div>
+                <span className="text-xl font-black tracking-tight text-white block">Ecorp Academy</span>
+                <span className="text-xs text-indigo-300 font-semibold tracking-wide uppercase font-mono">Prompt Engineering &amp; AI Systems</span>
+              </div>
+            </div>
+
+            {/* Hero Value Headline */}
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/40 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-200">
+                <Sparkles className="h-3.5 w-3.5 text-indigo-300" />
+                <span>Next-Gen LLM Architecture Curriculum</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black tracking-tight text-white leading-tight">
+                Master the Architecture of{' '}
+                <span className="bg-gradient-to-r from-indigo-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
+                  Large Language Models
+                </span>
+              </h1>
+              <p className="text-sm sm:text-base text-slate-300/90 leading-relaxed max-w-2xl">
+                Hands-on, production-grade mastery in structured directives, in-context reasoning, autonomous agents, and multi-modal prompt synthesis.
+              </p>
+            </div>
+
+            {/* Live Interactive Code/Prompt Preview Sandbox Card (Animated Directive Runtime) */}
+            <AnimatedPromptRuntime />
+
+            {/* 4 Feature Value Pillars Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              {[
+                {
+                  icon: BookOpen,
+                  title: 'Interactive Lessons',
+                  detail: '10+ structured modules with instant verification',
+                  color: 'text-indigo-300 bg-indigo-500/10 border-indigo-500/20',
+                },
+                {
+                  icon: Code2,
+                  title: 'Production Patterns',
+                  detail: 'CoT, Few-Shot, ReAct & RAG frameworks',
+                  color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+                },
+                {
+                  icon: WandSparkles,
+                  title: 'Live AI Sandbox',
+                  detail: 'Instant token benchmarks & output evaluations',
+                  color: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+                },
+                {
+                  icon: Trophy,
+                  title: 'Graded Missions',
+                  detail: 'Earn verified certificates & ledger XP',
+                  color: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+                },
+              ].map(({ icon: Icon, title, detail, color }) => (
+                <div
+                  key={title}
+                  className="flex items-start gap-3 rounded-xl bg-slate-900/50 p-3 sm:p-3.5 border border-slate-800/80 backdrop-blur-sm transition-all hover:bg-slate-900/80 hover:border-slate-700/80"
+                >
+                  <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${color}`}>
+                    <Icon className="h-4.5 w-4.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm font-bold text-slate-100">{title}</p>
+                    <p className="text-xs text-slate-400 leading-snug">{detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Social Trust Proof */}
+            <div className="flex items-center gap-4 pt-2 text-xs text-slate-400 border-t border-slate-800/70">
+              <div className="flex -space-x-2 overflow-hidden shrink-0">
+                <div className="inline-block h-7 w-7 rounded-full ring-2 ring-slate-900 bg-indigo-600 text-white font-bold flex items-center justify-center text-[10px]">EA</div>
+                <div className="inline-block h-7 w-7 rounded-full ring-2 ring-slate-900 bg-purple-600 text-white font-bold flex items-center justify-center text-[10px]">AI</div>
+                <div className="inline-block h-7 w-7 rounded-full ring-2 ring-slate-900 bg-emerald-600 text-white font-bold flex items-center justify-center text-[10px]">LLM</div>
+              </div>
+              <span className="leading-snug">Join <strong className="text-slate-200">10,000+</strong> engineers mastering prompt engineering worldwide.</span>
+            </div>
+          </section>
+
+          {/* RIGHT COLUMN: Auth form */}
+          <section
+            id="auth-form-section"
+            className="order-1 lg:order-2 lg:col-span-5 w-full flex justify-center"
+          >
+            {authFormCard}
           </section>
         </motion.div>
       </div>
@@ -856,148 +1052,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
         })}
       </footer>
 
-      {/* Forgot Password Flow Modal */}
-      <AnimatePresence>
-        {isForgotPasswordOpen && (
-          <div
-            id="forgot-password-modal-backdrop"
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm overflow-y-auto"
-            onClick={(e) => {
-              if (e.target === e.currentTarget) closeForgotPasswordModal();
-            }}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="forgot-password-title"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 12 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 12 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-6 sm:p-8 shadow-2xl shadow-indigo-950/50 text-slate-100 relative my-auto"
-            >
-              <button
-                type="button"
-                id="close-forgot-password-modal"
-                onClick={closeForgotPasswordModal}
-                className="absolute right-4 top-4 rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
-                aria-label="Close modal"
-              >
-                <X className="h-5 w-5" />
-              </button>
-
-              {!forgotSuccess ? (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-indigo-500/30 bg-indigo-500/10 text-indigo-300">
-                      <KeyRound className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h3 id="forgot-password-title" className="text-lg font-bold text-white">
-                        Reset Password
-                      </h3>
-                      <p className="text-xs text-slate-400">
-                        We'll send a secure password reset link to your email.
-                      </p>
-                    </div>
-                  </div>
-
-                  <form onSubmit={handleSendPasswordReset} className="space-y-4" noValidate>
-                    <div className="space-y-1.5">
-                      <label
-                        htmlFor="forgot-password-email-input"
-                        className="block text-xs sm:text-sm font-semibold text-slate-300"
-                      >
-                        Account email address
-                      </label>
-                      <div className="relative">
-                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-                        <input
-                          id="forgot-password-email-input"
-                          type="email"
-                          value={forgotEmail}
-                          onChange={(e) => {
-                            setForgotEmail(e.target.value);
-                            if (forgotEmailError) setForgotEmailError('');
-                            if (forgotError) setForgotError('');
-                          }}
-                          placeholder="you@domain.com"
-                          className={`login-input ${forgotEmailError ? 'has-error' : ''}`}
-                          autoComplete="email"
-                          autoFocus
-                          required
-                        />
-                      </div>
-                      {forgotEmailError && (
-                        <p className="text-xs text-rose-400 flex items-center gap-1 mt-1">
-                          <AlertCircle className="h-3.5 w-3.5" />
-                          <span>{forgotEmailError}</span>
-                        </p>
-                      )}
-                    </div>
-
-                    {forgotError && (
-                      <div role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300 flex items-start gap-2">
-                        <AlertCircle className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" />
-                        <span>{forgotError}</span>
-                      </div>
-                    )}
-
-                    <div className="flex flex-col sm:flex-row items-center gap-2 pt-2">
-                      <button
-                        type="submit"
-                        id="submit-password-reset-btn"
-                        disabled={isForgotSubmitting}
-                        aria-busy={isForgotSubmitting}
-                        className="w-full sm:flex-1 min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-600 py-2.5 px-4 text-sm font-bold text-white shadow-lg shadow-indigo-900/30 transition hover:brightness-110 active:scale-[0.99] disabled:opacity-60 cursor-pointer"
-                      >
-                        {isForgotSubmitting ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin text-white shrink-0" />
-                            <span>Sending link...</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>Send Reset Link</span>
-                            <ArrowRight className="h-4 w-4 shrink-0" />
-                          </>
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={closeForgotPasswordModal}
-                        disabled={isForgotSubmitting}
-                        className="w-full sm:w-auto min-h-[44px] rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-300 transition cursor-pointer"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              ) : (
-                <div className="text-center py-3 space-y-3">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
-                    <CheckCircle2 className="h-6 w-6" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white">Check your inbox</h3>
-                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                    We sent a password reset link to{' '}
-                    <strong className="text-indigo-300">{forgotEmail}</strong>. Follow the instructions to reset your password.
-                  </p>
-                  <button
-                    type="button"
-                    id="back-to-signin-after-reset-btn"
-                    onClick={closeForgotPasswordModal}
-                    className="w-full min-h-[44px] rounded-xl bg-slate-800 hover:bg-slate-700 text-white py-2.5 px-4 text-sm font-bold transition mt-2 cursor-pointer"
-                  >
-                    Return to Sign In
-                  </button>
-                </div>
-              )}
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {forgotPasswordDialog}
     </main>
   );
 };

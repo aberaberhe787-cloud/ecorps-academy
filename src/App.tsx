@@ -103,29 +103,34 @@ const AppShell: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-950 p-6 shadow-2xl space-y-4 my-8"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="auth-modal-title"
+              className="relative w-full max-w-md sm:max-w-lg rounded-2xl border border-slate-800 bg-slate-950 p-5 sm:p-6 shadow-2xl space-y-4 my-8 max-h-[min(92dvh,900px)] overflow-y-auto"
             >
               <button
                 onClick={closeAuthModal}
-                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-900 transition-colors cursor-pointer"
+                className="absolute top-3 right-3 z-10 p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-900 transition-colors cursor-pointer"
                 aria-label="Close dialog"
               >
                 <X className="h-5 w-5" />
               </button>
 
-              <div className="flex items-center gap-3 pr-8">
+              <div className="flex items-center gap-3 pr-10">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 shrink-0">
                   <Lock className="h-5 w-5" />
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-white">Authentication Required</h3>
-                  <p className="text-xs text-slate-400">
+                <div className="min-w-0">
+                  <h3 id="auth-modal-title" className="text-lg font-bold text-white">
+                    Authentication Required
+                  </h3>
+                  <p className="text-xs text-slate-400 leading-snug">
                     {authModalMessage || "Sign in to save your progress and unlock learner features."}
                   </p>
                 </div>
               </div>
 
-              <LoginPage message={authModalMessage} onSuccess={closeAuthModal} isModal redirectPath={redirectPath} />
+              <LoginPage onSuccess={closeAuthModal} isModal redirectPath={redirectPath} />
             </motion.div>
           </div>
         )}
