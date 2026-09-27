@@ -6,19 +6,21 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const variantStyles = {
-  default: "bg-slate-900/80 border-slate-800 text-slate-100",
-  elevated: "bg-slate-900 border-slate-800 shadow-xl text-slate-100",
+  default:
+    "bg-slate-900/70 border-slate-800/90 text-slate-100 shadow-sm backdrop-blur-sm",
+  elevated:
+    "bg-slate-900/85 border-slate-700/70 shadow-xl shadow-black/20 text-slate-100 backdrop-blur-md",
   interactive:
-    "bg-slate-900/80 border-slate-800 hover:border-blue-500/40 hover:bg-slate-900 text-slate-100 transition-all cursor-pointer shadow-md",
+    "bg-slate-900/70 border-slate-800/90 hover:border-indigo-500/40 hover:bg-slate-900/90 text-slate-100 transition-all cursor-pointer shadow-sm hover:shadow-lg hover:shadow-indigo-950/20",
   accent:
-    "bg-gradient-to-r from-slate-900 via-slate-900/95 to-blue-950/40 border-blue-500/20 text-slate-100 shadow-xl",
+    "bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-indigo-950/40 border-indigo-500/25 text-slate-100 shadow-xl shadow-indigo-950/20",
 };
 
 const paddingStyles = {
   none: "p-0",
-  sm: "p-3.5 sm:p-4",
-  md: "p-5 sm:p-6",
-  lg: "p-6 sm:p-8",
+  sm: "p-3 sm:p-4",
+  md: "p-4 sm:p-5 lg:p-6",
+  lg: "p-4 sm:p-6 lg:p-8",
 };
 
 export const Card: React.FC<CardProps> = ({
@@ -31,7 +33,7 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div
       {...props}
-      className={`rounded-2xl border ${variantStyles[variant]} ${paddingStyles[padding]} ${className}`}
+      className={`rounded-2xl border min-w-0 ${variantStyles[variant]} ${paddingStyles[padding]} ${className}`}
     >
       {children}
     </div>

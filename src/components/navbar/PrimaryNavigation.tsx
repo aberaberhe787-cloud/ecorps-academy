@@ -50,7 +50,7 @@ export const PrimaryNavigation: React.FC = () => {
             {isActive && (
               <motion.div
                 layoutId="primaryActiveTabIndicator"
-                className="absolute inset-0 bg-blue-600 rounded-lg shadow-sm shadow-blue-500/30 -z-10"
+                className="absolute inset-0 bg-indigo-600 rounded-lg shadow-sm shadow-indigo-500/30 -z-10"
                 transition={{
                   type: "spring",
                   stiffness: 400,

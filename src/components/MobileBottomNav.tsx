@@ -7,7 +7,6 @@ import { NavTab } from "../types";
 export const MobileBottomNav: React.FC = () => {
   const { activeTab, setActiveTab, userProgress, isDistractionFreeMode, activeLessonId } = useApp();
 
-  // Hide on mobile when inside active lesson or in distraction-free mode
   if (isDistractionFreeMode || (activeTab === "curriculum" && Boolean(activeLessonId))) {
     return null;
   }
@@ -24,7 +23,7 @@ export const MobileBottomNav: React.FC = () => {
     <nav
       id="mobile-bottom-navigation"
       aria-label="Mobile Navigation Bar"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 border-t border-slate-800/90 backdrop-blur-md px-1 pt-0.5 pb-[max(0.35rem,env(safe-area-inset-bottom,0px))] shadow-[0_-4px_24px_rgba(0,0,0,0.35)] transition-all"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#070b14]/95 border-t border-white/[0.07] backdrop-blur-xl px-1 pt-0.5 pb-[max(0.35rem,env(safe-area-inset-bottom,0px))] shadow-[0_-8px_32px_rgba(0,0,0,0.45)] transition-all"
     >
       <div className="flex items-stretch justify-around max-w-lg mx-auto gap-0.5">
         {navItems.map((item) => {
@@ -36,23 +35,20 @@ export const MobileBottomNav: React.FC = () => {
               onClick={() => setActiveTab(item.id)}
               aria-label={item.label}
               aria-current={isActive ? "page" : undefined}
-              className={`flex flex-col items-center justify-center flex-1 min-w-0 py-1.5 px-0.5 min-h-[52px] rounded-lg transition-colors active:scale-95 cursor-pointer relative ${
-                isActive
-                  ? "text-blue-400 font-semibold"
-                  : "text-slate-400 hover:text-slate-200"
+              className={`flex flex-col items-center justify-center flex-1 min-w-0 py-1.5 px-0.5 min-h-[52px] rounded-xl transition-colors active:scale-95 cursor-pointer relative ${
+                isActive ? "text-indigo-300 font-semibold" : "text-slate-400 hover:text-slate-200"
               }`}
             >
               <div className="relative">
                 <Icon
                   className={`h-[22px] w-[22px] transition-transform ${
-                    isActive ? "scale-105 text-blue-400" : "text-slate-400"
+                    isActive ? "scale-105 text-indigo-300" : "text-slate-400"
                   }`}
                 />
                 {item.id === "profile" && userProgress.streakDays > 0 && (
-                  <span className="absolute -top-0.5 -right-1 flex h-2 w-2 rounded-full bg-orange-500 ring-2 ring-slate-950" />
+                  <span className="absolute -top-0.5 -right-1 flex h-2 w-2 rounded-full bg-orange-500 ring-2 ring-[#070b14]" />
                 )}
               </div>
-              {/* Short labels on very narrow screens; full labels from ~380px */}
               <span className="text-[10px] leading-tight tracking-tight mt-0.5 whitespace-nowrap truncate max-w-full px-0.5">
                 <span className="min-[380px]:hidden">{item.shortLabel}</span>
                 <span className="hidden min-[380px]:inline">{item.label}</span>
@@ -60,12 +56,8 @@ export const MobileBottomNav: React.FC = () => {
               {isActive && (
                 <motion.div
                   layoutId="mobileActiveTabIndicator"
-                  className="absolute top-0.5 w-5 h-0.5 bg-blue-500 rounded-full"
-                  transition={{
-                    type: "spring",
-                    stiffness: 450,
-                    damping: 35,
-                  }}
+                  className="absolute top-0.5 w-5 h-0.5 bg-indigo-400 rounded-full"
+                  transition={{ type: "spring", stiffness: 450, damping: 35 }}
                 />
               )}
             </button>

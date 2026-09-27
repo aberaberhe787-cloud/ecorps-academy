@@ -13,14 +13,14 @@ export interface ProgressBarProps {
 const sizeMap = {
   sm: "h-1.5",
   md: "h-2",
-  lg: "h-3",
+  lg: "h-2.5",
 };
 
 const variantMap = {
-  blue: "bg-blue-500",
+  blue: "bg-indigo-500",
   emerald: "bg-emerald-500",
   amber: "bg-amber-500",
-  gradient: "bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500",
+  gradient: "bg-gradient-to-r from-indigo-500 via-violet-500 to-cyan-400",
 };
 
 export const ProgressBar: React.FC<ProgressBarProps> = ({
@@ -47,10 +47,10 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
         aria-valuenow={percentage}
         aria-valuemin={0}
         aria-valuemax={100}
-        className={`w-full overflow-hidden rounded-full bg-slate-800 ${sizeMap[size]}`}
+        className={`w-full overflow-hidden rounded-full bg-slate-800/90 ring-1 ring-inset ring-white/5 ${sizeMap[size]}`}
       >
         <div
-          className={`h-full transition-all duration-300 ${variantMap[variant]}`}
+          className={`h-full transition-all duration-500 ease-out rounded-full ${variantMap[variant]}`}
           style={{ width: `${percentage}%` }}
         />
       </div>

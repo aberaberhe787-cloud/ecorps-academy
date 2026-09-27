@@ -1,103 +1,184 @@
 /* =========================================================================
-   ECORP ACADEMY - UNIFIED DESIGN SYSTEM TOKENS
-   Single source of truth for surfaces, borders, typography, and states.
+   ECORP ACADEMY — Design System v2 ("Precision")
+   Presentation tokens only. No logic / backend coupling.
    ========================================================================= */
 
 :root {
-  /* Surface Tokens - Light */
-  --bg-color: #f8fafc;
-  --bg-primary: #f8fafc;
-  --surface-0: #f8fafc;
+  /* Surface — Light */
+  --bg-color: #f4f6fb;
+  --bg-primary: #f4f6fb;
+  --surface-0: #f4f6fb;
   --surface-1: #ffffff;
-  --surface-2: #f1f5f9;
+  --surface-2: #eef2f7;
   --surface-elevated: #ffffff;
-  --surface-interactive: #e2e8f0;
+  --surface-interactive: #e8eef7;
+  --surface-card: #ffffff;
+  --surface-card-hover: #f8fafc;
 
-  /* Text Tokens - Light */
-  --text-color: #0f172a;
-  --text-primary: #0f172a;
-  --text-primary-color: #0f172a;
+  /* Text — Light */
+  --text-color: #0b1220;
+  --text-primary: #0b1220;
+  --text-primary-color: #0b1220;
   --text-secondary-color: #334155;
   --text-muted-color: #64748b;
   --text-disabled-color: #94a3b8;
 
-  /* Border Tokens - Light */
-  --border-subtle: #f1f5f9;
+  /* Border — Light */
+  --border-subtle: #eef2f7;
   --border-default: #e2e8f0;
   --border-strong: #cbd5e1;
-  --border-focus: #3b82f6;
+  --border-focus: #4f46e5;
 
-  /* Accent & Status Tokens */
-  --accent-color: #2563eb;
-  --accent-primary: #2563eb;
-  --accent-success: #10b981;
-  --accent-warning: #f59e0b;
-  --accent-danger: #ef4444;
+  /* Accent */
+  --accent-color: #4f46e5;
+  --accent-primary: #4f46e5;
+  --accent-primary-hover: #4338ca;
+  --accent-glow: rgba(79, 70, 229, 0.28);
+  --accent-success: #059669;
+  --accent-warning: #d97706;
+  --accent-danger: #e11d48;
+  --accent-cyan: #0891b2;
 
-  /* Focus & Input System */
-  --focus-ring-color: #3b82f6;
+  /* Focus & Input */
+  --focus-ring-color: #6366f1;
   --focus-ring-offset: 2px;
   --focus-ring-width: 2px;
-  --input-focus-border: #3b82f6;
-  --input-focus-ring: #3b82f6;
-  --input-focus-ring-glow: rgba(59, 130, 246, 0.35);
+  --input-focus-border: #6366f1;
+  --input-focus-ring: #6366f1;
+  --input-focus-ring-glow: rgba(99, 102, 241, 0.32);
   --input-focus-ring-width: 2px;
   --input-focus-bg: #ffffff;
-  --input-error-border: #ef4444;
-  --input-error-ring-glow: rgba(239, 68, 68, 0.3);
-  --input-success-border: #10b981;
+  --input-error-border: #e11d48;
+  --input-error-ring-glow: rgba(225, 29, 72, 0.28);
+  --input-success-border: #059669;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.12);
+  --shadow-glow: 0 0 0 1px rgba(79, 70, 229, 0.12), 0 8px 28px rgba(79, 70, 229, 0.12);
+
+  /* Radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
 }
 
 :root.dark,
 .dark {
-  /* Surface Tokens - Dark */
-  --bg-color: #020617;
-  --bg-primary: #020617;
-  --surface-0: #020617;
-  --surface-1: #0b132b;
-  --surface-2: #0f172a;
-  --surface-elevated: #1e293b;
-  --surface-interactive: #1e293b;
+  /* Surface — Dark (cooler indigo undertone) */
+  --bg-color: #070b14;
+  --bg-primary: #070b14;
+  --surface-0: #070b14;
+  --surface-1: #0c1220;
+  --surface-2: #111827;
+  --surface-elevated: #151c2c;
+  --surface-interactive: #1a2336;
+  --surface-card: rgba(17, 24, 39, 0.72);
+  --surface-card-hover: rgba(26, 35, 54, 0.9);
 
-  /* Text Tokens - Dark */
-  --text-color: #f8fafc;
-  --text-primary: #f8fafc;
-  --text-primary-color: #f8fafc;
-  --text-secondary-color: #cbd5e1;
-  --text-muted-color: #94a3b8;
-  --text-disabled-color: #475569;
+  /* Text — Dark */
+  --text-color: #f1f5f9;
+  --text-primary: #f1f5f9;
+  --text-primary-color: #f1f5f9;
+  --text-secondary-color: #c7d2e0;
+  --text-muted-color: #8b9bb4;
+  --text-disabled-color: #4b5568;
 
-  /* Border Tokens - Dark */
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-default: #1e293b;
-  --border-strong: #334155;
-  --border-focus: #3b82f6;
+  /* Border — Dark */
+  --border-subtle: rgba(148, 163, 184, 0.08);
+  --border-default: rgba(148, 163, 184, 0.14);
+  --border-strong: rgba(148, 163, 184, 0.22);
+  --border-focus: #818cf8;
 
-  /* Accent & Status Tokens */
-  --accent-color: #3b82f6;
-  --accent-primary: #3b82f6;
-  --accent-success: #10b981;
-  --accent-warning: #f59e0b;
-  --accent-danger: #ef4444;
+  /* Accent */
+  --accent-color: #818cf8;
+  --accent-primary: #6366f1;
+  --accent-primary-hover: #818cf8;
+  --accent-glow: rgba(99, 102, 241, 0.35);
+  --accent-success: #34d399;
+  --accent-warning: #fbbf24;
+  --accent-danger: #fb7185;
+  --accent-cyan: #22d3ee;
 
-  /* Focus & Input System */
-  --focus-ring-color: #60a5fa;
+  /* Focus & Input */
+  --focus-ring-color: #a5b4fc;
   --focus-ring-offset: 2px;
   --focus-ring-width: 2px;
-  --input-focus-border: #60a5fa;
-  --input-focus-ring: #3b82f6;
-  --input-focus-ring-glow: rgba(59, 130, 246, 0.45);
+  --input-focus-border: #818cf8;
+  --input-focus-ring: #6366f1;
+  --input-focus-ring-glow: rgba(99, 102, 241, 0.4);
   --input-focus-ring-width: 2px;
-  --input-focus-bg: rgba(2, 6, 23, 0.92);
-  --input-error-border: #f87171;
-  --input-error-ring-glow: rgba(248, 113, 113, 0.42);
+  --input-focus-bg: rgba(12, 18, 32, 0.95);
+  --input-error-border: #fb7185;
+  --input-error-ring-glow: rgba(251, 113, 133, 0.4);
   --input-success-border: #34d399;
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.45);
+  --shadow-glow: 0 0 0 1px rgba(99, 102, 241, 0.25), 0 12px 40px rgba(99, 102, 241, 0.15);
 }
 
-/* Motion Tokens */
+/* Motion */
 :root {
-  --motion-micro: 140ms;
+  --motion-micro: 120ms;
   --motion-component: 200ms;
   --motion-panel: 280ms;
   --motion-ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-emphasized: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Utility surfaces for redesigned components */
+.ec-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.ec-card-interactive {
+  transition:
+    border-color var(--motion-component) var(--motion-ease-standard),
+    background-color var(--motion-component) var(--motion-ease-standard),
+    box-shadow var(--motion-component) var(--motion-ease-standard),
+    transform var(--motion-micro) var(--motion-ease-standard);
+}
+
+.ec-card-interactive:hover {
+  background: var(--surface-card-hover);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+.ec-card-accent {
+  border-color: rgba(99, 102, 241, 0.35);
+  box-shadow: var(--shadow-glow);
+  background:
+    linear-gradient(145deg, rgba(99, 102, 241, 0.12) 0%, transparent 42%),
+    var(--surface-card);
+}
+
+.ec-section-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-color);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.ec-heading {
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.ec-muted {
+  color: var(--text-muted-color);
+  line-height: 1.55;
 }
