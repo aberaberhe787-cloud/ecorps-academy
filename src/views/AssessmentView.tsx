@@ -141,7 +141,7 @@ export const AssessmentView: React.FC = () => {
 
       {status === 'loading' && (
         <div className="flex flex-col items-center justify-center p-12 rounded-2xl border border-blue-900/40 bg-slate-900/90 space-y-3 text-center">
-          <Loader2 className="animate-spin h-8 w-8 text-blue-400" />
+          <Loader2 className="animate-spin h-8 w-8 text-indigo-400" />
           <h3 className="text-sm font-bold text-white">Evaluating Submission</h3>
           <p className="text-xs text-slate-400 max-w-sm">
             Analyzing your prompt artifact against pedagogical benchmarks, delimiter validation, and output constraint schemas...

@@ -193,7 +193,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
         {isExecuting ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 py-16 text-center">
             <div className="relative">
-              <div className="h-10 w-10 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+              <div className="h-10 w-10 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
               <Zap className="absolute inset-0 m-auto h-4 w-4 text-blue-400 animate-pulse" />
             </div>
             <div>

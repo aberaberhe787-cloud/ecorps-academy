@@ -4,7 +4,8 @@
  */
 
 import React from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { viewEnter, viewEnterReduced, modalPanel, modalPanelReduced, modalBackdrop } from "./lib/motionPresets";
 import { Lock, X } from "lucide-react";
 import { AppProvider, useApp } from "./context/AppContext";
 import { ThemeProvider } from "./components/ThemeProvider";
@@ -15,14 +16,12 @@ import { CurriculumView } from "./views/CurriculumView";
 import { PlaygroundView } from "./views/PlaygroundView";
 import { PatternLibraryView } from "./views/PatternLibraryView";
 import { ResourcesView } from "./views/ResourcesView";
-import { ProtectedRoute } from "./components/ProtectedRoute";
 import { UserProfileView } from "./views/UserProfileView";
-import { PromptEngineeringPath, FOUNDATION_LESSONS } from "./views/PromptEngineeringPath";
+import { PromptEngineeringPath } from "./views/PromptEngineeringPath";
 import { AssessmentView } from "./views/AssessmentView";
 import { LoginPage } from "./components/LoginPage";
 import { LoadingOverlay } from "./components/LoadingOverlay";
 import { auth } from "./lib/firebase";
-import { DashboardHeader } from "./components/DashboardHeader";
 import { RequireAuth } from "./components/RequireAuth";
 import { NetworkStatusToast } from "./components/NetworkStatusIndicator";
 import { SessionInactivityWarning } from "./components/SessionInactivityWarning";
@@ -34,15 +33,17 @@ import { MobileBottomNav } from "./components/MobileBottomNav";
 
 const MainContent: React.FC = () => {
   const { activeTab } = useApp();
+  const reduceMotion = useReducedMotion();
+  const viewMotion = reduceMotion ? viewEnterReduced : viewEnter;
 
   // Smooth scroll to top whenever the tab selection changes
   React.useEffect(() => {
     window.scrollTo({
       top: 0,
       left: 0,
-      behavior: "smooth",
+      behavior: reduceMotion ? "auto" : "smooth",
     });
-  }, [activeTab]);
+  }, [activeTab, reduceMotion]);
 
   return (
     <main
@@ -53,13 +54,10 @@ const MainContent: React.FC = () => {
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
-          initial={{ opacity: 0, y: 14, filter: "blur(4px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          exit={{ opacity: 0, y: -10, filter: "blur(2px)" }}
-          transition={{
-            duration: 0.28,
-            ease: [0.22, 1, 0.36, 1], // Custom cubic bezier for smooth, snappy deceleration
-          }}
+          initial={viewMotion.initial}
+          animate={viewMotion.animate}
+          exit={viewMotion.exit}
+          transition={viewMotion.transition}
           className="w-full max-w-full min-w-0 flex-1 flex flex-col"
         >
           {activeTab === "home" && <HomeView />}
@@ -78,6 +76,8 @@ const MainContent: React.FC = () => {
 
 const AppShell: React.FC = () => {
   const { activeTab, activeLessonId, isDistractionFreeMode, isAuthModalOpen, authModalMessage, closeAuthModal, redirectPath } = useApp();
+  const reduceMotion = useReducedMotion();
+  const panelMotion = reduceMotion ? modalPanelReduced : modalPanel;
   const hideGlobalChrome =
     isDistractionFreeMode && activeTab === "curriculum" && !!activeLessonId;
 
@@ -98,11 +98,18 @@ const AppShell: React.FC = () => {
       {/* Global Auth Modal for Guest Action Prompts */}
       <AnimatePresence>
         {isAuthModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto"
+            initial={modalBackdrop.initial}
+            animate={modalBackdrop.animate}
+            exit={modalBackdrop.exit}
+            transition={modalBackdrop.transition}
+          >
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              initial={panelMotion.initial}
+              animate={panelMotion.animate}
+              exit={panelMotion.exit}
+              transition={panelMotion.transition}
               role="dialog"
               aria-modal="true"
               aria-labelledby="auth-modal-title"
@@ -132,7 +139,7 @@ const AppShell: React.FC = () => {
 
               <LoginPage onSuccess={closeAuthModal} isModal redirectPath={redirectPath} />
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

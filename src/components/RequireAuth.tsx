@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { auth, onAuthStateChanged } from '../lib/firebaseClient';
 import { LoginPage } from './LoginPage';
-import { Lock } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 export const RequireAuth: React.FC<{ children: React.ReactNode; message?: string }> = ({
   children,
@@ -20,27 +20,20 @@ export const RequireAuth: React.FC<{ children: React.ReactNode; message?: string
 
   if (checking) {
     return (
-      <div className="flex items-center justify-center w-full min-h-[12rem] py-12 text-sm text-slate-400 font-mono">
-        Checking authentication status...
+      <div
+        className="flex flex-col items-center justify-center gap-3 w-full min-h-[12rem] py-12 text-sm text-slate-400"
+        role="status"
+        aria-live="polite"
+      >
+        <Loader2 className="h-6 w-6 animate-spin text-indigo-400" aria-hidden="true" />
+        <span className="font-mono text-xs sm:text-sm">Checking authentication status...</span>
       </div>
     );
   }
 
   if (!authed) {
-    return (
-      <div className="page-shell page-shell--narrow py-8 space-y-6">
-        <div className="rounded-2xl border border-blue-500/30 bg-slate-900/90 p-6 sm:p-8 text-center space-y-3 shadow-xl">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
-            <Lock className="h-6 w-6" />
-          </div>
-          <div className="space-y-1">
-            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Authentication Required</h2>
-            <p className="text-sm text-slate-300 max-w-md mx-auto leading-relaxed">{message}</p>
-          </div>
-        </div>
-        <LoginPage message={message} />
-      </div>
-    );
+    // Single auth surface — LoginPage already includes messaging; avoid duplicate banner
+    return <LoginPage message={message} />;
   }
 
   return <>{children}</>;

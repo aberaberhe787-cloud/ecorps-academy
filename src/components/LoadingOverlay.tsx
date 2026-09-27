@@ -9,10 +9,13 @@ export const LoadingOverlay: React.FC = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950"
+      role="status"
+      aria-live="polite"
+      aria-label="Loading"
     >
-      <div className="flex flex-col items-center gap-4">
-        <Loader2 className="h-10 w-10 text-blue-500 animate-spin" />
-        <p className="text-sm font-medium text-slate-400 animate-pulse">
+      <div className="flex flex-col items-center gap-4 px-4">
+        <Loader2 className="h-10 w-10 text-indigo-400 animate-spin" aria-hidden="true" />
+        <p className="text-sm font-medium text-slate-400 text-center">
           Initializing secure learning space...
         </p>
       </div>
