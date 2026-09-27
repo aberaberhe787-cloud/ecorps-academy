@@ -96,9 +96,9 @@ const validateName = (val: string): string => {
 const FOOTER_FEATURES = [
   {
     icon: BookOpen,
-    iconColor: 'text-blue-400',
+    iconColor: 'text-indigo-300',
     number: '10+',
-    numberColor: 'text-blue-300',
+    numberColor: 'text-indigo-200',
     text: 'Interactive Lessons',
     gradient: 'conic-gradient(from 0deg at 50% 50%, transparent 0deg, transparent 150deg, #2563eb 220deg, #38bdf8 290deg, #818cf8 360deg)',
   },
@@ -418,7 +418,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
     <main className="login-page min-h-dvh bg-[#030712] text-slate-100 flex flex-col justify-between items-center w-full max-w-full overflow-x-hidden px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-8 lg:py-10 relative">
       {/* Background Ambient Glows & Cyber Gradients */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden z-0" aria-hidden="true">
-        <div className="absolute top-[-10%] left-[10%] w-[min(700px,90vw)] h-[min(700px,90vw)] max-w-[700px] rounded-full bg-blue-600/10 blur-[100px] lg:blur-[140px]" />
+        <div className="absolute top-[-10%] left-[10%] w-[min(700px,90vw)] h-[min(700px,90vw)] max-w-[700px] rounded-full bg-indigo-600/10 blur-[100px] lg:blur-[140px]" />
         <div className="absolute bottom-[-10%] right-[10%] w-[min(600px,80vw)] h-[min(600px,80vw)] max-w-[600px] rounded-full bg-indigo-600/10 blur-[90px] lg:blur-[130px]" />
         <div className="absolute inset-0 opacity-[0.03] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem]" />
       </div>
@@ -426,16 +426,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
       {/* Top Mobile/Tablet Header Branding (< 1024px) */}
       <header className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:hidden flex items-center justify-between mb-4 sm:mb-6 z-10 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-blue-500/40 bg-blue-950/80 shadow-md shadow-blue-950/60">
-            <WandSparkles className="h-5 w-5 text-blue-400" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-indigo-500/40 bg-indigo-950/80 shadow-md shadow-indigo-950/60">
+            <WandSparkles className="h-5 w-5 text-indigo-300" />
           </div>
           <div>
             <span className="text-base font-extrabold tracking-tight text-white block leading-tight">Ecorp Academy</span>
-            <span className="text-xs text-blue-400/90 font-medium leading-none block">Prompt Engineering &amp; AI</span>
+            <span className="text-xs text-indigo-300/90 font-medium leading-none block">Prompt Engineering &amp; AI</span>
           </div>
         </div>
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-300">
-          <Sparkles className="h-3 w-3 text-blue-400 shrink-0" />
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-200">
+          <Sparkles className="h-3 w-3 text-indigo-300 shrink-0" />
           <span>v2.4 Live</span>
         </div>
       </header>
@@ -455,24 +455,24 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
           >
             {/* Desktop Brand Banner */}
             <div className="hidden lg:flex items-center gap-3.5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-blue-500/40 bg-gradient-to-br from-blue-950/90 to-slate-900 shadow-lg shadow-blue-950/60">
-                <WandSparkles className="h-6 w-6 text-blue-400" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-indigo-500/40 bg-gradient-to-br from-indigo-950/90 to-slate-900 shadow-lg shadow-indigo-950/60">
+                <WandSparkles className="h-6 w-6 text-indigo-300" />
               </div>
               <div>
                 <span className="text-xl font-black tracking-tight text-white block">Ecorp Academy</span>
-                <span className="text-xs text-blue-400 font-semibold tracking-wide uppercase font-mono">Prompt Engineering &amp; AI Systems</span>
+                <span className="text-xs text-indigo-300 font-semibold tracking-wide uppercase font-mono">Prompt Engineering &amp; AI Systems</span>
               </div>
             </div>
 
             {/* Hero Value Headline */}
             <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/40 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-300">
-                <Sparkles className="h-3.5 w-3.5 text-blue-400" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/40 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-200">
+                <Sparkles className="h-3.5 w-3.5 text-indigo-300" />
                 <span>Next-Gen LLM Architecture Curriculum</span>
               </div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black tracking-tight text-white leading-tight">
                 Master the Architecture of{' '}
-                <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-indigo-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
                   Large Language Models
                 </span>
               </h1>
@@ -491,7 +491,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
                   icon: BookOpen,
                   title: 'Interactive Lessons',
                   detail: '10+ structured modules with instant verification',
-                  color: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+                  color: 'text-indigo-300 bg-indigo-500/10 border-indigo-500/20',
                 },
                 {
                   icon: Code2,
@@ -530,7 +530,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
             {/* Social Trust Proof */}
             <div className="flex items-center gap-4 pt-2 text-xs text-slate-400 border-t border-slate-800/70">
               <div className="flex -space-x-2 overflow-hidden shrink-0">
-                <div className="inline-block h-7 w-7 rounded-full ring-2 ring-slate-900 bg-blue-600 text-white font-bold flex items-center justify-center text-[10px]">EA</div>
+                <div className="inline-block h-7 w-7 rounded-full ring-2 ring-slate-900 bg-indigo-600 text-white font-bold flex items-center justify-center text-[10px]">EA</div>
                 <div className="inline-block h-7 w-7 rounded-full ring-2 ring-slate-900 bg-purple-600 text-white font-bold flex items-center justify-center text-[10px]">AI</div>
                 <div className="inline-block h-7 w-7 rounded-full ring-2 ring-slate-900 bg-emerald-600 text-white font-bold flex items-center justify-center text-[10px]">LLM</div>
               </div>
@@ -543,9 +543,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
             id="auth-form-section"
             className="order-1 lg:order-2 lg:col-span-5 w-full flex justify-center"
           >
-            <div className="w-full rounded-2xl sm:rounded-3xl border border-slate-800/90 bg-slate-900/90 p-5 sm:p-7 md:p-8 lg:p-8 xl:p-9 backdrop-blur-xl shadow-2xl shadow-blue-950/40 relative">
+            <div className="w-full rounded-2xl sm:rounded-3xl border border-slate-800/90 bg-slate-900/90 p-5 sm:p-7 md:p-8 lg:p-8 xl:p-9 backdrop-blur-xl shadow-2xl shadow-indigo-950/40 relative">
               {/* Top Accent Line */}
-              <div className="absolute top-0 left-8 right-8 h-[2px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent rounded-full" />
+              <div className="absolute top-0 left-8 right-8 h-[2px] bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent rounded-full" />
 
               {/* Form Title & Subtitle */}
               <div className="text-center space-y-1.5 mb-5 sm:mb-6">
@@ -561,8 +561,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
 
               {/* Action Banner Message */}
               {message && (
-                <div className="mb-4 p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 text-xs text-blue-300 font-medium flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-blue-400 shrink-0" />
+                <div className="mb-4 p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-xs text-indigo-200 font-medium flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-indigo-300 shrink-0" />
                   <span>{message}</span>
                 </div>
               )}
@@ -583,16 +583,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
                   onClick={() => handleProviderAuth('google')}
                   disabled={isSubmitting || socialLoading !== null}
                   aria-busy={socialLoading === 'google'}
-                  className={`group flex min-h-[44px] items-center justify-center gap-2 rounded-xl border py-2.5 px-3 text-xs sm:text-sm font-semibold transition-all duration-150 w-full shadow-sm touch-manipulation select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 ${
+                  className={`group flex min-h-[44px] items-center justify-center gap-2 rounded-xl border py-2.5 px-3 text-xs sm:text-sm font-semibold transition-all duration-150 w-full shadow-sm touch-manipulation select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 ${
                     socialLoading === 'google'
-                      ? 'border-blue-500/70 bg-blue-950/50 text-blue-200 cursor-wait'
+                      ? 'border-indigo-500/70 bg-indigo-950/50 text-blue-200 cursor-wait'
                       : isSubmitting || socialLoading !== null
                       ? 'border-slate-800 bg-slate-900/50 text-slate-500 cursor-not-allowed opacity-50'
                       : 'border-slate-700 bg-slate-800/80 text-slate-200 hover:border-slate-500 hover:bg-slate-800 active:scale-[0.98]'
                   }`}
                 >
                   {socialLoading === 'google' ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-blue-400" />
+                    <Loader2 className="h-4 w-4 animate-spin text-indigo-300" />
                   ) : (
                     <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -758,7 +758,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
                   id="primary-auth-submit-btn"
                   disabled={isSubmitting || socialLoading !== null}
                   aria-busy={isSubmitting}
-                  className="w-full min-h-[46px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 bg-[length:200%_auto] hover:bg-right py-3 px-4 text-sm font-bold text-white shadow-lg shadow-blue-900/40 transition-all duration-300 hover:brightness-110 active:scale-[0.99] disabled:opacity-60 cursor-pointer select-none mt-2"
+                  className="w-full min-h-[46px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-600 to-indigo-600 bg-[length:200%_auto] hover:bg-right py-3 px-4 text-sm font-bold text-white shadow-lg shadow-indigo-900/40 transition-all duration-300 hover:brightness-110 active:scale-[0.99] disabled:opacity-60 cursor-pointer select-none mt-2"
                 >
                   {isSubmitting ? (
                     <>
@@ -785,7 +785,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
                         type="checkbox"
                         checked={rememberMe}
                         onChange={(e) => handleRememberMeChange(e.target.checked)}
-                        className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-blue-600 focus:ring-blue-500 accent-blue-600 cursor-pointer"
+                        className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-blue-600 focus:ring-indigo-500 accent-blue-600 cursor-pointer"
                       />
                       <span>Remember me</span>
                     </label>
@@ -793,7 +793,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
                       type="button"
                       id="forgot-password-button"
                       onClick={openForgotPasswordModal}
-                      className="text-blue-400 hover:text-blue-300 font-medium hover:underline cursor-pointer"
+                      className="text-indigo-300 hover:text-indigo-200 font-medium hover:underline cursor-pointer"
                     >
                       Forgot password?
                     </button>
@@ -813,7 +813,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
                     setTouched({});
                     setResetSuccess('');
                   }}
-                  className="font-bold text-blue-400 hover:text-blue-300 hover:underline ml-1 cursor-pointer"
+                  className="font-bold text-indigo-300 hover:text-indigo-200 hover:underline ml-1 cursor-pointer"
                 >
                   {isSignUp ? 'Sign in' : 'Create an account'}
                 </button>
@@ -874,7 +874,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 12 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-6 sm:p-8 shadow-2xl shadow-blue-950/50 text-slate-100 relative my-auto"
+              className="w-full max-w-md rounded-3xl border border-slate-800 bg-slate-900 p-6 sm:p-8 shadow-2xl shadow-indigo-950/50 text-slate-100 relative my-auto"
             >
               <button
                 type="button"
@@ -889,7 +889,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
               {!forgotSuccess ? (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-blue-500/30 bg-blue-500/10 text-blue-400">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-indigo-500/30 bg-indigo-500/10 text-indigo-300">
                       <KeyRound className="h-5 w-5" />
                     </div>
                     <div>
@@ -949,7 +949,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
                         id="submit-password-reset-btn"
                         disabled={isForgotSubmitting}
                         aria-busy={isForgotSubmitting}
-                        className="w-full sm:flex-1 min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-2.5 px-4 text-sm font-bold text-white shadow-lg shadow-blue-900/30 transition hover:brightness-110 active:scale-[0.99] disabled:opacity-60 cursor-pointer"
+                        className="w-full sm:flex-1 min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-600 py-2.5 px-4 text-sm font-bold text-white shadow-lg shadow-indigo-900/30 transition hover:brightness-110 active:scale-[0.99] disabled:opacity-60 cursor-pointer"
                       >
                         {isForgotSubmitting ? (
                           <>
@@ -982,7 +982,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
                   <h3 className="text-lg font-bold text-white">Check your inbox</h3>
                   <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                     We sent a password reset link to{' '}
-                    <strong className="text-blue-400">{forgotEmail}</strong>. Follow the instructions to reset your password.
+                    <strong className="text-indigo-300">{forgotEmail}</strong>. Follow the instructions to reset your password.
                   </p>
                   <button
                     type="button"

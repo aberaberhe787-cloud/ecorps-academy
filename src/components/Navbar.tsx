@@ -15,7 +15,7 @@ export const Navbar: React.FC = () => {
       <header
         role="banner"
         aria-label="Ecorp Academy Platform Navigation"
-        className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-slate-950/85 backdrop-blur-md transition-colors"
+        className="sticky top-0 z-40 w-full border-b border-white/[0.06] bg-[#070b14]/80 backdrop-blur-xl transition-colors"
       >
         <div className="mx-auto flex h-14 sm:h-16 w-full max-w-7xl 2xl:max-w-[1536px] items-center justify-between gap-1.5 sm:gap-3 lg:gap-4 px-3 sm:px-4 lg:px-8 min-w-0">
           {/* Brand Identity */}
@@ -28,10 +28,10 @@ export const Navbar: React.FC = () => {
               <EcorpLogo size="sm" />
               <div className="flex flex-col text-left min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-mono text-xs sm:text-sm md:text-base font-bold tracking-tight text-white group-hover:text-blue-400 transition-colors truncate">
+                  <span className="font-mono text-xs sm:text-sm md:text-base font-bold tracking-tight text-white group-hover:text-indigo-300 transition-colors truncate">
                     {t.nav.brandName}
                   </span>
-                  <span className="hidden min-[360px]:inline rounded bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.2 font-mono text-[9px] font-bold text-blue-400 shrink-0">
+                  <span className="hidden min-[360px]:inline rounded-md bg-indigo-500/15 border border-indigo-400/25 px-1.5 py-0.5 font-mono text-[9px] font-bold text-indigo-300 shrink-0 tracking-wide">
                     ACADEMY
                   </span>
                 </div>
@@ -42,28 +42,21 @@ export const Navbar: React.FC = () => {
             </button>
           </div>
 
-          {/* Global Search Bar & Command Palette */}
           <GlobalSearch />
-
-          {/* Desktop & Compact Primary Navigation */}
           <PrimaryNavigation />
-
-          {/* System Controls & Account / Authentication Menu */}
-          <SystemControls 
-            mobileMenuOpen={mobileMenuOpen} 
-            onToggleMobileMenu={() => setMobileMenuOpen(prev => !prev)} 
+          <SystemControls
+            mobileMenuOpen={mobileMenuOpen}
+            onToggleMobileMenu={() => setMobileMenuOpen((prev) => !prev)}
           />
         </div>
       </header>
 
-      {/* Responsive Mobile Drawer */}
       <MobileMenuOverlay
         isOpen={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
         onOpenSearch={() => {
           setMobileMenuOpen(false);
-          // Focus search by dispatching standard shortcut
-          window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }));
+          window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }));
         }}
       />
     </>

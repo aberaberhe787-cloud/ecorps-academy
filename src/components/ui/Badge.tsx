@@ -10,13 +10,13 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const variantStyles: Record<BadgeVariant, string> = {
-  neutral: "bg-slate-800/80 text-slate-300 border-slate-700/80",
-  blue: "bg-blue-950/80 text-blue-300 border-blue-800/80",
-  emerald: "bg-emerald-950/80 text-emerald-300 border-emerald-800/80",
-  amber: "bg-amber-950/80 text-amber-300 border-amber-800/80",
-  rose: "bg-rose-950/80 text-rose-300 border-rose-800/80",
-  purple: "bg-purple-950/80 text-purple-300 border-purple-800/80",
-  indigo: "bg-indigo-950/80 text-indigo-300 border-indigo-800/80",
+  neutral: "bg-slate-800/70 text-slate-300 border-slate-700/70",
+  blue: "bg-indigo-950/80 text-indigo-300 border-indigo-700/50",
+  emerald: "bg-emerald-950/70 text-emerald-300 border-emerald-700/50",
+  amber: "bg-amber-950/70 text-amber-300 border-amber-700/50",
+  rose: "bg-rose-950/70 text-rose-300 border-rose-700/50",
+  purple: "bg-purple-950/70 text-purple-300 border-purple-700/50",
+  indigo: "bg-indigo-950/80 text-indigo-200 border-indigo-600/40",
 };
 
 const sizeStyles: Record<BadgeSize, string> = {
@@ -26,7 +26,7 @@ const sizeStyles: Record<BadgeSize, string> = {
 
 export const Badge: React.FC<BadgeProps> = ({
   children,
-  variant = "blue",
+  variant = "indigo",
   size = "sm",
   icon,
   className = "",
@@ -35,7 +35,7 @@ export const Badge: React.FC<BadgeProps> = ({
   return (
     <span
       {...props}
-      className={`inline-flex items-center border select-none ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+      className={`inline-flex items-center border select-none max-w-full ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
     >
       {icon && <span className="shrink-0">{icon}</span>}
       <span className="truncate">{children}</span>

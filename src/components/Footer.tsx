@@ -7,7 +7,7 @@ export const Footer: React.FC = () => {
   const { setActiveTab, t } = useApp();
 
   return (
-    <footer className="border-t border-slate-800/80 bg-slate-950/80 text-slate-400 text-xs py-6 sm:py-10 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] md:pb-10" id="ecorp-app-footer">
+    <footer className="border-t border-white/[0.06] bg-[#070b14]/90 text-slate-400 text-xs py-6 sm:py-10 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] md:pb-10" id="ecorp-app-footer">
       <div className="mx-auto max-w-7xl 2xl:max-w-[1536px] px-3 sm:px-6 lg:px-8 min-w-0">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
           {/* Brand */}
@@ -15,7 +15,7 @@ export const Footer: React.FC = () => {
             <div className="flex items-center gap-2">
               <EcorpLogo size="sm" />
               <span className="font-mono text-base font-bold text-white">
-                {t.nav.brandName} <span className="text-blue-400">Academy</span>
+                {t.nav.brandName} <span className="text-indigo-300">Academy</span>
               </span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
@@ -32,7 +32,7 @@ export const Footer: React.FC = () => {
               <li>
                 <button
                   onClick={() => setActiveTab("curriculum")}
-                  className="hover:text-blue-400 transition-colors cursor-pointer"
+                  className="hover:text-indigo-300 transition-colors cursor-pointer"
                 >
                   {t.footer.trackFoundations}
                 </button>
@@ -40,7 +40,7 @@ export const Footer: React.FC = () => {
               <li>
                 <button
                   onClick={() => setActiveTab("curriculum")}
-                  className="hover:text-blue-400 transition-colors cursor-pointer"
+                  className="hover:text-indigo-300 transition-colors cursor-pointer"
                 >
                   {t.footer.trackReasoning}
                 </button>
@@ -48,7 +48,7 @@ export const Footer: React.FC = () => {
               <li>
                 <button
                   onClick={() => setActiveTab("curriculum")}
-                  className="hover:text-blue-400 transition-colors cursor-pointer"
+                  className="hover:text-indigo-300 transition-colors cursor-pointer"
                 >
                   {t.footer.trackSystems}
                 </button>
@@ -56,7 +56,7 @@ export const Footer: React.FC = () => {
               <li>
                 <button
                   onClick={() => setActiveTab("curriculum")}
-                  className="hover:text-blue-400 transition-colors cursor-pointer"
+                  className="hover:text-indigo-300 transition-colors cursor-pointer"
                 >
                   {t.footer.trackSecurity}
                 </button>
@@ -73,7 +73,7 @@ export const Footer: React.FC = () => {
               <li>
                 <button
                   onClick={() => setActiveTab("playground")}
-                  className="hover:text-blue-400 transition-colors cursor-pointer"
+                  className="hover:text-indigo-300 transition-colors cursor-pointer"
                 >
                   {t.footer.toolSandbox}
                 </button>
@@ -81,7 +81,7 @@ export const Footer: React.FC = () => {
               <li>
                 <button
                   onClick={() => setActiveTab("playground")}
-                  className="hover:text-blue-400 transition-colors cursor-pointer"
+                  className="hover:text-indigo-300 transition-colors cursor-pointer"
                 >
                   {t.footer.toolMissions}
                 </button>
@@ -89,7 +89,7 @@ export const Footer: React.FC = () => {
               <li>
                 <button
                   onClick={() => setActiveTab("patterns")}
-                  className="hover:text-blue-400 transition-colors cursor-pointer"
+                  className="hover:text-indigo-300 transition-colors cursor-pointer"
                 >
                   {t.footer.toolPatterns}
                 </button>
@@ -97,7 +97,7 @@ export const Footer: React.FC = () => {
               <li>
                 <button
                   onClick={() => setActiveTab("resources")}
-                  className="hover:text-blue-400 transition-colors cursor-pointer"
+                  className="hover:text-indigo-300 transition-colors cursor-pointer"
                 >
                   {t.footer.toolResources}
                 </button>
@@ -125,7 +125,7 @@ export const Footer: React.FC = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => window.dispatchEvent(new CustomEvent("ecorp:open-shortcuts-modal"))}
-              className="hover:text-blue-400 transition-colors flex items-center gap-1.5 cursor-pointer"
+              className="hover:text-indigo-300 transition-colors flex items-center gap-1.5 cursor-pointer"
               title="View all keyboard shortcuts"
             >
               <kbd className="px-1.5 py-0.5 rounded border border-slate-700 bg-slate-900 text-[10px] font-mono text-slate-300">?</kbd>

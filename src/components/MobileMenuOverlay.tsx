@@ -193,7 +193,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                 className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition-colors cursor-pointer text-xs"
               >
                 <div className="flex items-center gap-2">
-                  <Search className="h-3.5 w-3.5 text-blue-400" />
+                  <Search className="h-3.5 w-3.5 text-indigo-300" />
                   <span>Search lessons, patterns...</span>
                 </div>
                 <kbd className="text-[10px] font-mono text-slate-500 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
@@ -205,7 +205,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
               {auth.currentUser ? (
                 <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1.5 font-mono text-blue-400 font-bold">
+                    <div className="flex items-center gap-1.5 font-mono text-indigo-300 font-bold">
                       <span>Level {level}</span>
                       <span className="text-slate-600">•</span>
                       <span className="text-amber-300">{userProgress.xp || 0} XP</span>
@@ -226,17 +226,17 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                         setActiveTab("curriculum");
                       }
                     }}
-                    className="w-full py-2 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-sm shadow-blue-600/20"
+                    className="w-full py-2 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-sm shadow-indigo-600/20"
                   >
                     <span>Continue Learning</span>
                     <ArrowRight className="h-3.5 w-3.5" />
                   </button>
                 </div>
               ) : (
-                <div className="p-3 rounded-xl bg-slate-900/80 border border-blue-500/30 space-y-2">
+                <div className="p-3 rounded-xl bg-slate-900/80 border border-indigo-500/30 space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-mono text-xs font-bold text-blue-400 flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-blue-400" />
+                    <span className="font-mono text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-indigo-300" />
                       <span>Guest Preview Mode</span>
                     </span>
                   </div>
@@ -248,7 +248,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                       onClose();
                       openAuthModal("Sign in to save your progress and unlock learner features.");
                     }}
-                    className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm"
+                    className="w-full py-2 px-3 rounded-lg bg-gradient-to-r from-indigo-600 to-indigo-600 hover:from-indigo-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm"
                   >
                     <User className="h-3.5 w-3.5" />
                     <span>Sign In / Register</span>
@@ -270,12 +270,12 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                       onClick={() => handleNavClick(item.id)}
                       className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left transition-all cursor-pointer ${
                         isActive
-                          ? "bg-blue-600/15 border border-blue-500/30 text-white font-semibold"
+                          ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold"
                           : "hover:bg-slate-900 text-slate-300 border border-transparent"
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-blue-400" : "text-slate-400"}`} />
+                        <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-indigo-300" : "text-slate-400"}`} />
                         <div className="truncate">
                           <p className="text-xs truncate">{item.label}</p>
                           <p className="text-[10px] text-slate-500 truncate">{item.description}</p>
@@ -286,7 +286,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                           {item.badge}
                         </span>
                       ) : (
-                        <ChevronRight className={`h-3.5 w-3.5 shrink-0 ${isActive ? "text-blue-400" : "text-slate-600"}`} />
+                        <ChevronRight className={`h-3.5 w-3.5 shrink-0 ${isActive ? "text-indigo-300" : "text-slate-600"}`} />
                       )}
                     </button>
                   );
@@ -347,10 +347,10 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                   className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80 text-slate-300 hover:text-white transition-colors cursor-pointer text-xs"
                 >
                   <div className="flex items-center gap-2">
-                    <Languages className="h-3.5 w-3.5 text-blue-400" />
+                    <Languages className="h-3.5 w-3.5 text-indigo-300" />
                     <span>{language === "en" ? "Switch to አማርኛ (Amharic)" : "Switch to English"}</span>
                   </div>
-                  <span className="font-mono text-[10px] font-bold text-blue-400 uppercase">
+                  <span className="font-mono text-[10px] font-bold text-indigo-300 uppercase">
                     {language}
                   </span>
                 </button>
@@ -380,7 +380,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                     onClose();
                     openAuthModal("Sign in to save your progress and unlock learner features.");
                   }}
-                  className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer active:scale-95"
+                  className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-600 hover:from-indigo-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer active:scale-95"
                 >
                   <User className="h-3.5 w-3.5" />
                   <span>Sign In / Register</span>

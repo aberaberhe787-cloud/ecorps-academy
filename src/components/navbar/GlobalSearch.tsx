@@ -302,7 +302,7 @@ export const GlobalSearch: React.FC = () => {
   const getItemIcon = (type: string) => {
     switch (type) {
       case "lesson":
-        return <BookOpen className="h-3.5 w-3.5 text-blue-400 shrink-0" />;
+        return <BookOpen className="h-3.5 w-3.5 text-indigo-300 shrink-0" />;
       case "pattern":
         return <Grid3X3 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />;
       case "mission":
@@ -310,7 +310,7 @@ export const GlobalSearch: React.FC = () => {
       case "resource":
         return <Award className="h-3.5 w-3.5 text-amber-400 shrink-0" />;
       case "command":
-        return <Command className="h-3.5 w-3.5 text-blue-400 shrink-0" />;
+        return <Command className="h-3.5 w-3.5 text-indigo-300 shrink-0" />;
       default:
         return <Sparkles className="h-3.5 w-3.5 text-slate-400 shrink-0" />;
     }
@@ -325,7 +325,7 @@ export const GlobalSearch: React.FC = () => {
         }}
         className="flex items-center gap-1.5 sm:gap-2 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs text-slate-400 cursor-text transition shadow-sm w-full group min-w-0"
       >
-        <Search className="h-3.5 w-3.5 text-slate-400 group-hover:text-blue-400 transition-colors shrink-0" />
+        <Search className="h-3.5 w-3.5 text-slate-400 group-hover:text-indigo-300 transition-colors shrink-0" />
         <input
           ref={searchInputRef}
           type="text"
@@ -374,7 +374,7 @@ export const GlobalSearch: React.FC = () => {
                 onClick={() => setSearchCategory(cat)}
                 className={`px-2.5 py-1 rounded-lg text-[11px] font-medium uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
                   searchCategory === cat
-                    ? 'bg-blue-600 text-white shadow-xs font-bold'
+                    ? 'bg-indigo-600 text-white shadow-xs font-bold'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
                 }`}
               >
@@ -386,7 +386,7 @@ export const GlobalSearch: React.FC = () => {
           <div className="overflow-y-auto max-h-[380px] p-2 custom-scrollbar">
             {isSearching ? (
               <div className="py-8 flex flex-col items-center justify-center text-slate-500 gap-2">
-                <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
+                <Loader2 className="h-5 w-5 animate-spin text-indigo-300" />
                 <span className="text-xs">Searching Ecorp Academy index...</span>
               </div>
             ) : searchResults.length > 0 ? (
@@ -400,7 +400,7 @@ export const GlobalSearch: React.FC = () => {
                       onMouseEnter={() => setSelectedIndex(idx)}
                       className={`w-full text-left p-2 rounded-xl flex items-start gap-2.5 transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-blue-600/15 border border-blue-500/30 text-white'
+                          ? 'bg-indigo-600/15 border border-indigo-500/30 text-white'
                           : 'hover:bg-slate-900/80 text-slate-300 border border-transparent'
                       }`}
                     >
@@ -416,7 +416,7 @@ export const GlobalSearch: React.FC = () => {
                         </div>
                         <p className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">{item.subtitle}</p>
                       </div>
-                      <ArrowRight className={`h-3.5 w-3.5 self-center shrink-0 transition-transform ${isSelected ? 'text-blue-400 translate-x-0.5' : 'text-slate-600'}`} />
+                      <ArrowRight className={`h-3.5 w-3.5 self-center shrink-0 transition-transform ${isSelected ? 'text-indigo-300 translate-x-0.5' : 'text-slate-600'}`} />
                     </button>
                   );
                 })}
@@ -441,12 +441,12 @@ export const GlobalSearch: React.FC = () => {
                       className="text-left p-2 rounded-xl bg-slate-900/50 hover:bg-slate-900 border border-slate-800/80 hover:border-slate-700 transition flex items-center justify-between group cursor-pointer"
                     >
                       <div className="truncate">
-                        <p className="text-xs font-medium text-slate-200 group-hover:text-blue-400 transition-colors truncate">
+                        <p className="text-xs font-medium text-slate-200 group-hover:text-indigo-300 transition-colors truncate">
                           {quick.label}
                         </p>
                         <p className="text-[10px] text-slate-500 truncate capitalize">{quick.type}</p>
                       </div>
-                      <Search className="h-3 w-3 text-slate-600 group-hover:text-blue-400 shrink-0 transition-colors" />
+                      <Search className="h-3 w-3 text-slate-600 group-hover:text-indigo-300 shrink-0 transition-colors" />
                     </button>
                   ))}
                 </div>
