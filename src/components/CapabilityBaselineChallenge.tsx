@@ -26,8 +26,8 @@ export const CapabilityBaselineChallenge: React.FC = () => {
       className="rounded-3xl bg-slate-900/40 p-8 shadow-2xl"
     >
       <div className="flex items-center gap-4 mb-8">
-        <div className="p-3 rounded-2xl bg-blue-950">
-          <BrainCircuit className="h-6 w-6 text-blue-400" />
+        <div className="p-3 rounded-2xl bg-indigo-950">
+          <BrainCircuit className="h-6 w-6 text-indigo-300" />
         </div>
         <div>
           <h2 className="text-xl font-black text-white">Ecorp Capability Baseline</h2>
@@ -39,12 +39,12 @@ export const CapabilityBaselineChallenge: React.FC = () => {
         {steps.map((step, idx) => (
           <motion.div 
             key={idx}
-            className={`p-6 rounded-2xl ${idx === activeStep ? 'bg-blue-950/20' : 'bg-slate-900/50'}`}
+            className={`p-6 rounded-2xl ${idx === activeStep ? 'bg-indigo-950/20' : 'bg-slate-900/50'}`}
           >
             <h3 className="font-bold text-white mb-3">{step.title}</h3>
             <code className="block p-4 bg-slate-950 rounded-lg text-xs font-mono text-slate-300 mb-4">{step.prompt}</code>
             <p className="text-xs text-slate-400 flex gap-2">
-              <span className="font-bold text-blue-400">{idx === 0 ? "Failure:" : "Success:"}</span>
+              <span className="font-bold text-indigo-300">{idx === 0 ? "Failure:" : "Success:"}</span>
               {idx === 0 ? step.failure : step.success}
             </p>
           </motion.div>
@@ -56,7 +56,7 @@ export const CapabilityBaselineChallenge: React.FC = () => {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setActiveStep(activeStep === 0 ? 1 : 0)}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-3 rounded-xl transition-all"
+          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-8 py-3 rounded-xl transition-all"
         >
           {activeStep === 0 ? "Compare with Ecorp Method" : "Complete Challenge"}
           <ChevronRight className="h-4 w-4" />

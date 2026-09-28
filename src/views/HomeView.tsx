@@ -16,17 +16,58 @@ import { Button } from "../components/ui/Button";
 import { OnboardingModal } from "../components/OnboardingModal";
 
 const TRACKS = [
-  { title: "Prompt Engineering Foundations", learner: "New learners", duration: "2 hours", outcome: "Safe, structured prompt habits", level: "Beginner", project: "Prompt Anatomy Lab" },
-  { title: "AI Productivity for Professionals", learner: "Practitioners", duration: "4 hours", outcome: "Automated work workflows", level: "Intermediate", project: "Workflow Automation" },
-  { title: "AI Systems and Evaluation", learner: "Advanced", duration: "6 hours", outcome: "Evaluated agent systems", level: "Advanced", project: "Agent Evaluation Harness" },
-  { title: "AI Adoption for Teams", learner: "Leaders", duration: "4 hours", outcome: "Governance & deployment plans", level: "Strategic", project: "AI Readiness Assessment" },
+  {
+    title: "Prompt Engineering Foundations",
+    learner: "New learners",
+    duration: "2 hours",
+    outcome: "Safe, structured prompt habits",
+    level: "Beginner",
+    project: "Prompt Anatomy Lab",
+    tab: "foundations" as const,
+    lessonId: "foundation-clarity",
+  },
+  {
+    title: "AI Productivity for Professionals",
+    learner: "Practitioners",
+    duration: "4 hours",
+    outcome: "Automated work workflows",
+    level: "Intermediate",
+    project: "Workflow Automation",
+    tab: "curriculum" as const,
+    lessonId: "m1-l1",
+  },
+  {
+    title: "AI Systems and Evaluation",
+    learner: "Advanced",
+    duration: "6 hours",
+    outcome: "Evaluated agent systems",
+    level: "Advanced",
+    project: "Agent Evaluation Harness",
+    tab: "curriculum" as const,
+    lessonId: "m2-l1",
+  },
+  {
+    title: "AI Adoption for Teams",
+    learner: "Leaders",
+    duration: "4 hours",
+    outcome: "Governance & deployment plans",
+    level: "Strategic",
+    project: "AI Readiness Assessment",
+    tab: "curriculum" as const,
+    lessonId: "m3-l1",
+  },
 ];
 
 export const HomeView: React.FC = () => {
   const reduceMotion = useReducedMotion();
   const itemMotion = reduceMotion ? staggerItemReduced : staggerItem;
 
-  const { setActiveTab } = useApp();
+  const { setActiveTab, setActiveLessonId, user, openAuthModal } = useApp();
+
+  const openLearningPath = (tab: "curriculum" | "foundations", lessonId?: string) => {
+    if (lessonId) setActiveLessonId(lessonId);
+    setActiveTab(tab);
+  };
   const [showDiagnostic, setShowDiagnostic] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
@@ -43,23 +84,42 @@ export const HomeView: React.FC = () => {
               ECORPS Academy is your hands-on learning platform for AI and modern technologies. Learn at your own pace, practice with real tools, and build projects that matter.
             </p>
             <div className="flex flex-col sm:flex-row flex-wrap justify-center lg:justify-start gap-4">
-              <Button size="lg" onClick={() => setShowOnboarding(true)} className="text-lg px-8">Start learning free →</Button>
+              <Button size="lg" onClick={() => openLearningPath("foundations", "foundation-clarity")} className="text-lg px-8">Start learning →</Button>
               <Button variant="outline" size="lg" onClick={() => setShowDiagnostic(true)} className="text-lg px-8">Choose your path</Button>
-              <Button variant="outline" size="lg" className="text-lg px-8">Train your team</Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-lg px-8"
+                onClick={() => (user ? setActiveTab("resources") : openAuthModal("Sign in to explore team adoption resources and save progress."))}
+              >
+                Train your team
+              </Button>
             </div>
             
             {/* Capability highlights */}
+            {!user && (
+              <p className="text-xs text-slate-400 text-center lg:text-left">
+                Browse curriculum free.{" "}
+                <button
+                  type="button"
+                  onClick={() => openAuthModal("Sign in to save progress, XP, and credentials.")}
+                  className="text-indigo-300 hover:text-indigo-200 font-semibold underline-offset-2 hover:underline cursor-pointer"
+                >
+                  Sign in to save progress
+                </button>
+              </p>
+            )}
             <div className="flex flex-wrap justify-center lg:justify-start gap-6 pt-4 text-sm text-slate-300">
                 <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-blue-500"/>
+                    <CheckCircle2 className="h-4 w-4 text-indigo-400"/>
                     <span className="font-medium">Hands-on Practice</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-blue-500"/>
+                    <CheckCircle2 className="h-4 w-4 text-indigo-400"/>
                     <span className="font-medium">Expert Curriculum</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-blue-500"/>
+                    <CheckCircle2 className="h-4 w-4 text-indigo-400"/>
                     <span className="font-medium">Track Progress</span>
                 </div>
             </div>
@@ -106,7 +166,14 @@ export const HomeView: React.FC = () => {
                       <li>Level: {track.level}</li>
                     </ul>
                   </div>
-                  <Button variant="ghost" size="sm" className="w-full mt-4 border border-slate-800">View Track →</Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full mt-4 border border-slate-800"
+                    onClick={() => openLearningPath(track.tab, track.lessonId)}
+                  >
+                    View Track →
+                  </Button>
                 </motion.div>
               ))}
             </motion.div>

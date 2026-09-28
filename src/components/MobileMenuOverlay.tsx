@@ -126,7 +126,14 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
     },
   ];
 
+  const navSections: { title: string; ids: NavTab[] }[] = [
+    { title: "Learn", ids: ["home", "curriculum", "foundations", "patterns", "resources"] },
+    { title: "Practice", ids: ["playground"] },
+    { title: "Assess", ids: ["certification"] },
+  ];
+
   const handleNavClick = (tabId: NavTab) => {
+
     if (tabId === "playground" && activeTab !== "playground") {
       setPrompt("");
       setSystemInstruction("");
@@ -256,41 +263,48 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                 </div>
               )}
 
-              {/* Primary Academy Navigation */}
-              <div className="space-y-1">
-                <p className="text-[10px] font-mono uppercase tracking-wider text-slate-500 px-2 mb-1">
-                  Academy Navigation
-                </p>
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeTab === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => handleNavClick(item.id)}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left transition-all cursor-pointer ${
-                        isActive
-                          ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold"
-                          : "hover:bg-slate-900 text-slate-300 border border-transparent"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-indigo-300" : "text-slate-400"}`} />
-                        <div className="truncate">
-                          <p className="text-xs truncate">{item.label}</p>
-                          <p className="text-[10px] text-slate-500 truncate">{item.description}</p>
-                        </div>
-                      </div>
-                      {item.badge ? (
-                        <span className="text-[10px] font-mono bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800 text-slate-400 shrink-0">
-                          {item.badge}
-                        </span>
-                      ) : (
-                        <ChevronRight className={`h-3.5 w-3.5 shrink-0 ${isActive ? "text-indigo-300" : "text-slate-600"}`} />
-                      )}
-                    </button>
-                  );
-                })}
+              {/* Primary Academy Navigation — Learn / Practice / Assess */}
+              <div className="space-y-3">
+                {navSections.map((section) => (
+                  <div key={section.title} className="space-y-1">
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-slate-500 px-2 mb-1">
+                      {section.title}
+                    </p>
+                    {section.ids.map((id) => {
+                      const item = navItems.find((n) => n.id === id);
+                      if (!item) return null;
+                      const Icon = item.icon;
+                      const isActive = activeTab === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => handleNavClick(item.id)}
+                          className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left transition-all cursor-pointer ${
+                            isActive
+                              ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold"
+                              : "hover:bg-slate-900 text-slate-300 border border-transparent"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-indigo-300" : "text-slate-400"}`} />
+                            <div className="truncate">
+                              <p className="text-xs truncate">{item.label}</p>
+                              <p className="text-[10px] text-slate-500 truncate">{item.description}</p>
+                            </div>
+                          </div>
+                          {item.badge ? (
+                            <span className="text-[10px] font-mono bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800 text-slate-400 shrink-0">
+                              {item.badge}
+                            </span>
+                          ) : (
+                            <ChevronRight className={`h-3.5 w-3.5 shrink-0 ${isActive ? "text-indigo-300" : "text-slate-600"}`} />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
 
               {/* Account & Quick Settings */}
