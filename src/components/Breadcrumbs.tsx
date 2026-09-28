@@ -47,7 +47,7 @@ export const Breadcrumbs: React.FC = () => {
       case "resources":
         return { label: "Resources", icon: Compass };
       case "certification":
-        return { label: "Certification", icon: Award };
+        return { label: "Assess", icon: Award };
       case "profile":
         return { label: "Profile", icon: User };
       default:

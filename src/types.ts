@@ -26,7 +26,8 @@ export interface ProgressModel {
 export type CheckpointStatus = "locked" | "available" | "passed";
 export type QuizInteractionState = "idle" | "selected" | "submitted" | "retrying";
 
-export type NavTab = "home" | "curriculum" | "foundations" | "playground" | "patterns" | "resources" | "ctf" | "certification" | "profile";
+export type NavTab = "home" | "curriculum" | "foundations" | "playground" | "patterns" | "resources" | "certification" | "profile";
+/** CTF is a Playground sub-tab only — not a top-level NavTab. */
 
 export type BloomsTaxonomyLevel =
   | "Remembering"
