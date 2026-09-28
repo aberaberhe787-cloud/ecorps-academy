@@ -6,7 +6,8 @@ import {
   Target,
   Terminal,
   Grid3X3,
-  Award,
+  Library,
+  ClipboardCheck,
 } from "lucide-react";
 import { useApp } from "../../context/AppContext";
 import { NavTab } from "../../types";
@@ -20,12 +21,14 @@ export const PrimaryNavigation: React.FC = () => {
     { id: "foundations", label: "Foundations", icon: Target },
     { id: "playground", label: t.nav.sandbox, icon: Terminal },
     { id: "patterns", label: t.nav.patterns, icon: Grid3X3 },
-    { id: "resources", label: t.nav.resources, icon: Award },
+    { id: "resources", label: t.nav.resources, icon: Library },
+    { id: "certification", label: "Assess", icon: ClipboardCheck },
   ];
 
-  const navItems = allNavItems.filter(item => {
-    if (item.id === "home") return true;
-    return !!user;
+  // Guests: full Learn + Practice. Auth required only for Assess (and Profile via account menu).
+  const navItems = allNavItems.filter((item) => {
+    if (item.id === "certification") return !!user;
+    return true;
   });
 
   return (

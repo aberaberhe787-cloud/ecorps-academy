@@ -3,6 +3,11 @@ import { auth } from '../lib/firebase';
 import { isSessionExpired, markSessionExpired } from '../lib/sessionManager';
 import { LoginPage } from './LoginPage';
 
+/**
+ * Session-aware auth gate (sign-out when session expired).
+ * App shell uses RequireAuth for tab-level gating; keep this helper for
+ * routes/flows that must enforce session expiry before render.
+ */
 export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = React.useState(auth.currentUser);
 
@@ -12,7 +17,9 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
         markSessionExpired();
         try {
           await auth.signOut();
-        } catch {}
+        } catch {
+          /* ignore sign-out errors */
+        }
         setUser(null);
       } else {
         setUser(u);
@@ -22,7 +29,7 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
   }, []);
 
   if (!user) {
-    return <LoginPage />;
+    return <LoginPage message="Sign in to continue. Your session may have expired." />;
   }
 
   return <>{children}</>;

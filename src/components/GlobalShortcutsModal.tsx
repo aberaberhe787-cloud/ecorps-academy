@@ -221,7 +221,7 @@ export const GlobalShortcutsModal: React.FC<GlobalShortcutsModalProps> = ({
                 placeholder="Search shortcuts (e.g., Home, Playground, Theme)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-slate-700/80 bg-slate-900/90 pl-8 pr-8 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:border-blue-500 focus:outline-none"
+                className="w-full rounded-xl border border-slate-700/80 bg-slate-900/90 pl-8 pr-8 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none"
               />
               {searchQuery && (
                 <button
@@ -261,7 +261,7 @@ export const GlobalShortcutsModal: React.FC<GlobalShortcutsModalProps> = ({
                 >
                   <div className="flex flex-col min-w-0 pr-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-slate-200 group-hover:text-blue-300 transition-colors">
+                      <span className="text-xs font-medium text-slate-200 group-hover:text-indigo-200 transition-colors">
                         {item.description}
                       </span>
                       {item.badge && (

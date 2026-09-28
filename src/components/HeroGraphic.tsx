@@ -5,7 +5,7 @@ export const HeroGraphic: React.FC = () => {
   return (
     <div className="relative w-full h-full min-h-[300px] bg-slate-900/50 rounded-2xl border border-slate-700 p-6 flex flex-col justify-between overflow-hidden">
       <div className="flex justify-between items-start">
-        <div className="p-3 bg-blue-950/50 rounded-lg border border-blue-800 text-blue-400">
+        <div className="p-3 bg-indigo-950/50 rounded-lg border border-indigo-800 text-indigo-300">
           <Terminal className="h-8 w-8" />
         </div>
         <div className="flex gap-2">
@@ -31,7 +31,7 @@ export const HeroGraphic: React.FC = () => {
         </div>
       </div>
       
-      <div className="absolute -bottom-10 -right-10 h-32 w-32 bg-blue-500/20 rounded-full blur-3xl"></div>
+      <div className="absolute -bottom-10 -right-10 h-32 w-32 bg-indigo-500/20 rounded-full blur-3xl"></div>
     </div>
   );
 };

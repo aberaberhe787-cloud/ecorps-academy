@@ -167,7 +167,6 @@ const AuthGate: React.FC = () => {
 };
 
 export default function App() {
-  console.log('App component mounting...');
   return (
     <AppProvider>
       <ThemeProvider>

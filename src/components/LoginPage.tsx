@@ -146,7 +146,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState<boolean>(() => {
     try {
-      const saved = localStorage.getItem('ai_studio_remember_me');
+      const saved =
+        localStorage.getItem('ecorp_remember_me') ??
+        localStorage.getItem('ai_studio_remember_me');
       return saved !== null ? saved === 'true' : true;
     } catch {
       return true;
@@ -156,7 +158,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
   const handleRememberMeChange = (checked: boolean) => {
     setRememberMe(checked);
     try {
-      localStorage.setItem('ai_studio_remember_me', String(checked));
+      localStorage.setItem('ecorp_remember_me', String(checked));
     } catch {
       // Ignore localStorage restrictions
     }
@@ -907,7 +909,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
         </div>
         <div className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-200">
           <Sparkles className="h-3 w-3 text-indigo-300 shrink-0" />
-          <span>v2.4 Live</span>
+          <span>Early access</span>
         </div>
       </header>
 
@@ -1005,7 +1007,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
                 <div className="inline-block h-7 w-7 rounded-full ring-2 ring-slate-900 bg-purple-600 text-white font-bold flex items-center justify-center text-[10px]">AI</div>
                 <div className="inline-block h-7 w-7 rounded-full ring-2 ring-slate-900 bg-emerald-600 text-white font-bold flex items-center justify-center text-[10px]">LLM</div>
               </div>
-              <span className="leading-snug">Join <strong className="text-slate-200">10,000+</strong> engineers mastering prompt engineering worldwide.</span>
+              <span className="leading-snug">Built for practitioners who need <strong className="text-slate-200">measurable</strong> prompt engineering skill—not one-off chat tricks.</span>
             </div>
           </section>
 

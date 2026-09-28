@@ -4,7 +4,17 @@ import { useApp } from "../context/AppContext";
 import { EcorpLogo } from "./EcorpLogo";
 
 export const Footer: React.FC = () => {
-  const { setActiveTab, t } = useApp();
+  const { setActiveTab, setActiveLessonId, t } = useApp();
+
+  const openCurriculumLesson = (lessonId: string) => {
+    setActiveLessonId(lessonId);
+    setActiveTab("curriculum");
+  };
+
+  const openFoundations = () => {
+    setActiveLessonId("foundation-clarity");
+    setActiveTab("foundations");
+  };
 
   return (
     <footer className="border-t border-white/[0.06] bg-[#070b14]/90 text-slate-400 text-xs py-6 sm:py-10 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] md:pb-10" id="ecorp-app-footer">
@@ -31,7 +41,8 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2 text-xs">
               <li>
                 <button
-                  onClick={() => setActiveTab("curriculum")}
+                  type="button"
+                  onClick={openFoundations}
                   className="hover:text-indigo-300 transition-colors cursor-pointer"
                 >
                   {t.footer.trackFoundations}
@@ -39,7 +50,8 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <button
-                  onClick={() => setActiveTab("curriculum")}
+                  type="button"
+                  onClick={() => openCurriculumLesson("m2-l1")}
                   className="hover:text-indigo-300 transition-colors cursor-pointer"
                 >
                   {t.footer.trackReasoning}
@@ -47,7 +59,8 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <button
-                  onClick={() => setActiveTab("curriculum")}
+                  type="button"
+                  onClick={() => openCurriculumLesson("m1-l1")}
                   className="hover:text-indigo-300 transition-colors cursor-pointer"
                 >
                   {t.footer.trackSystems}
@@ -55,7 +68,8 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <button
-                  onClick={() => setActiveTab("curriculum")}
+                  type="button"
+                  onClick={() => setActiveTab("playground")}
                   className="hover:text-indigo-300 transition-colors cursor-pointer"
                 >
                   {t.footer.trackSecurity}

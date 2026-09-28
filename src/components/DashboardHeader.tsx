@@ -1,11 +1,16 @@
+/**
+ * Optional streak/account strip. Not mounted in AppShell — Navbar + Profile own chrome.
+ * Kept for reuse (e.g. embedding streak chip). Avoid /login hard redirects in SPA shell.
+ */
 import React, { useEffect } from 'react';
 import { Flame } from 'lucide-react';
 import { auth, onAuthStateChanged, signOut } from '../lib/firebaseClient';
 import { useApp } from '../context/AppContext';
 
 const redirectToLogin = () => {
+  // SPA: full reload to origin root; App auth gate shows login when signed out
   if (typeof window !== 'undefined') {
-    window.location.href = '/login';
+    window.location.href = '/';
   }
 };
 
