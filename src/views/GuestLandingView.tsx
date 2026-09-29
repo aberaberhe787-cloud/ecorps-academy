@@ -8,6 +8,8 @@ import {
   X,
   GraduationCap,
   Layers,
+  CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { staggerContainer, staggerItem, staggerItemReduced } from "../lib/motionPresets";
@@ -18,7 +20,6 @@ import { TestimonialsCarousel } from "../components/TestimonialsCarousel";
 import { HeroGraphic } from "../components/HeroGraphic";
 import { InstructorsSection } from "../components/home/InstructorsSection";
 import { Button } from "../components/ui/Button";
-import { GuestLandingView } from "./GuestLandingView";
 
 const TRACKS = [
   {
@@ -65,7 +66,7 @@ const LOOP_STEPS = [
     title: "Learn",
     detail: "Curriculum and foundations with explicit tasks, constraints, and checks.",
     icon: BookOpen,
-    action: "Open curriculum",
+    action: "Browse curriculum",
     tab: "curriculum" as const,
   },
   {
@@ -81,34 +82,28 @@ const LOOP_STEPS = [
     title: "Assess",
     detail: "Capstone-style evaluation to verify skill—not just completion.",
     icon: ClipboardCheck,
-    action: "Open assessment",
+    action: "Sign in to assess",
     tab: "certification" as const,
+    requiresAuth: true,
   },
   {
     step: "04",
     title: "Progress",
-    detail: "XP, streaks, and competency evidence on your profile.",
+    detail: "XP, streaks, and competency evidence on your profile after you sign in.",
     icon: User,
-    action: "Open profile",
+    action: "Sign in to track",
     tab: "profile" as const,
+    requiresAuth: true,
   },
 ];
 
-export const HomeView: React.FC = () => {
-  const { user } = useApp();
-
-  // Guests get a dedicated landing; signed-in learners get the continue/home experience.
-  if (!user) {
-    return <GuestLandingView />;
-  }
-
-  return <SignedInHomeView />;
-};
-
-const SignedInHomeView: React.FC = () => {
+/**
+ * Dedicated first-visit / guest landing — browse free, convert to save progress.
+ */
+export const GuestLandingView: React.FC = () => {
   const reduceMotion = useReducedMotion();
   const itemMotion = reduceMotion ? staggerItemReduced : staggerItem;
-  const { setActiveTab, setActiveLessonId, user, openAuthModal, userProgress } = useApp();
+  const { setActiveTab, setActiveLessonId, openAuthModal } = useApp();
   const [showDiagnostic, setShowDiagnostic] = useState(false);
 
   const openLearningPath = (tab: "curriculum" | "foundations", lessonId?: string) => {
@@ -116,24 +111,39 @@ const SignedInHomeView: React.FC = () => {
     setActiveTab(tab);
   };
 
-  const openTab = (tab: "curriculum" | "foundations" | "playground" | "certification" | "profile" | "resources") => {
-    if ((tab === "certification" || tab === "profile") && !user) {
+  const openTab = (tab: "curriculum" | "foundations" | "playground" | "certification" | "profile" | "resources", requiresAuth?: boolean) => {
+    if (requiresAuth || tab === "certification" || tab === "profile") {
       openAuthModal(
         tab === "certification"
           ? "Sign in to take the assessment and save credentials."
-          : "Sign in to view your profile and progress."
+          : tab === "profile"
+            ? "Sign in to view your profile and progress."
+            : "Sign in to continue."
       );
       return;
     }
     setActiveTab(tab);
   };
 
-  const completedCount = userProgress?.completedLessons?.length ?? 0;
-  const hasProgress = completedCount > 0 || (userProgress?.xp ?? 0) > 0;
-
   return (
     <div className="w-full max-w-full overflow-x-hidden bg-slate-950 text-slate-100">
-      {/* ——— 1. HERO ——— */}
+      {/* Guest ribbon */}
+      <div className="border-b border-indigo-500/20 bg-indigo-950/40 px-4 py-2 text-center">
+        <p className="text-xs sm:text-sm text-slate-300">
+          <span className="font-semibold text-indigo-200">Guest mode</span>
+          {" — "}
+          browse curriculum and practice free.{" "}
+          <button
+            type="button"
+            onClick={() => openAuthModal("Create an account to save XP, progress, and certificates.")}
+            className="text-indigo-300 font-semibold hover:text-indigo-200 underline-offset-2 hover:underline cursor-pointer"
+          >
+            Sign in to save progress
+          </button>
+        </p>
+      </div>
+
+      {/* Hero */}
       <section className="relative pt-10 sm:pt-14 pb-10 sm:pb-14 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center">
           <div className="space-y-5 sm:space-y-6 text-center lg:text-left min-w-0">
@@ -151,32 +161,20 @@ const SignedInHomeView: React.FC = () => {
             </h1>
 
             <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              ECORP Academy is a structured learning loop—not a chat playground.
-              Build practical AI capability with curriculum, sandbox labs, and assessment you can evidence.
+              ECORP Academy is a structured learning loop—not a chat toy.
+              Start with Foundations free. Sign in when you want XP, streaks, and credentials saved.
             </p>
 
             <div className="flex flex-col sm:flex-row flex-wrap justify-center lg:justify-start gap-3">
-              {user && hasProgress ? (
-                <Button
-                  size="lg"
-                  onClick={() => openLearningPath("curriculum")}
-                  className="px-6 sm:px-8"
-                  icon={<ArrowRight className="h-4 w-4" />}
-                  iconPosition="right"
-                >
-                  Continue learning
-                </Button>
-              ) : (
-                <Button
-                  size="lg"
-                  onClick={() => openLearningPath("foundations", "foundation-clarity")}
-                  className="px-6 sm:px-8"
-                  icon={<ArrowRight className="h-4 w-4" />}
-                  iconPosition="right"
-                >
-                  Start learning
-                </Button>
-              )}
+              <Button
+                size="lg"
+                onClick={() => openLearningPath("foundations", "foundation-clarity")}
+                className="px-6 sm:px-8"
+                icon={<ArrowRight className="h-4 w-4" />}
+                iconPosition="right"
+              >
+                Start learning free
+              </Button>
               <Button
                 variant="outline"
                 size="lg"
@@ -185,27 +183,24 @@ const SignedInHomeView: React.FC = () => {
               >
                 Choose your path
               </Button>
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={() => openAuthModal("Sign in to save progress and unlock assessment.")}
+                className="px-6 sm:px-8"
+              >
+                Sign in
+              </Button>
             </div>
 
-            {!user && (
-              <p className="text-xs text-slate-500 text-center lg:text-left">
-                Browse curriculum free.{" "}
-                <button
-                  type="button"
-                  onClick={() => openAuthModal("Sign in to save progress, XP, and credentials.")}
-                  className="text-indigo-300 hover:text-indigo-200 font-semibold hover:underline cursor-pointer"
-                >
-                  Sign in to save progress
-                </button>
-              </p>
-            )}
-
-            {user && hasProgress && (
-              <p className="text-xs text-slate-400 text-center lg:text-left font-mono">
-                {completedCount} lesson{completedCount === 1 ? "" : "s"} completed · {userProgress.xp} XP
-                {userProgress.streakDays > 0 ? ` · ${userProgress.streakDays}d streak` : ""}
-              </p>
-            )}
+            <ul className="flex flex-wrap justify-center lg:justify-start gap-x-5 gap-y-2 text-xs text-slate-400 pt-1">
+              {["No account needed to browse", "Real curriculum & sandbox", "Sign in to save evidence"].map((line) => (
+                <li key={line} className="inline-flex items-center gap-1.5">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-indigo-400 shrink-0" aria-hidden="true" />
+                  {line}
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div className="hidden lg:block relative min-w-0">
@@ -215,15 +210,14 @@ const SignedInHomeView: React.FC = () => {
       </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20 space-y-14 sm:space-y-16">
-        {/* ——— 2. HONEST PRODUCT SIGNALS ——— */}
         <CredibilityStrip />
 
-        {/* ——— 3. START HERE ——— */}
+        {/* Start here */}
         <section className="rounded-2xl sm:rounded-3xl border border-indigo-500/25 bg-gradient-to-br from-indigo-950/40 via-slate-900/80 to-slate-950 p-5 sm:p-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div className="space-y-2 min-w-0">
               <p className="text-[11px] font-mono uppercase tracking-wider text-indigo-300 font-semibold">
-                Start here
+                Start here · no sign-in required
               </p>
               <h2 className="text-xl sm:text-2xl font-bold text-white">
                 Foundations · Lesson 1 — Clarity &amp; specificity
@@ -249,12 +243,12 @@ const SignedInHomeView: React.FC = () => {
           </div>
         </section>
 
-        {/* ——— 4. HOW THE PLATFORM WORKS ——— */}
+        {/* How it works */}
         <section className="space-y-6">
           <div className="text-center space-y-2 px-1">
             <h2 className="text-2xl sm:text-3xl font-bold text-white">How ECORP Academy works</h2>
             <p className="text-sm text-slate-400 max-w-2xl mx-auto">
-              A closed skill loop: learn the method, practice it, assess it, then evidence progress.
+              Learn → Practice → Assess → Progress. Guests can learn and practice; sign in to assess and save.
             </p>
           </div>
 
@@ -283,7 +277,7 @@ const SignedInHomeView: React.FC = () => {
                   <p className="text-xs text-slate-400 leading-relaxed flex-1">{item.detail}</p>
                   <button
                     type="button"
-                    onClick={() => openTab(item.tab)}
+                    onClick={() => openTab(item.tab, item.requiresAuth)}
                     className="text-xs font-semibold text-indigo-300 hover:text-indigo-200 inline-flex items-center gap-1 cursor-pointer mt-1"
                   >
                     {item.action}
@@ -295,12 +289,12 @@ const SignedInHomeView: React.FC = () => {
           </motion.div>
         </section>
 
-        {/* ——— 5. TRACKS ——— */}
+        {/* Tracks */}
         <section className="space-y-6">
           <div className="text-center space-y-2 px-1">
             <h2 className="text-2xl sm:text-3xl font-bold text-white">Outcome-led tracks</h2>
             <p className="text-sm text-slate-400 max-w-2xl mx-auto">
-              Pick a track by role—not by hype. Each opens a real lesson in the platform.
+              Open any track as a guest. Sign in later to keep completion and XP.
             </p>
           </div>
 
@@ -343,7 +337,7 @@ const SignedInHomeView: React.FC = () => {
           </motion.div>
         </section>
 
-        {/* ——— 6. PRACTICE TEASER ——— */}
+        {/* Practice */}
         <section className="rounded-2xl sm:rounded-3xl border border-slate-800 bg-slate-900/40 p-5 sm:p-8">
           <div className="flex flex-col md:flex-row md:items-center gap-6 md:justify-between">
             <div className="space-y-2 min-w-0">
@@ -351,10 +345,9 @@ const SignedInHomeView: React.FC = () => {
                 <Terminal className="h-5 w-5 shrink-0" aria-hidden="true" />
                 <span className="text-[11px] font-mono uppercase tracking-wider font-semibold">Practice</span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white">Sandbox, missions, and CTF labs</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-white">Try the sandbox as a guest</h2>
               <p className="text-sm text-slate-400 max-w-xl leading-relaxed">
-                Run prompts, complete missions, and stress-test techniques in the lab.
-                Practice is where capability becomes real—after you learn the structure.
+                Run prompts and explore labs. Mission XP and saved artifacts require an account.
               </p>
             </div>
             <Button
@@ -370,73 +363,44 @@ const SignedInHomeView: React.FC = () => {
           </div>
         </section>
 
-        {/* ——— 7. METHOD / OUTCOMES ——— */}
-        <section className="space-y-6">
-          <div className="text-center space-y-2 px-1">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white">From weak prompts to measurable output</h2>
-            <p className="text-sm text-slate-400 max-w-2xl mx-auto">
-              The habit the curriculum trains—not a claim about your company results.
-            </p>
-          </div>
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true, amount: 0.2 }}
-          >
-            {["Weak prompt", "Structured prompt", "Evaluated output", "Measurable improvement"].map(
-              (step, i) => (
-                <motion.div
-                  key={step}
-                  variants={itemMotion}
-                  className="p-4 sm:p-5 bg-slate-950 rounded-2xl border border-slate-800 text-center space-y-2"
-                >
-                  <div className="text-xl font-black text-indigo-500/40 font-mono">0{i + 1}</div>
-                  <div className="text-sm font-bold text-white">{step}</div>
-                </motion.div>
-              )
-            )}
-          </motion.div>
-        </section>
-
         <TestimonialsCarousel />
-
         <InstructorsSection />
 
-        {/* ——— 8. TEAM (secondary) ——— */}
-        <section className="rounded-2xl sm:rounded-3xl border border-slate-800 bg-slate-900/30 p-5 sm:p-8 text-center space-y-4">
-          <Layers className="h-8 w-8 text-indigo-400 mx-auto" aria-hidden="true" />
-          <h2 className="text-xl sm:text-2xl font-bold text-white">For teams adopting AI at work</h2>
-          <p className="text-sm text-slate-400 max-w-xl mx-auto leading-relaxed">
-            Use the same loop—curriculum, practice, assessment—to build shared standards
-            across roles. Sign in to save progress and evidence skill over time.
+        {/* Conversion footer */}
+        <section className="rounded-2xl sm:rounded-3xl border border-indigo-500/25 bg-indigo-950/30 p-5 sm:p-8 text-center space-y-4">
+          <Sparkles className="h-8 w-8 text-indigo-300 mx-auto" aria-hidden="true" />
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Ready to keep your progress?</h2>
+          <p className="text-sm text-slate-400 max-w-lg mx-auto leading-relaxed">
+            Sign in to save XP, streaks, competency evidence, track certificates, and assessment results.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-3 pt-1">
             <Button
-              variant="outline"
-              onClick={() => (user ? openTab("resources") : openAuthModal("Sign in to explore team adoption resources."))}
+              size="lg"
+              onClick={() => openAuthModal("Create an account or sign in to save your learning progress.")}
+              icon={<ArrowRight className="h-4 w-4" />}
+              iconPosition="right"
             >
-              Team resources
+              Sign in / Register
             </Button>
-            {!user && (
-              <Button
-                variant="secondary"
-                onClick={() => openAuthModal("Sign in to save progress and unlock assessment.")}
-              >
-                Sign in
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => openLearningPath("foundations", "foundation-clarity")}
+            >
+              Keep browsing free
+            </Button>
           </div>
+          <p className="text-[11px] text-slate-500 flex items-center justify-center gap-1.5">
+            <Layers className="h-3.5 w-3.5" aria-hidden="true" />
+            Teams can use the same loop after individuals sign in.
+          </p>
         </section>
       </div>
 
-      {/* Path diagnostic */}
       {showDiagnostic && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto"
           onClick={() => setShowDiagnostic(false)}
           role="dialog"
