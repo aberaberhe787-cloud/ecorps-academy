@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useApp } from "../context/AppContext";
-import { NavTab } from "../types";
+import { NavTab, getLearnerLevel } from "../types";
 import { EcorpLogo } from "./EcorpLogo";
 import { auth } from "../lib/firebase";
 
@@ -142,7 +142,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
     onClose();
   };
 
-  const level = Math.floor((userProgress?.xp || 0) / 250) + 1;
+  const level = getLearnerLevel(userProgress?.xp || 0);
 
   return (
     <AnimatePresence>

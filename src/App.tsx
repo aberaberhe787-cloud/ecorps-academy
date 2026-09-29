@@ -23,6 +23,7 @@ import { LoginPage } from "./components/LoginPage";
 import { LoadingOverlay } from "./components/LoadingOverlay";
 import { auth } from "./lib/firebase";
 import { RequireAuth } from "./components/RequireAuth";
+import { DashboardHeader } from "./components/DashboardHeader";
 import { NetworkStatusToast } from "./components/NetworkStatusIndicator";
 import { SessionInactivityWarning } from "./components/SessionInactivityWarning";
 import { GlobalShortcutsHandler } from "./components/GlobalShortcutsHandler";
@@ -67,7 +68,12 @@ const MainContent: React.FC = () => {
           {activeTab === "patterns" && <PatternLibraryView />}
           {activeTab === "resources" && <ResourcesView />}
           {activeTab === "certification" && <RequireAuth><AssessmentView /></RequireAuth>}
-          {activeTab === "profile" && <RequireAuth><UserProfileView /></RequireAuth>}
+          {activeTab === "profile" && (
+            <RequireAuth>
+              <DashboardHeader />
+              <UserProfileView />
+            </RequireAuth>
+          )}
         </motion.div>
       </AnimatePresence>
     </main>

@@ -10,7 +10,7 @@ export const AccountMenu: React.FC = () => {
   const [resetStatus, setResetStatus] = useState<string | null>(null);
   const accountMenuRef = useRef<HTMLDivElement>(null);
 
-  const level = Math.floor((userProgress?.xp || 0) / 250) + 1;
+  const level = getLearnerLevel(userProgress?.xp || 0);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

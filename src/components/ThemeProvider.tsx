@@ -1,12 +1,14 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, ReactNode } from "react";
 import "../theme.css";
-import { loadUserPreferences, savePreference, subscribeToPreferences, type ThemeMode } from "../lib/userPreferences";
+import { useApp } from "../context/AppContext";
+import type { ThemeMode } from "../lib/userPreferences";
 
 type Theme = ThemeMode;
 
 type ThemeContextValue = {
   theme: Theme;
   setTheme: (theme: Theme) => void;
+  isDarkMode: boolean;
 };
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
@@ -19,48 +21,15 @@ export function useTheme() {
   return context;
 }
 
+/**
+ * Single source of truth is AppContext (persisted preferences + document class).
+ * ThemeProvider only exposes the same API for components using useTheme().
+ */
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(() => loadUserPreferences().theme);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.add("theme-transition");
-
-    if (theme === "light") {
-      root.classList.add("light");
-      root.classList.remove("dark");
-    } else if (theme === "dark") {
-      root.classList.add("dark");
-      root.classList.remove("light");
-    } else {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      root.classList.toggle("dark", prefersDark);
-      root.classList.toggle("light", !prefersDark);
-    }
-    
-    const timeout = setTimeout(() => {
-      root.classList.remove("theme-transition");
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, [theme]);
-
-  const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme);
-    savePreference("theme", newTheme);
-  };
-
-  useEffect(() => {
-    const unsubscribe = subscribeToPreferences((prefs) => {
-      if (prefs.theme) {
-        setThemeState(prefs.theme);
-      }
-    });
-    return unsubscribe;
-  }, []);
+  const { theme, setTheme, isDarkMode } = useApp();
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, isDarkMode }}>
       {children}
     </ThemeContext.Provider>
   );
