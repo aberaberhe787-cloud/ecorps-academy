@@ -1,11 +1,20 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
-import PDFDocument from 'pdfkit';
-import { createCanvas } from 'canvas';
 import { desc, eq, and, sql } from 'drizzle-orm';
 import { foundationProgress, lessonProgress, lessons, promptAttempts, savedPrompts, users, certificates } from '../db/schema';
 import { requireDatabase } from './db';
 import { AuthRequest, issueToken, requireAuth } from './auth';
+
+async function loadPdfKit() {
+  const mod = await import('pdfkit');
+  return mod.default || mod;
+}
+
+async function loadCanvas() {
+  const mod = await import('canvas');
+  return mod.createCanvas;
+}
+
 
 const foundations = [
   ['foundation-clarity', 'Clarity & Specificity'],
@@ -22,6 +31,17 @@ const getUserId = (req: AuthRequest, requestedId?: string) => {
 };
 
 export const apiRouter = Router();
+
+apiRouter.get('/health', (_req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'ecorps-academy',
+    hasGeminiKey: Boolean(process.env.GEMINI_API_KEY),
+    hasDb: Boolean(process.env.DATABASE_URL),
+    ts: Date.now(),
+  });
+});
+
 
 apiRouter.post('/auth/register', async (req, res) => {
   try {
@@ -142,7 +162,7 @@ apiRouter.get('/certificate/:userId', requireAuth, async (req: AuthRequest, res)
     const completed = await database.select({ lessonId: lessonProgress.lessonId }).from(lessonProgress).where(eq(lessonProgress.userId, userId));
     if (!foundations.every(([id]) => completed.some((item) => item.lessonId === id))) return res.status(403).json({ error: 'Complete all foundations concepts first' });
     const [user] = await database.select({ name: users.name }).from(users).where(eq(users.id, userId)).limit(1);
-    const document = new PDFDocument({ size: 'A4', layout: 'landscape', margin: 50 });
+    const document = new (await loadPdfKit())({ size: 'A4', layout: 'landscape', margin: 50 });
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="prompt-engineering-foundations.pdf"');
     document.pipe(res);
@@ -155,28 +175,31 @@ apiRouter.get('/certificate/:userId', requireAuth, async (req: AuthRequest, res)
   } catch (error: any) { return res.status(400).json({ error: error.message }); }
 });
 
-apiRouter.get('/og-image/:title/:difficulty', (req, res) => {
-  const { title, difficulty } = req.params;
-  const width = 1200;
-  const height = 630;
-  const canvas = createCanvas(width, height);
-  const ctx = canvas.getContext('2d');
-  
-  // Background
-  ctx.fillStyle = '#050a19';
-  ctx.fillRect(0, 0, width, height);
-  
-  // Text
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 60px sans-serif';
-  ctx.fillText(decodeURIComponent(title), 100, 300);
-  ctx.font = '40px sans-serif';
-  ctx.fillStyle = '#64748b';
-  ctx.fillText(`Difficulty: ${difficulty}`, 100, 400);
-  
-  const buffer = canvas.toBuffer('image/png');
-  res.setHeader('Content-Type', 'image/png');
-  res.send(buffer);
+apiRouter.get('/og-image/:title/:difficulty', async (req, res) => {
+  try {
+    const { title, difficulty } = req.params;
+    const width = 1200;
+    const height = 630;
+    const createCanvas = await loadCanvas();
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#050a19';
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 60px sans-serif';
+    ctx.fillText(decodeURIComponent(title), 100, 300);
+    ctx.font = '40px sans-serif';
+    ctx.fillStyle = '#64748b';
+    ctx.fillText(`Difficulty: ${difficulty}`, 100, 400);
+
+    const buffer = canvas.toBuffer('image/png');
+    res.setHeader('Content-Type', 'image/png');
+    res.send(buffer);
+  } catch (error: any) {
+    return res.status(503).json({ error: error?.message || 'OG image generation unavailable' });
+  }
 });
 
 apiRouter.get('/seo/:page', (req, res) => {
