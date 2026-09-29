@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Sun, Moon, Laptop } from "lucide-react";
-import { useApp } from "../context/AppContext";
+import { useTheme } from "./ThemeProvider";
 
 const OPTIONS: { label: string; value: "light" | "dark" | "system"; icon: typeof Sun }[] = [
   { label: "Light", value: "light", icon: Sun },
@@ -9,7 +9,7 @@ const OPTIONS: { label: string; value: "light" | "dark" | "system"; icon: typeof
 ];
 
 export const ThemeToggle: React.FC = () => {
-  const { theme, setTheme, isDarkMode } = useApp();
+  const { theme, setTheme, isDarkMode } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
