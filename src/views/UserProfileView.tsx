@@ -63,7 +63,9 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
     deleteCodeSnippet, 
     deleteCustomPrompt, 
     isOnline,
-    competencyStates
+    competencyStates,
+    user,
+    openAuthModal,
   } = useApp();
   const [copiedSnippetId, setCopiedSnippetId] = useState<string | null>(null);
   const [activeSavedTab, setActiveSavedTab] = useState<'snippets' | 'prompts'>('snippets');
@@ -227,6 +229,14 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
 
   return (
     <div className="page-shell page-shell--medium app-view space-y-3.5 sm:space-y-8 py-2.5 sm:py-6 animate-in fade-in duration-200">
+      {!user && (
+        <div className="rounded-xl border border-indigo-500/25 bg-indigo-950/30 px-4 py-3 text-xs sm:text-sm text-slate-300 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <span>Guest preview of the Academic Dashboard. Sign in to sync XP, streaks, and certificates.</span>
+          <button type="button" onClick={() => openAuthModal("Sign in to save progress on your dashboard.")} className="shrink-0 font-semibold text-indigo-300 hover:text-indigo-200 cursor-pointer">
+            Sign in
+          </button>
+        </div>
+      )}
       {/* Learner Profile Header */}
       <div className="flex flex-col items-center gap-3 sm:gap-6 rounded-2xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-6 md:flex-row shadow-xl min-w-0">
         <div className="flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-3xl sm:text-4xl text-white font-bold shadow-lg shadow-indigo-900/30 shrink-0">

@@ -4,7 +4,7 @@ import { Sparkles, CheckCircle2, AlertCircle, Loader2, ArrowRight, ArrowLeft, Aw
 import { callGeminiEvaluate } from '../lib/geminiApi';
 
 export const AssessmentView: React.FC = () => {
-  const { userProgress, setActiveTab, completeAssessment } = useApp();
+  const { userProgress, setActiveTab, completeAssessment, user, openAuthModal } = useApp();
   const previouslyPassed = (userProgress.completedAssessments || []).includes('prompt-foundations-final');
   const [submission, setSubmission] = useState(previouslyPassed ? (userProgress.missionEvidence?.['prompt-foundations-final'] || '') : '');
   const [status, setStatus] = useState<'idle' | 'loading' | 'pass' | 'fail' | 'error'>(previouslyPassed ? 'pass' : 'idle');
@@ -68,6 +68,14 @@ export const AssessmentView: React.FC = () => {
 
   return (
     <div className="page-shell page-shell--narrow app-view py-2.5 sm:py-8 space-y-3.5 sm:space-y-6 animate-in fade-in duration-200">
+      {!user && (
+        <div className="mb-4 rounded-xl border border-indigo-500/25 bg-indigo-950/30 px-4 py-3 text-xs sm:text-sm text-slate-300 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <span>Guest preview — explore the assessment. Sign in to submit and save credentials.</span>
+          <button type="button" onClick={() => openAuthModal("Sign in to submit the assessment and save credentials.")} className="shrink-0 font-semibold text-indigo-300 hover:text-indigo-200 cursor-pointer">
+            Sign in
+          </button>
+        </div>
+      )}
       {/* Breadcrumb Navigation */}
       <div className="flex items-center justify-between gap-4">
         <button

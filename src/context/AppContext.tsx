@@ -312,20 +312,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [user, setUser] = useState<User | null>(() => auth.currentUser);
   const [activeTab, setActiveTabState] = useState<NavTab>("home");
   
-  // Only profile + assessment require auth at navigation time.
-  // Learn/Practice surfaces stay browseable for guests (progress save still prompts auth).
-  const AUTH_REQUIRED_TABS: NavTab[] = ["profile", "certification"];
-
+  // All primary nav destinations are browseable as a guest.
+  // Persist / submit / XP actions still call openAuthModal where needed.
   const setActiveTab = (tab: NavTab) => {
-    if (AUTH_REQUIRED_TABS.includes(tab) && !user) {
-      openAuthModal(
-        tab === "certification"
-          ? "Sign in to take the assessment and save credentials."
-          : "Sign in to view your profile and progress.",
-        tab
-      );
-      return;
-    }
     setActiveTabState(tab);
   };
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);

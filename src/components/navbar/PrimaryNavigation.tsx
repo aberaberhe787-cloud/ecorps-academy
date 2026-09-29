@@ -13,7 +13,7 @@ import { useApp } from "../../context/AppContext";
 import { NavTab } from "../../types";
 
 export const PrimaryNavigation: React.FC = () => {
-  const { activeTab, setActiveTab, t, user } = useApp();
+  const { activeTab, setActiveTab, t } = useApp();
 
   const allNavItems: { id: NavTab; label: string; icon: React.FC<{ className?: string }> }[] = [
     { id: "home", label: t.nav.home, icon: Compass },
@@ -25,11 +25,8 @@ export const PrimaryNavigation: React.FC = () => {
     { id: "certification", label: "Assess", icon: ClipboardCheck },
   ];
 
-  // Guests: full Learn + Practice. Auth required only for Assess (and Profile via account menu).
-  const navItems = allNavItems.filter((item) => {
-    if (item.id === "certification") return !!user;
-    return true;
-  });
+  // Guests may open every primary nav destination (save/submit still gated in actions).
+  const navItems = allNavItems;
 
   return (
     <nav 

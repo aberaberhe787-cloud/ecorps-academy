@@ -15,8 +15,6 @@ export const MobileBottomNav: React.FC = () => {
     userProgress,
     isDistractionFreeMode,
     activeLessonId,
-    openAuthModal,
-    user,
   } = useApp();
 
   if (isDistractionFreeMode || (activeTab === "curriculum" && Boolean(activeLessonId))) {
@@ -33,14 +31,6 @@ export const MobileBottomNav: React.FC = () => {
 
   // Soft-highlight Learn when on foundations/patterns/resources (secondary surfaces)
   const handleNav = (id: NavTab) => {
-    if ((id === "profile" || id === "certification") && !user) {
-      openAuthModal(
-        id === "certification"
-          ? "Sign in to take the assessment and save credentials."
-          : "Sign in to view your profile and progress."
-      );
-      return;
-    }
     setActiveTab(id);
   };
 

@@ -42,17 +42,8 @@ export const GuestLandingView: React.FC = () => {
     setActiveTab(tab);
   };
 
-  const openTab = (tab: GuestNavTab, requiresAuth?: boolean) => {
-    if (requiresAuth || tab === "certification" || tab === "profile") {
-      openAuthModal(
-        tab === "certification"
-          ? "Sign in to take the assessment and save credentials."
-          : tab === "profile"
-            ? "Sign in to view your profile and progress."
-            : "Sign in to continue."
-      );
-      return;
-    }
+  const openTab = (tab: GuestNavTab, _requiresAuth?: boolean) => {
+    // Guests can visit every nav surface; submit/save still prompts sign-in inside those views.
     setActiveTab(tab);
   };
 
