@@ -183,7 +183,7 @@ Rules & Guidelines:
     title: "Mission 5: Zero-Shot to Few-Shot Refactor",
     difficulty: "Expert",
     category: "Few-Shot Calibration",
-    description: "Refactor an unpredictable zero-shot categorization prompt into a deterministic few-shot prompt that handles subtle edge cases and ambiguity with 100% precision.",
+    description: "Refactor an unpredictable zero-shot categorization prompt into a deterministic few-shot prompt with balanced exemplars. Prefer edge cases; optionally note how retrieved (dynamic) exemplars would scale the same pattern in production.",
     objective: "Provide 3 high-quality input-output demonstration pairs covering positive, negative, and edge-case ambiguity before the target query.",
     targetCriteria: [
       "Include at least 3 distinct few-shot demonstration pairs (Input/Output)",

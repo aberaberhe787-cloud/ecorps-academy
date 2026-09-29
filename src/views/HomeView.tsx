@@ -34,7 +34,7 @@ const TRACKS = [
     title: "AI Systems & Applied Prompting",
     learner: "After foundations",
     duration: "Self-paced",
-    outcome: "In-context mechanics, reasoning patterns, and structured outputs",
+    outcome: "In-context mechanics, few-shot calibration, reasoning, structured outputs",
     level: "Intermediate → Advanced",
     tab: "curriculum" as const,
     lessonId: "m1-l1",

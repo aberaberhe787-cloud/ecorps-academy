@@ -34,7 +34,7 @@ const TRACKS: {
     id: "systems",
     title: "AI Systems & Applied Prompting",
     audience: "Practitioners moving past basics",
-    outcome: "In-context mechanics, reasoning patterns, and structured outputs",
+    outcome: "In-context mechanics, few-shot calibration, reasoning patterns, structured outputs",
     duration: "Self-paced",
     level: "Intermediate → Advanced",
   },
@@ -224,12 +224,19 @@ export const LearningHubView: React.FC = () => {
 
           {/* Systems modules overview (when systems track, no lesson focused) */}
           {trackId === "systems" && (
-            <p className="text-xs text-slate-400 rounded-lg border border-slate-800 bg-slate-950/50 px-3 py-2 leading-relaxed">
-              <span className="font-semibold text-slate-300">Prerequisite: </span>
-              Complete Foundations (module-0) first—or treat the opening Systems lesson
-              (constraint bounding) as a rigorous review of clarity, then continue into
-              delimiters and few-shot calibration.
-            </p>
+            <div className="space-y-2">
+              <p className="text-xs text-slate-400 rounded-lg border border-slate-800 bg-slate-950/50 px-3 py-2 leading-relaxed">
+                <span className="font-semibold text-slate-300">Prerequisite: </span>
+                Complete Foundations (module-0) first—or treat the opening Systems lesson
+                (constraint bounding) as a rigorous review of clarity, then continue into
+                delimiters and few-shot calibration.
+              </p>
+              <p className="text-xs text-slate-400 rounded-lg border border-indigo-500/20 bg-indigo-950/20 px-3 py-2 leading-relaxed">
+                <span className="font-semibold text-indigo-200">Skill focus — Few-shot: </span>
+                Module 1 lesson 3 covers label/format exemplars, order ablation, and retrieved
+                few-shot. Module 2 extends the same idea to Chain-of-Thought (reasoning) demos.
+              </p>
+            </div>
           )}
 
           {trackId === "systems" && !activeLessonId && (

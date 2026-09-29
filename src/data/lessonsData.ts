@@ -860,12 +860,17 @@ Question: Does TensorPulse-9 support water cooling and what is its maximum opera
         deepDive: [
           "Format Priming vs Instruction: Demonstrations convey syntax nuances (e.g. capitalization, enum values, rationale ordering) far more reliably than natural language instructions alone.",
           "Label Balance & Recency Bias: LLMs are prone to majority-label bias (favoring whichever label appears most in the prompt) and recency bias (favoring the format of the final exemplar). Maintain strict class balance across k-shot pairs.",
-          "Edge-Case Anchoring: Select exemplars that represent subtle, ambiguous classification boundaries rather than trivial obvious examples."
+          "Edge-Case Anchoring: Select exemplars that represent subtle, ambiguous classification boundaries rather than trivial obvious examples.",
+          "Order Ablation: Swap exemplar order while keeping labels balanced. If predictions flip on the same target, you are seeing position/recency effects—not true task understanding. Prefer identical templates and re-test after any reorder.",
+          "Retrieved (Dynamic) Few-Shot: In production, k exemplars are often fetched at runtime from a labeled store via embedding similarity to the live input (RAG-style). Static prompts teach the pattern; retrieval keeps demos relevant as categories grow.",
+          "Label Shots vs Reasoning Shots: This lesson calibrates output labels and format. Few-shot Chain-of-Thought (module-2) adds demonstration reasoning traces before the answer—process priming, not only class priming. Use both when the task needs structure and multi-step logic."
         ],
         keyRules: [
           "The Min-K Rule: 2 to 4 high-quality, balanced exemplars usually suffice. Adding >10 exemplars delivers diminishing returns while consuming context tokens.",
           "Exemplar Format Invariance: Ensure identical structural delimiters across all demonstration pairs.",
-          "Distribution Equilibrium: In classification tasks, provide equal numbers of positive, negative, and neutral examples."
+          "Distribution Equilibrium: In classification tasks, provide equal numbers of positive, negative, and neutral examples.",
+          "Order Sanity Check: After building k-shot prompts, swap the last two exemplars once and confirm the target still classifies stably.",
+          "Retrieve When Taxonomy Grows: If you maintain more than a handful of classes or domains, select the k nearest labeled exemplars per query instead of a fixed global list."
         ],
         concepts: [
           {
@@ -954,6 +959,98 @@ Category: `
               theoreticalRationale: "Balanced exemplars establish a format anchor without introducing label distribution skew."
             },
             xpReward: 40
+          },
+          {
+            id: "m1-l3-q2",
+            type: "quiz",
+            title: "Check Your Understanding: Order / Recency Sensitivity",
+            bloomLevel: "Analyzing",
+            question: "You keep one POSITIVE and one NEGATIVE exemplar (balanced) but move the NEGATIVE exemplar to the final position right before the target. What should you verify?",
+            options: [
+              {
+                id: "a",
+                text: "Nothing—order never matters if class counts are equal."
+              },
+              {
+                id: "b",
+                text: "Whether the model systematically favors the format or label of the last exemplar (recency bias) on ambiguous targets.",
+                code: "Order ablation under fixed label balance"
+              },
+              {
+                id: "c",
+                text: "Whether temperature must be set to 0."
+              },
+              {
+                id: "d",
+                text: "Whether you need at least 10 exemplars."
+              }
+            ],
+            correctAnswer: "b",
+            feedback: {
+              success: "Correct. Balance controls majority-label bias; order still triggers recency/position effects. Ablate order on purpose.",
+              failure: "Equal class counts are necessary but not sufficient—last-exemplar bias is a separate failure mode.",
+              theoreticalRationale: "In-context learning is sensitive to both frequency and position of demonstration tokens in the window."
+            },
+            xpReward: 25
+          },
+          {
+            id: "m1-l3-s2",
+            type: "sandbox-fix",
+            title: "Sandbox Challenge: Order Ablation",
+            bloomLevel: "Analyzing",
+            instructions: "Build a 2-shot prompt with one BUG and one FEATURE request exemplar, then explicitly show the SAME two exemplars in REVERSE order under a second heading. Keep labels balanced; demonstrate you can ablate order.",
+            taskGoal: "Include both orderings (Order A and Order B) with identical BUG/FEATURE labels and consistent Input/Classification formatting.",
+            brokenPrompt: "Classify: 'Dark mode would help night shifts.'",
+            initialPrompt: "Classify: 'Dark mode would help night shifts.'",
+            validationRule: {
+              requiredKeywords: ["Order A", "Order B", "BUG", "FEATURE", "Input:", "Classification:"],
+              minCharLength: 160
+            },
+            feedback: {
+              success: "Strong practice. You treated order as a first-class variable, not an accident of editing.",
+              failure: "Add Order A and Order B sections, each with one BUG and one FEATURE exemplar in opposite sequence.",
+              theoreticalRationale: "Order ablation is the practical test for recency bias when label balance is already fixed."
+            },
+            xpReward: 40
+          },
+          {
+            id: "m1-l3-c2",
+            type: "theory",
+            title: "Retrieved Few-Shot (Dynamic Exemplars)",
+            bloomLevel: "Understanding",
+            readMinutes: 4,
+            content: `Static few-shot prompts embed a fixed list of demos. Enterprise systems often use **retrieved few-shot**: embed the live user input, search a labeled exemplar store, and inject the k nearest neighbors into the prompt before generation.
+
+Why it matters:
+- Taxonomies grow (new product lines, new defect types) without rewriting one global prompt.
+- Demonstrations stay distributionally close to the query, improving boundary cases.
+- You still apply Min-K, format invariance, and label balance on the *retrieved* set.
+
+Pipeline sketch:
+1) Maintain (text, label) exemplars with embeddings.
+2) On query: retrieve top-k by similarity (optionally diversity re-rank).
+3) Render k demos in one template + the query.
+4) Log which exemplars were used for eval and drift detection.
+
+Static practice in this lesson builds the skill; retrieval is how that skill scales in production RAG + classification stacks.`,
+            keyTakeaway:
+              "Retrieval selects which k exemplars to show; few-shot technique still decides how you format, balance, and order them."
+          },
+          {
+            id: "m1-l3-c3",
+            type: "theory",
+            title: "Bridge: Label Few-Shot vs CoT Few-Shot",
+            bloomLevel: "Understanding",
+            readMinutes: 3,
+            content: `**Label / format few-shot** (this lesson): demos are input → short structured label or schema. Goal: lock syntax and class boundaries.
+
+**Chain-of-Thought few-shot** (Module 2 — Cognitive Reasoning): demos are input → intermediate reasoning steps → final answer. Goal: allocate reasoning tokens and stabilize multi-step logic.
+
+Use label few-shot when the hard part is *categorization or packing the output*. Use CoT few-shot when the hard part is *working through a procedure*. Many production prompts combine a little of both: a tiny reasoned demo, then a strict final line matching your schema.
+
+Next step in the Systems track: Module 2 lessons on Chain-of-Thought and decomposition.`,
+            keyTakeaway:
+              "Same ICL mechanism, different demo payload—labels calibrate outputs; CoT demos calibrate reasoning process."
           }
         ],
         badPrompt: {
@@ -1026,7 +1123,7 @@ Entities:`,
         bloomTaxonomyFocus: "Applying",
         xpReward: 50,
         conceptSummary:
-          "Transformers have fixed computational depth per output token (determined by layer count L and hidden dimension d). When asked to jump directly from input to answer on complex multi-step reasoning problems, the model is computationally starved. Chain-of-Thought (CoT) prompts force the model to generate intermediate reasoning tokens, effectively converting token generation into dynamic computational steps.",
+          "Transformers have fixed computational depth per output token (determined by layer count L and hidden dimension d). When asked to jump directly from input to answer on complex multi-step reasoning problems, the model is computationally starved. Chain-of-Thought (CoT) prompts force the model to generate intermediate reasoning tokens, effectively converting token generation into dynamic computational steps. Builds on few-shot label/format calibration (m1-l3); here demonstrations include reasoning traces, not only class tags.",
         deepDive: [
           "Theoretical Proof: Generating intermediate tokens allows the model to store partial computation states in the KV-cache, extending effective algorithmic depth.",
           "Zero-Shot CoT: Triggered by phrases like 'Let's think step by step' or 'Deconstruct this problem into atomic logical proofs'.",
