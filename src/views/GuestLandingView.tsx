@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BookOpen,
   Terminal,
@@ -20,6 +20,10 @@ import { TestimonialsCarousel } from "../components/TestimonialsCarousel";
 import { HeroGraphic } from "../components/HeroGraphic";
 import { InstructorsSection } from "../components/home/InstructorsSection";
 import { Button } from "../components/ui/Button";
+import {
+  GuestOnboarding,
+  hasCompletedGuestOnboarding,
+} from "../components/GuestOnboarding";
 
 const TRACKS = [
   {
@@ -105,6 +109,15 @@ export const GuestLandingView: React.FC = () => {
   const itemMotion = reduceMotion ? staggerItemReduced : staggerItem;
   const { setActiveTab, setActiveLessonId, openAuthModal } = useApp();
   const [showDiagnostic, setShowDiagnostic] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // First-visit guest onboarding (once per browser)
+  useEffect(() => {
+    if (!hasCompletedGuestOnboarding()) {
+      const t = window.setTimeout(() => setShowOnboarding(true), 400);
+      return () => window.clearTimeout(t);
+    }
+  }, []);
 
   const openLearningPath = (tab: "curriculum" | "foundations", lessonId?: string) => {
     if (lessonId) setActiveLessonId(lessonId);
@@ -139,6 +152,14 @@ export const GuestLandingView: React.FC = () => {
             className="text-indigo-300 font-semibold hover:text-indigo-200 underline-offset-2 hover:underline cursor-pointer"
           >
             Sign in to save progress
+          </button>
+          {" · "}
+          <button
+            type="button"
+            onClick={() => setShowOnboarding(true)}
+            className="text-slate-400 hover:text-slate-200 underline-offset-2 hover:underline cursor-pointer"
+          >
+            How it works
           </button>
         </p>
       </div>
@@ -396,6 +417,8 @@ export const GuestLandingView: React.FC = () => {
           </p>
         </section>
       </div>
+
+      <GuestOnboarding open={showOnboarding} onClose={() => setShowOnboarding(false)} />
 
       {showDiagnostic && (
         <motion.div
