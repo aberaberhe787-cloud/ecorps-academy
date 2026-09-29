@@ -18,7 +18,7 @@ export const PrimaryNavigation: React.FC = () => {
 
   const publicItems: { id: NavTab; label: string; icon: React.FC<{ className?: string }> }[] = [
     { id: "home", label: t.nav.home, icon: Compass },
-    { id: "curriculum", label: t.nav.curriculum, icon: BookOpen },
+    { id: "curriculum", label: "Learning Hub", icon: BookOpen },
     { id: "foundations", label: "Foundations", icon: Target },
     { id: "playground", label: t.nav.sandbox, icon: Terminal },
     { id: "patterns", label: t.nav.patterns, icon: Grid3X3 },

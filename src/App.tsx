@@ -12,12 +12,11 @@ import { ThemeProvider } from "./components/ThemeProvider";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { HomeView } from "./views/HomeView";
-import { CurriculumView } from "./views/CurriculumView";
+import { LearningHubView } from "./views/LearningHubView";
 import { PlaygroundView } from "./views/PlaygroundView";
 import { PatternLibraryView } from "./views/PatternLibraryView";
 import { ResourcesView } from "./views/ResourcesView";
 import { UserProfileView } from "./views/UserProfileView";
-import { PromptEngineeringPath } from "./views/PromptEngineeringPath";
 import { AssessmentView } from "./views/AssessmentView";
 import { LoginPage } from "./components/LoginPage";
 import { LoadingOverlay } from "./components/LoadingOverlay";
@@ -62,8 +61,8 @@ const MainContent: React.FC = () => {
           className="w-full max-w-full min-w-0 flex-1 flex flex-col"
         >
           {activeTab === "home" && <HomeView />}
-          {activeTab === "curriculum" && <CurriculumView />}
-          {activeTab === "foundations" && <PromptEngineeringPath />}
+          {(activeTab === "curriculum" || activeTab === "foundations") && <LearningHubView />}
+          
           {activeTab === "playground" && <PlaygroundView />}
           {activeTab === "patterns" && <PatternLibraryView />}
           {activeTab === "resources" && <ResourcesView />}
@@ -85,7 +84,7 @@ const AppShell: React.FC = () => {
   const reduceMotion = useReducedMotion();
   const panelMotion = reduceMotion ? modalPanelReduced : modalPanel;
   const hideGlobalChrome =
-    isDistractionFreeMode && activeTab === "curriculum" && !!activeLessonId;
+    isDistractionFreeMode && (activeTab === "curriculum" || activeTab === "foundations") && !!activeLessonId;
 
   return (
     <div className="flex min-h-dvh flex-col w-full max-w-full overflow-x-hidden bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-indigo-600 selection:text-white font-sans antialiased supports-[padding:max(0px)]:pb-0">
