@@ -1,69 +1,58 @@
+import React from "react";
+import { Flame, LogOut } from "lucide-react";
+import { useApp } from "../context/AppContext";
+
 /**
- * Optional streak/account strip. Not mounted in AppShell — Navbar + Profile own chrome.
- * Kept for reuse (e.g. embedding streak chip). Avoid /login hard redirects in SPA shell.
+ * Compact dashboard chrome: streak + logout.
+ * Mounted on the profile (Academic Dashboard) surface only.
  */
-import React, { useEffect } from 'react';
-import { Flame } from 'lucide-react';
-import { auth, onAuthStateChanged, signOut } from '../lib/firebaseClient';
-import { useApp } from '../context/AppContext';
-
-const redirectToLogin = () => {
-  // SPA: full reload to origin root; App auth gate shows login when signed out
-  if (typeof window !== 'undefined') {
-    window.location.href = '/';
-  }
-};
-
 export const DashboardHeader: React.FC = () => {
-  const { userProgress, setActiveTab } = useApp();
+  const { userProgress, setActiveTab, logout, user } = useApp();
 
-  useEffect(() => {
-    // Listen for auth state changes and redirect to /login when signed out
-    const unsub = onAuthStateChanged(auth, (user) => {
-      if (!user) redirectToLogin();
-    });
-    return () => unsub();
-  }, []);
+  if (!user) return null;
 
   const handleLogout = async () => {
     try {
-      await signOut();
+      await logout();
     } catch (e) {
-      console.error('signOut failed', e);
+      console.error("logout failed", e);
     } finally {
-      redirectToLogin();
+      setActiveTab("home");
     }
   };
 
   return (
-    <header className="w-full bg-transparent overflow-hidden" id="dashboard-header">
-      <div className="w-full max-w-7xl 2xl:max-w-[1536px] mx-auto px-3 sm:px-6 lg:px-8 min-w-0">
-        <div className="relative min-h-[48px] py-1.5 flex flex-wrap items-center justify-between gap-2 w-full min-w-0">
-          {/* Daily Study Streak Counter */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap min-w-0">
-            {userProgress && (
-              <div
-                id="dashboard-header-streak-counter"
-                title={`${userProgress.streakDays} Consecutive Days Study Streak!`}
-                onClick={() => setActiveTab('profile')}
-                className="flex items-center gap-1.5 bg-orange-500/10 border border-orange-500/30 hover:border-orange-500/50 hover:bg-orange-500/20 rounded-full px-2.5 sm:px-3 py-1 text-xs font-bold text-orange-400 cursor-pointer transition select-none shadow-sm shrink-0"
-              >
-                <Flame className="h-4 w-4 fill-orange-500 text-orange-400 animate-pulse shrink-0" />
-                <span className="font-mono text-xs">{userProgress.streakDays} Day Streak</span>
-              </div>
-            )}
-          </div>
-
-          <div className="py-1 flex items-center shrink-0">
+    <header
+      id="dashboard-header"
+      className="w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-sm"
+    >
+      <div className="page-shell page-shell--medium py-2 flex flex-wrap items-center justify-between gap-2 min-w-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-[11px] font-mono uppercase tracking-wider text-slate-500 shrink-0">
+            Dashboard
+          </span>
+          {userProgress && (
             <button
-              onClick={handleLogout}
-              className="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs sm:text-sm font-semibold bg-rose-600 hover:bg-rose-500 text-white transition-colors cursor-pointer shadow-sm active:scale-95"
-              aria-label="Log out"
+              type="button"
+              id="dashboard-header-streak-counter"
+              title={`${userProgress.streakDays} day study streak`}
+              onClick={() => setActiveTab("profile")}
+              className="flex items-center gap-1.5 bg-orange-500/10 border border-orange-500/30 hover:border-orange-500/50 hover:bg-orange-500/20 rounded-full px-2.5 py-1 text-xs font-bold text-orange-400 cursor-pointer transition select-none shadow-sm shrink-0"
             >
-              Log out
+              <Flame className="h-3.5 w-3.5 fill-orange-500 text-orange-400 shrink-0" aria-hidden="true" />
+              <span className="font-mono">{userProgress.streakDays}d streak</span>
             </button>
-          </div>
+          )}
         </div>
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition-colors cursor-pointer"
+          aria-label="Log out"
+        >
+          <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
+          Log out
+        </button>
       </div>
     </header>
   );

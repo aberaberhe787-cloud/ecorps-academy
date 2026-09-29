@@ -27,6 +27,19 @@ export type CheckpointStatus = "locked" | "available" | "passed";
 export type QuizInteractionState = "idle" | "selected" | "submitted" | "retrying";
 
 export type NavTab = "home" | "curriculum" | "foundations" | "playground" | "patterns" | "resources" | "certification" | "profile";
+
+
+/** XP required per learner level — single source of truth across the app. */
+export const XP_PER_LEVEL = 250;
+
+export function getLearnerLevel(xp: number): number {
+  return Math.floor((xp || 0) / XP_PER_LEVEL) + 1;
+}
+
+export function getLevelProgressPercent(xp: number): number {
+  const within = (xp || 0) % XP_PER_LEVEL;
+  return Math.min(100, Math.round((within / XP_PER_LEVEL) * 100));
+}
 /** CTF is a Playground sub-tab only — not a top-level NavTab. */
 
 export type BloomsTaxonomyLevel =

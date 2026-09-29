@@ -37,15 +37,7 @@ import { LearningOperationsPanel } from '../components/profile/LearningOperation
 import { FOUNDATION_LESSONS } from './PromptEngineeringPath';
 import { curriculumModules } from '../data/lessonsData';
 import { LESSON_COMPETENCY_REGISTRY } from '../lib/competencyModel';
-import { NavTab, levelMap } from '../types';
-
-const GLOBAL_COMPETENCY_AVERAGES: Record<string, number> = {
-  'foundations-01': 2.5,
-  'foundations-02': 2.2,
-  'foundations-03': 2.8,
-  'foundations-04': 2.1,
-  'foundations-05': 2.6,
-};
+import { NavTab, levelMap, getLearnerLevel, getLevelProgressPercent } from '../types';
 
 export interface LearningPath {
   id: string;
@@ -82,7 +74,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
   const foundationsTrack: LearningPath = {
     id: 'prompt-engineering-foundations',
     title: 'Prompt Engineering Foundations',
-    description: '5 Core Prompting Principles, Delimitation & Latent Steering',
+    description: '5 foundation lessons: clarity, roles, constraints, iteration, context',
     targetTab: 'foundations',
     lessons: FOUNDATION_LESSONS.map((lesson) => ({
       id: lesson.id,
@@ -94,7 +86,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
   const comprehensiveCurriculumTrack: LearningPath = {
     id: 'advanced-ai-systems',
     title: 'Advanced Prompt Engineering & AI Systems',
-    description: '10 In-Depth Modules across In-Context Reasoning & Red-Teaming',
+    description: '4 curriculum modules: foundations through structured outputs & systems',
     targetTab: 'curriculum',
     lessons: curriculumModules.flatMap((module) => module.lessons).map((lesson) => ({
       id: lesson.id,
@@ -125,7 +117,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
 
   const userName = auth.currentUser?.displayName || auth.currentUser?.email?.split('@')[0] || 'Ecorp Scholar';
   const photoUrl = auth.currentUser?.photoURL;
-  const level = Math.floor(userProgress.xp / 500) + 1;
+  const level = getLearnerLevel(userProgress.xp);
 
   const allLessons = [...FOUNDATION_LESSONS, ...curriculumModules.flatMap(m => m.lessons)];
   const weakestCompetency = [...competencyStates].sort((a, b) => levelMap[a.level] - levelMap[b.level])[0];
@@ -208,8 +200,8 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
     document.setFontSize(11);
     document.text(
       isFoundations 
-        ? '5 Foundational In-Context Engineering Modules · Context Boundary Calibration · Latent Steering'
-        : '10 In-Depth Interactive Modules · 5 Graded Missions · Red-Teaming CTF Lab Validation',
+        ? '5 foundation lessons · Core prompt clarity, roles, constraints, and context'
+        : '4 curriculum modules · Practice labs and assessment available in the platform',
       pageWidth / 2,
       138,
       { align: 'center' }
@@ -225,10 +217,10 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
     // Signatures
     document.setTextColor(248, 250, 252);
     document.setFontSize(12);
-    document.text('Ecorp Academy Academic Board', pageWidth - 85, 175);
+    document.text('ECORP Academy', pageWidth - 85, 175);
     document.setTextColor(148, 163, 184);
     document.setFontSize(10);
-    document.text('Authorized Verification Authority', pageWidth - 85, 183);
+    document.text('Track completion record', pageWidth - 85, 183);
 
     document.save(`Ecorp_Academy_${track.id}_Certificate.pdf`);
   };
@@ -237,13 +229,13 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
     <div className="page-shell page-shell--medium app-view space-y-3.5 sm:space-y-8 py-2.5 sm:py-6 animate-in fade-in duration-200">
       {/* Learner Profile Header */}
       <div className="flex flex-col items-center gap-3 sm:gap-6 rounded-2xl border border-slate-800 bg-slate-900/90 p-3.5 sm:p-6 md:flex-row shadow-xl min-w-0">
-        <div className="flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-3xl sm:text-4xl text-white font-bold shadow-lg shadow-blue-900/30 shrink-0">
+        <div className="flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-3xl sm:text-4xl text-white font-bold shadow-lg shadow-indigo-900/30 shrink-0">
           {photoUrl ? <img src={photoUrl} alt="" className="h-full w-full object-cover" /> : userName[0]}
         </div>
         <div className="flex-1 text-center md:text-left space-y-1 min-w-0 w-full">
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
             <h1 className="text-xl sm:text-2xl font-black text-white truncate max-w-full">{userName}</h1>
-            <span className="rounded-full bg-blue-950/80 border border-blue-800 px-3 py-0.5 text-xs font-semibold text-blue-300 font-mono">
+            <span className="rounded-full bg-indigo-950/80 border border-indigo-800 px-3 py-0.5 text-xs font-semibold text-indigo-300 font-mono">
               Level {level} Scholar
             </span>
           </div>
@@ -263,7 +255,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
           </div>
         </div>
         <div className="shrink-0">
-          <ProgressRing progress={Math.min(100, (userProgress.xp % 500) / 5)} label="Level XP" />
+          <ProgressRing progress={getLevelProgressPercent(userProgress.xp)} label="Level XP" />
         </div>
       </div>
 
@@ -281,16 +273,43 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
       {/* Unified Learning & Competency Architecture (P2 Competency Progress Section) */}
       <CompetencyPortfolio competencyStates={competencyStates} />
 
+      {/* Next action + credential types */}
+      <section className="rounded-2xl border border-indigo-500/20 bg-indigo-950/20 p-4 sm:p-5 space-y-3">
+        <h2 className="text-sm font-bold text-white">What to do next</h2>
+        <p className="text-xs text-slate-400 leading-relaxed">
+          Continue an open track below, or use <span className="text-indigo-300 font-semibold">Assess</span> in the
+          main nav for the platform skill evaluation. Track certificates on this page mark
+          <span className="text-slate-300"> lesson-path completion</span>; assessment credentials are separate.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab(currentTrack.targetTab)}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-3 py-2 text-xs font-bold text-white transition-colors cursor-pointer"
+          >
+            Continue current track
+            <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('certification')}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900 hover:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-200 transition-colors cursor-pointer"
+          >
+            Open assessment
+          </button>
+        </div>
+      </section>
+
       {/* Multi-Track Overview Cards */}
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
           <div>
             <h2 className="text-lg font-black text-white flex items-center gap-2">
-              <GraduationCap className="h-5 w-5 text-blue-400" />
+              <GraduationCap className="h-5 w-5 text-indigo-400" />
               Academic Credential Tracks
             </h2>
             <p className="text-xs text-slate-400">
-              Select a learning track to inspect module mastery and claim verified certificates.
+              Select a learning track to inspect module mastery and download a track completion certificate.
             </p>
           </div>
           <span className="text-xs font-mono font-bold text-slate-400 bg-slate-800/60 px-3 py-1 rounded-lg border border-slate-700">
@@ -318,7 +337,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
               >
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="space-y-1">
-                    <span className="text-xs sm:text-xs font-mono uppercase tracking-widest font-bold text-blue-400">
+                    <span className="text-xs sm:text-xs font-mono uppercase tracking-widest font-bold text-indigo-400">
                       Track {track.id === 'prompt-engineering-foundations' ? '01' : '02'}
                     </span>
                     <h3 className="text-base font-bold text-white">{track.title}</h3>
@@ -338,12 +357,12 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
                 <div className="space-y-2 mt-4">
                   <div className="flex justify-between text-xs font-medium">
                     <span className="text-slate-400">Completion</span>
-                    <span className={pct === 100 ? 'text-emerald-400 font-bold' : 'text-blue-300'}>{pct}%</span>
+                    <span className={pct === 100 ? 'text-emerald-400 font-bold' : 'text-indigo-300'}>{pct}%</span>
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800">
                     <div
                       className={`h-full transition-all duration-500 ${
-                        pct === 100 ? 'bg-emerald-500' : 'bg-blue-500'
+                        pct === 100 ? 'bg-emerald-500' : 'bg-indigo-500'
                       }`}
                       style={{ width: `${pct}%` }}
                     />
@@ -360,7 +379,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold uppercase text-blue-400">Active Syllabus</span>
+              <span className="text-xs font-mono font-bold uppercase text-indigo-400">Active Syllabus</span>
               <span className="text-xs text-slate-500">•</span>
               <span className="text-xs text-slate-400">{completedCount} of {totalCount} Modules Completed</span>
             </div>
@@ -370,7 +389,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
           <div className="flex items-center gap-3">
             <button
               onClick={() => setActiveTab(currentTrack.targetTab)}
-              className="flex items-center gap-1.5 text-xs font-bold text-blue-400 hover:text-blue-300 bg-blue-950/60 border border-blue-800/80 px-3.5 py-2 rounded-xl transition-colors"
+              className="flex items-center gap-1.5 text-xs font-bold text-indigo-400 hover:text-indigo-300 bg-indigo-950/60 border border-indigo-800/80 px-3.5 py-2 rounded-xl transition-colors"
             >
               <span>Go to Track Lessons</span>
               <ArrowRight className="h-3.5 w-3.5" />
@@ -415,13 +434,13 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Award className={`h-4 w-4 ${isCurrentTrackComplete ? 'text-amber-400' : 'text-slate-500'}`} />
               {isCurrentTrackComplete
-                ? `Verified ${currentTrack.title} Certificate Unlocked!`
-                : `Complete all ${totalCount} modules to unlock certificate`}
+                ? `${currentTrack.title} — track complete`
+                : `Complete all ${totalCount} lessons in this track to unlock the certificate`}
             </h3>
             <p className="text-xs text-slate-400">
               {isCurrentTrackComplete
-                ? 'Your credential is authenticated and ready to export as an official PDF.'
-                : `${totalCount - completedCount} module${totalCount - completedCount === 1 ? '' : 's'} left to unlock this verified credential.`}
+                ? 'Download a PDF record of this track completion (not a third-party verified credential).'
+                : `${totalCount - completedCount} lesson${totalCount - completedCount === 1 ? '' : 's'} left to unlock this track certificate.`}
             </p>
           </div>
 
@@ -433,13 +452,13 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-600 px-5 py-3 font-bold text-xs sm:text-sm text-slate-950 shadow-lg shadow-amber-950/50 hover:brightness-110 active:scale-95 transition-all"
               >
                 <Download className="h-4 w-4" />
-                <span>Download Verified Certificate (PDF)</span>
+                <span>Download track certificate (PDF)</span>
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => setActiveTab(currentTrack.targetTab)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 px-5 py-3 font-bold text-xs sm:text-sm text-white shadow-lg transition-all"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 px-5 py-3 font-bold text-xs sm:text-sm text-white shadow-lg transition-all"
               >
                 <span>Continue Learning</span>
                 <ArrowRight className="h-4 w-4" />
@@ -496,7 +515,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
                 <ShieldCheck className={`h-4 w-4 ${foundationsComplete ? 'text-emerald-400' : 'text-slate-500'}`} />
                 <div>
                   <div className="font-bold text-white">Foundations of Prompt Engineering</div>
-                  <div className="text-xs text-slate-400">5 Foundational Modules</div>
+                  <div className="text-xs text-slate-400">5 foundation lessons</div>
                 </div>
               </div>
               <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${
@@ -504,7 +523,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
                   ? 'text-emerald-300 bg-emerald-950 border border-emerald-800' 
                   : 'text-slate-400 bg-slate-800'
               }`}>
-                {foundationsComplete ? 'Certified' : `${foundationsTrack.lessons.filter(l=>l.completed).length}/5`}
+                {foundationsComplete ? 'Complete' : `${foundationsTrack.lessons.filter(l=>l.completed).length}/5`}
               </span>
             </div>
 
@@ -513,7 +532,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
                 <ShieldCheck className={`h-4 w-4 ${curriculumComplete ? 'text-emerald-400' : 'text-slate-500'}`} />
                 <div>
                   <div className="font-bold text-white">Advanced AI Systems & Prompting</div>
-                  <div className="text-xs text-slate-400">10 Comprehensive Modules</div>
+                  <div className="text-xs text-slate-400">4 curriculum modules</div>
                 </div>
               </div>
               <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${
@@ -521,7 +540,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
                   ? 'text-emerald-300 bg-emerald-950 border border-emerald-800' 
                   : 'text-slate-400 bg-slate-800'
               }`}>
-                {curriculumComplete ? 'Certified' : `${comprehensiveCurriculumTrack.lessons.filter(l=>l.completed).length}/10`}
+                {curriculumComplete ? 'Complete' : `${comprehensiveCurriculumTrack.lessons.filter(l=>l.completed).length}/${comprehensiveCurriculumTrack.lessons.length}`}
               </span>
             </div>
           </div>
@@ -530,16 +549,16 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 space-y-6 shadow-xl">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-blue-400" />
+              <BookOpen className="h-5 w-5 text-indigo-400" />
               Recommended Next Lesson
             </h2>
             {recommendedLesson ? (
-              <div className="bg-slate-950 p-4 rounded-xl border border-blue-900/50 space-y-2">
-                <h3 className="text-blue-300 font-bold">{recommendedLesson.title}</h3>
+              <div className="bg-slate-950 p-4 rounded-xl border border-indigo-900/50 space-y-2">
+                <h3 className="text-indigo-300 font-bold">{recommendedLesson.title}</h3>
                 <p className="text-sm text-slate-400">Targeting: {weakestCompetency?.competency.title}</p>
                 <button
                   onClick={() => setActiveTab('curriculum')}
-                  className="mt-2 text-sm font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                  className="mt-2 text-sm font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1"
                 >
                   Start Lesson <ArrowRight className="h-4 w-4" />
                 </button>
@@ -567,14 +586,13 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
             <LearningTimeline allLessons={allLessons} completedLessonIds={userProgress.completedLessons} />
           </div>
 
-          <CompetencyPortfolio competencyStates={competencyStates} />
         </section>
 
         {/* Unified Competency Architecture Portfolio */}
         <section className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 space-y-4 shadow-xl">
           <div className="flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-base font-bold text-white">
-              <Sparkles className="text-blue-400 h-5 w-5" /> 
+              <Sparkles className="text-indigo-400 h-5 w-5" /> 
               <span>Competency Radar</span>
             </h2>
             <label className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
@@ -602,7 +620,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
                     onClick={() => setHighlightedCompetencyId(highlightedCompetencyId === state.competency.id ? null : state.competency.id)}
                     className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
                       highlightedCompetencyId === state.competency.id 
-                        ? 'bg-blue-600 text-white' 
+                        ? 'bg-indigo-600 text-white' 
                         : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
                     }`}
                   >
@@ -617,14 +635,14 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
         </section>
 
         <section>
-          <CompetencyTrendChart />
+          <CompetencyTrendChart userProgress={userProgress} competencyStates={competencyStates} />
         </section>
 
       {/* Saved Code Snippets & Custom Prompts Library */}
         <section className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 space-y-4 shadow-xl">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <h2 className="flex items-center gap-2 text-base font-bold text-white">
-              <Code2 className="text-blue-400 h-5 w-5" />
+              <Code2 className="text-indigo-400 h-5 w-5" />
               <span>Saved Code Snippets & Library</span>
             </h2>
             <div className="flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-950 p-1 text-xs">
@@ -632,7 +650,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
                 onClick={() => setActiveSavedTab('snippets')}
                 className={`px-3 py-1 rounded-md font-semibold transition-all ${
                   activeSavedTab === 'snippets'
-                    ? 'bg-blue-600 text-white shadow-sm'
+                    ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -642,7 +660,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
                 onClick={() => setActiveSavedTab('prompts')}
                 className={`px-3 py-1 rounded-md font-semibold transition-all ${
                   activeSavedTab === 'prompts'
-                    ? 'bg-blue-600 text-white shadow-sm'
+                    ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -658,14 +676,14 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
                   <Code2 className="h-8 w-8 text-slate-600 mb-2" />
                   <p className="text-sm font-medium text-slate-400">No saved SDK code snippets yet</p>
                   <p className="text-xs text-slate-500 mt-1 max-w-sm">
-                    Open the Playground and click <span className="text-blue-400 font-semibold">"Save Snippet"</span> to save Python, TypeScript, cURL, or JSON code directly to your account.
+                    Open the Playground and click <span className="text-indigo-400 font-semibold">"Save Snippet"</span> to save Python, TypeScript, cURL, or JSON code directly to your account.
                   </p>
                   <button
                     onClick={() => {
                       setActiveTab('playground');
                       setPlaygroundSubTab('sandbox');
                     }}
-                    className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-colors"
+                    className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors"
                   >
                     Go to Playground <ArrowRight className="h-3.5 w-3.5" />
                   </button>
@@ -682,7 +700,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
                           <span className="font-bold text-white text-xs truncate max-w-[200px]">
                             {snippet.title}
                           </span>
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-950/80 border border-blue-800 text-blue-300 uppercase font-semibold">
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-950/80 border border-indigo-800 text-indigo-300 uppercase font-semibold">
                             {snippet.language}
                           </span>
                         </div>
@@ -746,7 +764,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
                               setActiveTab('playground');
                               setPlaygroundSubTab('sandbox');
                             }}
-                            className="flex items-center gap-1 px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-semibold transition-colors"
+                            className="flex items-center gap-1 px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-semibold transition-colors"
                             title="Open in Playground Sandbox"
                           >
                             <span>Open</span>
@@ -826,7 +844,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
                             setActiveTab('playground');
                             setPlaygroundSubTab('sandbox');
                           }}
-                          className="flex items-center gap-1 px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-semibold transition-colors"
+                          className="flex items-center gap-1 px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-semibold transition-colors"
                         >
                           <span>Open</span>
                           <ExternalLink className="h-3 w-3" />
