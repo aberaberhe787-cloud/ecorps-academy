@@ -223,8 +223,17 @@ export const LearningHubView: React.FC = () => {
           </div>
 
           {/* Systems modules overview (when systems track, no lesson focused) */}
+          {trackId === "systems" && (
+            <p className="text-xs text-slate-400 rounded-lg border border-slate-800 bg-slate-950/50 px-3 py-2 leading-relaxed">
+              <span className="font-semibold text-slate-300">Prerequisite: </span>
+              Complete Foundations (module-0) first—or treat the opening Systems lesson
+              (constraint bounding) as a rigorous review of clarity, then continue into
+              delimiters and few-shot calibration.
+            </p>
+          )}
+
           {trackId === "systems" && !activeLessonId && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
               {systemsModules.map((mod, index) => {
                 const done = mod.lessons.filter((l) =>
                   userProgress.completedLessons.includes(l.id)

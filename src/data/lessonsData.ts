@@ -476,29 +476,29 @@ Question: What is the refund policy for annual enterprise plans?`
   {
     id: "module-1",
     code: "PROMPT-101",
-    title: "Module 1: Foundations of In-Context Mechanics",
+    title: "Module 1: In-Context Mechanics",
     level: "Core Mechanics",
-    academicTrack: "Attention Calibration & Latent Steering",
+    academicTrack: "Attention Calibration & Context Control",
     description:
-      "Master the foundational mathematical and empirical pillars of prompt architecture: token probability conditioning, context boundary delimiters, persona latent steering, and few-shot calibration.",
-    badge: "Core Foundations",
+      "Deepen prompt control beyond Foundations: constrain output entropy, isolate instructions from data with delimiters (injection defense), and calibrate behavior with balanced few-shot exemplars. Role/persona basics remain in Foundations (foundation-role); this module focuses on in-context boundaries and demonstration design.",
+    badge: "Core Mechanics",
     iconName: "Compass",
     estimatedTotalHours: 1.5,
     lessons: [
       {
         id: "m1-l1",
         moduleId: "module-1",
-        moduleTitle: "Foundations of In-Context Mechanics",
-        title: "Clarity, Specificity & Constraint Bounding",
-        subtitle: "Eliminating token probability entropy through explicit boundary calibration",
+        moduleTitle: "In-Context Mechanics",
+        title: "Constraint Bounding & Entropy (Advanced Clarity)",
+        subtitle: "Treat Foundations clarity as given—now bound format, scope, and token budget to reduce output variance",
         objective:
-          "Formulate unambiguous prompt instructions that eliminate latent variance by mathematically constraining output format, domain scope, and token budget.",
+          "Build on Foundations clarity skills: add hard constraints (format, scope, exclusions, length) so next-token probability mass concentrates on usable, low-variance outputs.",
         estimatedMinutes: 8,
         difficulty: "Beginner",
         bloomTaxonomyFocus: "Applying",
         xpReward: 50,
         conceptSummary:
-          "Large Language Models operate via causal autoregressive next-token prediction P(w_t | w_<t). Vague prompts spread the probability distribution across diverse latent paths, yielding generic and ungrounded outputs. Bounding instructions with unambiguous verbs, specific audience personas, and strict negative constraints concentrates probability mass on deterministic, high-fidelity completions.",
+          "After Foundations clarity (task, audience, success criteria), the next failure mode is unbounded variance: models still wander on format, length, and scope. Causal next-token prediction P(w_t | w_<t) spreads probability mass when constraints are soft. Hard bounds—directive verbs, negative constraints, and explicit budgets—concentrate mass on deterministic, high-fidelity completions.",
         deepDive: [
           "Entropy Minimization: High-temperature or underspecified prompts create broad probability distributions. Explicit constraints reduce semantic entropy.",
           "Directive Verbs: Replace subjective verbs ('talk about', 'explain') with deterministic operational verbs ('synthesize into 3 bullets', 'contrast in a 2-column markdown table').",
@@ -672,13 +672,13 @@ Constraints:
       {
         id: "m1-l2",
         moduleId: "module-1",
-        moduleTitle: "Foundations of In-Context Mechanics",
+        moduleTitle: "In-Context Mechanics",
         title: "Delimiter Architecture & Prompt Injection Defense",
         subtitle: "Isolating instruction channels from data payloads using strict semantic encapsulation",
         objective:
           "Design multi-tier delimiter boundaries using XML tags and markdown blocks to prevent context bleeding, data exfiltration, and prompt injection attacks.",
         estimatedMinutes: 10,
-        difficulty: "Beginner",
+        difficulty: "Intermediate",
         bloomTaxonomyFocus: "Analyzing",
         xpReward: 50,
         conceptSummary:
@@ -686,7 +686,8 @@ Constraints:
         deepDive: [
           "The Instruction-Data Confusion Problem: Transformers do not naturally distinguish between meta-instructions and raw input data unless separated by structural markers.",
           "XML Tag Isolation: Modern frontier models (Gemini, Claude) are heavily pre-trained to recognize XML boundary semantics as hierarchical enclosures.",
-          "Negative Fallback Invariants: Mandatory instruction stipulating: 'If the answer cannot be deduced strictly from within the <context> tags, output: [INSUFFICIENT_CONTEXT]'."
+          "Negative Fallback Invariants: Mandatory instruction stipulating: 'If the answer cannot be deduced strictly from within the <context> tags, output: [INSUFFICIENT_CONTEXT]'.",
+          "Role at the boundary: Keep durable persona/role in the system or outer instruction channel; put untrusted user or document text inside delimited data tags so role cannot be overwritten by payload content. Foundations (foundation-role) teaches role design; here you enforce where role lives in the token stream.",
         ],
         keyRules: [
           "The Tag Closure Rule: Always instruct the model to treat everything inside <untrusted_input> as raw string literals, never executable directives.",
@@ -845,7 +846,7 @@ Question: Does TensorPulse-9 support water cooling and what is its maximum opera
       {
         id: "m1-l3",
         moduleId: "module-1",
-        moduleTitle: "Foundations of In-Context Mechanics",
+        moduleTitle: "In-Context Mechanics",
         title: "Few-Shot In-Context Exemplar Calibration",
         subtitle: "Steering token conditional probability through curated k-shot demonstration pairs",
         objective:
