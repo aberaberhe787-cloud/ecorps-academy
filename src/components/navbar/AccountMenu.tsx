@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { User, ArrowRight, KeyRound, LogOut, CheckCircle2 } from "lucide-react";
 import { useApp } from "../../context/AppContext";
+import { getLearnerLevel } from "../../types";
 import { auth } from "../../lib/firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
 
