@@ -16,14 +16,14 @@ export const GuestTracks: React.FC<GuestTracksProps> = ({ onOpenTrack }) => {
   return (
     <section className="space-y-6">
       <div className="text-center space-y-2 px-1">
-        <h2 className="text-2xl sm:text-3xl font-bold text-white">Outcome-led tracks</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold text-white">Learning Hub tracks</h2>
         <p className="text-sm text-slate-400 max-w-2xl mx-auto">
-          Open any track as a guest. Sign in later to keep completion and XP.
+          Same two tracks as the Learning Hub. Sign in later to keep completion and XP.
         </p>
       </div>
 
       <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6"
         variants={staggerContainer}
         initial="initial"
         whileInView="animate"

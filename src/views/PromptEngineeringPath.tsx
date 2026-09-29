@@ -95,7 +95,7 @@ export const PromptEngineeringPath: React.FC = () => {
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono">
                   <Award className="h-4 w-4" /> Capstone Pathway Unlocked
                 </div>
-                <h3 className="text-lg font-bold text-white">All 5 Foundation Modules Mastered!</h3>
+                <h3 className="text-lg font-bold text-white">All 5 foundation lessons completed!</h3>
                 <p className="text-xs text-slate-300">
                   You are now ready to take the official Capstone Assessment evaluation to verify your prompt engineering credential.
                 </p>

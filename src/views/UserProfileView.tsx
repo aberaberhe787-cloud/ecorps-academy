@@ -85,16 +85,20 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
     })),
   };
 
+  // Systems track = module-1..3 only (module-0 is Foundations track exclusively)
   const comprehensiveCurriculumTrack: LearningPath = {
     id: 'advanced-ai-systems',
-    title: 'Advanced Prompt Engineering & AI Systems',
-    description: '4 curriculum modules: foundations through structured outputs & systems',
+    title: 'AI Systems & Applied Prompting',
+    description: '3 modules: in-context mechanics, reasoning, and structured outputs',
     targetTab: 'curriculum',
-    lessons: curriculumModules.flatMap((module) => module.lessons).map((lesson) => ({
-      id: lesson.id,
-      title: lesson.title,
-      completed: userProgress.completedLessons.includes(lesson.id),
-    })),
+    lessons: curriculumModules
+      .filter((module) => module.id !== 'module-0')
+      .flatMap((module) => module.lessons)
+      .map((lesson) => ({
+        id: lesson.id,
+        title: lesson.title,
+        completed: userProgress.completedLessons.includes(lesson.id),
+      })),
   };
 
   const availableTracks = [foundationsTrack, comprehensiveCurriculumTrack];
@@ -323,7 +327,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
             </p>
           </div>
           <span className="text-xs font-mono font-bold text-slate-400 bg-slate-800/60 px-3 py-1 rounded-lg border border-slate-700">
-            Total Modules Mastered: {totalCompletedLessonsAllTracks} / {totalLessonsAllTracks}
+            Lessons completed: {totalCompletedLessonsAllTracks} / {totalLessonsAllTracks}
           </span>
         </div>
 
@@ -391,7 +395,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ path: customPa
             <div className="flex items-center gap-2">
               <span className="text-xs font-mono font-bold uppercase text-indigo-400">Active Syllabus</span>
               <span className="text-xs text-slate-500">•</span>
-              <span className="text-xs text-slate-400">{completedCount} of {totalCount} Modules Completed</span>
+              <span className="text-xs text-slate-400">{completedCount} of {totalCount} lessons completed</span>
             </div>
             <h2 className="text-xl font-bold text-white mt-1">{currentTrack.title}</h2>
           </div>

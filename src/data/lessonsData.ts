@@ -477,7 +477,7 @@ Question: What is the refund policy for annual enterprise plans?`
     id: "module-1",
     code: "PROMPT-101",
     title: "Module 1: Foundations of In-Context Mechanics",
-    level: "Foundations",
+    level: "Core Mechanics",
     academicTrack: "Attention Calibration & Latent Steering",
     description:
       "Master the foundational mathematical and empirical pillars of prompt architecture: token probability conditioning, context boundary delimiters, persona latent steering, and few-shot calibration.",

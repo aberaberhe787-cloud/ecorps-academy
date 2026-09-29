@@ -27,14 +27,14 @@ const TRACKS: {
     title: "Prompt Engineering Foundations",
     audience: "New learners",
     outcome: "Clear tasks, roles, constraints, and iteration habits",
-    duration: "~2 hours",
+    duration: "~1 hour",  // matches module-0 estimatedTotalHours ~0.8
     level: "Beginner",
   },
   {
     id: "systems",
     title: "AI Systems & Applied Prompting",
     audience: "Practitioners moving past basics",
-    outcome: "Structured modules across reasoning, evaluation, and systems use",
+    outcome: "In-context mechanics, reasoning patterns, and structured outputs",
     duration: "Self-paced",
     level: "Intermediate → Advanced",
   },
@@ -72,9 +72,14 @@ export const LearningHubView: React.FC = () => {
     [userProgress.completedLessons]
   );
 
-  const systemsLessons = useMemo(
-    () => curriculumModules.flatMap((m) => m.lessons),
+  // Systems track owns module-1..3 only; module-0 is Foundations track exclusively.
+  const systemsModules = useMemo(
+    () => curriculumModules.filter((m) => m.id !== "module-0"),
     []
+  );
+  const systemsLessons = useMemo(
+    () => systemsModules.flatMap((m) => m.lessons),
+    [systemsModules]
   );
   const systemsDone = useMemo(
     () =>
@@ -220,7 +225,7 @@ export const LearningHubView: React.FC = () => {
           {/* Systems modules overview (when systems track, no lesson focused) */}
           {trackId === "systems" && !activeLessonId && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-              {curriculumModules.map((mod, index) => {
+              {systemsModules.map((mod, index) => {
                 const done = mod.lessons.filter((l) =>
                   userProgress.completedLessons.includes(l.id)
                 ).length;
@@ -230,7 +235,7 @@ export const LearningHubView: React.FC = () => {
                     className="rounded-xl border border-slate-800 bg-slate-900/40 p-3 min-w-0"
                   >
                     <p className="text-[10px] font-mono text-slate-500">
-                      Module {index + 1}
+                      Module {index + 1} · {mod.id.replace("module-", "")}
                     </p>
                     <p className="text-xs font-semibold text-white leading-snug mt-0.5 line-clamp-2">
                       {mod.title}
@@ -251,7 +256,7 @@ export const LearningHubView: React.FC = () => {
         {trackId === "foundations" ? (
           <PromptEngineeringPath />
         ) : (
-          <CurriculumView />
+          <CurriculumView excludeModuleIds={["module-0"]} />
         )}
       </div>
     </div>

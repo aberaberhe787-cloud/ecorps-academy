@@ -75,7 +75,14 @@ const BLOOM_COLORS: Record<BloomsTaxonomyLevel, { bg: string; text: string; bord
   Creating: { bg: "bg-rose-950/80", text: "text-rose-300", border: "border-rose-700/50" },
 };
 
-export const CurriculumView: React.FC = () => {
+export interface CurriculumViewProps {
+  /** When set, those module IDs are hidden (e.g. Foundations track owns module-0). */
+  excludeModuleIds?: string[];
+}
+
+export const CurriculumView: React.FC<CurriculumViewProps> = ({
+  excludeModuleIds = [],
+}) => {
   const {
     activeLessonId,
     setActiveLessonId,
@@ -99,7 +106,15 @@ export const CurriculumView: React.FC = () => {
 
   const isPreviewMode = !user;
 
-  const allLessons: Lesson[] = currentCurriculum.flatMap((m) => m.lessons);
+  const displayCurriculum = useMemo(
+    () =>
+      excludeModuleIds.length
+        ? currentCurriculum.filter((m) => !excludeModuleIds.includes(m.id))
+        : currentCurriculum,
+    [currentCurriculum, excludeModuleIds]
+  );
+
+  const allLessons: Lesson[] = displayCurriculum.flatMap((m) => m.lessons);
   
   // Apply preview restriction
   const availableLessons = useMemo(() => {
@@ -109,7 +124,7 @@ export const CurriculumView: React.FC = () => {
   const currentLesson: Lesson =
     allLessons.find((l) => l.id === activeLessonId) || availableLessons[0];
 
-  const currentModule: CurriculumModule | undefined = currentCurriculum.find((m) =>
+  const currentModule: CurriculumModule | undefined = displayCurriculum.find((m) =>
     m.lessons.some((l) => l.id === currentLesson.id)
   );
 
@@ -256,7 +271,7 @@ export const CurriculumView: React.FC = () => {
   const getTierLessons = (tierKey: string): Lesson[] => {
     if (tierKey === "All") return allLessons;
     if (tierKey === "Beginner") {
-      return allLessons.filter((l) => l.difficulty === "Beginner" || l.moduleId === "module-1");
+      return allLessons.filter((l) => l.difficulty === "Beginner" || l.moduleId === "module-0" || l.moduleId === "module-1");
     }
     if (tierKey === "Intermediate") {
       return allLessons.filter((l) => l.difficulty === "Intermediate" || l.moduleId === "module-2");
@@ -307,11 +322,11 @@ export const CurriculumView: React.FC = () => {
 
   // Filtered modules for syllabus and visual map views
   const filteredModules = React.useMemo(() => {
-    return currentCurriculum
+    return displayCurriculum
       .map((m) => {
         const isModuleInDifficulty =
           difficultyFilter === "All" ||
-          (difficultyFilter === "Beginner" && (m.id === "module-1" || m.level?.toLowerCase().includes("foundation") || m.lessons.some((l) => l.difficulty === "Beginner"))) ||
+          (difficultyFilter === "Beginner" && (m.id === "module-0" || m.id === "module-1" || m.level?.toLowerCase().includes("foundation") || m.lessons.some((l) => l.difficulty === "Beginner"))) ||
           (difficultyFilter === "Intermediate" && (m.id === "module-2" || m.level?.toLowerCase().includes("intermediate") || m.lessons.some((l) => l.difficulty === "Intermediate"))) ||
           (difficultyFilter === "Advanced" && (m.id === "module-3" || m.level?.toLowerCase().includes("advanced") || m.lessons.some((l) => l.difficulty === "Advanced" || l.difficulty === "Expert")));
 
@@ -339,7 +354,7 @@ export const CurriculumView: React.FC = () => {
           const matchesDifficulty =
             difficultyFilter === "All" ||
             l.difficulty === difficultyFilter ||
-            (difficultyFilter === "Beginner" && (l.difficulty === "Beginner" || m.id === "module-1")) ||
+            (difficultyFilter === "Beginner" && (l.difficulty === "Beginner" || m.id === "module-0" || m.id === "module-1")) ||
             (difficultyFilter === "Intermediate" && (l.difficulty === "Intermediate" || m.id === "module-2")) ||
             (difficultyFilter === "Advanced" && (l.difficulty === "Advanced" || l.difficulty === "Expert" || m.id === "module-3"));
 
@@ -362,7 +377,7 @@ export const CurriculumView: React.FC = () => {
         };
       })
       .filter((m): m is CurriculumModule => m !== null);
-  }, [currentCurriculum, searchQuery, difficultyFilter, statusFilter, userProgress.completedLessons, userProgress.bookmarkedLessons]);
+  }, [displayCurriculum, searchQuery, difficultyFilter, statusFilter, userProgress.completedLessons, userProgress.bookmarkedLessons]);
 
   const totalMatchingLessons = filteredModules.reduce(
     (acc, m) => acc + m.lessons.length,
@@ -1135,7 +1150,7 @@ export const CurriculumView: React.FC = () => {
         {viewMode === "skilltree" && (
           <div className="animate-in fade-in duration-300" id="lms-skill-tree-view">
             <InteractiveSkillTree
-              modules={currentCurriculum}
+              modules={displayCurriculum}
               completedLessonIds={userProgress.completedLessons}
               activeLessonId={activeLessonId}
               onSelectLesson={handleSelectLesson}
