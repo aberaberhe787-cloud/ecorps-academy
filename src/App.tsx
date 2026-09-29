@@ -28,6 +28,7 @@ import { SessionInactivityWarning } from "./components/SessionInactivityWarning"
 import { GlobalShortcutsHandler } from "./components/GlobalShortcutsHandler";
 import { AchievementNotificationToast } from "./components/AchievementNotificationToast";
 import { Breadcrumbs } from "./components/Breadcrumbs";
+import { SectionModeBanner } from "./components/SectionModeBanner";
 import { LearnerInactivityReminder } from "./components/LearnerInactivityReminder";
 import { MobileBottomNav } from "./components/MobileBottomNav";
 
@@ -96,6 +97,7 @@ const AppShell: React.FC = () => {
       </a>
       {!hideGlobalChrome && <Navbar />}
       {!hideGlobalChrome && <Breadcrumbs />}
+      {!hideGlobalChrome && <SectionModeBanner />}
       <MainContent />
       {!hideGlobalChrome && <MobileBottomNav />}
       {!hideGlobalChrome && <Footer />}

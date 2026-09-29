@@ -99,7 +99,7 @@ export const AccountMenu: React.FC = () => {
               setActiveTab("profile");
             }}
           >
-            <span>Academic Dashboard</span>
+            <span>Workspace · Dashboard</span>
             <ArrowRight className="h-3.5 w-3.5 text-slate-500" />
           </button>
 

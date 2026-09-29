@@ -5,9 +5,11 @@ import { PrimaryNavigation } from "./navbar/PrimaryNavigation";
 import { GlobalSearch } from "./navbar/GlobalSearch";
 import { SystemControls } from "./navbar/SystemControls";
 import { MobileMenuOverlay } from "./MobileMenuOverlay";
+import { getPlatformSection, SECTION_COPY } from "../lib/platformSections";
 
 export const Navbar: React.FC = () => {
-  const { setActiveTab, t } = useApp();
+  const { setActiveTab, t, activeTab, user } = useApp();
+  const section = getPlatformSection(activeTab);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -33,6 +35,17 @@ export const Navbar: React.FC = () => {
                   </span>
                   <span className="hidden min-[360px]:inline rounded-md bg-indigo-500/15 border border-indigo-400/25 px-1.5 py-0.5 font-mono text-[9px] font-bold text-indigo-300 shrink-0 tracking-wide">
                     ACADEMY
+                  </span>
+                  <span
+                    className={`hidden sm:inline rounded-md px-1.5 py-0.5 font-mono text-[9px] font-bold shrink-0 tracking-wide border ${
+                      section === "workspace"
+                        ? "bg-violet-500/15 border-violet-400/25 text-violet-300"
+                        : "bg-slate-800/80 border-slate-600/40 text-slate-400"
+                    }`}
+                    title={user ? "Signed in" : "Browsing as guest"}
+                  >
+                    {SECTION_COPY[section].shortLabel}
+                    {!user ? " · Guest" : ""}
                   </span>
                 </div>
                 <span className="hidden md:block text-[10px] text-slate-400 -mt-0.5 truncate">

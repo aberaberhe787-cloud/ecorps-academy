@@ -3,6 +3,7 @@ import { Compass, BookOpen, Terminal, ClipboardCheck, User } from "lucide-react"
 import { motion } from "motion/react";
 import { useApp } from "../context/AppContext";
 import { NavTab } from "../types";
+import { isWorkspaceTab } from "../lib/platformSections";
 
 /**
  * Primary mobile destinations (max 5).
@@ -46,6 +47,7 @@ export const MobileBottomNav: React.FC = () => {
           const showActive =
             activeTab === item.id ||
             (item.id === "curriculum" && (activeTab === "foundations" || activeTab === "patterns" || activeTab === "resources"));
+          const workspace = isWorkspaceTab(item.id);
 
           return (
             <button
@@ -55,13 +57,13 @@ export const MobileBottomNav: React.FC = () => {
               aria-label={item.label}
               aria-current={showActive ? "page" : undefined}
               className={`flex flex-col items-center justify-center flex-1 min-w-0 py-1.5 px-0.5 min-h-[52px] rounded-xl transition-colors active:scale-95 cursor-pointer relative ${
-                showActive ? "text-indigo-300 font-semibold" : "text-slate-400 hover:text-slate-200"
+                showActive ? (workspace ? "text-violet-300 font-semibold" : "text-indigo-300 font-semibold") : "text-slate-400 hover:text-slate-200"
               }`}
             >
               <div className="relative">
                 <Icon
                   className={`h-[22px] w-[22px] transition-transform ${
-                    showActive ? "scale-105 text-indigo-300" : "text-slate-400"
+                    showActive ? (workspace ? "scale-105 text-violet-300" : "scale-105 text-indigo-300") : "text-slate-400"
                   }`}
                 />
                 {item.id === "profile" && userProgress.streakDays > 0 && (

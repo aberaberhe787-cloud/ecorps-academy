@@ -126,10 +126,10 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
     },
   ];
 
-  const navSections: { title: string; ids: NavTab[] }[] = [
-    { title: "Learn", ids: ["home", "curriculum", "foundations", "patterns", "resources"] },
-    { title: "Practice", ids: ["playground"] },
-    { title: "Assess", ids: ["certification"] },
+  const navSections: { title: string; ids: NavTab[]; zone?: "public" | "workspace" }[] = [
+    { title: "Public · Learn", ids: ["home", "curriculum", "foundations", "patterns", "resources"], zone: "public" },
+    { title: "Public · Practice", ids: ["playground"], zone: "public" },
+    { title: "Workspace · Assess", ids: ["certification"], zone: "workspace" },
   ];
 
   const handleNavClick = (tabId: NavTab) => {
@@ -263,11 +263,13 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                 </div>
               )}
 
-              {/* Primary Academy Navigation — Learn / Practice / Assess */}
+              {/* Public learning vs authenticated workspace */}
               <div className="space-y-3">
                 {navSections.map((section) => (
                   <div key={section.title} className="space-y-1">
-                    <p className="text-[10px] font-mono uppercase tracking-wider text-slate-500 px-2 mb-1">
+                    <p className={`text-[10px] font-mono uppercase tracking-wider px-2 mb-1 ${
+                      section.zone === "workspace" ? "text-violet-400/90" : "text-slate-500"
+                    }`}>
                       {section.title}
                     </p>
                     {section.ids.map((id) => {
@@ -282,7 +284,9 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                           onClick={() => handleNavClick(item.id)}
                           className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left transition-all cursor-pointer ${
                             isActive
-                              ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold"
+                              ? section.zone === "workspace"
+                                ? "bg-violet-600/15 border border-violet-500/30 text-white font-semibold"
+                                : "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold"
                               : "hover:bg-slate-900 text-slate-300 border border-transparent"
                           }`}
                         >
@@ -309,8 +313,8 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
 
               {/* Account & Quick Settings */}
               <div className="space-y-2 pt-2 border-t border-slate-800/80">
-                <p className="text-[10px] font-mono uppercase tracking-wider text-slate-500 px-2">
-                  Account &amp; Appearance
+                <p className="text-[10px] font-mono uppercase tracking-wider text-violet-400/90 px-2">
+                  Workspace · Account
                 </p>
 
                 <button
@@ -319,7 +323,7 @@ export const MobileMenuOverlay: React.FC<MobileMenuOverlayProps> = ({
                 >
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4 text-slate-400" />
-                    <span>Academic Dashboard</span>
+                    <span>Workspace · Dashboard</span>
                   </div>
                   <ChevronRight className="h-3.5 w-3.5 text-slate-600" />
                 </button>
