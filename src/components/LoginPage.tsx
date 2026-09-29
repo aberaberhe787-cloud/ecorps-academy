@@ -137,9 +137,6 @@ interface LoginPageProps {
 
 export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModal = false, redirectPath = null }) => {
   const { setActiveTab } = useApp();
-  // ... inside handleEmailAuth onSuccess and handleProviderAuth onSuccess:
-  // if (redirectPath) setActiveTab(redirectPath as any);
-  // else if (onSuccess) onSuccess();
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -194,12 +191,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
     getRedirectResult(auth).then((result) => {
       if (result && result.user) {
         recordUserActivity();
+        onSuccess?.();
+        if (redirectPath) {
+          setActiveTab(redirectPath as any);
+        }
       }
     }).catch((redirectError: any) => {
       if (redirectError) {
         setError(getAuthErrorMessage(redirectError));
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount for redirect return
   }, []);
 
   const handleNameChange = (val: string) => {
@@ -299,8 +301,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
         await signInWithEmailAndPassword(auth, email.trim(), password);
       }
       recordUserActivity();
-      if (redirectPath) setActiveTab(redirectPath as any);
-      else if (onSuccess) onSuccess();
+      // Always close modal first; AppContext also closes on auth state change.
+      onSuccess?.();
+      if (redirectPath) {
+        setActiveTab(redirectPath as any);
+      }
     } catch (authError: any) {
       const code = authError?.code;
       const genericMsg = getAuthErrorMessage(authError);
@@ -347,8 +352,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ message, onSuccess, isModa
 
       await signInWithPopup(auth, provider);
       recordUserActivity();
-      if (redirectPath) setActiveTab(redirectPath as any);
-      else if (onSuccess) onSuccess();
+      onSuccess?.();
+      if (redirectPath) {
+        setActiveTab(redirectPath as any);
+      }
     } catch (authError: any) {
       if (authError?.code === 'auth/popup-blocked') {
         try {

@@ -312,9 +312,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [user, setUser] = useState<User | null>(() => auth.currentUser);
   const [activeTab, setActiveTabState] = useState<NavTab>("home");
   
+  // Only profile + assessment require auth at navigation time.
+  // Learn/Practice surfaces stay browseable for guests (progress save still prompts auth).
+  const AUTH_REQUIRED_TABS: NavTab[] = ["profile", "certification"];
+
   const setActiveTab = (tab: NavTab) => {
-    if (tab !== "home" && !user) {
-      openAuthModal("Sign in to access this feature.", tab);
+    if (AUTH_REQUIRED_TABS.includes(tab) && !user) {
+      openAuthModal(
+        tab === "certification"
+          ? "Sign in to take the assessment and save credentials."
+          : "Sign in to view your profile and progress.",
+        tab
+      );
       return;
     }
     setActiveTabState(tab);
@@ -338,6 +347,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsAuthModalOpen(false);
     setRedirectPath(null);
   };
+
+  // After successful sign-in, always dismiss the auth modal and honor pending redirect.
+  // LoginPage may race ahead of React user state; this is the reliable close path.
+  useEffect(() => {
+    if (!user || !isAuthModalOpen) return;
+    const pending = redirectPath;
+    setIsAuthModalOpen(false);
+    setRedirectPath(null);
+    if (pending) {
+      setActiveTabState(pending);
+    }
+  }, [user, isAuthModalOpen, redirectPath]);
   
   // Persistent user preferences layer (theme, distraction-free mode, language, AI mode, sampling)
   const initialPrefsRef = useRef<UserPreferences>(loadUserPreferences());
