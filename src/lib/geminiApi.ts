@@ -1,4 +1,5 @@
 import { robustApiFetch } from "./apiErrorHandler";
+import { track } from "./analytics";
 import { auth } from "./firebase";
 
 /**
@@ -159,6 +160,7 @@ export async function callGeminiGenerate(params: {
     const message = result.data?.error || result.error || "Gemini execution failed. Your prompt was not evaluated.";
     throw new Error(message);
   }
+  track("sandbox_run", { ok: true });
 
   return result.data;
 }
@@ -208,6 +210,7 @@ export async function callGeminiEvaluate(params: {
     const message = result.data?.error || result.error || "Gemini evaluation unavailable. Your prompt was not evaluated.";
     throw new Error(message);
   }
+  track("mission_evaluate", { ok: true });
 
   return result.data;
 }

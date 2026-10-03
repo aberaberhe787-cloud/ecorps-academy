@@ -1,3 +1,4 @@
+import { track } from "../lib/analytics";
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from "react";
 import confetti from "canvas-confetti";
 import {
@@ -316,6 +317,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Persist / submit / XP actions still call openAuthModal where needed.
   const setActiveTab = (tab: NavTab) => {
     setActiveTabState(tab);
+    track("page_view", { tab });
   };
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [activeMissionId, setActiveMissionId] = useState<string | null>(null);
@@ -327,6 +329,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [redirectPath, setRedirectPath] = useState<NavTab | null>(null);
 
   const openAuthModal = (msg?: string, path?: NavTab) => {
+    track("auth_modal_open");
     setAuthModalMessage(msg || "Sign in to save your progress and unlock learner features.");
     if (path) setRedirectPath(path);
     setIsAuthModalOpen(true);
@@ -1833,6 +1836,7 @@ Provide:
   };
 
   const markLessonComplete = (lessonId: string) => {
+    track("lesson_complete", { lessonId });
     if (!auth.currentUser) {
       openAuthModal("Sign in to save your lesson progress and earn XP.");
       return;
@@ -1878,6 +1882,7 @@ Provide:
   };
 
   const completeAssessment = (assessmentId: string, submission: string) => {
+    track("assessment_submit", { assessmentId });
     if (!auth.currentUser) {
       openAuthModal("Sign in to submit assessments and unlock certification credentials.");
       return;

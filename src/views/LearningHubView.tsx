@@ -11,6 +11,7 @@ import { CurriculumView } from "./CurriculumView";
 import { PromptEngineeringPath } from "./PromptEngineeringPath";
 import { FOUNDATION_LESSONS, curriculumModules } from "../data/lessonsData";
 import { Button } from "../components/ui/Button";
+import { track } from "../lib/analytics";
 
 export type LearningTrackId = "foundations" | "systems";
 
@@ -94,6 +95,7 @@ export const LearningHubView: React.FC = () => {
 
   const selectTrack = (id: LearningTrackId) => {
     setTrackId(id);
+    track("track_select", { trackId: id });
     // Keep lesson IDs intact; clear systems lesson focus when switching away
     if (id === "foundations") {
       setActiveLessonId(null);

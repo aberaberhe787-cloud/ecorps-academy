@@ -315,3 +315,38 @@
     transparent
   );
 }
+
+/* Atlas light-mode parity — readable public chrome when .dark is off */
+:root:not(.dark) {
+  --ecorp-mesh-a: rgba(79, 70, 229, 0.08);
+  --ecorp-mesh-b: rgba(14, 165, 233, 0.05);
+  --ecorp-mesh-c: rgba(139, 92, 246, 0.06);
+}
+
+:root:not(.dark) .ecorp-display {
+  color: #0b1220;
+}
+
+:root:not(.dark) .ecorp-gradient-text {
+  background: linear-gradient(115deg, #4338ca 0%, #4f46e5 40%, #7c3aed 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+:root:not(.dark) .ecorp-glass {
+  background: rgba(255, 255, 255, 0.86);
+  border-color: rgba(226, 232, 240, 0.95);
+}
+
+:root:not(.dark) .ecorp-panel {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+:root:not(.dark) .ecorp-panel-glow {
+  background:
+    linear-gradient(155deg, rgba(79, 70, 229, 0.06) 0%, transparent 40%),
+    #ffffff;
+  border-color: rgba(79, 70, 229, 0.22);
+}

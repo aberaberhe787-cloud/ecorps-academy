@@ -8,6 +8,7 @@ import { Pool } from 'pg';
 import * as schema from './src/db/schema';
 import { apiRouter } from './src/server/routes';
 import { getEcorpAiGateway } from "./src/lib/ai/gateway";
+import { rateLimit, clientKey } from "./src/lib/rateLimit";
 import { curriculumModules } from "./src/data/lessonsData";
 
 dotenv.config();
@@ -126,6 +127,17 @@ app.use('/api', apiRouter);
     const requestId = "req_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 9);
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     try {
+      const rl = rateLimit(clientKey(req, "gemini-generate"), 30, 60_000);
+      res.setHeader("X-RateLimit-Remaining", String(rl.remaining));
+      if (!rl.allowed) {
+        res.setHeader("Retry-After", String(rl.retryAfterSec));
+        return res.status(429).json({
+          success: false,
+          error: "Too many generate requests. Please wait a moment.",
+          requestId,
+          retryAfterSec: rl.retryAfterSec,
+        });
+      }
       const { prompt, systemInstruction, temperature, topP, model } = req.body || {};
       if (!prompt || typeof prompt !== "string") {
         return res.status(400).json({ success: false, error: "Prompt is required", requestId });
@@ -170,6 +182,17 @@ app.use('/api', apiRouter);
     const requestId = "eval_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 9);
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     try {
+      const rl = rateLimit(clientKey(req, "gemini-evaluate"), 20, 60_000);
+      res.setHeader("X-RateLimit-Remaining", String(rl.remaining));
+      if (!rl.allowed) {
+        res.setHeader("Retry-After", String(rl.retryAfterSec));
+        return res.status(429).json({
+          success: false,
+          error: "Too many evaluation requests. Please wait a moment.",
+          requestId,
+          retryAfterSec: rl.retryAfterSec,
+        });
+      }
       const { prompt, rubric, missionContext, type } = req.body || {};
       if (!prompt || typeof prompt !== "string") {
         return res.status(400).json({ success: false, error: "Prompt is required", requestId });
