@@ -22,7 +22,7 @@ export const SectionModeBanner: React.FC = () => {
 
   return (
     <div
-      className={`border-b px-3 sm:px-4 py-1.5 ${
+      className={`border-b px-3 sm:px-4 py-2 backdrop-blur-sm ${
         section === "workspace"
           ? "border-violet-500/20 bg-violet-950/30"
           : "border-slate-800/80 bg-slate-950/40"

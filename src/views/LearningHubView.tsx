@@ -118,17 +118,17 @@ export const LearningHubView: React.FC = () => {
       {!hideChrome && (
         <div className="page-shell page-shell--medium pt-3 sm:pt-5 pb-2 space-y-4">
           {/* Hub identity */}
-          <header className="space-y-1 min-w-0">
-            <p className="text-[11px] font-mono uppercase tracking-wider text-indigo-300/90 font-semibold flex items-center gap-1.5">
+          <header className="space-y-2 min-w-0">
+            <p className="ec-section-label flex items-center gap-1.5 text-indigo-300">
               <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
               Learning Hub
             </p>
-            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-              Learn · structured tracks
+            <h1 className="ecorp-display text-2xl sm:text-3xl text-white">
+              Structured tracks. Measurable skill.
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
-              Choose a track, work through modules or lessons in order, then practice
-              in the sandbox. Lesson IDs and progress stay the same as before.
+              Choose Foundations or Systems, complete lessons in order, then practice in the sandbox.
+              Progress and lesson IDs stay consistent across the platform.
             </p>
           </header>
 
@@ -152,7 +152,7 @@ export const LearningHubView: React.FC = () => {
                   onClick={() => selectTrack(track.id)}
                   className={`text-left rounded-2xl border p-4 sm:p-5 transition-colors cursor-pointer min-w-0 ${
                     selected
-                      ? "border-indigo-500/50 bg-indigo-950/40 shadow-lg shadow-indigo-950/20"
+                      ? "border-indigo-500/45 bg-indigo-950/50 shadow-lg shadow-indigo-950/30 ring-1 ring-indigo-400/20"
                       : "border-slate-800 bg-slate-900/50 hover:border-slate-700"
                   }`}
                 >

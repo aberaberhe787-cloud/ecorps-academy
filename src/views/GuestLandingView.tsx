@@ -50,7 +50,7 @@ export const GuestLandingView: React.FC = () => {
   const startFoundations = () => openLearningPath("foundations", "foundation-clarity");
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden bg-slate-950 text-slate-100">
+    <div className="w-full max-w-full overflow-x-hidden text-slate-100">
       <GuestRibbon
         onSignIn={() =>
           openAuthModal("Create an account to save XP, progress, and certificates.")

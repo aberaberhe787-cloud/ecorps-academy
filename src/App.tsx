@@ -87,7 +87,7 @@ const AppShell: React.FC = () => {
     isDistractionFreeMode && (activeTab === "curriculum" || activeTab === "foundations") && !!activeLessonId;
 
   return (
-    <div className="flex min-h-dvh flex-col w-full max-w-full overflow-x-hidden bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-indigo-600 selection:text-white font-sans antialiased supports-[padding:max(0px)]:pb-0">
+    <div className="ecorp-atmosphere flex min-h-dvh flex-col w-full max-w-full overflow-x-hidden bg-white text-slate-900 dark:bg-[#070b14] dark:text-slate-100 selection:bg-indigo-600 selection:text-white font-sans antialiased supports-[padding:max(0px)]:pb-0">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-indigo-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"

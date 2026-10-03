@@ -11,13 +11,11 @@ export const GuestStartHere: React.FC<GuestStartHereProps> = ({
   onOpenFirstLesson,
   onOpenCurriculum,
 }) => (
-  <section className="rounded-2xl sm:rounded-3xl border border-indigo-500/25 bg-gradient-to-br from-indigo-950/40 via-slate-900/80 to-slate-950 p-5 sm:p-8">
+  <section className="ecorp-panel-glow rounded-2xl sm:rounded-3xl p-5 sm:p-8">
     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
       <div className="space-y-2 min-w-0">
-        <p className="text-[11px] font-mono uppercase tracking-wider text-indigo-300 font-semibold">
-          Start here · no sign-in required
-        </p>
-        <h2 className="text-xl sm:text-2xl font-bold text-white">
+        <p className="ec-section-label text-indigo-300">Start here · no sign-in required</p>
+        <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
           Foundations · Lesson 1 — Clarity &amp; specificity
         </h2>
         <p className="text-sm text-slate-400 max-w-xl leading-relaxed">
@@ -35,7 +33,7 @@ export const GuestStartHere: React.FC<GuestStartHereProps> = ({
           Open first lesson
         </Button>
         <Button variant="outline" size="lg" onClick={onOpenCurriculum}>
-          Full curriculum
+          Learning Hub
         </Button>
       </div>
     </div>

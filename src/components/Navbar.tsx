@@ -17,7 +17,7 @@ export const Navbar: React.FC = () => {
       <header
         role="banner"
         aria-label="Ecorp Academy Platform Navigation"
-        className="sticky top-0 z-40 w-full border-b border-white/[0.06] bg-[#070b14]/80 backdrop-blur-xl transition-colors"
+        className="sticky top-0 z-40 w-full border-b border-white/[0.07] ecorp-glass shadow-[0_1px_0_0_rgba(99,102,241,0.06)] transition-colors"
       >
         <div className="mx-auto flex h-14 sm:h-16 w-full max-w-7xl 2xl:max-w-[1536px] items-center justify-between gap-1.5 sm:gap-3 lg:gap-4 px-3 sm:px-4 lg:px-8 min-w-0">
           {/* Brand Identity */}

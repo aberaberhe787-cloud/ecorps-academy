@@ -17,7 +17,7 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="border-t border-white/[0.06] bg-[#070b14]/90 text-slate-400 text-xs py-6 sm:py-10 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] md:pb-10" id="ecorp-app-footer">
+    <footer className="border-t border-white/[0.07] bg-[#070b14]/85 backdrop-blur-md text-slate-400 text-xs py-8 sm:py-12 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] md:pb-12" id="ecorp-app-footer">
       <div className="mx-auto max-w-7xl 2xl:max-w-[1536px] px-3 sm:px-6 lg:px-8 min-w-0">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
           {/* Brand */}
